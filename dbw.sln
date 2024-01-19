@@ -1,0 +1,112 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbw", "dbw\dbw.vcxproj", "{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_win32_directx12", "imgui\examples\example_win32_directx12\example_win32_directx12.vcxproj", "{E22E7048-DC50-444E-97AE-D76DB97C5DDF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "clap-host", "clap-host", "{1A960160-2566-428F-81C8-3D8687FCE977}"
+	ProjectSection(SolutionItems) = preProject
+		clap-host\host\about-dialog.cc = clap-host\host\about-dialog.cc
+		clap-host\host\about-dialog.hh = clap-host\host\about-dialog.hh
+		clap-host\host\application.cc = clap-host\host\application.cc
+		clap-host\host\application.hh = clap-host\host\application.hh
+		clap-host\host\audio-settings-widget.cc = clap-host\host\audio-settings-widget.cc
+		clap-host\host\audio-settings-widget.hh = clap-host\host\audio-settings-widget.hh
+		clap-host\host\audio-settings.cc = clap-host\host\audio-settings.cc
+		clap-host\host\audio-settings.hh = clap-host\host\audio-settings.hh
+		clap-host\host\CMakeLists.txt = clap-host\host\CMakeLists.txt
+		clap-host\host\device-reference.hh = clap-host\host\device-reference.hh
+		clap-host\host\engine.cc = clap-host\host\engine.cc
+		clap-host\host\engine.hh = clap-host\host\engine.hh
+		clap-host\host\linux-clap-host.version = clap-host\host\linux-clap-host.version
+		clap-host\host\macos-symbols.txt = clap-host\host\macos-symbols.txt
+		clap-host\host\main-window.cc = clap-host\host\main-window.cc
+		clap-host\host\main-window.hh = clap-host\host\main-window.hh
+		clap-host\host\main.cc = clap-host\host\main.cc
+		clap-host\host\midi-settings-widget.cc = clap-host\host\midi-settings-widget.cc
+		clap-host\host\midi-settings-widget.hh = clap-host\host\midi-settings-widget.hh
+		clap-host\host\midi-settings.cc = clap-host\host\midi-settings.cc
+		clap-host\host\midi-settings.hh = clap-host\host\midi-settings.hh
+		clap-host\host\plugin-host-settings.cc = clap-host\host\plugin-host-settings.cc
+		clap-host\host\plugin-host-settings.hh = clap-host\host\plugin-host-settings.hh
+		clap-host\host\plugin-host.cc = clap-host\host\plugin-host.cc
+		clap-host\host\plugin-host.hh = clap-host\host\plugin-host.hh
+		clap-host\host\plugin-info.hh = clap-host\host\plugin-info.hh
+		clap-host\host\plugin-param.cc = clap-host\host\plugin-param.cc
+		clap-host\host\plugin-param.hh = clap-host\host\plugin-param.hh
+		clap-host\host\plugin-parameters-widget.cc = clap-host\host\plugin-parameters-widget.cc
+		clap-host\host\plugin-parameters-widget.hh = clap-host\host\plugin-parameters-widget.hh
+		clap-host\host\plugin-quick-control-widget.cc = clap-host\host\plugin-quick-control-widget.cc
+		clap-host\host\plugin-quick-control-widget.hh = clap-host\host\plugin-quick-control-widget.hh
+		clap-host\host\plugin-quick-controls-widget.cc = clap-host\host\plugin-quick-controls-widget.cc
+		clap-host\host\plugin-quick-controls-widget.hh = clap-host\host\plugin-quick-controls-widget.hh
+		clap-host\host\precompiled-header.hh = clap-host\host\precompiled-header.hh
+		clap-host\host\settings-dialog.cc = clap-host\host\settings-dialog.cc
+		clap-host\host\settings-dialog.hh = clap-host\host\settings-dialog.hh
+		clap-host\host\settings-widget.cc = clap-host\host\settings-widget.cc
+		clap-host\host\settings-widget.hh = clap-host\host\settings-widget.hh
+		clap-host\host\settings.cc = clap-host\host\settings.cc
+		clap-host\host\settings.hh = clap-host\host\settings.hh
+		clap-host\host\tweaks-dialog.cc = clap-host\host\tweaks-dialog.cc
+		clap-host\host\tweaks-dialog.hh = clap-host\host\tweaks-dialog.hh
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "portaudio\msvc\portaudio.vcxproj", "{0A18A071-125E-442F-AFF7-A3F68ABECF99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+		ReleaseMinDependency|x64 = ReleaseMinDependency|x64
+		ReleaseMinDependency|x86 = ReleaseMinDependency|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Debug|x64.ActiveCfg = Debug|x64
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Debug|x64.Build.0 = Debug|x64
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Debug|x86.ActiveCfg = Debug|Win32
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Debug|x86.Build.0 = Debug|Win32
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Release|x64.ActiveCfg = Release|x64
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Release|x64.Build.0 = Release|x64
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Release|x86.ActiveCfg = Release|Win32
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.Release|x86.Build.0 = Release|Win32
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.ReleaseMinDependency|x64.ActiveCfg = Release|x64
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.ReleaseMinDependency|x64.Build.0 = Release|x64
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.ReleaseMinDependency|x86.ActiveCfg = Release|Win32
+		{B4CF9797-519D-4AFE-A8F4-5141A6B521D3}.ReleaseMinDependency|x86.Build.0 = Release|Win32
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Debug|x64.ActiveCfg = Debug|x64
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Debug|x64.Build.0 = Debug|x64
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Debug|x86.ActiveCfg = Debug|Win32
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Debug|x86.Build.0 = Debug|Win32
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Release|x64.ActiveCfg = Release|x64
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Release|x64.Build.0 = Release|x64
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Release|x86.ActiveCfg = Release|Win32
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.Release|x86.Build.0 = Release|Win32
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.ReleaseMinDependency|x64.ActiveCfg = Release|x64
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.ReleaseMinDependency|x64.Build.0 = Release|x64
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.ReleaseMinDependency|x86.ActiveCfg = Release|Win32
+		{E22E7048-DC50-444E-97AE-D76DB97C5DDF}.ReleaseMinDependency|x86.Build.0 = Release|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x64.ActiveCfg = Debug|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x64.Build.0 = Debug|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x86.ActiveCfg = Debug|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x86.Build.0 = Debug|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x64.ActiveCfg = Release|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x64.Build.0 = Release|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x86.ActiveCfg = Release|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x86.Build.0 = Release|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.ActiveCfg = ReleaseMinDependency|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.Build.0 = ReleaseMinDependency|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.ActiveCfg = ReleaseMinDependency|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.Build.0 = ReleaseMinDependency|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D7CA3DD0-9677-4D99-A1F8-DB23DDDE3DBF}
+	EndGlobalSection
+EndGlobal
