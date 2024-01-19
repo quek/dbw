@@ -1,6 +1,7 @@
 #include "AudioEngine.h"
 #include <stdio.h>
 #include <string.h>
+#include "PluginHost.h"
 
 
 /* This routine will be called by the PortAudio engine when audio is needed.
@@ -47,6 +48,11 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::start()
 {
+	{
+		auto* pluginHost = new PluginHost();
+		pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\VCV Rack 2.clap", 0);
+		delete pluginHost;
+	}
 	try {
 		PaError err = Pa_Initialize();
 		if (err != paNoError) {
@@ -75,10 +81,10 @@ void AudioEngine::start()
 
 		PaStreamParameters inputParameters{
 			 deviceIndex,
-		     2,
-		     paFloat32,
-		     Pa_GetDeviceInfo(deviceIndex)->defaultLowInputLatency,
-		     nullptr //See you specific host's API docs for info on using this field
+			 2,
+			 paFloat32,
+			 Pa_GetDeviceInfo(deviceIndex)->defaultLowInputLatency,
+			 nullptr //See you specific host's API docs for info on using this field
 		};
 		PaStreamParameters outputParameters{};
 		outputParameters.channelCount = 2;

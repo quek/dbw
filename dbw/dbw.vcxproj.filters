@@ -24,6 +24,7 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="AudioEngine.cpp" />
+    <ClCompile Include="PluginHost.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -42,6 +43,7 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="AudioEngine.h" />
+    <ClInclude Include="PluginHost.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
