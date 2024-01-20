@@ -176,20 +176,20 @@ clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_
 		if (_inputs[0] != nullptr) {
 			std::free(_inputs[0]);
 		}
-		_inputs[0] = (float*)std::calloc(1, bufferSize);
+		_inputs[0] = (float*)std::calloc(bufferSize, sizeof(float));
 		if (_inputs[1] != nullptr) {
 			std::free(_inputs[1]);
 		}
-		_inputs[1] = (float*)std::calloc(1, bufferSize);
+		_inputs[1] = (float*)std::calloc(bufferSize, sizeof(float));
 
 		if (_outputs[0] != nullptr) {
 			std::free(_outputs[0]);
 		}
-		_outputs[0] = (float*)std::calloc(1, bufferSize);
+		_outputs[0] = (float*)std::calloc(bufferSize, sizeof(float));
 		if (_outputs[1] != nullptr) {
 			std::free(_outputs[1]);
 		}
-		_outputs[1] = (float*)std::calloc(1, bufferSize);
+		_outputs[1] = (float*)std::calloc(bufferSize, sizeof(float));
 	}
 	_process.in_events = _evIn.clapInputEvents();
 	_process.out_events = _evOut.clapOutputEvents();
