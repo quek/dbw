@@ -18,21 +18,35 @@
 class PluginHost
 {
 public:
-	PluginHost();
+	PluginHost(const clap_window* window);
 	~PluginHost();
-	bool load(const std::string path, int pluginIndex);
+	bool load(const std::string path, uint32_t pluginIndex);
+	clap_process* process(double sampleRate, uint32_t bufferSize);
+	void edit();
+	bool canUseGui() const noexcept;
 
 private:
+	const clap_window* _window;
 	clap_host _clap_host;
+	const clap_plugin* _plugin = nullptr;
+	const clap_plugin_gui* _pluginGui = nullptr;
+	bool _processing = false;
 	// const clap_plugin_entry* _pluginEntry = nullptr;
 	// const clap_plugin_factory* _pluginFactory = nullptr;
 	// std::unique_ptr<PluginProxy> _plugin;
 
 	/* process stuff */
-	// clap_audio_buffer _audioIn = {};
-	// clap_audio_buffer _audioOut = {};
-	// clap::helpers::EventList _evIn;
-	// clap::helpers::EventList _evOut;
+	float* _inputs[2] = { nullptr, nullptr };
+	float* _outputs[2] = { nullptr, nullptr };
+	clap_process _process = {};
+	clap::helpers::EventList _evIn;
+	clap::helpers::EventList _evOut;
 	// clap_process _process;
+
+
+	static const void* clapGetExtension(const clap_host_t* host, const char* extension_id) noexcept;
+	static void clapRequestRestart(const clap_host_t* host) noexcept;
+	static void clapRequestProcess(const clap_host_t* host) noexcept;
+	static void clapRequestCallback(const clap_host_t* host) noexcept;
 };
 

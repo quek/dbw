@@ -21,24 +21,22 @@ static int paCallback(
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
-	for (i = 0; i < framesPerBuffer; i++)
-	{
-		*out = audioEngine->left_phase * 0.2f;  /* left */
+	clap_process* process = audioEngine->process(framesPerBuffer);
+
+	auto buffer = process->audio_outputs;
+	bool isLeftConstant = (buffer->constant_mask & (1 << 0)) != 0;
+	bool isRightConstant = (buffer->constant_mask & (1 << 1)) != 0;
+	for (i = 0; i < framesPerBuffer; ++i) {
+		*out = buffer->data32[0][isLeftConstant ? 0 : i];
 		++out;
-		*out = audioEngine->right_phase * 0.2f;  /* right */
+		*out = buffer->data32[1][isRightConstant ? 0 : i];
 		++out;
-		/* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
-		audioEngine->left_phase += 0.01f;
-		/* When signal reaches top, drop back down. */
-		if (audioEngine->left_phase >= 1.0f) audioEngine->left_phase -= 2.0f;
-		/* higher pitch so we can distinguish left and right. */
-		audioEngine->right_phase += 0.03f;
-		if (audioEngine->right_phase >= 1.0f) audioEngine->right_phase -= 2.0f;
 	}
+
 	return 0;
 }
 
-AudioEngine::AudioEngine()
+AudioEngine::AudioEngine(const clap_window* window) : _window(window)
 {
 }
 
@@ -49,9 +47,10 @@ AudioEngine::~AudioEngine()
 void AudioEngine::start()
 {
 	{
-		auto* pluginHost = new PluginHost();
-		pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\VCV Rack 2.clap", 0);
-		delete pluginHost;
+		_pluginHost = new PluginHost(_window);
+		// pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\VCV Rack 2.clap", 0);
+		_pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap", 0);
+		_pluginHost->edit();
 	}
 	try {
 		PaError err = Pa_Initialize();
@@ -156,6 +155,13 @@ void AudioEngine::stop()
 		// TODO
 		printf("PortAudio error: %s\n", Pa_GetErrorText(err));
 	}
+
+	delete _pluginHost;
+}
+
+clap_process* AudioEngine::process(unsigned long framesPerBuffer)
+{
+	return _pluginHost->process(_sampleRate, _bufferSize);
 }
 
 
