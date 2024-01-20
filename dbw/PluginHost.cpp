@@ -144,7 +144,7 @@ void PluginHost::stop()
 	_plugin->destroy(_plugin);
 }
 
-const void* PluginHost::clapGetExtension(const clap_host_t* host, const char* extension_id) noexcept
+const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const char* extension_id) noexcept
 {
 	printf("get extension %s\n", extension_id);
 	return nullptr;

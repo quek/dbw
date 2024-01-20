@@ -28,6 +28,7 @@
 #include <dxgidebug.h>
 #pragma comment(lib, "dxguid.lib")
 #endif
+#include <cstdio>
 
 struct FrameContext
 {
@@ -62,6 +63,7 @@ void CleanupRenderTarget();
 void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT WINAPI xWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Main code
 int main(int, char**)
@@ -124,7 +126,10 @@ int main(int, char**)
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 
-	HWND x_hwnd = ::CreateWindowW(wc.lpszClassName, L"dbw", WS_OVERLAPPEDWINDOW, 300, 300, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+	//HWND x_hwnd = ::CreateWindowW(wc.lpszClassName, L"plugin window", WS_OVERLAPPEDWINDOW, 300, 300, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+	WNDCLASSEXW x_wc = { sizeof(wc), CS_CLASSDC, xWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"Plugin Window", nullptr };
+	::RegisterClassExW(&x_wc);
+	HWND x_hwnd = ::CreateWindowW(x_wc.lpszClassName, L"plugin window", WS_OVERLAPPEDWINDOW, 300, 300, 1280, 800, nullptr, nullptr, x_wc.hInstance, nullptr);
 	::ShowWindow(x_hwnd, SW_SHOWDEFAULT);
 	clap_window clapWindow = clap_window{ CLAP_WINDOW_API_WIN32 , x_hwnd };
 	AudioEngine* audioEngine = new AudioEngine(&clapWindow);
@@ -482,5 +487,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		::PostQuitMessage(0);
 		return 0;
 	}
+	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+LRESULT WINAPI xWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
 	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
