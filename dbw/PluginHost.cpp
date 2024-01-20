@@ -2,18 +2,6 @@
 
 #include <windows.h>
 
-const void* get_extension(const struct clap_host* /* host */, const char* /* extension_id */) {
-	return (const void*)nullptr;
-}
-
-void request_restart(const struct clap_host* /* host */) {
-}
-
-void request_process(const struct clap_host* /* host */) {
-}
-
-void request_callback(const struct clap_host* /* host */) {
-}
 
 PluginHost::PluginHost(const clap_window* window) : _window(window) {
 	_clap_host = clap_host{
@@ -56,12 +44,25 @@ PluginHost::PluginHost(const clap_window* window) : _window(window) {
 	// Set to -1 if not available, otherwise the value must be greater or equal to 0,
 	// and must be increased by at least `frames_count` for the next call to process.
 	// int64_t steady_time;
-	_process.steady_time = -1;
+	_process.steady_time = 0;
 	// time info at sample 0
 	// If null, then this is a free running host, no transport events will be provided
 	_process.transport = nullptr;
 	_process.audio_inputs_count = 2;
 	_process.audio_outputs_count = 2;
+
+	_audioIn.data32 = _inputs;
+	_audioIn.data64 = nullptr;
+	_audioIn.channel_count = 2;
+	_audioIn.latency = 0;
+	_audioIn.constant_mask = 0;
+	_process.audio_inputs = &_audioIn;
+	_audioOut.data32 = _inputs;
+	_audioOut.data64 = nullptr;
+	_audioOut.channel_count = 2;
+	_audioOut.latency = 0;
+	_audioOut.constant_mask = 0;
+	_process.audio_outputs = &_audioOut;
 }
 
 PluginHost::~PluginHost() {}
@@ -130,26 +131,43 @@ bool PluginHost::canUseGui() const noexcept {
 	return false;
 }
 
-const void* PluginHost::clapGetExtension(const clap_host_t* host, const char* /* extension_id */) noexcept
+void PluginHost::stop()
 {
+	if (!_plugin) {
+		return;
+	}
+	if (_processing) {
+		_plugin->stop_processing(_plugin);
+		_plugin->deactivate(_plugin);
+		_processing = false;
+	}
+	_plugin->destroy(_plugin);
+}
+
+const void* PluginHost::clapGetExtension(const clap_host_t* host, const char* extension_id) noexcept
+{
+	printf("get extension %s\n", extension_id);
 	return nullptr;
 }
 
 void PluginHost::clapRequestRestart(const clap_host_t* /* host */) noexcept
 {
+	printf("request restart\n");
 }
 
 void PluginHost::clapRequestProcess(const clap_host_t* /* host */) noexcept
 {
+	printf("request process\n");
 }
 
 void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
 {
+	printf("request callback\n");
 }
 
 clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_t steadyTime) {
 	if (!_processing) {
-	    _plugin->activate(_plugin, sampleRate, bufferSize, bufferSize);
+		_plugin->activate(_plugin, sampleRate, bufferSize, bufferSize);
 		_plugin->start_processing(_plugin);
 		_processing = true;
 	}
@@ -159,47 +177,19 @@ clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_
 			std::free(_inputs[0]);
 		}
 		_inputs[0] = (float*)std::calloc(1, bufferSize);
-		std::free(_inputs[1]);
-		_inputs[1] = (float*)std::calloc(1, bufferSize);
-		if (_process.audio_inputs) {
-			delete _process.audio_inputs;
+		if (_inputs[1] != nullptr) {
+			std::free(_inputs[1]);
 		}
-		_process.audio_inputs = new clap_audio_buffer_t{
-			// Either data32 or data64 pointer will be set.
-			// float  **data32;
-			_inputs,
-			// double **data64;
-			nullptr,
-			// uint32_t channel_count;
-			2,
-			// uint32_t latency; // latency from/to the audio interface
-			0,
-			// uint64_t constant_mask;
-			0
-		};
+		_inputs[1] = (float*)std::calloc(1, bufferSize);
 
 		if (_outputs[0] != nullptr) {
 			std::free(_outputs[0]);
 		}
 		_outputs[0] = (float*)std::calloc(1, bufferSize);
-		std::free(_outputs[1]);
-		_outputs[1] = (float*)std::calloc(1, bufferSize);
-		if (_process.audio_outputs) {
-			delete _process.audio_outputs;
+		if (_outputs[1] != nullptr) {
+			std::free(_outputs[1]);
 		}
-		_process.audio_outputs = new clap_audio_buffer_t{
-			// Either data32 or data64 pointer will be set.
-			// float  **data32;
-			_outputs,
-			// double **data64;
-			nullptr,
-			// uint32_t channel_count;
-			2,
-			// uint32_t latency; // latency from/to the audio interface
-			0,
-			// uint64_t constant_mask;
-			0
-		};
+		_outputs[1] = (float*)std::calloc(1, bufferSize);
 	}
 	_process.in_events = _evIn.clapInputEvents();
 	_process.out_events = _evOut.clapOutputEvents();

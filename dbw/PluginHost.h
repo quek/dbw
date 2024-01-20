@@ -24,6 +24,7 @@ public:
 	clap_process* process(double sampleRate, uint32_t bufferSize, int64_t steadyTime);
 	void edit();
 	bool canUseGui() const noexcept;
+	void stop();
 
 private:
 	const clap_window* _window;
@@ -39,9 +40,10 @@ private:
 	float* _inputs[2] = { nullptr, nullptr };
 	float* _outputs[2] = { nullptr, nullptr };
 	clap_process _process = {};
+	clap_audio_buffer _audioIn = {};
+	clap_audio_buffer _audioOut = {};
 	clap::helpers::EventList _evIn;
 	clap::helpers::EventList _evOut;
-	// clap_process _process;
 
 
 	static const void* clapGetExtension(const clap_host_t* host, const char* extension_id) noexcept;

@@ -136,6 +136,12 @@ void AudioEngine::start()
 
 void AudioEngine::stop()
 {
+	if (!_pluginHost) {
+		_pluginHost->stop();
+		delete _pluginHost;
+		_pluginHost = nullptr;
+	}
+
 	PaError err;
 	if (_stream != nullptr) {
 		err = Pa_StopStream(_stream);
@@ -148,6 +154,7 @@ void AudioEngine::stop()
 			// TODO
 			printf("PortAudio error: %s\n", Pa_GetErrorText(err));
 		}
+		_stream = nullptr;
 	}
 
 	err = Pa_Terminate();
@@ -156,7 +163,6 @@ void AudioEngine::stop()
 		printf("PortAudio error: %s\n", Pa_GetErrorText(err));
 	}
 
-	delete _pluginHost;
 }
 
 clap_process* AudioEngine::process(unsigned long framesPerBuffer)
