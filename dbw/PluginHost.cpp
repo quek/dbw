@@ -147,7 +147,7 @@ void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
 {
 }
 
-clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize) {
+clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_t steadyTime) {
 	if (!_processing) {
 	    _plugin->activate(_plugin, sampleRate, bufferSize, bufferSize);
 		_plugin->start_processing(_plugin);
@@ -203,8 +203,12 @@ clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize) {
 	}
 	_process.in_events = _evIn.clapInputEvents();
 	_process.out_events = _evOut.clapOutputEvents();
-	// clap_process_status status = _plugin->process(_plugin, &p);
-	_plugin->process(_plugin, &_process);
+	_process.steady_time = steadyTime;
+
+	clap_process_status status = _plugin->process(_plugin, &_process);
+	if (status == CLAP_PROCESS_ERROR) {
+		printf("process error");
+	}
 
 	return &_process;
 }

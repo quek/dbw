@@ -19,6 +19,7 @@ private:
 	PaStream* _stream = nullptr;
 	double _sampleRate = 48000.0;
 	unsigned long _bufferSize = 1024;
+	int64_t _steadyTime = 0;
 	PluginHost* _pluginHost = nullptr;
 };
 

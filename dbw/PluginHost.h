@@ -21,7 +21,7 @@ public:
 	PluginHost(const clap_window* window);
 	~PluginHost();
 	bool load(const std::string path, uint32_t pluginIndex);
-	clap_process* process(double sampleRate, uint32_t bufferSize);
+	clap_process* process(double sampleRate, uint32_t bufferSize, int64_t steadyTime);
 	void edit();
 	bool canUseGui() const noexcept;
 

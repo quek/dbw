@@ -24,8 +24,8 @@ static int paCallback(
 	clap_process* process = audioEngine->process(framesPerBuffer);
 
 	auto buffer = process->audio_outputs;
-	bool isLeftConstant = (buffer->constant_mask & (1 << 0)) != 0;
-	bool isRightConstant = (buffer->constant_mask & (1 << 1)) != 0;
+	bool isLeftConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 0)) != 0;
+	bool isRightConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 1)) != 0;
 	for (i = 0; i < framesPerBuffer; ++i) {
 		*out = buffer->data32[0][isLeftConstant ? 0 : i];
 		++out;
@@ -161,7 +161,9 @@ void AudioEngine::stop()
 
 clap_process* AudioEngine::process(unsigned long framesPerBuffer)
 {
-	return _pluginHost->process(_sampleRate, _bufferSize);
+	auto process = _pluginHost->process(_sampleRate, _bufferSize, _steadyTime);
+	_steadyTime += framesPerBuffer;
+	return process;
 }
 
 
