@@ -37,6 +37,7 @@ private:
 	// std::unique_ptr<PluginProxy> _plugin;
 
 	/* process stuff */
+	unsigned long _allocatedSize = 0;
 	float* _inputs[2] = { nullptr, nullptr };
 	float* _outputs[2] = { nullptr, nullptr };
 	clap_process _process = {};

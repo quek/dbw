@@ -171,8 +171,8 @@ clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_
 		_plugin->start_processing(_plugin);
 		_processing = true;
 	}
-	if (_process.frames_count != bufferSize) {
-		_process.frames_count = bufferSize;
+	if (_allocatedSize < bufferSize) {
+		_allocatedSize = bufferSize;
 		if (_inputs[0] != nullptr) {
 			std::free(_inputs[0]);
 		}
@@ -191,6 +191,7 @@ clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_
 		}
 		_outputs[1] = (float*)std::calloc(bufferSize, sizeof(float));
 	}
+	_process.frames_count = bufferSize;
 	_process.in_events = _evIn.clapInputEvents();
 	_process.out_events = _evOut.clapOutputEvents();
 	_process.steady_time = steadyTime;
