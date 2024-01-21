@@ -27,6 +27,9 @@
     <ClCompile Include="PluginHost.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="PluginEventList.cpp" />
+    <ClCompile Include="..\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -48,6 +51,9 @@
     <ClInclude Include="PluginHost.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="PluginEventList.h" />
+    <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

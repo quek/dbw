@@ -13,5 +13,6 @@ private:
 	
 	// delete
 	PluginHost* _pluginHost = nullptr;;
+	std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
 };
 

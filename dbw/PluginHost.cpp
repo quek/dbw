@@ -265,9 +265,9 @@ void PluginHost::openGui()
 	_pluginGui->get_size(_plugin, &width, &height);
 	printf("can_resize %d, widht %d, height %d", resizable, width, height);
 	if (!_gui) {
-		_wc = WNDCLASSEXW{ sizeof(_wc), CS_CLASSDC, PluginHostWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"Plugin Window", nullptr };
-		::RegisterClassExW(&_wc);
-		_hwnd = ::CreateWindowW(_wc.lpszClassName, L"plugin window", WS_OVERLAPPEDWINDOW, 300, 300, width + 14, height + 39, nullptr, nullptr, _wc.hInstance, nullptr);
+		_wndClass = WNDCLASSEXW{ sizeof(_wndClass), CS_CLASSDC, PluginHostWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"Plugin Window", nullptr };
+		::RegisterClassExW(&_wndClass);
+		_hwnd = ::CreateWindowW(_wndClass.lpszClassName, L"plugin window", WS_OVERLAPPEDWINDOW, 300, 300, width + 14, height + 39, nullptr, nullptr, _wndClass.hInstance, this);
 		::ShowWindow(_hwnd, SW_SHOWDEFAULT);
 		::UpdateWindow(_hwnd);
 		_clap_window.api = api;
@@ -283,15 +283,33 @@ void PluginHost::openGui()
 void PluginHost::closeGui()
 {
 	if (_gui) {
+		_gui = false;
 		_pluginGui->hide(_plugin);
 		_pluginGui->destroy(_plugin);
 		::DestroyWindow(_hwnd);
-		::UnregisterClassW(_wc.lpszClassName, _wc.hInstance);
-		_gui = false;
+		::UnregisterClassW(_wndClass.lpszClassName, _wndClass.hInstance);
 	}
 }
 
 LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	switch (msg) {
+	case WM_CREATE: {
+		PluginHost* pluginHost = (PluginHost*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pluginHost);
+		break;
+	}
+	case WM_SIZE:
+		if (wParam != SIZE_MINIMIZED) {
+			// TODO ‚È‚É‚©‚·‚é
+			printf("WM_SIZE\n");
+		}
+		return 0;
+	case WM_DESTROY: {
+		PluginHost* pluginHost = (PluginHost*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+		pluginHost->closeGui();
+		break;
+	}
+	}
 	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }

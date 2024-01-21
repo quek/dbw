@@ -187,6 +187,7 @@ PluginHost* AudioEngine::addPlugin(std::string path)
 	PluginHost* pluginHost = new PluginHost();
 	pluginHost->load(path.c_str(), 0);
 	pluginHost->start(_sampleRate, _bufferSize);
+	pluginHost->openGui();
 	_pluginHosts.push_back(pluginHost);
 	return pluginHost;
 }

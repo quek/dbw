@@ -23,7 +23,7 @@ private:
 	bool _gui = false;
 	clap_window _clap_window = {};
 	HWND _hwnd = {};
-	WNDCLASSEXW _wc = {};
+	WNDCLASSEXW _wndClass = {};
 	clap_host _clap_host;
 	const clap_plugin* _plugin = nullptr;
 	const clap_plugin_gui* _pluginGui = nullptr;
