@@ -25,6 +25,8 @@
     </ClCompile>
     <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="PluginHost.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="PluginEventList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -44,6 +46,8 @@
     </ClInclude>
     <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="PluginHost.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="PluginEventList.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

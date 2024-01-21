@@ -67,7 +67,9 @@ PluginHost::PluginHost() {
 	_process.audio_outputs = &_audioOut;
 }
 
-PluginHost::~PluginHost() {}
+PluginHost::~PluginHost() {
+	unload();
+}
 
 bool PluginHost::load(const std::string path, uint32_t pluginIndex)
 {
@@ -119,6 +121,15 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
 	return true;
 }
 
+void PluginHost::unload() {
+	if (!_plugin) {
+		return;
+	}
+	stop();
+	_plugin->destroy(_plugin);
+	_plugin = nullptr;
+}
+
 bool PluginHost::canUseGui() const noexcept {
 	if (!_pluginGui)
 		return false;
@@ -133,6 +144,17 @@ bool PluginHost::canUseGui() const noexcept {
 	return false;
 }
 
+void PluginHost::start(double sampleRate, uint32_t bufferSize) {
+	if (!_plugin) {
+		return;
+	}
+	if (!_processing) {
+		_plugin->activate(_plugin, sampleRate, bufferSize, bufferSize);
+		_plugin->start_processing(_plugin);
+		_processing = true;
+	}
+}
+
 void PluginHost::stop()
 {
 	if (!_plugin) {
@@ -143,7 +165,6 @@ void PluginHost::stop()
 		_plugin->deactivate(_plugin);
 		_processing = false;
 	}
-	_plugin->destroy(_plugin);
 }
 
 const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const char* extension_id) noexcept
@@ -166,6 +187,7 @@ void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
 {
 	printf("request callback\n");
 }
+
 
 clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_t steadyTime) {
 	if (!_processing) {
@@ -267,7 +289,6 @@ void PluginHost::closeGui()
 		::UnregisterClassW(_wc.lpszClassName, _wc.hInstance);
 		_gui = false;
 	}
-	stop();
 }
 
 LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

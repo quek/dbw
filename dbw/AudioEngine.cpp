@@ -22,15 +22,24 @@ static int paCallback(
 	unsigned int i;
 
 	clap_process* process = audioEngine->process(framesPerBuffer);
-
-	auto buffer = process->audio_outputs;
-	bool isLeftConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 0)) != 0;
-	bool isRightConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 1)) != 0;
-	for (i = 0; i < framesPerBuffer; ++i) {
-		*out = buffer->data32[0][isLeftConstant ? 0 : i];
-		++out;
-		*out = buffer->data32[1][isRightConstant ? 0 : i];
-		++out;
+	if (process) {
+		auto buffer = process->audio_outputs;
+		bool isLeftConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 0)) != 0;
+		bool isRightConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 1)) != 0;
+		for (i = 0; i < framesPerBuffer; ++i) {
+			*out = buffer->data32[0][isLeftConstant ? 0 : i];
+			++out;
+			*out = buffer->data32[1][isRightConstant ? 0 : i];
+			++out;
+		}
+	}
+	else {
+		for (i = 0; i < framesPerBuffer; ++i) {
+			*out = 0.0;
+			++out;
+			*out = 0.0;
+			++out;
+		}
 	}
 
 	return 0;
@@ -38,26 +47,33 @@ static int paCallback(
 
 AudioEngine::AudioEngine()
 {
+	PaError err = Pa_Initialize();
+	if (err != paNoError) {
+		// TODO
+		printf("PortAudio error: %s\n", Pa_GetErrorText(err));
+	}
 }
 
 AudioEngine::~AudioEngine()
 {
+	stop();
+	for (auto iterator = _pluginHosts.begin(); iterator != _pluginHosts.end(); ++iterator) {
+		(*iterator)->unload();
+		delete (*iterator);
+	}
+	_pluginHosts.clear();
+
+	PaError err = Pa_Terminate();
+	if (err != paNoError) {
+		// TODO
+		printf("PortAudio error: %s\n", Pa_GetErrorText(err));
+	}
 }
 
 void AudioEngine::start()
 {
-	{
-		_pluginHost = new PluginHost();
-		// pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\VCV Rack 2.clap", 0);
-		_pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap", 0);
-		_pluginHost->openGui();
-	}
 	try {
-		PaError err = Pa_Initialize();
-		if (err != paNoError) {
-			// TODO
-			printf("PortAudio error: %s\n", Pa_GetErrorText(err));
-		}
+		PaError err;
 
 		const PaDeviceInfo* deviceInfo;
 		PaDeviceIndex nDevices = Pa_GetDeviceCount();
@@ -136,10 +152,8 @@ void AudioEngine::start()
 
 void AudioEngine::stop()
 {
-	if (!_pluginHost) {
-		_pluginHost->stop();
-		delete _pluginHost;
-		_pluginHost = nullptr;
+	for (auto iterator = _pluginHosts.begin(); iterator != _pluginHosts.end(); ++iterator) {
+		(*iterator)->stop();
 	}
 
 	PaError err;
@@ -156,20 +170,24 @@ void AudioEngine::stop()
 		}
 		_stream = nullptr;
 	}
-
-	err = Pa_Terminate();
-	if (err != paNoError) {
-		// TODO
-		printf("PortAudio error: %s\n", Pa_GetErrorText(err));
-	}
-
 }
 
 clap_process* AudioEngine::process(unsigned long framesPerBuffer)
 {
-	auto process = _pluginHost->process(_sampleRate, _bufferSize, _steadyTime);
+	clap_process* process = nullptr;
+	for (auto iterator = _pluginHosts.begin(); iterator != _pluginHosts.end(); ++iterator) {
+		process = (*iterator)->process(_sampleRate, _bufferSize, _steadyTime);
+	}
 	_steadyTime += framesPerBuffer;
 	return process;
 }
 
+PluginHost* AudioEngine::addPlugin(std::string path)
+{
+	PluginHost* pluginHost = new PluginHost();
+	pluginHost->load(path.c_str(), 0);
+	pluginHost->start(_sampleRate, _bufferSize);
+	_pluginHosts.push_back(pluginHost);
+	return pluginHost;
+}
 
