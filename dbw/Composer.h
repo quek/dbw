@@ -2,10 +2,10 @@
 #include "AudioEngine.h"
 #include "PluginHost.h"
 
-class MainWindow
+class Composer
 {
 public:
-	MainWindow(AudioEngine* audioEngine);
+	Composer(AudioEngine* audioEngine);
 	void render();
 
 private:

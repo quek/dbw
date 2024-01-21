@@ -29,7 +29,7 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 #include <cstdio>
-#include "MainWindow.h"
+#include "Composer.h"
 
 struct FrameContext
 {
@@ -129,7 +129,7 @@ int main(int, char**)
 	AudioEngine* audioEngine = new AudioEngine();
 	audioEngine->start();
 
-	MainWindow mainWindow{ audioEngine };
+	Composer composer{ audioEngine };
 
 	// Main loop
 	bool done = false;
@@ -154,7 +154,7 @@ int main(int, char**)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		mainWindow.render();
+		composer.render();
 
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 		if (show_demo_window)
