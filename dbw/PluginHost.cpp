@@ -1,6 +1,7 @@
 #include "PluginHost.h"
 
 #include <windows.h>
+#include "logging.h"
 
 
 LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -78,7 +79,7 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
     _library = LoadLibrary(lpwstr);
     if (!_library) {
         // TODO
-        printf("Load error %s", path.c_str());
+        logger->error("Load error {}", path);
         return false;
     }
     struct clap_plugin_entry* entry = (struct clap_plugin_entry*)GetProcAddress(_library, "clap_entry");
@@ -88,33 +89,31 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
     auto count = factory->get_plugin_count(factory);
     if (pluginIndex > count) {
         // TODO
-        printf("pluginIndex %d > count %d is false", pluginIndex, count);
+        logger->error("pluginIndex {} > count {} is false", pluginIndex, count);
         return false;
     }
 
     auto desc = factory->get_plugin_descriptor(factory, pluginIndex);
     if (!desc) {
-        printf("no plugin descriptor");
+        logger->error("no plugin descriptor");
         return false;
     }
 
     if (!clap_version_is_compatible(desc->clap_version)) {
-        printf("Incompatible clap version");
+        logger->error("Incompatible clap version");
         return false;
     }
 
     _plugin = factory->create_plugin(factory, &_clap_host, desc->id);
     if (!_plugin) {
-        printf("could not create the plugin with id: %s", desc->id);
+        logger->error("could not create the plugin with id: {}", desc->id);
         return false;
     }
 
     if (!_plugin->init(_plugin)) {
-        printf("could not init the plugin with id: %s", desc->id);
+        logger->error("could not init the plugin with id: {}", desc->id);
         return false;
     }
-
-
 
     _pluginGui = static_cast<const clap_plugin_gui*>(_plugin->get_extension(_plugin, CLAP_EXT_GUI));
 
@@ -175,23 +174,23 @@ void PluginHost::stop()
 
 const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const char* extension_id) noexcept
 {
-    printf("get extension %s\n", extension_id);
+    logger->debug("get extension {}", extension_id);
     return nullptr;
 }
 
 void PluginHost::clapRequestRestart(const clap_host_t* /* host */) noexcept
 {
-    printf("request restart\n");
+    logger->debug("request restart");
 }
 
 void PluginHost::clapRequestProcess(const clap_host_t* /* host */) noexcept
 {
-    printf("request process\n");
+    logger->debug("request process");
 }
 
 void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
 {
-    printf("request callback\n");
+    logger->debug("request callback");
 }
 
 

@@ -6,7 +6,6 @@
 
 Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine)
 {
-	logger->debug("This message should be displayed.."); 
 }
 
 void Composer::render()
