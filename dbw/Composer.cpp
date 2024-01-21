@@ -2,9 +2,11 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "PluginHost.h"
+#include "logging.h"
 
 Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine)
 {
+	logger->debug("This message should be displayed.."); 
 }
 
 void Composer::render()

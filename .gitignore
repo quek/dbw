@@ -8,6 +8,7 @@ clap-host
 clap
 imgui
 portaudio
+spdlog
 
 # User-specific files
 *.rsuser

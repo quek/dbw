@@ -24,7 +24,7 @@ class Track {
 };
 
 
-class PlayPosition {
+class Position {
 public:
     int bar = 0;
     int beat = 0;
@@ -49,7 +49,7 @@ private:
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
 
     float bpm{ 128.0 };
-    PlayPosition _playPosition{};
+    Position _playPosition{};
 
     std::vector<std::unique_ptr<Track>> _tracks;
 };
