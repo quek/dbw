@@ -20,6 +20,7 @@ public:
 	void stop();
 
 private:
+    HMODULE _library = nullptr;
 	bool _gui = false;
 	clap_window _clap_window = {};
 	HWND _hwnd = {};

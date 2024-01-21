@@ -75,13 +75,13 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
 {
     std::wstring wstr(path.begin(), path.end());
     LPCWSTR lpwstr = wstr.c_str();
-    HMODULE library = LoadLibrary(lpwstr);
-    if (!library) {
+    _library = LoadLibrary(lpwstr);
+    if (!_library) {
         // TODO
         printf("Load error %s", path.c_str());
         return false;
     }
-    struct clap_plugin_entry* entry = (struct clap_plugin_entry*)GetProcAddress(library, "clap_entry");
+    struct clap_plugin_entry* entry = (struct clap_plugin_entry*)GetProcAddress(_library, "clap_entry");
     entry->init(path.c_str());
     auto factory =
         static_cast<const clap_plugin_factory*>(entry->get_factory(CLAP_PLUGIN_FACTORY_ID));
@@ -123,11 +123,17 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
 
 void PluginHost::unload() {
     if (!_plugin) {
+        if (_library != nullptr) {
+            FreeLibrary(_library);
+        }
         return;
     }
     stop();
     _plugin->destroy(_plugin);
     _plugin = nullptr;
+    if (_library != nullptr) {
+        FreeLibrary(_library);
+    }
 }
 
 bool PluginHost::canUseGui() const noexcept {
@@ -301,7 +307,7 @@ LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
     }
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED) {
-            // TODO Ç»Ç…Ç©Ç∑ÇÈ
+            // TODO „Å™„Å´„Åã„Åô„Çã
             printf("WM_SIZE\n");
         }
         return 0;
