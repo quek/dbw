@@ -27,3 +27,11 @@ void Composer::render()
 	}
 	ImGui::End();
 }
+
+void Composer::play()
+{
+}
+
+void Composer::stop()
+{
+}
