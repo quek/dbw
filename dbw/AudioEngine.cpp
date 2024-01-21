@@ -36,7 +36,7 @@ static int paCallback(
 	return 0;
 }
 
-AudioEngine::AudioEngine(const clap_window* window) : _window(window)
+AudioEngine::AudioEngine()
 {
 }
 
@@ -47,10 +47,10 @@ AudioEngine::~AudioEngine()
 void AudioEngine::start()
 {
 	{
-		_pluginHost = new PluginHost(_window);
+		_pluginHost = new PluginHost();
 		// pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\VCV Rack 2.clap", 0);
 		_pluginHost->load("C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap", 0);
-		_pluginHost->edit();
+		_pluginHost->openGui();
 	}
 	try {
 		PaError err = Pa_Initialize();

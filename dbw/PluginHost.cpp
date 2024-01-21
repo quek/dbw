@@ -3,7 +3,9 @@
 #include <windows.h>
 
 
-PluginHost::PluginHost(const clap_window* window) : _window(window) {
+LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+PluginHost::PluginHost() {
 	_clap_host = clap_host{
 		// clap_version_t clap_version; // initialized to CLAP_VERSION
 		CLAP_VERSION,
@@ -204,7 +206,7 @@ clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_
 	return &_process;
 }
 
-void PluginHost::edit()
+void PluginHost::openGui()
 {
 	/// Showing the GUI works as follow:
 	///  1. clap_plugin_gui->is_api_supported(), check what can work
@@ -222,7 +224,7 @@ void PluginHost::edit()
 	/// 13. clap_plugin_gui->hide()/show() ...
 	/// 14. clap_plugin_gui->destroy() when done with the gui
 
-	auto api = _window->api;
+	auto api = CLAP_WINDOW_API_WIN32;
 	auto is_floating = false;
 	if (!canUseGui()) {
 		return;
@@ -240,8 +242,35 @@ void PluginHost::edit()
 	uint32_t width, height;
 	_pluginGui->get_size(_plugin, &width, &height);
 	printf("can_resize %d, widht %d, height %d", resizable, width, height);
-	_pluginGui->set_parent(_plugin, _window);
+	if (!_gui) {
+		_wc = WNDCLASSEXW{ sizeof(_wc), CS_CLASSDC, PluginHostWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"Plugin Window", nullptr };
+		::RegisterClassExW(&_wc);
+		_hwnd = ::CreateWindowW(_wc.lpszClassName, L"plugin window", WS_OVERLAPPEDWINDOW, 300, 300, width + 14, height + 39, nullptr, nullptr, _wc.hInstance, nullptr);
+		::ShowWindow(_hwnd, SW_SHOWDEFAULT);
+		::UpdateWindow(_hwnd);
+		_clap_window.api = api;
+		_clap_window.win32 = _hwnd;
+		_gui = true;
+	}
+	_pluginGui->set_parent(_plugin, &_clap_window);
 	if (!_pluginGui->show(_plugin)) {
 		printf("show failed");
 	}
+}
+
+void PluginHost::closeGui()
+{
+	if (_gui) {
+		_pluginGui->hide(_plugin);
+		_pluginGui->destroy(_plugin);
+		::DestroyWindow(_hwnd);
+		::UnregisterClassW(_wc.lpszClassName, _wc.hInstance);
+		_gui = false;
+	}
+	stop();
+}
+
+LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }

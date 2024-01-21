@@ -5,6 +5,7 @@
 #include <clap/helpers/reducing-param-queue.hh>
 #include <clap/helpers/host.hh>
 #include <clap/helpers/plugin-proxy.hh>
+#include <windows.h>
 
 // constexpr auto PluginHost_MH = clap::helpers::MisbehaviourHandler::Terminate;
 // constexpr auto PluginHost_CL = clap::helpers::CheckingLevel::Maximal;
@@ -18,16 +19,20 @@
 class PluginHost
 {
 public:
-	PluginHost(const clap_window* window);
+	PluginHost();
 	~PluginHost();
 	bool load(const std::string path, uint32_t pluginIndex);
 	clap_process* process(double sampleRate, uint32_t bufferSize, int64_t steadyTime);
-	void edit();
+	void openGui();
+	void closeGui();
 	bool canUseGui() const noexcept;
 	void stop();
 
 private:
-	const clap_window* _window;
+	bool _gui = false;
+	clap_window _clap_window;
+	HWND _hwnd;
+	WNDCLASSEXW _wc;
 	clap_host _clap_host;
 	const clap_plugin* _plugin = nullptr;
 	const clap_plugin_gui* _pluginGui = nullptr;

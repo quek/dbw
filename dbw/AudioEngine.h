@@ -8,14 +8,13 @@ class PluginHost;
 class AudioEngine
 {
 public:
-	AudioEngine(const clap_window* window);
+	AudioEngine();
 	~AudioEngine();
 	void start();
 	void stop();
 	clap_process* process(unsigned long framesPerBuffer);
 
 private:
-	const clap_window* _window;
 	PaStream* _stream = nullptr;
 	double _sampleRate = 48000.0;
 	unsigned long _bufferSize = 1024;
