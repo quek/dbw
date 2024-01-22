@@ -68,6 +68,9 @@ FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 std::shared_ptr<spdlog::logger> logger;
+float TEXT_BASE_WIDTH;
+float TEXT_BASE_HEIGHT;
+
 // Main code
 int main(int, char**)
 {
@@ -135,9 +138,11 @@ int main(int, char**)
 
 
     AudioEngine* audioEngine = new AudioEngine();
-    audioEngine->start();
 
-    Composer composer{ audioEngine };
+    Composer composer(audioEngine);
+    audioEngine->_composer = &composer;
+
+    audioEngine->start();
 
     // Main loop
     bool done = false;
@@ -161,6 +166,9 @@ int main(int, char**)
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+
+        TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
+        TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
         composer.render();
 
@@ -240,6 +248,7 @@ int main(int, char**)
         frameCtx->FenceValue = fenceValue;
     }
 
+    composer.stop();
     audioEngine->stop();
     delete audioEngine;
     audioEngine = nullptr;

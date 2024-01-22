@@ -194,12 +194,7 @@ void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
 }
 
 
-clap_process* PluginHost::process(double sampleRate, uint32_t bufferSize, int64_t steadyTime) {
-    if (!_processing) {
-        _plugin->activate(_plugin, sampleRate, bufferSize, bufferSize);
-        _plugin->start_processing(_plugin);
-        _processing = true;
-    }
+clap_process* PluginHost::process(uint32_t bufferSize, int64_t steadyTime) {
     if (_allocatedSize < bufferSize) {
         _allocatedSize = bufferSize;
         if (_inputs[0] != nullptr) {

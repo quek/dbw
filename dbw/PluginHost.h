@@ -12,7 +12,7 @@ public:
 	~PluginHost();
 	bool load(const std::string path, uint32_t pluginIndex);
 	void unload();
-	clap_process* process(double sampleRate, uint32_t bufferSize, int64_t steadyTime);
+	clap_process* process(uint32_t bufferSize, int64_t steadyTime);
 	void openGui();
 	void closeGui();
 	bool canUseGui() const noexcept;
