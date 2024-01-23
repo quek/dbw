@@ -5,7 +5,45 @@
 #include "logging.h"
 #include <sstream>
 #include <cstdlib>
+#include <map>
 
+
+const int16_t NOTE_OFF = 128;
+const int16_t NOTE_NONE = -1;
+
+int16_t noteToNumber(std::string note_name) {
+    std::map<std::string, int> table = {
+        {"OFF", NOTE_OFF},
+        {"C0", 12}, {"C0#", 13}, {"D0", 14}, {"D0#", 15}, {"E0", 16},
+        {"F0", 17}, {"F0#", 18}, {"G0", 19}, {"G0#", 20}, {"A0", 21},
+        {"A0#", 22}, {"B0", 23}, {"C1", 24}, {"C1#", 25}, {"D1", 26},
+        {"D1#", 27}, {"E1", 28}, {"F1", 29}, {"F1#", 30}, {"G1", 31},
+        {"G1#", 32}, {"A1", 33}, {"A1#", 34}, {"B1", 35}, {"C2", 36},
+        {"C2#", 37}, {"D2", 38}, {"D2#", 39}, {"E2", 40}, {"F2", 41},
+        {"F2#", 42}, {"G2", 43}, {"G2#", 44}, {"A2", 45}, {"A2#", 46},
+        {"B2", 47}, {"C3", 48}, {"C3#", 49}, {"D3", 50}, {"D3#", 51},
+        {"E3", 52}, {"F3", 53}, {"F3#", 54}, {"G3", 55}, {"G3#", 56},
+        {"A3", 57}, {"A3#", 58}, {"B3", 59}, {"C4", 60}, {"C4#", 61},
+        {"D4", 62}, {"D4#", 63}, {"E4", 64}, {"F4", 65}, {"F4#", 66},
+        {"G4", 67}, {"G4#", 68}, {"A4", 69}, {"A4#", 70}, {"B4", 71},
+        {"C5", 72}, {"C5#", 73}, {"D5", 74}, {"D5#", 75}, {"E5", 76},
+        {"F5", 77}, {"F5#", 78}, {"G5", 79}, {"G5#", 80}, {"A5", 81},
+        {"A5#", 82}, {"B5", 83}, {"C6", 84}, {"C6#", 85}, {"D6", 86},
+        {"D6#", 87}, {"E6", 88}, {"F6", 89}, {"F6#", 90}, {"G6", 91},
+        {"G6#", 92}, {"A6", 93}, {"A6#", 94}, {"B6", 95}, {"C7", 96},
+        {"C7#", 97}, {"D7", 98}, {"D7#", 99}, {"E7", 100}, {"F7", 101},
+        {"F7#", 102}, {"G7", 103}, {"G7#", 104}, {"A7", 105}, {"A7#", 106},
+        {"B7", 107}, {"C8", 108}, {"C8#", 109}, {"D8", 110}, {"D8#", 111},
+        {"E8", 112}, {"F8", 113}, {"F8#", 114}, {"G8", 115}, {"G8#", 116},
+        {"A8", 117}, {"A8#", 118}, {"B8", 119}, {"C9", 120}
+    };
+
+    auto x = table.find(note_name);
+    if (x == table.end()) {
+        return NOTE_NONE;
+    }
+    return static_cast<int16_t>(x->second);
+}
 
 
 Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine)
@@ -39,7 +77,7 @@ void Composer::process(float* in, float* out, unsigned long framesPerBuffer, int
     }
 
     if (_playing) {
-        _playPosition += _nextPlayPosition;
+        _playPosition = _nextPlayPosition;
     }
 }
 
@@ -113,6 +151,8 @@ void Composer::play()
 void Composer::stop()
 {
     _playing = false;
+    _playPosition = PlayPosition{ ._line = 0, ._delay = 0 };
+    _nextPlayPosition = PlayPosition{ ._line = 0, ._delay = 0 };
 }
 
 void Composer::addTrack()
@@ -147,12 +187,27 @@ Track::~Track()
 
 void Track::process(AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime)
 {
-    // TODO DELETE
-    clap_event_note event;
-    if (_composer->_playing) {
-        in->_eventIn.noteOn(60, 0, 100, 0);
-        in->_eventIn.noteOff(60, 0, 100, 1024);
+    PlayPosition* from = &_composer->_playPosition;
+    PlayPosition* to = &_composer->_nextPlayPosition;
+    int fromLine = from->_delay == 0 ? from->_line : from->_line + 1;
+    int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
+    for (int i = fromLine; i < toLine && i < _lines.size(); ++i) {
+        if (_lines[i]->empty()) {
+            continue;
+        }
+        int16_t key = noteToNumber(*_lines[i]);
+        if (key == NOTE_NONE) {
+            continue;
+        }
+        if (key == NOTE_OFF) {
+            in->_eventIn.noteOff(_lastKey, 0, 100, 0);
+            continue;
+        }
+        in->_eventIn.noteOn(key, 0, 100, 0);
+        _lastKey = key;
+
     }
+
 
     _audioBuffer.ensure(framesPerBuffer);
     AudioBuffer* buffer = in;
@@ -271,17 +326,22 @@ void Module::process(AudioBuffer* /* in */, unsigned long framesPerBuffer, int64
     _audioBuffer.ensure(framesPerBuffer);
 }
 
-PlayPosition PlayPosition::nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb)
+PlayPosition PlayPosition::nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb) const
 {
     double deltaSec = framesPerBuffer / sampleRate;
     double oneBeatSec = 60.0 / bpm;
     double oneLineSec = oneBeatSec / lpb;
     double quotient = std::floor(deltaSec / oneLineSec);
     double remainder = std::fmod(deltaSec, oneLineSec);
-    int line = static_cast<int>(quotient);
-    unsigned char delay = static_cast<unsigned char>(std::floor(remainder / (oneLineSec / 0xff)));
+    int line = static_cast<int>(quotient) + _line;
+    double oneDelaySec = oneLineSec / 0x100;
+    auto delay = (std::floor(remainder / oneDelaySec)) + _delay;
+    if (delay > 0xff) {
+        ++line;
+        delay -= 0x100;
+    }
 
-    return PlayPosition{ line,  delay };
+    return PlayPosition{ line,  static_cast<unsigned char>(delay) };
 }
 
 PlayPosition& PlayPosition::operator+=(const PlayPosition& rhs)
@@ -289,11 +349,11 @@ PlayPosition& PlayPosition::operator+=(const PlayPosition& rhs)
     _line += rhs._line;
     auto delay = _delay + rhs._delay;
     if (delay > 0xff) {
-        ++_line;
-        _delay = delay - 0x100;
+        _line += delay / 0x100;
+        _delay = static_cast<unsigned char>(delay % 0x100);
     }
     else {
-        _delay = delay;
+        _delay = static_cast<unsigned char>(delay);
     }
     return *this;
 }

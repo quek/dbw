@@ -10,8 +10,8 @@ class Composer;
 
 class AudioBuffer {
 public:
-    AudioBuffer::AudioBuffer();
-    AudioBuffer::AudioBuffer(unsigned long framesPerBuffer);
+    AudioBuffer();
+    AudioBuffer(unsigned long framesPerBuffer);
     void ensure(unsigned long framesPerBuffer);
     std::unique_ptr<float[]> _in;
     std::unique_ptr<float[]> _out;
@@ -34,8 +34,8 @@ public:
 
 class PluginModule : public Module {
 public:
-    PluginModule::PluginModule(PluginHost* pluginHost);
-    PluginModule::~PluginModule();
+    PluginModule(PluginHost* pluginHost);
+    ~PluginModule();
     void openGui() const { _pluginHost->openGui(); };
     void closeUgi() const { _pluginHost->closeGui(); };
     void process(AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime) override;
@@ -53,8 +53,8 @@ class Clip {
 
 class Track {
 public:
-    Track::Track(std::string name, Composer* composer);
-    Track::~Track();
+    Track(std::string name, Composer* composer);
+    ~Track();
     void process(AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
     void render();
     void renderLine(int line);
@@ -65,6 +65,7 @@ public:
     std::vector<std::unique_ptr<Clip>> _clips;
     std::vector<std::unique_ptr<std::string>> _lines;
     std::vector<std::unique_ptr<Module>> _modules;
+    int16_t _lastKey = 0;
 
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
     Composer* _composer;
@@ -75,7 +76,7 @@ class PlayPosition {
 public:
     int _line = 0;
     unsigned char _delay = 0;
-    PlayPosition nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb);
+    PlayPosition nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb) const;
 
     //int bar = 0;
     //int beat = 0;
