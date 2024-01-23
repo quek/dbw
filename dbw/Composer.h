@@ -17,6 +17,10 @@ public:
     std::unique_ptr<float[]> _out;
     unsigned long _framesPerBuffer;
     void copyOutToOutFrom(AudioBuffer* from);
+    PluginEventList _eventIn;
+    PluginEventList _eventOut;
+
+    void clear();
 };
 
 class Module {
@@ -53,11 +57,13 @@ public:
     Track::~Track();
     void process(AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
     void render();
+    void renderLine(int line);
     AudioBuffer _audioBuffer;
     float* _out = nullptr;
 
     std::string _name;
     std::vector<std::unique_ptr<Clip>> _clips;
+    std::vector<std::unique_ptr<std::string>> _lines;
     std::vector<std::unique_ptr<Module>> _modules;
 
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
@@ -65,12 +71,18 @@ public:
 };
 
 
-class Position {
+class PlayPosition {
 public:
-    int bar = 0;
-    int beat = 0;
-    int tick = 0;
-    static const int TICK_PER_BEAT = 960;
+    int _line = 0;
+    unsigned char _delay = 0;
+    PlayPosition nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb);
+
+    //int bar = 0;
+    //int beat = 0;
+    //int tick = 0;
+    //static const int TICK_PER_BEAT = 960;
+
+    PlayPosition& operator+=(const PlayPosition& rhs);
 };
 
 class Composer
@@ -86,14 +98,18 @@ public:
 
     AudioEngine* _audioEngine;
     AudioBuffer _audioBuffer;
+    float _bpm = 128.0;
+    int _lpb = 4;
+    bool _playing = false;
+    int _maxLine = 0x40;
+    PlayPosition _playPosition{};
+    PlayPosition _nextPlayPosition{};
 private:
 
     // delete
     PluginHost* _pluginHost = nullptr;;
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
 
-    float bpm{ 128.0 };
-    Position _playPosition{};
 
     std::vector<std::unique_ptr<Track>> _tracks;
 };

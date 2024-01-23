@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include "logging.h"
+#include "Composer.h"
 
 
 LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -194,7 +195,7 @@ void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
 }
 
 
-clap_process* PluginHost::process(uint32_t bufferSize, int64_t steadyTime) {
+clap_process* PluginHost::process(AudioBuffer* in, uint32_t bufferSize, int64_t steadyTime) {
     if (_allocatedSize < bufferSize) {
         _allocatedSize = bufferSize;
         if (_inputs[0] != nullptr) {
@@ -216,7 +217,7 @@ clap_process* PluginHost::process(uint32_t bufferSize, int64_t steadyTime) {
         _outputs[1] = (float*)std::calloc(bufferSize, sizeof(float));
     }
     _process.frames_count = bufferSize;
-    _process.in_events = _evIn.clapInputEvents();
+    _process.in_events = in->_eventIn.clapInputEvents();
     _process.out_events = _evOut.clapOutputEvents();
     _process.steady_time = steadyTime;
 
