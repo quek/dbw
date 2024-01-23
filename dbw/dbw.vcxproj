@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -104,7 +104,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -140,7 +140,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
