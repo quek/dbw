@@ -30,6 +30,8 @@
     <ClCompile Include="..\imgui\misc\cpp\imgui_stdlib.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Midi.cpp" />
+    <ClCompile Include="PlayPosition.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -55,6 +57,8 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="logging.h" />
+    <ClInclude Include="Midi.h" />
+    <ClInclude Include="PlayPosition.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

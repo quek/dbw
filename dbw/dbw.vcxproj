@@ -161,6 +161,8 @@
     <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="Composer.h" />
     <ClInclude Include="logging.h" />
+    <ClInclude Include="Midi.h" />
+    <ClInclude Include="PlayPosition.h" />
     <ClInclude Include="PluginEventList.h" />
     <ClInclude Include="PluginHost.h" />
   </ItemGroup>
@@ -176,6 +178,8 @@
     <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Composer.cpp" />
+    <ClCompile Include="Midi.cpp" />
+    <ClCompile Include="PlayPosition.cpp" />
     <ClCompile Include="PluginEventList.cpp" />
     <ClCompile Include="PluginHost.cpp" />
   </ItemGroup>

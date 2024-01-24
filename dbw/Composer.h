@@ -1,10 +1,17 @@
 #pragma once
 #include "AudioEngine.h"
 #include "PluginHost.h"
+#include "PlayPosition.h"
+#include "Midi.h"
 #include <memory>
 
 extern float TEXT_BASE_WIDTH;
 extern float TEXT_BASE_HEIGHT;
+
+struct ImVec4;
+extern ImVec4 COLOR_BUTTON_ON;
+extern ImVec4 COLOR_BUTTON_ON_HOVERED;
+extern ImVec4 COLOR_BUTTON_ON_ACTIVE;
 
 class Composer;
 
@@ -16,7 +23,8 @@ public:
     std::unique_ptr<float[]> _in;
     std::unique_ptr<float[]> _out;
     unsigned long _framesPerBuffer;
-    void copyOutToOutFrom(AudioBuffer* from);
+    void copyInToInFrom(const AudioBuffer* from);
+    void copyOutToOutFrom(const AudioBuffer* from);
     PluginEventList _eventIn;
     PluginEventList _eventOut;
 
@@ -55,7 +63,7 @@ class Track {
 public:
     Track(std::string name, Composer* composer);
     ~Track();
-    void process(AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
+    void process(const AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
     void render();
     void renderLine(int line);
     AudioBuffer _audioBuffer;
@@ -65,25 +73,10 @@ public:
     std::vector<std::unique_ptr<Clip>> _clips;
     std::vector<std::unique_ptr<std::string>> _lines;
     std::vector<std::unique_ptr<Module>> _modules;
-    int16_t _lastKey = 0;
+    int16_t _lastKey = NOTE_NONE;
 
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
     Composer* _composer;
-};
-
-
-class PlayPosition {
-public:
-    int _line = 0;
-    unsigned char _delay = 0;
-    PlayPosition nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb) const;
-
-    //int bar = 0;
-    //int beat = 0;
-    //int tick = 0;
-    //static const int TICK_PER_BEAT = 960;
-
-    PlayPosition& operator+=(const PlayPosition& rhs);
 };
 
 class Composer
@@ -102,9 +95,13 @@ public:
     float _bpm = 128.0;
     int _lpb = 4;
     bool _playing = false;
+    bool _looping = false;
+    bool _scrollLock = false;
     int _maxLine = 0x40;
     PlayPosition _playPosition{};
     PlayPosition _nextPlayPosition{};
+    PlayPosition _loopStartPosition{};
+    PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
 private:
 
     // delete
