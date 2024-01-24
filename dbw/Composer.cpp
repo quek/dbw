@@ -1,4 +1,5 @@
 #include "Composer.h"
+#include "Line.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "logging.h"
@@ -47,6 +48,17 @@ void Composer::process(float* in, float* out, unsigned long framesPerBuffer, int
         if (_playPosition >= _loopEndPosition) {
             _playPosition = _loopStartPosition;
         }
+    }
+    if (_playPosition._line > _maxLine) {
+        _playPosition._line = 0;
+        _playPosition._delay = 0;
+    }
+}
+
+void Composer::changeMaxLine()
+{
+    for (auto track = _tracks.begin(); track != _tracks.end(); ++track) {
+        (*track)->changeMaxLine(_maxLine);
     }
 }
 
@@ -99,6 +111,12 @@ void Composer::render()
         }
     }
     ImGui::SameLine();
+    ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4);
+    if (ImGui::DragInt("Lines", &_maxLine, 1.0f, 1, 0x40 * 1000)) {
+        changeMaxLine();
+    }
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(ImGui::GetFontSize() * 5);
     ImGui::DragFloat("BPM", &_bpm, 1.0f, 0.0f, 999.0f, "%.02f");
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
@@ -145,7 +163,6 @@ void Composer::render()
 
 
     {
-        ImGuiIO& io = ImGui::GetIO();
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             _playing = !_playing;
         }
@@ -179,34 +196,47 @@ void Composer::addTrack()
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer)
 {
     for (auto i = 0; i < composer->_maxLine; ++i) {
-        _lines.push_back(std::make_unique<std::string>());
+        _lines.push_back(std::make_unique<Line>());
     }
-    _lines[0x00]->assign(Midi::C4);
-    _lines[0x04]->assign(Midi::E4);
-    _lines[0x08]->assign(Midi::OFF);
-    _lines[0x0a]->assign(Midi::G4);
-    _lines[0x0f]->assign(Midi::OFF);
-    _lines[0x10]->assign(Midi::C4);
-    _lines[0x14]->assign(Midi::E4);
-    _lines[0x18]->assign(Midi::OFF);
-    _lines[0x1a]->assign(Midi::G4);
-    _lines[0x1f]->assign(Midi::OFF);
-    _lines[0x20]->assign(Midi::C4);
-    _lines[0x24]->assign(Midi::E4);
-    _lines[0x28]->assign(Midi::OFF);
-    _lines[0x2a]->assign(Midi::G4);
-    _lines[0x2f]->assign(Midi::OFF);
-    _lines[0x30]->assign(Midi::C4);
-    _lines[0x34]->assign(Midi::E4);
-    _lines[0x38]->assign(Midi::OFF);
-    _lines[0x3a]->assign(Midi::G4);
-    _lines[0x3f]->assign(Midi::OFF);
+    _lines[0x00]->_note.assign(Midi::C4);
+    _lines[0x04]->_note.assign(Midi::E4);
+    _lines[0x06]->_note.assign(Midi::G4);
+    _lines[0x07]->_note.assign(Midi::A4);
+    _lines[0x08]->_note.assign(Midi::OFF);
+    _lines[0x10]->_note.assign(Midi::E4);
+    _lines[0x14]->_note.assign(Midi::G4);
+    _lines[0x16]->_note.assign(Midi::A4);
+    _lines[0x17]->_note.assign(Midi::B4);
+    _lines[0x18]->_note.assign(Midi::OFF);
+    _lines[0x20]->_note.assign(Midi::C4);
+    _lines[0x24]->_note.assign(Midi::E4);
+    _lines[0x26]->_note.assign(Midi::G4);
+    _lines[0x27]->_note.assign(Midi::A4);
+    _lines[0x28]->_note.assign(Midi::OFF);
+    _lines[0x30]->_note.assign(Midi::D4);
+    _lines[0x34]->_note.assign(Midi::F4);
+    _lines[0x36]->_note.assign(Midi::G4);
+    _lines[0x37]->_note.assign(Midi::C5);
+    _lines[0x38]->_note.assign(Midi::OFF);
+    _lines[0x3a]->_note.assign(Midi::C5);
+    _lines[0x3c]->_note.assign(Midi::C5);
+    _lines[0x3d]->_note.assign(Midi::D5);
+    _lines[0x3e]->_note.assign(Midi::B4);
+    _lines[0x3f]->_note.assign(Midi::OFF);
+
 }
 
 Track::~Track()
 {
     if (_out != nullptr) {
         free(_out);
+    }
+}
+
+void Track::changeMaxLine(int value)
+{
+    for (auto i = _lines.size(); i < value; ++i) {
+        _lines.push_back(std::make_unique<Line>());
     }
 }
 
@@ -220,10 +250,10 @@ void Track::process(const AudioBuffer* in, unsigned long framesPerBuffer, int64_
     int fromLine = from->_delay == 0 ? from->_line : from->_line + 1;
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
     for (int i = fromLine; i < toLine && i < _lines.size(); ++i) {
-        if (_lines[i]->empty()) {
+        if (_lines[i]->_note.empty()) {
             continue;
         }
-        int16_t key = noteToNumber(*_lines[i]);
+        int16_t key = noteToNumber(_lines[i]->_note);
         if (key == NOTE_NONE) {
             continue;
         }
@@ -261,19 +291,15 @@ void Track::render()
         _modules.push_back(std::make_unique<PluginModule>(pluginHost));
     }
     for (auto i = _modules.begin(); i != _modules.end(); ++i) {
+        ImGui::PushID((*i).get());
         (*i)->render();
+        ImGui::PopID();
     }
 }
 
 void Track::renderLine(int line)
 {
-    auto p = _lines[line].get();
-    ImGui::PushID(p);
-    if (ImGui::InputText("", p)) {
-        std::transform(p->begin(), p->end(), p->begin(),
-            [](auto c) { return static_cast<char>(std::toupper(c)); });
-    }
-    ImGui::PopID();
+    _lines[line]->render();
 }
 
 PluginModule::PluginModule(PluginHost* pluginHost) : _pluginHost(pluginHost)

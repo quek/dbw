@@ -160,6 +160,7 @@
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="Composer.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="Midi.h" />
     <ClInclude Include="PlayPosition.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="..\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\imgui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="AudioEngine.cpp" />
+    <ClCompile Include="Line.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Composer.cpp" />
     <ClCompile Include="Midi.cpp" />

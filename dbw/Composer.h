@@ -14,6 +14,7 @@ extern ImVec4 COLOR_BUTTON_ON_HOVERED;
 extern ImVec4 COLOR_BUTTON_ON_ACTIVE;
 
 class Composer;
+class Line;
 
 class AudioBuffer {
 public:
@@ -66,12 +67,13 @@ public:
     void process(const AudioBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
     void render();
     void renderLine(int line);
+    void changeMaxLine(int value);
     AudioBuffer _audioBuffer;
     float* _out = nullptr;
 
     std::string _name;
     std::vector<std::unique_ptr<Clip>> _clips;
-    std::vector<std::unique_ptr<std::string>> _lines;
+    std::vector<std::unique_ptr<Line>> _lines;
     std::vector<std::unique_ptr<Module>> _modules;
     int16_t _lastKey = NOTE_NONE;
 
@@ -89,6 +91,7 @@ public:
     void play();
     void stop();
     void addTrack();
+    void changeMaxLine();
 
     AudioEngine* _audioEngine;
     AudioBuffer _audioBuffer;
@@ -102,6 +105,7 @@ public:
     PlayPosition _nextPlayPosition{};
     PlayPosition _loopStartPosition{};
     PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
+
 private:
 
     // delete
