@@ -199,6 +199,8 @@ Track::Track(std::string name, Composer* composer) : _name(name), _composer(comp
         _lines.push_back(std::make_unique<Line>());
     }
     _lines[0x00]->_note.assign(Midi::C4);
+    _lines[0x01]->_note.assign(Midi::C4);
+    _lines[0x02]->_note.assign(Midi::OFF);
     _lines[0x04]->_note.assign(Midi::E4);
     _lines[0x06]->_note.assign(Midi::G4);
     _lines[0x07]->_note.assign(Midi::A4);
@@ -209,6 +211,8 @@ Track::Track(std::string name, Composer* composer) : _name(name), _composer(comp
     _lines[0x17]->_note.assign(Midi::B4);
     _lines[0x18]->_note.assign(Midi::OFF);
     _lines[0x20]->_note.assign(Midi::C4);
+    _lines[0x21]->_note.assign(Midi::C4);
+    _lines[0x22]->_note.assign(Midi::OFF);
     _lines[0x24]->_note.assign(Midi::E4);
     _lines[0x26]->_note.assign(Midi::G4);
     _lines[0x27]->_note.assign(Midi::A4);
