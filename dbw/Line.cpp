@@ -21,12 +21,12 @@ class EditVelocity : public Command {
 public:
     EditVelocity(Line* line, unsigned char velocity, unsigned char lastVelocity) : _line(line), _velocity(velocity), _lastVelocity(lastVelocity) {}
 
-    void execute(Composer* composer) override {
+    void execute(Composer* /*composer*/) override {
         _line->_velocity = _velocity;
         _line->_lastVelocity = _velocity;
     }
 
-    void undo(Composer* composer) override {
+    void undo(Composer* /*composer*/) override {
         _line->_velocity = _lastVelocity;
         _line->_lastVelocity = _lastVelocity;
     }

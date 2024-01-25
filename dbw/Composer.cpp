@@ -336,6 +336,13 @@ void Track::render()
 {
     ImGui::Text(_name.c_str());
 
+    if (ImGui::Button("+")) {
+        _openModuleSelector = true;
+    }
+    if (_openModuleSelector) {
+        _composer->_pluginManager.openModuleSelector(this);
+    }
+    /*
     ImGui::InputText("plugin path", &_pluginPath);
 
     if (ImGui::Button("Load")) {
@@ -351,6 +358,7 @@ void Track::render()
         (*i)->render();
         ImGui::PopID();
     }
+    */
 }
 
 void Track::renderLine(int line)

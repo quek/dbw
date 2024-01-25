@@ -74,6 +74,7 @@ public:
 
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
     Composer* _composer;
+    bool _openModuleSelector = false;
 };
 
 class Composer
