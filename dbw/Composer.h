@@ -105,6 +105,7 @@ public:
     PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
     CommandManager _commandManager;
     PluginManager _pluginManager;
+    std::vector<std::unique_ptr<Track>> _tracks;
 
 private:
 
@@ -113,6 +114,5 @@ private:
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
 
 
-    std::vector<std::unique_ptr<Track>> _tracks;
 };
 

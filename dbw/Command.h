@@ -8,28 +8,28 @@ class Composer;
 class Command
 {
 public:
-    Command(std::function<void(Composer*)> execute, std::function<void(Composer*)> undo)
-        : _execute(execute), _undo(undo) {}
     virtual ~Command() = default;
-
-    std::function<void(Composer*)> _execute;
-    std::function<void(Composer*)> _undo;
+    virtual void execute(Composer* composer) = 0;
+    virtual void undo(Composer* composer) = 0;
+private:
+    Composer* _composer;
 };
 
 class CommandManager {
 
 public:
     CommandManager(Composer* composer);
-    void executeCommand(std::shared_ptr<Command> command) {
-        command->_execute(_composer);
-        _undoStack.push(command);
+    void executeCommand(Command* command) {
+        command->execute(_composer);
+        std::shared_ptr<Command> p(command);
+        _undoStack.push(p);
         _redoStack = std::stack<std::shared_ptr<Command>>();
     }
 
     void undo() {
         if (!_undoStack.empty()) {
             auto& command = _undoStack.top();
-            command->_undo(_composer);
+            command->undo(_composer);
             _redoStack.push(command);
             _undoStack.pop();
         }
@@ -38,7 +38,7 @@ public:
     void redo() {
         if (!_redoStack.empty()) {
             auto& command = _redoStack.top();
-            command->_execute(_composer);
+            command->execute(_composer);
             _undoStack.push(command);
             _redoStack.pop();
         }

@@ -17,6 +17,25 @@ Line::Line(const char* note, unsigned char velocity, unsigned char delay, Track*
 {
 }
 
+class EditVelocity : public Command {
+public:
+    EditVelocity(Line* line, unsigned char velocity, unsigned char lastVelocity) : _line(line), _velocity(velocity), _lastVelocity(lastVelocity) {}
+
+    void execute(Composer* composer) override {
+        _line->_velocity = _velocity;
+        _line->_lastVelocity = _velocity;
+    }
+
+    void undo(Composer* composer) override {
+        _line->_velocity = _lastVelocity;
+        _line->_lastVelocity = _lastVelocity;
+    }
+
+    Line* _line;
+    unsigned char _velocity;
+    unsigned char _lastVelocity;
+};
+
 void Line::render()
 {
     ImGui::PushID(this);
@@ -34,18 +53,8 @@ void Line::render()
     }
     bool activep = ImGui::IsItemActive();
     if (_velocityEditing && !activep) {
-        unsigned char value = _velocity;
-        unsigned char lastValue = _lastVelocity;
         if (_velocity != _lastVelocity) {
-            auto execute = [this, value](Composer* composer) {
-                _velocity = value;
-                _lastVelocity = value;
-                };
-            auto undo = [this, lastValue](Composer* composer) {
-                _velocity = lastValue;
-                _lastVelocity = lastValue;
-                };
-            _track->_composer->_commandManager.executeCommand(std::make_shared<Command>(execute, undo));
+            _track->_composer->_commandManager.executeCommand(new EditVelocity(this, _velocity, _lastVelocity));
         }
     }
     _velocityEditing = activep;

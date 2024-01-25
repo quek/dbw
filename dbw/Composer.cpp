@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <map>
 #include "GuiUtil.h"
+#include "Command.h"
 
 Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine), _commandManager(this)
 {
@@ -201,20 +202,29 @@ void Composer::stop()
     _nextPlayPosition = PlayPosition{ ._line = 0, ._delay = 0 };
 }
 
+class AddTrackCommand : public Command {
+public:
+    AddTrackCommand(Track* track) : _track(track) {}
+    void execute(Composer* composer) override {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        composer->_tracks.push_back(std::move(_track));
+    }
+    void undo(Composer* composer) override {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        _track = std::move(composer->_tracks.back());
+        composer->_tracks.pop_back();
+    }
+
+    std::unique_ptr<Track> _track;
+
+};
+
 void Composer::addTrack()
 {
     std::stringstream name;
     name << "track " << this->_tracks.size() + 1;
-    auto track = std::make_unique<Track>(name.str(), this);
-    auto command = std::make_shared<Command>([track](Composer* composer) {
-        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
-        composer->_tracks.push_back(track);
-        },
-        [](Composer* composer) {
-            composer->_tracks.pop_back();
-
-        });
-    _commandManager.executeCommand(command);
+    Track* track = new Track(name.str(), this);
+    _commandManager.executeCommand(new AddTrackCommand(track));
 }
 
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer)
