@@ -1,19 +1,19 @@
 #include "PluginManager.h"
 #include "util.h"
-#include "Windows.h":
+#include "Windows.h"
 #include <fstream>
 #include <filesystem>
 #include "logging.h"
 #include "PluginHost.h"
 
-void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::string& filename) {
+
+void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::string& filename, std::string content) {
     std::string configPath = directory + "\\config";
     std::string fullPath = configPath + "\\" + filename;
     CreateDirectoryA(configPath.c_str(), NULL);
 
     std::ofstream configFile(fullPath);
-    configFile << "Ý’èƒf[ƒ^" << std::endl;
-    configFile << "ƒvƒ‰ƒOƒCƒ“";
+    configFile << content << std::endl;
     configFile.close();
 }
 
@@ -28,52 +28,32 @@ void PluginManager::scan()
                 pluginPaths.push_back(entry.path().string());
             }
         }
-    }
-    catch (const std::filesystem::filesystem_error& e) {
-        // ƒfƒBƒŒƒNƒgƒŠ‚Ì’Tõ’†‚ÉƒGƒ‰[‚ª”­¶‚µ‚½ê‡‚ÌƒGƒ‰[ˆ—
+    } catch (const std::filesystem::filesystem_error& e) {
+        // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®æŽ¢ç´¢ä¸­ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸå ´åˆã®ã‚¨ãƒ©ãƒ¼å‡¦ç†
         logger->error("Filesystem error: {}", e.what());
     }
 
+    _plugins.clear();
     for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
         PluginHost pluginHost;
-        pluginHost.scan(*i);
+        auto x = pluginHost.scan(*i);
+        for (auto p = x.begin(); p != x.end(); ++p) {
+            _plugins["clap"].push_back(*p);
+        }
     }
 
     std::string exePath = GetExecutablePath();
-    CreateConfigDirectoryAndSaveFile(exePath, "config.txt");
+    CreateConfigDirectoryAndSaveFile(exePath, "plugin.json", _plugins.dump(2));
 }
 
-/*
-  <Plug>
-    <PluginFormat>CLAP</PluginFormat>
-    <FilePath>/C:/Program Files/Common Files/CLAP/Surge Synth Team/Surge XT.clap</FilePath>
-    <Name/>
-    <PluginSdkVersion>1.1.8</PluginSdkVersion>
-    <FileSize>20382208</FileSize>
-    <ExeBitSize>64</ExeBitSize>
-    <Enabled>1</Enabled>
-    <Favorite>0</Favorite>
-    <LastDataFilePath/>
-    <PrefNumAuxAudioInputs>0</PrefNumAuxAudioInputs>
-    <PrefNumAuxAudioOutputs>0</PrefNumAuxAudioOutputs>
-    <PrefNumAuxEventInputs>0</PrefNumAuxEventInputs>
-    <PrefNumAuxEventOutputs>0</PrefNumAuxEventOutputs>
-    <Categories/>
-    <MustZeroOutputsBeforeProcessReplacing>0</MustZeroOutputsBeforeProcessReplacing>
-    <ClapVersion>1.1.8</ClapVersion>
-    <Id>org.surge-synth-team.surge-xt</Id>
-    <Name/>
-    <Vendor>Surge Synth Team</Vendor>
-    <Url>https://surge-synth-team.org/</Url>
-    <ManualUrl/>
-    <SupportUrl/>
-    <Version>1.3.0</Version>
-    <Description>Surge XT</Description>
-    <Features>
-      <Tag>instrument</Tag>
-      <Tag>synthesizer</Tag>
-      <Tag>hybrid</Tag>
-      <Tag>free and open source</Tag>
-    </Features>
-  </Plug>
-*/
+void PluginManager::load()
+{
+    std::string configFile = GetExecutablePath() + "\\config\\plugin.json";
+    std::ifstream in(configFile);
+    if (in.is_open()) {
+        in >> _plugins;
+    } else {
+        scan();
+    }
+}
+

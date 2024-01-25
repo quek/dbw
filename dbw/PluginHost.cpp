@@ -122,14 +122,14 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
 
 nlohmann::json PluginHost::scan(const std::string path)
 {
-    nlohmann::json result;
+    nlohmann::json plugins;
     std::wstring wstr(path.begin(), path.end());
     LPCWSTR lpwstr = wstr.c_str();
     _library = LoadLibrary(lpwstr);
     if (!_library) {
         // TODO
         logger->error("Load error {}", path);
-        return result;
+        return plugins;
     }
     struct clap_plugin_entry* entry = (struct clap_plugin_entry*)GetProcAddress(_library, "clap_entry");
     entry->init(path.c_str());
@@ -137,62 +137,31 @@ nlohmann::json PluginHost::scan(const std::string path)
         static_cast<const clap_plugin_factory*>(entry->get_factory(CLAP_PLUGIN_FACTORY_ID));
     auto count = factory->get_plugin_count(factory);
 
-    nlohmann::json plugins;
     for (uint32_t i = 0; i < count; ++i) {
         const clap_plugin_descriptor* desc = factory->get_plugin_descriptor(factory, i);
         if (!desc) {
             logger->error("no plugin descriptor");
-            return result;
+            return plugins;
         }
-        /*
-        typedef struct clap_plugin_descriptor {
-           clap_version_t clap_version; // initialized to CLAP_VERSION
 
-           // Mandatory fields must be set and must not be blank.
-           // Otherwise the fields can be null or blank, though it is safer to make them blank.
-           //
-           // Some indications regarding id and version
-           // - id is an arbitrary string which should be unique to your plugin,
-           //   we encourage you to use a reverse URI eg: "com.u-he.diva"
-           // - version is an arbitrary string which describes a plugin,
-           //   it is useful for the host to understand and be able to compare two different
-           //   version strings, so here is a regex like expression which is likely to be
-           //   understood by most hosts: MAJOR(.MINOR(.REVISION)?)?( (Alpha|Beta) XREV)?
-           const char *id;          // eg: "com.u-he.diva", mandatory
-           const char *name;        // eg: "Diva", mandatory
-           const char *vendor;      // eg: "u-he"
-           const char *url;         // eg: "https://u-he.com/products/diva/"
-           const char *manual_url;  // eg: "https://dl.u-he.com/manuals/plugins/diva/Diva-user-guide.pdf"
-           const char *support_url; // eg: "https://u-he.com/support/"
-           const char *version;     // eg: "1.4.4"
-           const char *description; // eg: "The spirit of analogue"
-
-           // Arbitrary list of keywords.
-           // They can be matched by the host indexer and used to classify the plugin.
-           // The array of pointers must be null terminated.
-           // For some standard features see plugin-features.h
-           const char *const *features;
-        } clap_plugin_descriptor_t;
-        */
-
-        nlohmann::json plugin_info;
-        plugin_info["id"] = desc->id;
-        plugin_info["name"] = desc->name;
-        plugin_info["vendor"] = desc->vendor;
-        plugin_info["url"] = desc->url;
-        plugin_info["manual_url"] = desc->manual_url;
-        plugin_info["support_url"] = desc->support_url;
-        plugin_info["version"] = desc->version;
-        plugin_info["description"] = desc->description;
+        nlohmann::json json;
+        json["id"] = desc->id;
+        json["name"] = desc->name;
+        json["vendor"] = desc->vendor;
+        json["url"] = desc->url;
+        json["manual_url"] = desc->manual_url;
+        json["support_url"] = desc->support_url;
+        json["version"] = desc->version;
+        json["description"] = desc->description;
         nlohmann::json features;
         for (int j = 0; desc->features[j] != nullptr; ++j) {
             features.push_back(desc->features[j]);
         }
-        plugin_info["features"] = features;
-        plugins.push_back(plugin_info);
+        json["features"] = features;
+        json["path"] = path;
+        plugins.push_back(json);
     }
-    result["clap"] = plugins;
-    return result;
+    return plugins;
 }
 
 void PluginHost::unload() {

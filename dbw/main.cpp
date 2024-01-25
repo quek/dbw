@@ -140,6 +140,7 @@ int main(int, char**)
 
     Composer composer(audioEngine);
     audioEngine->_composer = &composer;
+    composer._pluginManager.load();
 
     audioEngine->start();
 
