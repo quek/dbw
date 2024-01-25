@@ -1,7 +1,7 @@
 #include "PlayPosition.h"
 #include <cmath>
 
-PlayPosition PlayPosition::nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb) const
+PlayPosition PlayPosition::nextPlayPosition(double sampleRate, unsigned long framesPerBuffer, float bpm, int lpb, int* samplePerDelay) const
 {
     double deltaSec = framesPerBuffer / sampleRate;
     double oneBeatSec = 60.0 / bpm;
@@ -16,7 +16,14 @@ PlayPosition PlayPosition::nextPlayPosition(double sampleRate, unsigned long fra
         delay -= 0x100;
     }
 
+    *samplePerDelay = static_cast<int>(std::round(oneDelaySec / (1 / sampleRate)));
+
     return PlayPosition{ line,  static_cast<unsigned char>(delay) };
+}
+
+int PlayPosition::diffInDelay(const PlayPosition& other) const
+{
+    return ((_line * 0x100) + _delay) - ((other._line * 0x100) + other._delay);
 }
 
 PlayPosition& PlayPosition::operator+=(const PlayPosition& rhs)

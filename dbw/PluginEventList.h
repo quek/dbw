@@ -22,8 +22,8 @@ public:
         _events.push_back(event);
     }
 
-    void noteOn(int16_t key, int16_t channel, double velocity, uint32_t sampleOffset);
-    void noteOff(int16_t key, int16_t channel, double velocity, uint32_t sampleOffset);
+    void noteOn(int16_t key, int16_t channel, unsigned char velocity, uint32_t sampleOffset);
+    void noteOff(int16_t key, int16_t channel, unsigned char velocity, uint32_t sampleOffset);
     void clear();
 
     clap_input_events_t* clapInputEvents();

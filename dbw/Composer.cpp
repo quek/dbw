@@ -6,20 +6,16 @@
 #include <sstream>
 #include <cstdlib>
 #include <map>
+#include "GuiUtil.h"
 
-ImVec4 COLOR_PALY_LINE = ImVec4(0.3f, 0.7f, 0.7f, 0.65f);
-ImVec4 COLOR_BUTTON_ON = ImVec4(0.3f, 0.7f, 0.7f, 0.65f);
-ImVec4 COLOR_BUTTON_ON_HOVERED = ImVec4(0.5f, 0.9f, 0.9f, 0.65f);
-ImVec4 COLOR_BUTTON_ON_ACTIVE = ImVec4(0.4f, 0.8f, 0.8f, 0.65f);
-
-Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine)
+Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine), _commandManager(this)
 {
     addTrack();
 }
 
 void Composer::process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
     if (_playing) {
-        _nextPlayPosition = _playPosition.nextPlayPosition(_audioEngine->_sampleRate, framesPerBuffer, _bpm, _lpb);
+        _nextPlayPosition = _playPosition.nextPlayPosition(_audioEngine->_sampleRate, framesPerBuffer, _bpm, _lpb, &_samplePerDelay);
     }
 
     for (unsigned long i = 0; i < framesPerBuffer * 2; ++i) {
@@ -53,6 +49,11 @@ void Composer::process(float* in, float* out, unsigned long framesPerBuffer, int
         _playPosition._line = 0;
         _playPosition._delay = 0;
     }
+}
+
+void Composer::scanPlugin()
+{
+    _pluginManager.scan();
 }
 
 void Composer::changeMaxLine()
@@ -118,6 +119,18 @@ void Composer::render()
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 5);
     ImGui::DragFloat("BPM", &_bpm, 1.0f, 0.0f, 999.0f, "%.02f");
+    ImGui::SameLine();
+    if (ImGui::Button("Undo")) {
+        _commandManager.undo();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Redo")) {
+        _commandManager.redo();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Scan Plugin")) {
+        scanPlugin();
+    }
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
     // When using ScrollX or ScrollY we need to specify a size for our table container!
@@ -164,7 +177,12 @@ void Composer::render()
 
     {
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
-            _playing = !_playing;
+            if (_playing) {
+                stop();
+            }
+            else {
+                play();
+            }
         }
     }
 
@@ -186,21 +204,35 @@ void Composer::stop()
 void Composer::addTrack()
 {
     std::stringstream name;
-    name << "track " << _tracks.size() + 1;
-    {
-        std::lock_guard<std::mutex> lock(_audioEngine->mtx);
-        _tracks.push_back(std::make_unique<Track>(name.str(), this));
-    }
+    name << "track " << this->_tracks.size() + 1;
+    auto track = std::make_unique<Track>(name.str(), this);
+    auto command = std::make_shared<Command>([track](Composer* composer) {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        composer->_tracks.push_back(track);
+        },
+        [](Composer* composer) {
+            composer->_tracks.pop_back();
+
+        });
+    _commandManager.executeCommand(command);
 }
 
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer)
 {
     for (auto i = 0; i < composer->_maxLine; ++i) {
-        _lines.push_back(std::make_unique<Line>());
+        _lines.push_back(std::make_unique<Line>(this));
     }
-    _lines[0x00]->_note.assign(Midi::C4);
-    _lines[0x01]->_note.assign(Midi::C4);
-    _lines[0x02]->_note.assign(Midi::OFF);
+    //_lines[0x00]->_note.assign(Midi::C4);
+    _lines[0x00].reset(new Line(Midi::C4, 0x64, 0, this));
+    //_lines[0x01]->_note.assign(Midi::C4);
+    //_lines[0x01]->_delay = 0x80;
+    _lines[0x01].reset(new Line(Midi::C4, 0x64, 0x80, this));
+    //_lines[0x02]->_note.assign(Midi::C4);
+    //_lines[0x02]->_velocity = 0x40;
+    _lines[0x02].reset(new Line(Midi::C4, 0x40, 0x00, this));
+
+    _lines[0x03]->_note.assign(Midi::C4);
+    _lines[0x03]->_velocity = 0x7f;
     _lines[0x04]->_note.assign(Midi::E4);
     _lines[0x06]->_note.assign(Midi::G4);
     _lines[0x07]->_note.assign(Midi::A4);
@@ -223,9 +255,13 @@ Track::Track(std::string name, Composer* composer) : _name(name), _composer(comp
     _lines[0x37]->_note.assign(Midi::C5);
     _lines[0x38]->_note.assign(Midi::OFF);
     _lines[0x3a]->_note.assign(Midi::C5);
+    _lines[0x3a]->_velocity = 0x70;
     _lines[0x3c]->_note.assign(Midi::C5);
+    _lines[0x3c]->_velocity = 0x74;
     _lines[0x3d]->_note.assign(Midi::D5);
+    _lines[0x3d]->_velocity = 0x78;
     _lines[0x3e]->_note.assign(Midi::B4);
+    _lines[0x3e]->_velocity = 0x7f;
     _lines[0x3f]->_note.assign(Midi::OFF);
 
 }
@@ -240,7 +276,7 @@ Track::~Track()
 void Track::changeMaxLine(int value)
 {
     for (auto i = _lines.size(); i < value; ++i) {
-        _lines.push_back(std::make_unique<Line>());
+        _lines.push_back(std::make_unique<Line>(this));
     }
 }
 
@@ -251,9 +287,15 @@ void Track::process(const AudioBuffer* in, unsigned long framesPerBuffer, int64_
 
     PlayPosition* from = &_composer->_playPosition;
     PlayPosition* to = &_composer->_nextPlayPosition;
-    int fromLine = from->_delay == 0 ? from->_line : from->_line + 1;
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
-    for (int i = fromLine; i < toLine && i < _lines.size(); ++i) {
+    for (int i = from->_line; i <= toLine && i < _lines.size(); ++i) {
+        PlayPosition linePosition{ ._line = i, ._delay = static_cast<unsigned char>(_lines[i]->_delay) };
+        if (linePosition < *from || *to <= linePosition) {
+            continue;
+        }
+        auto delay = linePosition.diffInDelay(*from);
+        uint32_t sampleOffset = delay * _composer->_samplePerDelay;
+
         if (_lines[i]->_note.empty()) {
             continue;
         }
@@ -262,13 +304,13 @@ void Track::process(const AudioBuffer* in, unsigned long framesPerBuffer, int64_
             continue;
         }
         if (key == NOTE_OFF) {
-            _audioBuffer._eventIn.noteOff(_lastKey, 0, 100, 0);
+            _audioBuffer._eventIn.noteOff(_lastKey, 0, 0x7f, sampleOffset);
             continue;
         }
         if (_lastKey != NOTE_NONE) {
-            _audioBuffer._eventIn.noteOff(_lastKey, 0, 100, 0);
+            _audioBuffer._eventIn.noteOff(_lastKey, 0, 0x7f, sampleOffset);
         }
-        _audioBuffer._eventIn.noteOn(key, 0, 100, 0);
+        _audioBuffer._eventIn.noteOn(key, 0, _lines[i]->_velocity, sampleOffset);
         _lastKey = key;
     }
 

@@ -9,6 +9,7 @@ clap
 imgui
 portaudio
 spdlog
+nlohmann
 
 # User-specific files
 *.rsuser

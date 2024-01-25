@@ -3,15 +3,9 @@
 #include "PluginHost.h"
 #include "PlayPosition.h"
 #include "Midi.h"
+#include "Command.h"
+#include "PluginManager.h"
 #include <memory>
-
-extern float TEXT_BASE_WIDTH;
-extern float TEXT_BASE_HEIGHT;
-
-struct ImVec4;
-extern ImVec4 COLOR_BUTTON_ON;
-extern ImVec4 COLOR_BUTTON_ON_HOVERED;
-extern ImVec4 COLOR_BUTTON_ON_ACTIVE;
 
 class Composer;
 class Line;
@@ -34,6 +28,7 @@ public:
 
 class Module {
 public:
+    virtual ~Module() = default;
     void openGui() {};
     void closeGui() {};
     virtual void render();
@@ -92,19 +87,24 @@ public:
     void stop();
     void addTrack();
     void changeMaxLine();
+    void scanPlugin();
 
     AudioEngine* _audioEngine;
     AudioBuffer _audioBuffer;
     float _bpm = 128.0;
     int _lpb = 4;
+    int _samplePerDelay;
     bool _playing = false;
     bool _looping = false;
     bool _scrollLock = false;
     int _maxLine = 0x40;
+    PlayPosition _playStartPosition{};
     PlayPosition _playPosition{};
     PlayPosition _nextPlayPosition{};
     PlayPosition _loopStartPosition{};
     PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
+    CommandManager _commandManager;
+    PluginManager _pluginManager;
 
 private:
 

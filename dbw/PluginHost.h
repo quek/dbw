@@ -4,6 +4,7 @@
 #include <windows.h>
 #include "PluginEventList.h"
 #include <string>
+#include <json.hpp>
 
 class AudioBuffer;
 
@@ -13,6 +14,7 @@ public:
 	PluginHost();
 	~PluginHost();
 	bool load(const std::string path, uint32_t pluginIndex);
+	nlohmann::json scan(const std::string path);
 	void unload();
 	clap_process* process(AudioBuffer* in, uint32_t bufferSize, int64_t steadyTime);
 	void openGui();

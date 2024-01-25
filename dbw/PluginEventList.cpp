@@ -29,7 +29,7 @@ bool PluginEventList::try_push(const struct clap_output_events* list,
     return true;
 }
 
-void PluginEventList::noteOn(int16_t key, int16_t channel, double velocity, uint32_t sampleOffset)
+void PluginEventList::noteOn(int16_t key, int16_t channel, unsigned char velocity, uint32_t sampleOffset)
 {
     clap_event_note* event = new clap_event_note;
     event->header.space_id = CLAP_CORE_EVENT_SPACE_ID;
@@ -46,7 +46,7 @@ void PluginEventList::noteOn(int16_t key, int16_t channel, double velocity, uint
     _event_notes.push_back(std::unique_ptr<clap_event_note>(event));
 }
 
-void PluginEventList::noteOff(int16_t key, int16_t channel, double velocity, uint32_t sampleOffset) {
+void PluginEventList::noteOff(int16_t key, int16_t channel, unsigned char velocity, uint32_t sampleOffset) {
     clap_event_note* event = new clap_event_note;
     event->header.space_id = CLAP_CORE_EVENT_SPACE_ID;
     event->header.type = CLAP_EVENT_NOTE_OFF;

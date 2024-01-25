@@ -18,6 +18,7 @@
 #include <tchar.h>
 
 #include "AudioEngine.h"
+#include "GuiUtil.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -68,8 +69,6 @@ FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 std::shared_ptr<spdlog::logger> logger;
-float TEXT_BASE_WIDTH;
-float TEXT_BASE_HEIGHT;
 
 // Main code
 int main(int, char**)

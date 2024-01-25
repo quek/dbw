@@ -33,6 +33,10 @@
     <ClCompile Include="Midi.cpp" />
     <ClCompile Include="PlayPosition.cpp" />
     <ClCompile Include="Line.cpp" />
+    <ClCompile Include="GuiUtil.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="PluginManager.cpp" />
+    <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -61,6 +65,10 @@
     <ClInclude Include="Midi.h" />
     <ClInclude Include="PlayPosition.h" />
     <ClInclude Include="Line.h" />
+    <ClInclude Include="GuiUtil.h" />
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="PluginManager.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
