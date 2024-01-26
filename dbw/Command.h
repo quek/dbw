@@ -2,11 +2,11 @@
 #include <functional>
 #include <stack>
 #include <memory>
+#include <queue>
 
 class Composer;
 
-class Command
-{
+class Command {
 public:
     virtual ~Command() = default;
     virtual void execute(Composer* composer) = 0;
@@ -17,32 +17,17 @@ class CommandManager {
 
 public:
     CommandManager(Composer* composer);
-    void executeCommand(Command* command) {
-        command->execute(_composer);
-        std::shared_ptr<Command> p(command);
-        _undoStack.push(p);
-        _redoStack = std::stack<std::shared_ptr<Command>>();
-    }
 
-    void undo() {
-        if (!_undoStack.empty()) {
-            auto& command = _undoStack.top();
-            command->undo(_composer);
-            _redoStack.push(command);
-            _undoStack.pop();
-        }
-    }
+    void executeCommand(Command* command);
 
-    void redo() {
-        if (!_redoStack.empty()) {
-            auto& command = _redoStack.top();
-            command->execute(_composer);
-            _undoStack.push(command);
-            _redoStack.pop();
-        }
-    }
+    void run();
+
+    void undo();
+
+    void redo();
 private:
     Composer* _composer;
+    std::queue<std::shared_ptr<Command>> _queue;
     std::stack<std::shared_ptr<Command>> _undoStack;
     std::stack<std::shared_ptr<Command>> _redoStack;
 };

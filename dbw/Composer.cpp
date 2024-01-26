@@ -65,6 +65,8 @@ void Composer::changeMaxLine() {
 }
 
 void Composer::render() {
+    _commandManager.run();
+
     ImGui::Begin("main window");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 
     if (_playing) {

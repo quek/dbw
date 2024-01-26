@@ -24,7 +24,7 @@ public:
 
     std::string _name;
     const clap_plugin* _plugin = nullptr;
-    double _sampleRate;
+    double _sampleRate = 0;
     uint32_t _bufferSize = 0;
 
 private:
