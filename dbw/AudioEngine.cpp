@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "Composer.h"
+#include "logging.h"
 
 
 /* This routine will be called by the PortAudio engine when audio is needed.
@@ -18,20 +19,26 @@ static int paCallback(
 ) {
     /* Cast data passed through stream to our structure. */
     AudioEngine* audioEngine = (AudioEngine*)userData;
-    std::lock_guard<std::mutex> lock(audioEngine->mtx);
+    int result = 0;
+    try {
+        std::lock_guard<std::mutex> lock(audioEngine->mtx);
 
-    audioEngine->process((float*)inputBuffer, (float*)outputBuffer, framesPerBuffer);
-    float* out = (float*)outputBuffer;
-    for (unsigned long i = 0; i < framesPerBuffer * 2; ++i) {
-        if (*out != 0.0) {
-            if (*out > 1.0) {
-                *out = 1.0;
+        audioEngine->process((float*)inputBuffer, (float*)outputBuffer, framesPerBuffer);
+        float* out = (float*)outputBuffer;
+        for (unsigned long i = 0; i < framesPerBuffer * 2; ++i) {
+            if (*out != 0.0) {
+                if (*out > 1.0) {
+                    *out = 1.0;
+                }
             }
+            ++out;
         }
-        ++out;
+    } catch (...) {
+        logger->error("catch(...) in paCallback!");
+        result = -1;
     }
 
-    return 0;
+    return result;
 }
 
 AudioEngine::AudioEngine()

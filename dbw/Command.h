@@ -11,8 +11,6 @@ public:
     virtual ~Command() = default;
     virtual void execute(Composer* composer) = 0;
     virtual void undo(Composer* composer) = 0;
-private:
-    Composer* _composer;
 };
 
 class CommandManager {

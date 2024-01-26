@@ -10,18 +10,13 @@
 // This is because we need ImTextureID to carry a 64-bit value and by default ImTextureID is defined as void*.
 // This define is set in the example .vcxproj file and need to be replicated in your app or by adding it to your imconfig.h file.
 
+#include <cstdio>
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx12.h"
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <tchar.h>
-
-#include "AudioEngine.h"
-#include "GuiUtil.h"
-#include <spdlog/spdlog.h>
-#include <spdlog/async.h>
-#include <spdlog/sinks/rotating_file_sink.h>
 
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
@@ -31,8 +26,16 @@
 #include <dxgidebug.h>
 #pragma comment(lib, "dxguid.lib")
 #endif
-#include <cstdio>
+
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+
 #include "Composer.h"
+#include "PluginHost.h"
+#include "util.h"
+#include "AudioEngine.h"
+#include "GuiUtil.h"
 
 struct FrameContext
 {
@@ -136,9 +139,9 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 
-    AudioEngine* audioEngine = new AudioEngine();
+    std::unique_ptr<AudioEngine> audioEngine = std::make_unique<AudioEngine>();
 
-    Composer composer(audioEngine);
+    Composer composer(audioEngine.get());
     audioEngine->_composer = &composer;
     composer._pluginManager.load();
 
@@ -148,6 +151,16 @@ int main(int, char**)
     bool done = false;
     while (!done)
     {
+        {
+            std::lock_guard<std::mutex> lock(gClapRequestCallbackQueueMutex);
+            while (!gClapRequestCallbackQueue.empty()) {
+                const clap_host* host = gClapRequestCallbackQueue.front();
+                gClapRequestCallbackQueue.pop();
+                PluginHost* pluginHost = (PluginHost*)host->host_data;
+                pluginHost->_plugin->on_main_thread(pluginHost->_plugin);
+            }
+        }
+
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
         MSG msg;
@@ -250,8 +263,7 @@ int main(int, char**)
 
     composer.stop();
     audioEngine->stop();
-    delete audioEngine;
-    audioEngine = nullptr;
+    audioEngine.reset();
 
     WaitForLastSubmittedFrame();
 

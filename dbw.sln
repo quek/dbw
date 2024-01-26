@@ -7,59 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbw", "dbw\dbw.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_win32_directx12", "imgui\examples\example_win32_directx12\example_win32_directx12.vcxproj", "{E22E7048-DC50-444E-97AE-D76DB97C5DDF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "clap-host", "clap-host", "{1A960160-2566-428F-81C8-3D8687FCE977}"
-	ProjectSection(SolutionItems) = preProject
-		clap-host\host\about-dialog.cc = clap-host\host\about-dialog.cc
-		clap-host\host\about-dialog.hh = clap-host\host\about-dialog.hh
-		clap-host\host\application.cc = clap-host\host\application.cc
-		clap-host\host\application.hh = clap-host\host\application.hh
-		clap-host\host\audio-settings-widget.cc = clap-host\host\audio-settings-widget.cc
-		clap-host\host\audio-settings-widget.hh = clap-host\host\audio-settings-widget.hh
-		clap-host\host\audio-settings.cc = clap-host\host\audio-settings.cc
-		clap-host\host\audio-settings.hh = clap-host\host\audio-settings.hh
-		clap-host\host\CMakeLists.txt = clap-host\host\CMakeLists.txt
-		clap-host\host\device-reference.hh = clap-host\host\device-reference.hh
-		clap-host\host\engine.cc = clap-host\host\engine.cc
-		clap-host\host\engine.hh = clap-host\host\engine.hh
-		clap-host\host\linux-clap-host.version = clap-host\host\linux-clap-host.version
-		clap-host\host\macos-symbols.txt = clap-host\host\macos-symbols.txt
-		clap-host\host\main-window.cc = clap-host\host\main-window.cc
-		clap-host\host\main-window.hh = clap-host\host\main-window.hh
-		clap-host\host\main.cc = clap-host\host\main.cc
-		clap-host\host\midi-settings-widget.cc = clap-host\host\midi-settings-widget.cc
-		clap-host\host\midi-settings-widget.hh = clap-host\host\midi-settings-widget.hh
-		clap-host\host\midi-settings.cc = clap-host\host\midi-settings.cc
-		clap-host\host\midi-settings.hh = clap-host\host\midi-settings.hh
-		clap-host\host\plugin-host-settings.cc = clap-host\host\plugin-host-settings.cc
-		clap-host\host\plugin-host-settings.hh = clap-host\host\plugin-host-settings.hh
-		clap-host\host\plugin-host.cc = clap-host\host\plugin-host.cc
-		clap-host\host\plugin-host.hh = clap-host\host\plugin-host.hh
-		clap-host\host\plugin-info.hh = clap-host\host\plugin-info.hh
-		clap-host\host\plugin-param.cc = clap-host\host\plugin-param.cc
-		clap-host\host\plugin-param.hh = clap-host\host\plugin-param.hh
-		clap-host\host\plugin-parameters-widget.cc = clap-host\host\plugin-parameters-widget.cc
-		clap-host\host\plugin-parameters-widget.hh = clap-host\host\plugin-parameters-widget.hh
-		clap-host\host\plugin-quick-control-widget.cc = clap-host\host\plugin-quick-control-widget.cc
-		clap-host\host\plugin-quick-control-widget.hh = clap-host\host\plugin-quick-control-widget.hh
-		clap-host\host\plugin-quick-controls-widget.cc = clap-host\host\plugin-quick-controls-widget.cc
-		clap-host\host\plugin-quick-controls-widget.hh = clap-host\host\plugin-quick-controls-widget.hh
-		clap-host\host\precompiled-header.hh = clap-host\host\precompiled-header.hh
-		clap-host\host\settings-dialog.cc = clap-host\host\settings-dialog.cc
-		clap-host\host\settings-dialog.hh = clap-host\host\settings-dialog.hh
-		clap-host\host\settings-widget.cc = clap-host\host\settings-widget.cc
-		clap-host\host\settings-widget.hh = clap-host\host\settings-widget.hh
-		clap-host\host\settings.cc = clap-host\host\settings.cc
-		clap-host\host\settings.hh = clap-host\host\settings.hh
-		clap-host\host\tweaks-dialog.cc = clap-host\host\tweaks-dialog.cc
-		clap-host\host\tweaks-dialog.hh = clap-host\host\tweaks-dialog.hh
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "portaudio\msvc\portaudio.vcxproj", "{0A18A071-125E-442F-AFF7-A3F68ABECF99}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{892B26BD-DAAA-4919-B4D1-E3A6C7B75980}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clap-host", "clap-host\clap-host.vcxproj", "{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,6 +62,18 @@ Global
 		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.Build.0 = ReleaseMinDependency|x64
 		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.ActiveCfg = ReleaseMinDependency|Win32
 		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.Build.0 = ReleaseMinDependency|Win32
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Debug|x64.ActiveCfg = Debug|x64
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Debug|x64.Build.0 = Debug|x64
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Debug|x86.ActiveCfg = Debug|Win32
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Debug|x86.Build.0 = Debug|Win32
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Release|x64.ActiveCfg = Release|x64
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Release|x64.Build.0 = Release|x64
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Release|x86.ActiveCfg = Release|Win32
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.Release|x86.Build.0 = Release|Win32
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.ReleaseMinDependency|x64.ActiveCfg = Release|x64
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.ReleaseMinDependency|x64.Build.0 = Release|x64
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.ReleaseMinDependency|x86.ActiveCfg = Release|Win32
+		{79CE38C8-29F4-4F11-8CE4-A5A38C90BC15}.ReleaseMinDependency|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

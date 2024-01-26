@@ -10,5 +10,7 @@ public:
     void load();
     void openModuleSelector(Track* track);
     nlohmann::json _plugins;
+
+    std::string _query;
 };
 

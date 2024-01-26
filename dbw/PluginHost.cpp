@@ -1,47 +1,61 @@
 #include "PluginHost.h"
-#include <windows.h>
-#include "logging.h"
 #include "Composer.h"
-
+#include "logging.h"
+#include "util.h"
 
 LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+const clap_host_audio_ports PluginHost::_hostAudioPorts = {
+    // Checks if the host allows a plugin to change a given aspect of the audio ports definition.
+    // [main-thread]
+    // bool(CLAP_ABI *is_rescan_flag_supported)(const clap_host_t *host, uint32_t flag);
+     .is_rescan_flag_supported = [](const clap_host_t* /* host */, uint32_t /*flag*/) {
+        return false;
+    },
+     // Rescan the full list of audio ports according to the flags.
+     // It is illegal to ask the host to rescan with a flag that is not supported.
+     // Certain flags require the plugin to be de-activated.
+     // [main-thread]
+     // void(CLAP_ABI * rescan)(const clap_host_t * host, uint32_t flags);
+    .rescan = [](const clap_host_t * /*host*/, uint32_t /*flags*/) {}
+};
 
 PluginHost::PluginHost() {
     _clap_host = clap_host{
         // clap_version_t clap_version; // initialized to CLAP_VERSION
-        CLAP_VERSION,
+        .clap_version = CLAP_VERSION,
         // void *host_data; // reserved pointer for the host
-        nullptr,
+        .host_data = this,
         // name and version are mandatory.
         // const char *name;    // eg: "Bitwig Studio"
-        "dbw",
+        .name = "dbw",
         // const char *vendor;  // eg: "Bitwig GmbH"
-        "dbw",
+        .vendor = "dbw",
         // const char *url;     // eg: "https://bitwig.com"
-        "https://github.com/quek/dbw",
+        .url = "https://github.com/quek/dbw",
         // const char *version; // eg: "4.3", see plugin.h for advice on how to format the version
-        "0.0.1",
+        .version = "0.0.1",
         // Query an extension.
         // The returned pointer is owned by the host.
         // It is forbidden to call it before plugin->init().
         // You can call it within plugin->init() call, and after.
         // [thread-safe]
         // const void *(CLAP_ABI *get_extension)(const struct clap_host *host, const char *extension_id);
-        clapGetExtension,
+        .get_extension = clapGetExtension,
         // Request the host to deactivate and then reactivate the plugin.
         // The operation may be delayed by the host.
         // [thread-safe]
         // void(CLAP_ABI *request_restart)(const struct clap_host *host);
-        clapRequestRestart,
+        .request_restart = clapRequestRestart,
         // Request the host to activate and start processing the plugin.
         // This is useful if you have external IO and need to wake up the plugin from "sleep".
         // [thread-safe]
         // void(CLAP_ABI *request_process)(const struct clap_host *host);
-        clapRequestProcess,
+        .request_process = clapRequestProcess,
         // Request the host to schedule a call to plugin->on_main_thread(plugin) on the main thread.
         // [thread-safe]
         // void(CLAP_ABI *request_callback)(const struct clap_host *host);
-        clapRequestCallback,
+        .request_callback = clapRequestCallback,
     };
 
     // Set to -1 if not available, otherwise the value must be greater or equal to 0,
@@ -51,8 +65,8 @@ PluginHost::PluginHost() {
     // time info at sample 0
     // If null, then this is a free running host, no transport events will be provided
     _process.transport = nullptr;
-    _process.audio_inputs_count = 2;
-    _process.audio_outputs_count = 2;
+    _process.audio_inputs_count =1;
+    _process.audio_outputs_count = 1;
 
     _audioIn.data32 = _inputs;
     _audioIn.data64 = nullptr;
@@ -72,8 +86,7 @@ PluginHost::~PluginHost() {
     unload();
 }
 
-bool PluginHost::load(const std::string path, uint32_t pluginIndex)
-{
+bool PluginHost::load(const std::string path, uint32_t pluginIndex) {
     std::wstring wstr(path.begin(), path.end());
     LPCWSTR lpwstr = wstr.c_str();
     _library = LoadLibrary(lpwstr);
@@ -116,12 +129,22 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex)
     }
 
     _pluginGui = static_cast<const clap_plugin_gui*>(_plugin->get_extension(_plugin, CLAP_EXT_GUI));
+    _pluginAudioPorts = static_cast<const clap_plugin_audio_ports*>(_plugin->get_extension(_plugin, CLAP_EXT_AUDIO_PORTS));
+    {
+        uint32_t index = 0;
+        bool isInput = true;
+        clap_audio_port_info info;
+        bool result = _pluginAudioPorts->get(_plugin, index, isInput, &info);
+        logger->info("audio ports result: {}", result);
+    }
+
+
+    _name = desc->name;
 
     return true;
 }
 
-nlohmann::json PluginHost::scan(const std::string path)
-{
+nlohmann::json PluginHost::scan(const std::string path) {
     nlohmann::json plugins;
     std::wstring wstr(path.begin(), path.end());
     LPCWSTR lpwstr = wstr.c_str();
@@ -159,6 +182,7 @@ nlohmann::json PluginHost::scan(const std::string path)
         }
         json["features"] = features;
         json["path"] = path;
+        json["index"] = i;
         plugins.push_back(json);
     }
     return plugins;
@@ -194,6 +218,8 @@ bool PluginHost::canUseGui() const noexcept {
 }
 
 void PluginHost::start(double sampleRate, uint32_t bufferSize) {
+    _sampleRate = sampleRate;
+    _bufferSize = bufferSize;
     if (!_plugin) {
         return;
     }
@@ -204,8 +230,7 @@ void PluginHost::start(double sampleRate, uint32_t bufferSize) {
     }
 }
 
-void PluginHost::stop()
-{
+void PluginHost::stop() {
     if (!_plugin) {
         return;
     }
@@ -216,29 +241,35 @@ void PluginHost::stop()
     }
 }
 
-const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const char* extension_id) noexcept
-{
+const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const char* extension_id) noexcept {
     logger->debug("get extension {}", extension_id);
+    if (!std::strcmp(extension_id, CLAP_EXT_AUDIO_PORTS)) {
+        return &_hostAudioPorts;
+    }
+
     return nullptr;
 }
 
-void PluginHost::clapRequestRestart(const clap_host_t* /* host */) noexcept
-{
+void PluginHost::clapRequestRestart(const clap_host_t* host) noexcept {
     logger->debug("request restart");
+    PluginHost* pluginHost = (PluginHost*)host->host_data;
+    auto plugin = pluginHost->_plugin;
+    plugin->deactivate(plugin);
+    plugin->activate(plugin, pluginHost->_sampleRate, pluginHost->_bufferSize, pluginHost->_bufferSize);
 }
 
-void PluginHost::clapRequestProcess(const clap_host_t* /* host */) noexcept
-{
+void PluginHost::clapRequestProcess(const clap_host_t* /* host */) noexcept {
     logger->debug("request process");
 }
 
-void PluginHost::clapRequestCallback(const clap_host_t* /* host */) noexcept
-{
+void PluginHost::clapRequestCallback(const clap_host_t* host) noexcept {
     logger->debug("request callback");
+    std::lock_guard<std::mutex> lock(gClapRequestCallbackQueueMutex);
+    gClapRequestCallbackQueue.push(host);
 }
 
 
-clap_process* PluginHost::process(AudioBuffer* in, uint32_t bufferSize, int64_t steadyTime) {
+clap_process* PluginHost::process(ProcessBuffer* in, uint32_t bufferSize, int64_t steadyTime) {
     if (_allocatedSize < bufferSize) {
         _allocatedSize = bufferSize;
         if (_inputs[0] != nullptr) {
@@ -264,16 +295,28 @@ clap_process* PluginHost::process(AudioBuffer* in, uint32_t bufferSize, int64_t 
     _process.out_events = _evOut.clapOutputEvents();
     _process.steady_time = steadyTime;
 
-    clap_process_status status = _plugin->process(_plugin, &_process);
-    if (status == CLAP_PROCESS_ERROR) {
-        printf("process error");
+    for (uint32_t i = 0; i < bufferSize; ++i) {
+        _inputs[0][i] = in->_out[0][i];
+        _inputs[1][i] = in->_out[1][i];
+    }
+
+    try {
+        clap_process_status status = _plugin->process(_plugin, &_process);
+        if (status == CLAP_PROCESS_ERROR) {
+            logger->error("process error");
+        }
+    } catch (const std::exception& e) {
+        // 標準例外をキャッチ
+        logger->error("Standard exception: {}", e.what());
+    } catch (...) {
+        // その他すべての例外をキャッチ
+        logger->error("Unknown exception caught");
     }
 
     return &_process;
 }
 
-void PluginHost::openGui()
-{
+void PluginHost::openGui() {
     /// Showing the GUI works as follow:
     ///  1. clap_plugin_gui->is_api_supported(), check what can work
     ///  2. clap_plugin_gui->create(), allocates gui resources
@@ -324,8 +367,7 @@ void PluginHost::openGui()
     }
 }
 
-void PluginHost::closeGui()
-{
+void PluginHost::closeGui() {
     if (_gui) {
         _gui = false;
         _pluginGui->hide(_plugin);
@@ -335,8 +377,7 @@ void PluginHost::closeGui()
     }
 }
 
-LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
+LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
     case WM_CREATE: {
         PluginHost* pluginHost = (PluginHost*)(((LPCREATESTRUCT)lParam)->lpCreateParams);

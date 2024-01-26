@@ -12,3 +12,5 @@ std::string GetExecutablePath() {
     return std::string(path);
 }
 
+std::queue<const clap_host*> gClapRequestCallbackQueue;
+std::mutex gClapRequestCallbackQueueMutex;
