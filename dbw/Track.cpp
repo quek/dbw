@@ -2,6 +2,7 @@
 #include <mutex>
 #include "imgui.h"
 #include "AudioEngine.h"
+#include "Column.h"
 #include "Command.h"
 #include "Composer.h"
 #include "Line.h"
@@ -15,47 +16,36 @@ Track::Track(std::string name, Composer* composer) : _name(name), _composer(comp
     for (auto i = 0; i < composer->_maxLine; ++i) {
         _lines.push_back(std::make_unique<Line>(this));
     }
-    //_lines[0x00]->_note.assign(Midi::C4);
     _lines[0x00].reset(new Line(Midi::C4, 0x64, 0, this));
-    //_lines[0x01]->_note.assign(Midi::C4);
-    //_lines[0x01]->_delay = 0x80;
     _lines[0x01].reset(new Line(Midi::C4, 0x64, 0x80, this));
-    //_lines[0x02]->_note.assign(Midi::C4);
-    //_lines[0x02]->_velocity = 0x40;
     _lines[0x02].reset(new Line(Midi::C4, 0x40, 0x00, this));
-
-    _lines[0x03]->_note.assign(Midi::C4);
-    _lines[0x03]->_velocity = 0x7f;
-    _lines[0x04]->_note.assign(Midi::E4);
-    _lines[0x06]->_note.assign(Midi::G4);
-    _lines[0x07]->_note.assign(Midi::A4);
-    _lines[0x08]->_note.assign(Midi::OFF);
-    _lines[0x10]->_note.assign(Midi::E4);
-    _lines[0x14]->_note.assign(Midi::G4);
-    _lines[0x16]->_note.assign(Midi::A4);
-    _lines[0x17]->_note.assign(Midi::B4);
-    _lines[0x18]->_note.assign(Midi::OFF);
-    _lines[0x20]->_note.assign(Midi::C4);
-    _lines[0x21]->_note.assign(Midi::C4);
-    _lines[0x22]->_note.assign(Midi::OFF);
-    _lines[0x24]->_note.assign(Midi::E4);
-    _lines[0x26]->_note.assign(Midi::G4);
-    _lines[0x27]->_note.assign(Midi::A4);
-    _lines[0x28]->_note.assign(Midi::OFF);
-    _lines[0x30]->_note.assign(Midi::D4);
-    _lines[0x34]->_note.assign(Midi::F4);
-    _lines[0x36]->_note.assign(Midi::G4);
-    _lines[0x37]->_note.assign(Midi::C5);
-    _lines[0x38]->_note.assign(Midi::OFF);
-    _lines[0x3a]->_note.assign(Midi::C5);
-    _lines[0x3a]->_velocity = 0x70;
-    _lines[0x3c]->_note.assign(Midi::C5);
-    _lines[0x3c]->_velocity = 0x74;
-    _lines[0x3d]->_note.assign(Midi::D5);
-    _lines[0x3d]->_velocity = 0x78;
-    _lines[0x3e]->_note.assign(Midi::B4);
-    _lines[0x3e]->_velocity = 0x7f;
-    _lines[0x3f]->_note.assign(Midi::OFF);
+    _lines[0x03].reset(new Line(Midi::C4, 0x7f, 0x00, this));
+    _lines[0x04].reset(new Line(Midi::E4, 0x64, 0x00, this));
+    _lines[0x06].reset(new Line(Midi::G4, 0x64, 0x00, this));
+    _lines[0x07].reset(new Line(Midi::A4, 0x64, 0x00, this));
+    _lines[0x08].reset(new Line(Midi::OFF, 0x64, 0x00, this));
+    _lines[0x10].reset(new Line(Midi::E4, 0x64, 0x00, this));
+    _lines[0x14].reset(new Line(Midi::G4, 0x64, 0x00, this));
+    _lines[0x16].reset(new Line(Midi::A4, 0x64, 0x00, this));
+    _lines[0x17].reset(new Line(Midi::B4, 0x64, 0x00, this));
+    _lines[0x18].reset(new Line(Midi::OFF, 0x64, 0x00, this));
+    _lines[0x20].reset(new Line(Midi::C4, 0x64, 0x00, this));
+    _lines[0x21].reset(new Line(Midi::C4, 0x64, 0x00, this));
+    _lines[0x22].reset(new Line(Midi::OFF, 0x64, 0x00, this));
+    _lines[0x24].reset(new Line(Midi::E4, 0x64, 0x00, this));
+    _lines[0x26].reset(new Line(Midi::G4, 0x64, 0x00, this));
+    _lines[0x27].reset(new Line(Midi::A4, 0x64, 0x00, this));
+    _lines[0x28].reset(new Line(Midi::OFF, 0x64, 0x00, this));
+    _lines[0x30].reset(new Line(Midi::D4, 0x64, 0x00, this));
+    _lines[0x34].reset(new Line(Midi::F4, 0x64, 0x00, this));
+    _lines[0x36].reset(new Line(Midi::G4, 0x64, 0x00, this));
+    _lines[0x37].reset(new Line(Midi::C5, 0x64, 0x00, this));
+    _lines[0x38].reset(new Line(Midi::OFF, 0x64, 0x00, this));
+    _lines[0x3a].reset(new Line(Midi::C5, 0x70, 0x00, this));
+    _lines[0x3c].reset(new Line(Midi::C5, 0x74, 0x00, this));
+    _lines[0x3d].reset(new Line(Midi::D5, 0x78, 0x00, this));
+    _lines[0x3e].reset(new Line(Midi::B4, 0x7f, 0x00, this));
+    _lines[0x3f].reset(new Line(Midi::OFF, 0x64, 0x00, this));
 
 }
 
@@ -82,17 +72,17 @@ void Track::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int6
     PlayPosition* to = &_composer->_nextPlayPosition;
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
     for (int i = from->_line; i <= toLine && i < _lines.size(); ++i) {
-        PlayPosition linePosition{ ._line = i, ._delay = static_cast<unsigned char>(_lines[i]->_delay) };
+        PlayPosition linePosition{ ._line = i, ._delay = static_cast<unsigned char>(_lines[i]->_columns[0]->_delay) };
         if (linePosition < *from || *to <= linePosition) {
             continue;
         }
         auto delay = linePosition.diffInDelay(*from);
         uint32_t sampleOffset = delay * _composer->_samplePerDelay;
 
-        if (_lines[i]->_note.empty()) {
+        if (_lines[i]->_columns[0]->_note.empty()) {
             continue;
         }
-        int16_t key = noteToNumber(_lines[i]->_note);
+        int16_t key = noteToNumber(_lines[i]->_columns[0]->_note);
         if (key == NOTE_NONE) {
             continue;
         }
@@ -103,7 +93,7 @@ void Track::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int6
         if (_lastKey != NOTE_NONE) {
             _processBuffer._eventIn.noteOff(_lastKey, 0, 0x7f, sampleOffset);
         }
-        _processBuffer._eventIn.noteOn(key, 0, _lines[i]->_velocity, sampleOffset);
+        _processBuffer._eventIn.noteOn(key, 0, _lines[i]->_columns[0]->_velocity, sampleOffset);
         _lastKey = key;
     }
 

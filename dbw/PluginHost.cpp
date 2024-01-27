@@ -12,12 +12,12 @@ const clap_host_audio_ports PluginHost::_hostAudioPorts = {
      .is_rescan_flag_supported = [](const clap_host_t* /* host */, uint32_t /*flag*/) {
         return false;
     },
-     // Rescan the full list of audio ports according to the flags.
-     // It is illegal to ask the host to rescan with a flag that is not supported.
-     // Certain flags require the plugin to be de-activated.
-     // [main-thread]
-     // void(CLAP_ABI * rescan)(const clap_host_t * host, uint32_t flags);
-    .rescan = [](const clap_host_t * /*host*/, uint32_t /*flags*/) {}
+    // Rescan the full list of audio ports according to the flags.
+    // It is illegal to ask the host to rescan with a flag that is not supported.
+    // Certain flags require the plugin to be de-activated.
+    // [main-thread]
+    // void(CLAP_ABI * rescan)(const clap_host_t * host, uint32_t flags);
+   .rescan = [](const clap_host_t* /*host*/, uint32_t /*flags*/) {}
 };
 
 PluginHost::PluginHost() {
@@ -65,7 +65,7 @@ PluginHost::PluginHost() {
     // time info at sample 0
     // If null, then this is a free running host, no transport events will be provided
     _process.transport = nullptr;
-    _process.audio_inputs_count =1;
+    _process.audio_inputs_count = 1;
     _process.audio_outputs_count = 1;
 
     _audioIn.data32 = _inputs;
@@ -192,6 +192,7 @@ void PluginHost::unload() {
     if (!_plugin) {
         if (_library != nullptr) {
             FreeLibrary(_library);
+            _library = nullptr;
         }
         return;
     }
@@ -200,6 +201,7 @@ void PluginHost::unload() {
     _plugin = nullptr;
     if (_library != nullptr) {
         FreeLibrary(_library);
+        _library = nullptr;
     }
 }
 

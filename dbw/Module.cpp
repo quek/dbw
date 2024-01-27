@@ -37,7 +37,7 @@ public:
     }
 
     Module* _module;
-    int _index = 0;
+    size_t _index = 0;
     std::unique_ptr<Module> _moduleUniquePtr;
 };
 
