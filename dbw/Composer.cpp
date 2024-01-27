@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "AudioEngine.h"
+#include "Column.h"
 #include "Command.h"
 #include "GuiUtil.h"
 #include "Line.h"
@@ -63,6 +64,32 @@ void Composer::changeMaxLine() {
         (*track)->changeMaxLine(_maxLine);
     }
 }
+
+class AddColumnCommand : public Command {
+public:
+    AddColumnCommand(Track* track) : _track(track) {
+        for (auto line = _track->_lines.begin(); line != _track->_lines.end(); ++line) {
+            _columns.push_back(std::make_unique<Column>((*line).get()));
+        }
+    }
+    void execute(Composer* /* composer */) override {
+        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
+             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
+            (*line)->_columns.push_back(std::move(*column));
+            _track->_ncolumns++;
+        }
+    }
+    void undo(Composer* /* composer */) override {
+        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
+             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
+            (*column) = std::move((*line)->_columns.back());
+            (*line)->_columns.pop_back();
+            _track->_ncolumns--;
+        }
+    }
+    Track* _track;
+    std::vector<std::unique_ptr<Column>> _columns;
+};
 
 void Composer::render() {
     _commandManager.run();
@@ -137,11 +164,31 @@ void Composer::render() {
     ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * 20);
     if (ImGui::BeginTable("tracks", 1 + static_cast<int>(_tracks.size()), flags, outer_size)) {
         ImGui::TableSetupScrollFreeze(1, 1);
-        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide); // Make the first column not hideable to match our use of TableSetupScrollFreeze()
+        // Make the first column not hideable to match our use of TableSetupScrollFreeze()
+        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize);
         for (auto i = 0; i < _tracks.size(); ++i) {
-            ImGui::TableSetupColumn(_tracks[i]->_name.c_str());
+            ImGui::TableSetupColumn(_tracks[i]->_name.c_str(), ImGuiTableColumnFlags_NoResize);
         }
-        ImGui::TableHeadersRow();
+        //ImGui::TableHeadersRow();
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TableHeader("#");
+        for (auto i = 0; i < _tracks.size(); ++i) {
+            ImGui::TableSetColumnIndex(i + 1);
+            ImGui::PushID(i);
+            auto name = _tracks[i]->_name.c_str();
+            ImGui::TableHeader(name);
+            ImGui::SameLine(ImGui::CalcTextSize(name).x + ImGui::GetStyle().ItemSpacing.x);
+            if (ImGui::Button("+")) {
+                _commandManager.executeCommand(new AddColumnCommand(_tracks[i].get()));
+            }
+            if (_tracks[i]->_ncolumns > 1) {
+                ImGui::SameLine();
+                ImGui::Button("-");
+            }
+            ImGui::PopID();
+        }
+
         for (int line = 0; line < _maxLine; line++) {
             ImGui::TableNextRow();
             if (line == _playPosition._line) {

@@ -23,6 +23,7 @@ public:
     float* _out = nullptr;
 
     std::string _name;
+    size_t _ncolumns;
     std::vector<std::unique_ptr<Line>> _lines;
     std::vector<std::unique_ptr<Module>> _modules;
     int16_t _lastKey;

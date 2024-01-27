@@ -9,12 +9,11 @@ class Column;
 class Line
 {
 public:
-    Line(Track* track);
+    Line(Track* track, size_t ncolumns);
     Line(const char* note, unsigned char velocity, unsigned char delay, Track* track);
     void render();
 
     Track* _track;
     std::vector<std::unique_ptr<Column>> _columns;
-    size_t _ncolumns;
 };
 

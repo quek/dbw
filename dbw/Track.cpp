@@ -11,10 +11,10 @@
 #include "PluginModule.h"
 #include "PluginHost.h"
 
-Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _lastKey(NOTE_NONE)
+Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _lastKey(NOTE_NONE), _ncolumns(1)
 {
     for (auto i = 0; i < composer->_maxLine; ++i) {
-        _lines.push_back(std::make_unique<Line>(this));
+        _lines.push_back(std::make_unique<Line>(this, _ncolumns));
     }
     _lines[0x00].reset(new Line(Midi::C4, 0x64, 0, this));
     _lines[0x01].reset(new Line(Midi::C4, 0x64, 0x80, this));
@@ -59,7 +59,7 @@ Track::~Track()
 void Track::changeMaxLine(int value)
 {
     for (auto i = _lines.size(); i < value; ++i) {
-        _lines.push_back(std::make_unique<Line>(this));
+        _lines.push_back(std::make_unique<Line>(this, _ncolumns));
     }
 }
 
