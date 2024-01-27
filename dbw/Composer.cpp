@@ -79,6 +79,7 @@ public:
             (*line)->_columns.push_back(std::move(*column));
         }
         _track->_ncolumns++;
+        _track->_lastKeys.push_back(0);
     }
     void undo(Composer* composer) override {
         std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
@@ -88,6 +89,7 @@ public:
             (*line)->_columns.pop_back();
         }
         _track->_ncolumns--;
+        _track->_lastKeys.pop_back();
     }
     Track* _track;
     std::vector<std::unique_ptr<Column>> _columns;
@@ -108,6 +110,7 @@ public:
             (*line)->_columns.pop_back();
         }
         _track->_ncolumns--;
+        _track->_lastKeys.pop_back();
     }
     void undo(Composer* composer) override {
         std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
@@ -117,6 +120,7 @@ public:
         }
         _columns.clear();
         _track->_ncolumns++;
+        _track->_lastKeys.push_back(0);
     }
     Track* _track;
     std::vector<std::unique_ptr<Column>> _columns;

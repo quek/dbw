@@ -16,36 +16,11 @@ Column::Column(const char* note, unsigned char velocity, unsigned char delay, Li
     _line(line) {
 }
 
-template <typename T>
-class EditColumn : public Command {
-public:
-    EditColumn(Column* column, T Column::* x, T Column::* lastX, T value, T lastValue)
-        : _column(column), _x(x), _lastX(lastX), _value(value), _lastValue(lastValue) {
-    }
-
-    void execute(Composer* /*composer*/) override {
-        _column->*_x = _value;
-        _column->*_lastX = _value;
-    }
-
-    void undo(Composer* /*composer*/) override {
-        _column->*_x = _lastValue;
-        _column->*_lastX = _lastValue;
-    }
-
-private:
-    Column* _column;
-    T Column::* _x;
-    T Column::* _lastX;
-    T _value;
-    T _lastValue;
-};
-
 void Column::render() {
     ImGui::PushID(this);
 
     ImGui::SetNextItemWidth(widthWithPadding(3));
-    if (ImGui::InputText("##note", &_note)) {
+    if (ImGui::InputText("##note", &_note, ImGuiInputTextFlags_AutoSelectAll)) {
         std::transform(_note.begin(), _note.end(), _note.begin(),
                        [](auto c) { return static_cast<char>(std::toupper(c)); });
     }
@@ -53,8 +28,8 @@ void Column::render() {
     if (_noteEditing && !activep) {
         if (_note != _lastNote) {
             _line->_track->_composer->_commandManager.executeCommand(
-                new EditColumn<std::string>(this, &Column::_note, &Column::_lastNote,
-                                            _note, _lastNote));
+                new EditProperty<Column, std::string>(this, &Column::_note, &Column::_lastNote,
+                                                      _note, _lastNote));
         }
     }
     _noteEditing = activep;
@@ -71,8 +46,8 @@ void Column::render() {
     if (_velocityEditing && !activep) {
         if (_velocity != _lastVelocity) {
             _line->_track->_composer->_commandManager.executeCommand(
-                new EditColumn<unsigned char>(this, &Column::_velocity, &Column::_lastVelocity,
-                                              _velocity, _lastVelocity));
+                new EditProperty<Column, unsigned char>(this, &Column::_velocity, &Column::_lastVelocity,
+                                                        _velocity, _lastVelocity));
         }
     }
     _velocityEditing = activep;
@@ -84,7 +59,7 @@ void Column::render() {
     if (_delayEditing && !activep) {
         if (_delay != _lastDelay) {
             _line->_track->_composer->_commandManager.executeCommand(
-                new EditColumn<unsigned char>(this, &Column::_delay, &Column::_lastDelay, _delay, _lastDelay));
+                new EditProperty<Column, unsigned char>(this, &Column::_delay, &Column::_lastDelay, _delay, _lastDelay));
         }
     }
     _delayEditing = activep;

@@ -26,7 +26,7 @@ public:
     size_t _ncolumns;
     std::vector<std::unique_ptr<Line>> _lines;
     std::vector<std::unique_ptr<Module>> _modules;
-    int16_t _lastKey;
+    std::vector<int16_t> _lastKeys;
 
     std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
     Composer* _composer;

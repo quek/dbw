@@ -31,3 +31,29 @@ private:
     std::stack<std::shared_ptr<Command>> _undoStack;
     std::stack<std::shared_ptr<Command>> _redoStack;
 };
+
+template <typename T, typename P>
+class EditProperty : public Command {
+public:
+    EditProperty(T* column, P T::* x, P T::* lastX, P value, P lastValue)
+        : _column(column), _x(x), _lastX(lastX), _value(value), _lastValue(lastValue) {
+    }
+
+    void execute(Composer* /*composer*/) override {
+        _column->*_x = _value;
+        _column->*_lastX = _value;
+    }
+
+    void undo(Composer* /*composer*/) override {
+        _column->*_x = _lastValue;
+        _column->*_lastX = _lastValue;
+    }
+
+private:
+    T* _column;
+    P T::* _x;
+    P T::* _lastX;
+    P _value;
+    P _lastValue;
+};
+

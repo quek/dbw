@@ -11,8 +11,9 @@
 #include "PluginModule.h"
 #include "PluginHost.h"
 
-Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _lastKey(NOTE_NONE), _ncolumns(1)
+Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _ncolumns(1)
 {
+    _lastKeys.push_back(0);
     for (auto i = 0; i < composer->_maxLine; ++i) {
         _lines.push_back(std::make_unique<Line>(this, _ncolumns));
     }
@@ -71,30 +72,35 @@ void Track::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int6
     PlayPosition* from = &_composer->_playPosition;
     PlayPosition* to = &_composer->_nextPlayPosition;
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
-    for (int i = from->_line; i <= toLine && i < _lines.size(); ++i) {
-        PlayPosition linePosition{ ._line = i, ._delay = static_cast<unsigned char>(_lines[i]->_columns[0]->_delay) };
-        if (linePosition < *from || *to <= linePosition) {
-            continue;
-        }
-        auto delay = linePosition.diffInDelay(*from);
-        uint32_t sampleOffset = delay * _composer->_samplePerDelay;
+    for (int lineIndex = from->_line; lineIndex <= toLine && lineIndex < _lines.size(); ++lineIndex) {
+        auto& line = _lines[lineIndex];
+        for (int columnIndex = 0; columnIndex < _ncolumns; ++columnIndex) {
+            auto& column = line->_columns[columnIndex];
+            auto lastKey = _lastKeys[columnIndex];
+            PlayPosition linePosition{ ._line = lineIndex, ._delay = static_cast<unsigned char>(column->_delay) };
+            if (linePosition < *from || *to <= linePosition) {
+                continue;
+            }
+            auto delay = linePosition.diffInDelay(*from);
+            uint32_t sampleOffset = delay * _composer->_samplePerDelay;
 
-        if (_lines[i]->_columns[0]->_note.empty()) {
-            continue;
+            if (column->_note.empty()) {
+                continue;
+            }
+            int16_t key = noteToNumber(column->_note);
+            if (key == NOTE_NONE) {
+                continue;
+            }
+            if (key == NOTE_OFF) {
+                _processBuffer._eventIn.noteOff(lastKey, 0, 0x7f, sampleOffset);
+                continue;
+            }
+            if (lastKey != NOTE_NONE) {
+                _processBuffer._eventIn.noteOff(lastKey, 0, 0x7f, sampleOffset);
+            }
+            _processBuffer._eventIn.noteOn(key, 0, column->_velocity, sampleOffset);
+            _lastKeys[columnIndex] = key;
         }
-        int16_t key = noteToNumber(_lines[i]->_columns[0]->_note);
-        if (key == NOTE_NONE) {
-            continue;
-        }
-        if (key == NOTE_OFF) {
-            _processBuffer._eventIn.noteOff(_lastKey, 0, 0x7f, sampleOffset);
-            continue;
-        }
-        if (_lastKey != NOTE_NONE) {
-            _processBuffer._eventIn.noteOff(_lastKey, 0, 0x7f, sampleOffset);
-        }
-        _processBuffer._eventIn.noteOn(key, 0, _lines[i]->_columns[0]->_velocity, sampleOffset);
-        _lastKey = key;
     }
 
     ProcessBuffer* buffer = &_processBuffer;
