@@ -22,6 +22,7 @@ public:
     void changeMaxLine();
     void scanPlugin();
 
+    std::unique_ptr<Project> _project;
     AudioEngine* _audioEngine;
     ProcessBuffer _processBuffer;
     float _bpm = 128.0;

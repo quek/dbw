@@ -9,10 +9,12 @@
 #include "Command.h"
 #include "GuiUtil.h"
 #include "Line.h"
+#include "Project.h"
 #include "logging.h"
 #include "Track.h"
 
 Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine), _commandManager(this) {
+    _project = std::make_unique<Project>("noname", this);
     addTrack();
 }
 

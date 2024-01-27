@@ -42,6 +42,8 @@
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="PluginModule.cpp" />
     <ClCompile Include="Column.cpp" />
+    <ClCompile Include="Project.cpp" />
+    <ClCompile Include="tinyxml2\tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -79,6 +81,8 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="PluginModule.h" />
     <ClInclude Include="Column.h" />
+    <ClInclude Include="Project.h" />
+    <ClInclude Include="tinyxml2\tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

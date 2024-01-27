@@ -1,7 +1,5 @@
 #include "util.h"
 #include <Windows.h>
-
-// PathRemoveFileSpecA
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
@@ -14,3 +12,7 @@ std::string GetExecutablePath() {
 
 std::queue<const clap_host*> gClapRequestCallbackQueue;
 std::mutex gClapRequestCallbackQueueMutex;
+
+std::filesystem::path projectDir() {
+    return std::filesystem::path(GetExecutablePath()) / "user" / "projects";
+}

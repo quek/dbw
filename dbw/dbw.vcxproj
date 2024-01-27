@@ -173,6 +173,8 @@
     <ClInclude Include="PluginHost.h" />
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PluginModule.h" />
+    <ClInclude Include="Project.h" />
+    <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
@@ -200,6 +202,8 @@
     <ClCompile Include="PluginHost.cpp" />
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="PluginModule.cpp" />
+    <ClCompile Include="Project.cpp" />
+    <ClCompile Include="tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
