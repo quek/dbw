@@ -72,24 +72,57 @@ public:
             _columns.push_back(std::make_unique<Column>((*line).get()));
         }
     }
-    void execute(Composer* /* composer */) override {
+    void execute(Composer* composer) override {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
         for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
              line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
             (*line)->_columns.push_back(std::move(*column));
-            _track->_ncolumns++;
         }
+        _track->_ncolumns++;
     }
-    void undo(Composer* /* composer */) override {
+    void undo(Composer* composer) override {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
         for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
              line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
             (*column) = std::move((*line)->_columns.back());
             (*line)->_columns.pop_back();
-            _track->_ncolumns--;
         }
+        _track->_ncolumns--;
     }
     Track* _track;
     std::vector<std::unique_ptr<Column>> _columns;
 };
+
+class DeleteColumnCommand : public Command {
+public:
+    DeleteColumnCommand(Track* track) : _track(track) {
+        for (auto i = 0; i < _track->_composer->_maxLine; ++i) {
+            _columns.push_back(std::make_unique<Column>(nullptr));
+        }
+    }
+    void execute(Composer* composer) override {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
+             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
+            (*column) = std::move((*line)->_columns.back());
+            (*line)->_columns.pop_back();
+        }
+        _track->_ncolumns--;
+    }
+    void undo(Composer* composer) override {
+        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
+             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
+            (*line)->_columns.push_back(std::move(*column));
+        }
+        _columns.clear();
+        _track->_ncolumns++;
+    }
+    Track* _track;
+    std::vector<std::unique_ptr<Column>> _columns;
+};
+
+
 
 void Composer::render() {
     _commandManager.run();
@@ -184,7 +217,9 @@ void Composer::render() {
             }
             if (_tracks[i]->_ncolumns > 1) {
                 ImGui::SameLine();
-                ImGui::Button("-");
+                if (ImGui::Button("-")) {
+                    _commandManager.executeCommand(new DeleteColumnCommand(_tracks[i].get()));
+                }
             }
             ImGui::PopID();
         }
