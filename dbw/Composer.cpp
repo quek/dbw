@@ -199,6 +199,7 @@ void Composer::render() {
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
     ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * 20);
+    std::vector<float> columnWidths;
     if (ImGui::BeginTable("tracks", 1 + static_cast<int>(_tracks.size()), flags, outer_size)) {
         ImGui::TableSetupScrollFreeze(1, 1);
         // Make the first column not hideable to match our use of TableSetupScrollFreeze()
@@ -239,20 +240,45 @@ void Composer::render() {
             }
             ImGui::TableSetColumnIndex(0);
             ImGui::Text("%02X", line);
+            if (line == 0) {
+                columnWidths.push_back(ImGui::GetContentRegionAvail().x);
+            }
             for (auto i = 0; i < _tracks.size(); ++i) {
                 auto track = _tracks[i].get();
                 ImGui::TableSetColumnIndex(i + 1);
                 track->renderLine(line);
+                if (line == 0) {
+                    columnWidths.push_back(ImGui::GetContentRegionAvail().x);
+                }
             }
         }
         ImGui::EndTable();
     }
 
+    if (ImGui::BeginTable("racks", 1 + static_cast<int>(_tracks.size()), flags, ImVec2(0.0f, TEXT_BASE_HEIGHT * 10))) {
+        ImGui::TableSetupScrollFreeze(1, 1);
+        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[0]);
+        for (auto i = 0; i < _tracks.size(); ++i) {
+            ImGui::TableSetupColumn(_tracks[i]->_name.c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[i + 1]);
+        }
+        ImGui::TableHeadersRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TableHeader("#");
+        for (auto i = 0; i < _tracks.size(); ++i) {
+            ImGui::TableSetColumnIndex(i + 1);
+            auto name = _tracks[i]->_name.c_str();
+            ImGui::TableHeader(name);
+        }
 
-    for (auto i = 0; i < _tracks.size(); ++i) {
-        ImGui::PushID(i);
-        _tracks[i]->render();
-        ImGui::PopID();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TableNextRow();
+        for (auto i = 0; i < _tracks.size(); ++i) {
+            ImGui::TableSetColumnIndex(i + 1);
+            ImGui::PushID(i);
+            _tracks[i]->render();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
     }
 
     if (ImGui::Button("Add track")) {

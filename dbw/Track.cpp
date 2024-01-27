@@ -113,7 +113,6 @@ void Track::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int6
 
 void Track::render()
 {
-    ImGui::Text(_name.c_str());
     for (auto module = _modules.begin(); module != _modules.end(); ++module) {
         ImGui::PushID((*module).get());
         (*module)->render();
