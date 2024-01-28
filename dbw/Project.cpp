@@ -1,6 +1,7 @@
 #include "Project.h"
 #include <format>
 #include "tinyxml2/tinyxml2.h"
+#include "AudioEngine.h"
 #include "Column.h"
 #include "Composer.h"
 #include "Line.h"
@@ -15,9 +16,20 @@ Project::Project(std::string name, Composer* composer) : _dir(::projectDir()), _
 }
 
 void Project::open() {
+    auto path = getOpenFileName();
+    if (path.empty()) {
+        return;
+    }
+    auto parent_path = path.parent_path();
+    _dir = parent_path.parent_path();
+    _name = parent_path.filename();
     tinyxml2::XMLDocument doc;
-    doc.LoadFile(projectXml().string().c_str());
+    doc.LoadFile(path.string().c_str());
 
+    _composer->stop();
+    _composer->_audioEngine->stop();
+    _composer->_tracks.clear();
+    _composer->_commandManager.clear();
 
     tinyxml2::XMLElement* tempo = doc.FirstChildElement("Project")->FirstChildElement("Transport")->FirstChildElement("Tempo");
     if (tempo != nullptr) {
@@ -47,11 +59,14 @@ void Project::open() {
                         auto state = deviceElement->FirstChildElement("State");
                         pluginHost->_statePath = state->Attribute("path");
                         pluginHost->loadState();
+                        module->start();
                     }
                 }
             }
         }
     }
+
+    _composer->_audioEngine->start();
 }
 
 void Project::save() {

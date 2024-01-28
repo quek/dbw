@@ -17,14 +17,11 @@ class CommandManager {
 
 public:
     CommandManager(Composer* composer);
-
     void executeCommand(Command* command);
-
     void run();
-
     void undo();
-
     void redo();
+    void clear();
 private:
     Composer* _composer;
     std::queue<std::shared_ptr<Command>> _queue;

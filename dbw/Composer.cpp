@@ -196,6 +196,10 @@ void Composer::render() {
         scanPlugin();
     }
     ImGui::SameLine();
+    if (ImGui::Button("Open")) {
+        _project->open();
+    }
+    ImGui::SameLine();
     if (ImGui::Button("Save")) {
         _project->save();
     }

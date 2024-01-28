@@ -1,7 +1,6 @@
 #include "Command.h"
 
-CommandManager::CommandManager(Composer* composer) : _composer(composer)
-{
+CommandManager::CommandManager(Composer* composer) : _composer(composer) {
 }
 
 // iterator でまわっているときに要素の削除をすると落ちるので
@@ -37,4 +36,13 @@ void CommandManager::redo() {
         _undoStack.push(command);
         _redoStack.pop();
     }
+}
+
+void CommandManager::clear() {
+    std::queue<std::shared_ptr<Command>> queue;
+    _queue.swap(queue);
+    std::stack<std::shared_ptr<Command>> undoStack;
+    _undoStack.swap(undoStack);
+    std::stack<std::shared_ptr<Command>> redoStack;
+    _redoStack.swap(redoStack);
 }
