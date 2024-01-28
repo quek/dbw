@@ -152,7 +152,7 @@ public:
 };
 
 void Track::addModule(std::string path, uint32_t index) {
-    PluginHost* pluginHost = new PluginHost();
+    PluginHost* pluginHost = new PluginHost(this);
     pluginHost->load(path.c_str(), index);
     Module* module = new PluginModule(pluginHost->_name, this, pluginHost);
     _composer->_commandManager.executeCommand(new AddModuleCommand(this, module));

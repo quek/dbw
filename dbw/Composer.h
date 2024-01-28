@@ -5,6 +5,7 @@
 #include "Midi.h"
 #include "PlayPosition.h"
 #include "PluginManager.h"
+#include "Project.h"
 #include "Track.h"
 
 class AudioEngine;

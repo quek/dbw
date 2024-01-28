@@ -26,6 +26,28 @@ void PluginModule::process(ProcessBuffer* in, unsigned long framesPerBuffer, int
     }
 }
 
+tinyxml2::XMLElement* PluginModule::dawProject(tinyxml2::XMLDocument* doc) {
+    auto* element = doc->NewElement("ClapPlugin");
+    // TODO Possible values: instrument, noteFX, audioFX, analyzer
+    element->SetAttribute("deviceRole", "instrument");
+    element->SetAttribute("deviceName", _name.c_str());
+    element->SetAttribute("deviceID", _pluginHost->_plugin->desc->id);
+    {
+        element->InsertNewChildElement("Parameters");
+    }
+    {
+        auto* enabled = element->InsertNewChildElement("Enabled");
+        enabled->SetAttribute("value", true);
+    }
+    {
+        auto* state= element->InsertNewChildElement("State");
+        state->SetAttribute("path", _pluginHost->_statePath.string().c_str());
+        _pluginHost->saveState();
+    }
+
+    return element;
+}
+
 void PluginModule::openGui() {
     _pluginHost->openGui();
     Module::openGui();

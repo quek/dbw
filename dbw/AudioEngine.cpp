@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "Composer.h"
-#include "logging.h"
+#include "logger.h"
 
 
 /* This routine will be called by the PortAudio engine when audio is needed.

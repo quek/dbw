@@ -68,7 +68,7 @@
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="logging.h" />
+    <ClInclude Include="logger.h" />
     <ClInclude Include="Midi.h" />
     <ClInclude Include="PlayPosition.h" />
     <ClInclude Include="Line.h" />

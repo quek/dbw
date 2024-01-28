@@ -5,10 +5,11 @@
 #include "Windows.h"
 #include <fstream>
 #include <filesystem>
-#include "logging.h"
+#include "logger.h"
 #include "PluginHost.h"
 #include "Composer.h"
 #include "Track.h"
+#include "util.h"
 
 
 void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::string& filename, std::string content) {
@@ -39,21 +40,22 @@ void PluginManager::scan()
 
     _plugins.clear();
     for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
-        PluginHost pluginHost;
-        auto x = pluginHost.scan(*i);
+        auto x = PluginHost::scan(*i);
         for (auto p = x.begin(); p != x.end(); ++p) {
             _plugins["clap"].push_back(*p);
         }
     }
 
-    std::string exePath = GetExecutablePath();
-    CreateConfigDirectoryAndSaveFile(exePath, "plugin.json", _plugins.dump(2));
+    auto path = configDir() / "plugin.json";
+    std::ofstream configFile(path);
+    configFile << _plugins.dump(2) << std::endl;
+    configFile.close();
 }
 
 void PluginManager::load()
 {
-    std::string configFile = GetExecutablePath() + "\\config\\plugin.json";
-    std::ifstream in(configFile);
+    auto path = configDir() / "plugin.json";
+    std::ifstream in(path);
     if (in.is_open()) {
         in >> _plugins;
     } else {
@@ -99,5 +101,13 @@ void PluginManager::openModuleSelector(Track* track)
     //    ImGui::PopID();
     //}
     ImGui::End();
+}
+
+nlohmann::json* PluginManager::findPlugin(const std::string deviceId) {
+    auto plugin = std::find_if(_plugins["clap"].begin(), _plugins["clap"].end(), [&deviceId](auto x) { return x["id"] == deviceId; });
+    if (plugin != _plugins["clap"].end()) {
+        return &*plugin;
+    }
+    return nullptr;
 }
 

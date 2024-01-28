@@ -10,11 +10,10 @@
 #include "GuiUtil.h"
 #include "Line.h"
 #include "Project.h"
-#include "logging.h"
+#include "logger.h"
 #include "Track.h"
 
-Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine), _commandManager(this) {
-    _project = std::make_unique<Project>("noname", this);
+Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine), _commandManager(this), _project(std::make_unique<Project>("noname", this)) {
     addTrack();
 }
 
@@ -195,6 +194,10 @@ void Composer::render() {
     ImGui::SameLine();
     if (ImGui::Button("Scan Plugin")) {
         scanPlugin();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Save")) {
+        _project->save();
     }
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;

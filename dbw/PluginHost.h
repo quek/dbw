@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <clap/clap.h>
 #include <windows.h>
@@ -7,13 +8,14 @@
 #include "PluginEventList.h"
 
 class ProcessBuffer;
+class Track;
 
 class PluginHost {
 public:
-    PluginHost();
+    PluginHost(Track* track);
     ~PluginHost();
     bool load(const std::string path, uint32_t pluginIndex);
-    nlohmann::json scan(const std::string path);
+    static nlohmann::json scan(const std::string path);
     void unload();
     clap_process* process(ProcessBuffer* in, uint32_t bufferSize, int64_t steadyTime);
     void openGui();
@@ -21,11 +23,14 @@ public:
     bool canUseGui() const noexcept;
     void start(double sampleRate, uint32_t bufferSize);
     void stop();
+    void loadState();
+    void saveState();
 
     std::string _name;
     const clap_plugin* _plugin = nullptr;
     double _sampleRate = 0;
     uint32_t _bufferSize = 0;
+    std::filesystem::path _statePath;
 
 private:
     HMODULE _library = nullptr;
@@ -36,6 +41,7 @@ private:
     clap_host _clap_host;
     const clap_plugin_gui* _pluginGui = nullptr;
     const clap_plugin_audio_ports* _pluginAudioPorts = nullptr;
+    const clap_plugin_state* _pluginState = nullptr;
     bool _processing = false;
 
     /* process stuff */
@@ -47,6 +53,8 @@ private:
     clap_process _process = {};
     clap_audio_buffer _audioIn = {};
     clap_audio_buffer _audioOut = {};
+
+    Track* _track;
 
 
     static const void* clapGetExtension(const clap_host_t* host, const char* extension_id) noexcept;

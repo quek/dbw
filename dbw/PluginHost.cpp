@@ -1,6 +1,7 @@
 #include "PluginHost.h"
+#include <fstream>
 #include "Composer.h"
-#include "logging.h"
+#include "logger.h"
 #include "util.h"
 
 LRESULT WINAPI PluginHostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -20,7 +21,7 @@ const clap_host_audio_ports PluginHost::_hostAudioPorts = {
    .rescan = [](const clap_host_t* /*host*/, uint32_t /*flags*/) {}
 };
 
-PluginHost::PluginHost() {
+PluginHost::PluginHost(Track* track) : _track(track) {
     _clap_host = clap_host{
         // clap_version_t clap_version; // initialized to CLAP_VERSION
         .clap_version = CLAP_VERSION,
@@ -80,6 +81,8 @@ PluginHost::PluginHost() {
     _audioOut.latency = 0;
     _audioOut.constant_mask = 0;
     _process.audio_outputs = &_audioOut;
+
+    _statePath = std::filesystem::path("plugins") / (generateUniqueId() + ".clap-preset");
 }
 
 PluginHost::~PluginHost() {
@@ -137,6 +140,7 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex) {
         bool result = _pluginAudioPorts->get(_plugin, index, isInput, &info);
         logger->info("audio ports result: {}", result);
     }
+    _pluginState = static_cast<const clap_plugin_state*>(_plugin->get_extension(_plugin, CLAP_EXT_STATE));
 
 
     _name = desc->name;
@@ -148,13 +152,13 @@ nlohmann::json PluginHost::scan(const std::string path) {
     nlohmann::json plugins;
     std::wstring wstr(path.begin(), path.end());
     LPCWSTR lpwstr = wstr.c_str();
-    _library = LoadLibrary(lpwstr);
-    if (!_library) {
+    auto library = LoadLibrary(lpwstr);
+    if (!library) {
         // TODO
         logger->error("Load error {}", path);
         return plugins;
     }
-    struct clap_plugin_entry* entry = (struct clap_plugin_entry*)GetProcAddress(_library, "clap_entry");
+    struct clap_plugin_entry* entry = (struct clap_plugin_entry*)GetProcAddress(library, "clap_entry");
     entry->init(path.c_str());
     auto factory =
         static_cast<const clap_plugin_factory*>(entry->get_factory(CLAP_PLUGIN_FACTORY_ID));
@@ -243,6 +247,37 @@ void PluginHost::stop() {
     }
 }
 
+void PluginHost::loadState() {
+    auto path = _track->_composer->_project->projectDir() / _statePath;
+    std::ifstream ofs(path, std::ios::binary);
+    clap_istream stream{
+        .ctx = &ofs,
+        .read = [](const struct clap_istream* stream, void* buffer, uint64_t size) -> int64_t {
+            ((std::ifstream*)stream->ctx)->read(static_cast<char*>(buffer), size);
+            return ((std::ifstream*)stream->ctx)->gcount();
+        }
+    };
+    _pluginState->load(_plugin, &stream);
+}
+
+void PluginHost::saveState() {
+    auto path = _track->_composer->_project->projectDir() / _statePath;
+    std::filesystem::create_directories(path.parent_path());
+    std::ofstream ofs(path, std::ios::binary);
+    clap_ostream stream{
+        .ctx = &ofs,
+        .write = [](const struct clap_ostream* stream, const void* buffer, uint64_t size) -> int64_t {
+            ((std::ofstream*)stream->ctx)->write(static_cast<const char*>(buffer), size);
+            if (((std::ofstream*)stream->ctx)->fail()) {
+                // TODO
+            }
+            return size;
+        }
+    };
+    _pluginState->save(_plugin, &stream);
+}
+
+// TODO see host.hxx 130
 const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const char* extension_id) noexcept {
     logger->debug("get extension {}", extension_id);
     if (!std::strcmp(extension_id, CLAP_EXT_AUDIO_PORTS)) {
