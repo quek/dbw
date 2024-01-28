@@ -11,7 +11,7 @@ public:
     PluginModule(std::string name, Track* track, PluginHost* pluginHost);
     ~PluginModule();
     void openGui() override;
-    void closeGui()override;
+    void closeGui() override;
     void start() override;
     void stop() override;
     void process(ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime) override;

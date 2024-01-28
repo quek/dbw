@@ -9,7 +9,7 @@ class Track;
 class Module {
 public:
     Module(std::string name, Track* track) : _name(name), _track(track) {}
-    virtual ~Module() = default;
+    virtual ~Module();
     virtual void openGui() { _didOpenGui = true; };
     virtual void closeGui() { _didOpenGui = false; };
     virtual void start() {};

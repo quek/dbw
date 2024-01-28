@@ -42,3 +42,22 @@ short noteToNumber(std::string note_name) {
     }
     return static_cast<int16_t>(x->second);
 }
+
+std::map<int, std::string> createReverseMap() {
+    std::map<int, std::string> reverseTable;
+    for (const auto& pair : table) {
+        if (reverseTable.find(pair.second) == reverseTable.end()) { // まだ追加されていない場合
+            reverseTable[pair.second] = pair.first;
+        }
+    }
+    return reverseTable;
+}
+
+std::string numberToNote(int16_t key) {
+    static const std::map<int, std::string> reverseTable = createReverseMap();
+    auto it = reverseTable.find(key);
+    if (it != reverseTable.end()) {
+        return it->second;
+    }
+    return "";
+}

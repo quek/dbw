@@ -2,6 +2,7 @@
 #include <string>
 
 short noteToNumber(std::string note_name);
+std::string numberToNote(int16_t key);
    
 constexpr short NOTE_OFF = 128;
 constexpr short NOTE_NONE = -1;

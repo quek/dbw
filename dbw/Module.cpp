@@ -41,6 +41,11 @@ public:
     std::unique_ptr<Module> _moduleUniquePtr;
 };
 
+Module::~Module() {
+    closeGui();
+    stop();
+}
+
 void Module::render() {
     if (ImGui::Button(_name.c_str())) {
         if (_didOpenGui) {

@@ -267,7 +267,7 @@ void Composer::render() {
     if (ImGui::BeginTable("racks", 1 + static_cast<int>(_tracks.size()), flags, ImVec2(0.0f, TEXT_BASE_HEIGHT * 10))) {
         ImGui::TableSetupScrollFreeze(1, 1);
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[0]);
-        for (int i = 0; i < _tracks.size(); ++i) {
+        for (size_t i = 0; i < _tracks.size(); ++i) {
             ImGui::TableSetupColumn(_tracks[i]->_name.c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[i + 1]);
         }
         ImGui::TableHeadersRow();

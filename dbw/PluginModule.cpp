@@ -9,6 +9,7 @@ PluginModule::PluginModule(std::string name, Track* track, PluginHost* pluginHos
 }
 
 PluginModule::~PluginModule() {
+    _pluginHost->closeGui();
     _pluginHost->stop();
     _pluginHost->unload();
 }

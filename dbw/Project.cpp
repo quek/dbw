@@ -83,17 +83,46 @@ void Project::open() {
                 }
                 (*track)->_ncolumns++;
             }
-            for (auto [note, line] = std::pair{ notes->FirstChildElement("Note"), (*track)->_lines.begin() };
-                 note != nullptr && line != (*track)->_lines.end();
-                 note = note->NextSiblingElement("Note"), ++line) {
-                auto& column = (*line)->_columns.back();
-                // FIXME see save
-                column->_note = note->Attribute("key");
+
+
+            double lpb = _composer->_lpb;
+            double endTime = std::numeric_limits<double>::max();
+            for (auto note = notes->FirstChildElement("Note");
+                 note != nullptr;
+                 note = note->NextSiblingElement("Note")) {
+                double time;
+                note->QueryDoubleAttribute("time", &time);
+                int lineIndex = time * 4;
+                if (time > endTime) {
+                    int endLineIndex = endTime * 4;
+                    if (lineIndex > endLineIndex) {
+                        auto& line = (*track)->_lines[endLineIndex];
+                        auto& column = line->_columns.back();
+                        column->_note = Midi::OFF;
+                        double remainder = std::fmod(endTime, 1 / lpb);
+                        unsigned char delay = remainder / (1 / lpb / 0x100);
+                        column->_delay = delay;
+                    }
+                }
+
+                int key;
+                note->QueryIntAttribute("key", &key);
                 double vel;
                 note->QueryDoubleAttribute("vel", &vel);
-                column->_velocity = vel * 127.0;
-                // FIXME see save;
-                column->_delay = std::atoi(note->Attribute("duration"));
+                double remainder = std::fmod(time, 1 / lpb);
+                unsigned char delay = remainder / (1 / lpb / 0x100);
+                double duration;
+                note->QueryDoubleAttribute("duration", &duration);
+                endTime = time + duration;
+
+                if ((*track)->_lines.size() <= lineIndex) {
+                    continue;
+                }
+                auto& line = (*track)->_lines[lineIndex];
+                auto& column = line->_columns.back();
+                column->_note = numberToNote(key);
+                column->_velocity = vel * 127;
+                column->_delay = delay;
             }
         }
     }
@@ -155,16 +184,42 @@ void Project::save() {
                 lanes->SetAttribute("track", std::format("track{}", trackIndex).c_str());
                 for (int columnIndex = 0; columnIndex < track->_ncolumns; ++columnIndex) {
                     auto* notes = lanes->InsertNewChildElement("Notes");
+
+                    auto lastKey = NOTE_NONE;
+                    double startTime = 0.0;
+                    double velocity = 0.0;
+                    double delay = 0;
+                    double lpb = _composer->_lpb;
                     for (int lineIndex = 0; lineIndex < _composer->_maxLine; ++lineIndex) {
                         Column* column = track->_lines[lineIndex]->_columns[columnIndex].get();
+                        int16_t key = noteToNumber(column->_note);
+                        if (key == NOTE_NONE) {
+                            continue;
+                        }
+                        double time = lineIndex / lpb + column->_delay / (lpb * 256.0);
+                        if (lastKey != NOTE_NONE) {
+                            auto* note = notes->InsertNewChildElement("Note");
+                            note->SetAttribute("key", lastKey);
+                            note->SetAttribute("time", startTime);
+                            note->SetAttribute("duration", time - startTime);
+                            note->SetAttribute("vel", velocity);
+                            startTime = time;
+                        }
+                        if (key == NOTE_OFF) {
+                            lastKey = NOTE_NONE;
+                        } else {
+                            lastKey = key;
+                            startTime = time;
+                            velocity = column->_velocity / 127.0;
+                            delay = column->_delay;
+                        }
+                    }
+                    if (lastKey != NOTE_NONE) {
                         auto* note = notes->InsertNewChildElement("Note");
-                        // FIXME lpb と delay を計算に入れる
-                        note->SetAttribute("time", lineIndex);
-                        // FIXME 次のノートの開始位置から算出
-                        note->SetAttribute("duration", column->_delay);
-                        // FIXME MIDI key of this note.	あと OFF は入れない
-                        note->SetAttribute("key", column->_note.c_str());
-                        note->SetAttribute("vel", column->_velocity / 127.0);
+                        note->SetAttribute("key", lastKey);
+                        note->SetAttribute("time", startTime);
+                        note->SetAttribute("duration", 1 / lpb - (delay / (lpb * 256.0)));
+                        note->SetAttribute("vel", velocity);
                     }
                 }
             }
