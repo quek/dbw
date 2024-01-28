@@ -44,6 +44,7 @@
     <ClCompile Include="Column.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="MasterTrack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -83,6 +84,7 @@
     <ClInclude Include="Column.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
+    <ClInclude Include="MasterTrack.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

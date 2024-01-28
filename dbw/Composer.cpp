@@ -13,33 +13,41 @@
 #include "logger.h"
 #include "Track.h"
 
-Composer::Composer(AudioEngine* audioEngine) : _audioEngine(audioEngine), _commandManager(this), _project(std::make_unique<Project>("noname", this)) {
+Composer::Composer(AudioEngine* audioEngine) :
+    _audioEngine(audioEngine),
+    _commandManager(this),
+    _project(std::make_unique<Project>("noname", this)),
+    _masterTrack(std::make_unique<MasterTrack>(this)) {
     addTrack();
 }
 
 void Composer::process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
+    _masterTrack->_processBuffer.clear();
+    _masterTrack->_processBuffer.ensure(framesPerBuffer);
+
     if (_playing) {
         _nextPlayPosition = _playPosition.nextPlayPosition(_audioEngine->_sampleRate, framesPerBuffer, _bpm, _lpb, &_samplePerDelay);
     }
 
-    for (unsigned long i = 0; i < framesPerBuffer * 2; ++i) {
-        out[i] = 0.0;
-    }
-    ProcessBuffer* audioBuffer = &_processBuffer;
-    audioBuffer->clear();
-    audioBuffer->ensure(framesPerBuffer);
+    ProcessBuffer* processBuffer = &_processBuffer;
+    processBuffer->clear();
+    processBuffer->ensure(framesPerBuffer);
     for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-        audioBuffer->_out[0][i] = in[i * 2];
-        audioBuffer->_out[1][i] = in[i * 2 + 1];
+        processBuffer->_out[0][i] = in[i * 2];
+        processBuffer->_out[1][i] = in[i * 2 + 1];
     }
     for (auto iter = _tracks.begin(); iter != _tracks.end(); ++iter) {
         auto& track = *iter;
-        track->process(audioBuffer, framesPerBuffer, steadyTime);
-        // TODO master track
+        track->process(processBuffer, framesPerBuffer, steadyTime);
         for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-            out[i * 2] += track->_processBuffer._out[0][i];
-            out[i * 2 + 1] += track->_processBuffer._out[1][i];
+            _masterTrack->_processBuffer._out[0][i] += track->_processBuffer._out[0][i];
+            _masterTrack->_processBuffer._out[1][i] += track->_processBuffer._out[1][i];
         }
+    }
+    _masterTrack->process(processBuffer, framesPerBuffer, steadyTime);
+    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
+        out[i * 2] = _masterTrack->_processBuffer._out[0][i];
+        out[i * 2 + 1] = _masterTrack->_processBuffer._out[1][i];
     }
 
     if (_playing) {
@@ -209,13 +217,16 @@ void Composer::render() {
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
     ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * 20);
     std::vector<float> columnWidths;
-    if (ImGui::BeginTable("tracks", 1 + static_cast<int>(_tracks.size()), flags, outer_size)) {
+    // 2 is timeline and master track.
+    if (ImGui::BeginTable("tracks", 2 + static_cast<int>(_tracks.size()), flags, outer_size)) {
         ImGui::TableSetupScrollFreeze(1, 1);
         // Make the first column not hideable to match our use of TableSetupScrollFreeze()
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize);
         for (auto i = 0; i < _tracks.size(); ++i) {
             ImGui::TableSetupColumn(_tracks[i]->_name.c_str(), ImGuiTableColumnFlags_NoResize);
         }
+        ImGui::TableSetupColumn(_masterTrack->_name.c_str(), ImGuiTableColumnFlags_NoResize);
+
         //ImGui::TableHeadersRow();
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         ImGui::TableSetColumnIndex(0);
@@ -237,6 +248,10 @@ void Composer::render() {
             }
             ImGui::PopID();
         }
+        ImGui::TableSetColumnIndex(_tracks.size() + 1);
+        ImGui::PushID(_masterTrack.get());
+        ImGui::TableHeader(_masterTrack->_name.c_str());
+        ImGui::PopID();
 
         for (int line = 0; line < _maxLine; line++) {
             ImGui::TableNextRow();
@@ -260,16 +275,23 @@ void Composer::render() {
                     columnWidths.push_back(ImGui::GetContentRegionAvail().x);
                 }
             }
+
+            ImGui::TableSetColumnIndex(_tracks.size() + 1);
+            _masterTrack->renderLine(line);
+            if (line == 0) {
+                columnWidths.push_back(ImGui::GetContentRegionAvail().x);
+            }
         }
         ImGui::EndTable();
     }
 
-    if (ImGui::BeginTable("racks", 1 + static_cast<int>(_tracks.size()), flags, ImVec2(0.0f, TEXT_BASE_HEIGHT * 10))) {
+    if (ImGui::BeginTable("racks", 2 + static_cast<int>(_tracks.size()), flags, ImVec2(0.0f, TEXT_BASE_HEIGHT * 10))) {
         ImGui::TableSetupScrollFreeze(1, 1);
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[0]);
         for (size_t i = 0; i < _tracks.size(); ++i) {
             ImGui::TableSetupColumn(_tracks[i]->_name.c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[i + 1]);
         }
+        ImGui::TableSetupColumn(_masterTrack->_name.c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, columnWidths[_tracks.size() + 1]);
         ImGui::TableHeadersRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::TableHeader("#");
@@ -287,6 +309,12 @@ void Composer::render() {
             _tracks[i]->render();
             ImGui::PopID();
         }
+
+        ImGui::TableSetColumnIndex(_tracks.size() + 1);
+        ImGui::PushID("MASTER RACK");
+        _masterTrack->render();
+        ImGui::PopID();
+
         ImGui::EndTable();
     }
 

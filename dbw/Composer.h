@@ -2,6 +2,7 @@
 #include <memory>
 #include "ProcessBuffer.h"
 #include "Command.h"
+#include "MasterTrack.h"
 #include "Midi.h"
 #include "PlayPosition.h"
 #include "PluginManager.h"
@@ -41,5 +42,6 @@ public:
     CommandManager _commandManager;
     PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;
+    std::unique_ptr<MasterTrack> _masterTrack;
 };
 

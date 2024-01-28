@@ -13,10 +13,10 @@ class Module;
 class Track {
 public:
     Track(std::string name, Composer* composer);
-    ~Track();
-    void process(const ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
-    void render();
-    void renderLine(int line);
+    virtual ~Track();
+    virtual void process(const ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
+    virtual void render();
+    virtual void renderLine(int line);
     void changeMaxLine(int value);
     void addModule(std::string path, uint32_t index);
     ProcessBuffer _processBuffer;
@@ -28,7 +28,6 @@ public:
     std::vector<std::unique_ptr<Module>> _modules;
     std::vector<int16_t> _lastKeys;
 
-    std::string _pluginPath = { "C:\\Program Files\\Common Files\\CLAP\\Surge Synth Team\\Surge XT.clap" };
     Composer* _composer;
     bool _openModuleSelector = false;
 };
