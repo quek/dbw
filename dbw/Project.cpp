@@ -65,6 +65,38 @@ void Project::open() {
             }
         }
     }
+    auto* lanesWrap = doc.FirstChildElement("Project")->FirstChildElement("Arrangement")->FirstChildElement("Lanes");
+    for (auto [lanes, track] = std::pair{ lanesWrap->FirstChildElement("Lanes"), _composer->_tracks.begin() };
+         lanes != nullptr && track != _composer->_tracks.end();
+         lanes = lanes->NextSiblingElement("Lanes"), ++track) {
+        // FIXME see save
+        bool first = true;
+        for (auto* notes = lanes->FirstChildElement("Notes");
+             notes != nullptr;
+             notes = notes->NextSiblingElement("Notes")) {
+            if (first) {
+                first = false;
+            } else {
+                for (int i = 0; i < _composer->_maxLine; ++i) {
+                    auto line = (*track)->_lines[i].get();
+                    line->_columns.push_back(std::make_unique<Column>(line));
+                }
+                (*track)->_ncolumns++;
+            }
+            for (auto [note, line] = std::pair{ notes->FirstChildElement("Note"), (*track)->_lines.begin() };
+                 note != nullptr && line != (*track)->_lines.end();
+                 note = note->NextSiblingElement("Note"), ++line) {
+                auto& column = (*line)->_columns.back();
+                // FIXME see save
+                column->_note = note->Attribute("key");
+                double vel;
+                note->QueryDoubleAttribute("vel", &vel);
+                column->_velocity = vel * 127.0;
+                // FIXME see save;
+                column->_delay = std::atoi(note->Attribute("duration"));
+            }
+        }
+    }
 
     _composer->_audioEngine->start();
 }
@@ -119,22 +151,20 @@ void Project::save() {
             lanesWrap->SetAttribute("timeUnit", "beats");
             for (int trackIndex = 0; trackIndex < _composer->_tracks.size(); ++trackIndex) {
                 Track* track = _composer->_tracks[trackIndex].get();
-                auto* lanes = arrangement->InsertNewChildElement("Lanes");
+                auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
                 lanes->SetAttribute("track", std::format("track{}", trackIndex).c_str());
                 for (int columnIndex = 0; columnIndex < track->_ncolumns; ++columnIndex) {
                     auto* notes = lanes->InsertNewChildElement("Notes");
                     for (int lineIndex = 0; lineIndex < _composer->_maxLine; ++lineIndex) {
                         Column* column = track->_lines[lineIndex]->_columns[columnIndex].get();
-                        if (!column->_note.empty()) {
-                            auto* note = notes->InsertNewChildElement("Note");
-                            // FIXME lpb と delay を計算に入れる
-                            note->SetAttribute("time", lineIndex);
-                            // FIXME 次のノートの開始位置から算出
-                            note->SetAttribute("duration", column->_delay);
-                            // FIXME MIDI key of this note.	あと OFF は入れない
-                            note->SetAttribute("key", column->_note.c_str());
-                            note->SetAttribute("vel", column->_velocity / 127.0);
-                        }
+                        auto* note = notes->InsertNewChildElement("Note");
+                        // FIXME lpb と delay を計算に入れる
+                        note->SetAttribute("time", lineIndex);
+                        // FIXME 次のノートの開始位置から算出
+                        note->SetAttribute("duration", column->_delay);
+                        // FIXME MIDI key of this note.	あと OFF は入れない
+                        note->SetAttribute("key", column->_note.c_str());
+                        note->SetAttribute("vel", column->_velocity / 127.0);
                     }
                 }
             }
