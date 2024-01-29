@@ -161,13 +161,11 @@ void Composer::render() {
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
         if (ImGui::Button("Loop")) {
             _looping = false;
-            gErrorWindow->show("Stop loop...\nHello World!\naaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccceeeeeeeeeeeeeeeeeeeeeeeee  dflaksdjf  lskdfjsda  as;ldkfjasdklf alfs;kjsadlkfa asd;flkjsadl;kfjasd;l asdlkfjsadlkf sadfklsdfjla asdfasdf");
         }
         ImGui::PopStyleColor(3);
     } else {
         if (ImGui::Button("Loop")) {
             _looping = true;
-            gErrorWindow->show("Start loop...");
         }
     }
     ImGui::SameLine();
@@ -219,6 +217,7 @@ void Composer::render() {
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
     ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * 20);
     std::vector<float> columnWidths;
+    float scrollX;
     // 2 is timeline and master track.
     if (ImGui::BeginTable("tracks", 2 + static_cast<int>(_tracks.size()), flags, outer_size)) {
         ImGui::TableSetupScrollFreeze(1, 1);
@@ -283,6 +282,7 @@ void Composer::render() {
             if (line == 0) {
                 columnWidths.push_back(ImGui::GetContentRegionAvail().x);
             }
+            scrollX = ImGui::GetScrollX();
         }
         ImGui::EndTable();
     }
@@ -316,6 +316,8 @@ void Composer::render() {
         ImGui::PushID("MASTER RACK");
         _masterTrack->render();
         ImGui::PopID();
+
+        ImGui::SetScrollX(scrollX);
 
         ImGui::EndTable();
     }
