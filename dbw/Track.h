@@ -14,7 +14,7 @@ class Track {
 public:
     Track(std::string name, Composer* composer);
     virtual ~Track();
-    virtual void process(const ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
+    virtual void process(int64_t steadyTime);
     virtual void render();
     virtual void renderLine(int line);
     void changeMaxLine(int value);

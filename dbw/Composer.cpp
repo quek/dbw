@@ -21,34 +21,29 @@ Composer::Composer(AudioEngine* audioEngine) :
     addTrack();
 }
 
-void Composer::process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
+void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
     _masterTrack->_processBuffer.clear();
-    _masterTrack->_processBuffer.ensure(framesPerBuffer);
+    _masterTrack->_processBuffer.ensure(framesPerBuffer, 2);
 
     if (_playing) {
         _nextPlayPosition = _playPosition.nextPlayPosition(_audioEngine->_sampleRate, framesPerBuffer, _bpm, _lpb, &_samplePerDelay);
     }
 
-    ProcessBuffer* processBuffer = &_processBuffer;
-    processBuffer->clear();
-    processBuffer->ensure(framesPerBuffer);
-    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-        processBuffer->_out[0][i] = in[i * 2];
-        processBuffer->_out[1][i] = in[i * 2 + 1];
-    }
+    _processBuffer.clear();
+    _processBuffer.ensure(framesPerBuffer, 2);
+
+    _masterTrack->_processBuffer.ensure(framesPerBuffer, 2);
+    _masterTrack->_processBuffer._in.zero();
     for (auto iter = _tracks.begin(); iter != _tracks.end(); ++iter) {
         auto& track = *iter;
-        track->process(processBuffer, framesPerBuffer, steadyTime);
-        for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-            _masterTrack->_processBuffer._out[0][i] += track->_processBuffer._out[0][i];
-            _masterTrack->_processBuffer._out[1][i] += track->_processBuffer._out[1][i];
-        }
+        track->_processBuffer.clear();
+        track->_processBuffer.ensure(framesPerBuffer, 2);
+        track->process(steadyTime);
+        _masterTrack->_processBuffer._in.add(track->_processBuffer._out);
     }
-    _masterTrack->process(processBuffer, framesPerBuffer, steadyTime);
-    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-        out[i * 2] = _masterTrack->_processBuffer._out[0][i];
-        out[i * 2 + 1] = _masterTrack->_processBuffer._out[1][i];
-    }
+
+    _masterTrack->process(steadyTime);
+    _masterTrack->_processBuffer._out.copyTo(out, framesPerBuffer, 2);
 
     if (_playing) {
         _playPosition = _nextPlayPosition;
@@ -248,7 +243,7 @@ void Composer::render() {
             }
             ImGui::PopID();
         }
-        ImGui::TableSetColumnIndex(_tracks.size() + 1);
+        ImGui::TableSetColumnIndex(static_cast<int>(_tracks.size() + 1));
         ImGui::PushID(_masterTrack.get());
         ImGui::TableHeader(_masterTrack->_name.c_str());
         ImGui::PopID();
@@ -276,7 +271,7 @@ void Composer::render() {
                 }
             }
 
-            ImGui::TableSetColumnIndex(_tracks.size() + 1);
+            ImGui::TableSetColumnIndex(static_cast<int>(_tracks.size() + 1));
             _masterTrack->renderLine(line);
             if (line == 0) {
                 columnWidths.push_back(ImGui::GetContentRegionAvail().x);
@@ -310,7 +305,7 @@ void Composer::render() {
             ImGui::PopID();
         }
 
-        ImGui::TableSetColumnIndex(_tracks.size() + 1);
+        ImGui::TableSetColumnIndex(static_cast<int>(_tracks.size() + 1));
         ImGui::PushID("MASTER RACK");
         _masterTrack->render();
         ImGui::PopID();

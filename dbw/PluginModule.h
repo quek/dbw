@@ -14,7 +14,7 @@ public:
     void closeGui() override;
     void start() override;
     void stop() override;
-    void process(ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime) override;
+    bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
 
     std::unique_ptr<PluginHost> _pluginHost;

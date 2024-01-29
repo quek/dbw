@@ -11,8 +11,7 @@
 #include "PluginModule.h"
 #include "PluginHost.h"
 
-Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _ncolumns(1)
-{
+Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _ncolumns(1) {
     _lastKeys.push_back(0);
     for (auto i = 0; i < composer->_maxLine; ++i) {
         _lines.push_back(std::make_unique<Line>(this, _ncolumns));
@@ -50,25 +49,19 @@ Track::Track(std::string name, Composer* composer) : _name(name), _composer(comp
 
 }
 
-Track::~Track()
-{
+Track::~Track() {
     if (_out != nullptr) {
         free(_out);
     }
 }
 
-void Track::changeMaxLine(int value)
-{
+void Track::changeMaxLine(int value) {
     for (auto i = _lines.size(); i < value; ++i) {
         _lines.push_back(std::make_unique<Line>(this, _ncolumns));
     }
 }
 
-void Track::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime)
-{
-    _processBuffer.clear();
-    _processBuffer.copyInToInFrom(in);
-
+void Track::process(int64_t steadyTime) {
     PlayPosition* from = &_composer->_playPosition;
     PlayPosition* to = &_composer->_nextPlayPosition;
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
@@ -103,16 +96,14 @@ void Track::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int6
         }
     }
 
-    ProcessBuffer* buffer = &_processBuffer;
     for (auto module = _modules.begin(); module != _modules.end(); ++module) {
-        (*module)->process(buffer, framesPerBuffer, steadyTime);
-        buffer = &(*module)->_processBuffer;
+        (*module)->process(&_processBuffer, steadyTime);
+        _processBuffer.swapInOut();
     }
-    _processBuffer.copyOutToOutFrom(buffer);
+    _processBuffer.swapInOut();
 }
 
-void Track::render()
-{
+void Track::render() {
     for (auto module = _modules.begin(); module != _modules.end(); ++module) {
         ImGui::PushID((*module).get());
         (*module)->render();
@@ -126,8 +117,7 @@ void Track::render()
     }
 }
 
-void Track::renderLine(int line)
-{
+void Track::renderLine(int line) {
     _lines[line]->render();
 }
 

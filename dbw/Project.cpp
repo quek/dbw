@@ -92,15 +92,15 @@ void Project::open() {
                  note = note->NextSiblingElement("Note")) {
                 double time;
                 note->QueryDoubleAttribute("time", &time);
-                int lineIndex = time * 4;
+                int lineIndex = static_cast<int>(time * 4);
                 if (time > endTime) {
-                    int endLineIndex = endTime * 4;
+                    int endLineIndex = static_cast<int>(endTime * 4);
                     if (lineIndex > endLineIndex) {
                         auto& line = (*track)->_lines[endLineIndex];
                         auto& column = line->_columns.back();
                         column->_note = Midi::OFF;
                         double remainder = std::fmod(endTime, 1 / lpb);
-                        unsigned char delay = remainder / (1 / lpb / 0x100);
+                        unsigned char delay =static_cast<unsigned char>(remainder / (1 / lpb / 0x100));
                         column->_delay = delay;
                     }
                 }
@@ -110,7 +110,7 @@ void Project::open() {
                 double vel;
                 note->QueryDoubleAttribute("vel", &vel);
                 double remainder = std::fmod(time, 1 / lpb);
-                unsigned char delay = remainder / (1 / lpb / 0x100);
+                unsigned char delay = static_cast<unsigned char>(remainder / (1 / lpb / 0x100));
                 double duration;
                 note->QueryDoubleAttribute("duration", &duration);
                 endTime = time + duration;
@@ -120,8 +120,8 @@ void Project::open() {
                 }
                 auto& line = (*track)->_lines[lineIndex];
                 auto& column = line->_columns.back();
-                column->_note = numberToNote(key);
-                column->_velocity = vel * 127;
+                column->_note = numberToNote(static_cast<int16_t>(key));
+                column->_velocity = static_cast<unsigned char>(vel * 127);
                 column->_delay = delay;
             }
         }
@@ -231,7 +231,7 @@ void Project::save() {
     tinyxml2::XMLError error = doc.SaveFile(path.string().c_str());
     if (error != tinyxml2::XMLError::XML_SUCCESS) {
         // TODO
-        logger->error("Save error {}", error);
+        logger->error("Save error!");
     }
 }
 

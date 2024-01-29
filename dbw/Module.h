@@ -15,10 +15,9 @@ public:
     virtual void start() {};
     virtual void stop() {};
     virtual void render();
-    virtual void process(ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime);
+    virtual bool process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) { return true; }
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) = 0;
 
-    ProcessBuffer _processBuffer;
     Track* _track;
     std::string _name;
     bool _didOpenGui = false;

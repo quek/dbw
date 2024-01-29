@@ -10,7 +10,7 @@ PluginEventList::PluginEventList() :
 // uint32_t(CLAP_ABI* size)(const struct clap_input_events* list) {
 uint32_t PluginEventList::size(const struct clap_input_events* list) {
     PluginEventList* self = (PluginEventList*)list->ctx;
-    return (uint32_t)self->_events.size();
+    return static_cast<uint32_t>(self->_events.size());
 }
 
 // Don't free the returned event, it belongs to the list
@@ -70,10 +70,14 @@ void PluginEventList::clear()
 
 clap_input_events_t* PluginEventList::clapInputEvents()
 {
+    // ProcessBuffer::swapInOut() で this が書き換えられるの再設定する
+    _clap_input_events.ctx = this;
     return &_clap_input_events;
 }
 
 clap_output_events_t* PluginEventList::clapOutputEvents()
 {
+    // ProcessBuffer::swapInOut() で this が書き換えられるの再設定する
+    _clap_input_events.ctx = this;
     return &_clap_output_events;
 }

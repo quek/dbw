@@ -45,6 +45,7 @@
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
+    <ClCompile Include="AudioBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -85,6 +86,7 @@
     <ClInclude Include="Project.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="MasterTrack.h" />
+    <ClInclude Include="AudioBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

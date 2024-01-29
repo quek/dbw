@@ -9,7 +9,7 @@
 MasterTrack::MasterTrack(Composer* composer) : Track("MASTER", composer) {
 }
 
-void MasterTrack::process(const ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime) {
+void MasterTrack::process(int64_t steadyTime) {
     PlayPosition* from = &_composer->_playPosition;
     PlayPosition* to = &_composer->_nextPlayPosition;
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
@@ -44,16 +44,14 @@ void MasterTrack::process(const ProcessBuffer* in, unsigned long framesPerBuffer
         }
     }
 
-    ProcessBuffer* buffer = &_processBuffer;
     for (auto module = _modules.begin(); module != _modules.end(); ++module) {
-        (*module)->process(buffer, framesPerBuffer, steadyTime);
-        buffer = &(*module)->_processBuffer;
+        (*module)->process(&_processBuffer, steadyTime);
+        _processBuffer.swapInOut();
     }
-    _processBuffer.copyOutToOutFrom(buffer);
-
+    _processBuffer.swapInOut();
 }
 
-void MasterTrack::renderLine(int line) {
+void MasterTrack::renderLine(int /*line*/) {
     ImGui::Text("--");
 }
 

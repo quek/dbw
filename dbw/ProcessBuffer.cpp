@@ -1,50 +1,27 @@
 #include "ProcessBuffer.h"
 
-ProcessBuffer::ProcessBuffer() : ProcessBuffer(0) {
+ProcessBuffer::ProcessBuffer() : _framesPerBuffer(0), _nchannels(0) {
 }
 
-ProcessBuffer::ProcessBuffer(unsigned long framesPerBuffer) {
-    ensure(framesPerBuffer);
-}
-
-void ProcessBuffer::ensure(unsigned long framesPerBuffer) {
-    if (_framesPerBuffer != framesPerBuffer) {
-        _framesPerBuffer = framesPerBuffer;
-        _in.clear();
-        _out.clear();
-        for (auto i = 0; i < _nchanels; ++i) {
-            _in.push_back(std::vector<float>(framesPerBuffer, 0.0f));
-            _out.push_back(std::vector<float>(framesPerBuffer, 0.0f));
-        }
-    }
-}
-
-void ProcessBuffer::copyInToInFrom(const ProcessBuffer* from) {
-    if (this == from) {
+void ProcessBuffer::ensure(unsigned long framesPerBuffer, int nchannels) {
+    if (_framesPerBuffer == framesPerBuffer && _nchannels == nchannels) {
         return;
     }
-    ensure(from->_framesPerBuffer);
-    for (auto i = 0; i < _nchanels; ++i) {
-        _in[i] = from->_in[i];
-    }
-}
-
-void ProcessBuffer::copyOutToOutFrom(const ProcessBuffer* from) {
-    if (this == from) {
-        return;
-    }
-    ensure(from->_framesPerBuffer);
-    for (auto i = 0; i < _nchanels; ++i) {
-        _out[i] = from->_out[i];
-    }
+    _framesPerBuffer = framesPerBuffer;
+    _nchannels = nchannels;
+    _in.ensure(_framesPerBuffer, _nchannels);
+    _out.ensure(_framesPerBuffer, _nchannels);
 }
 
 void ProcessBuffer::clear() {
-    for (auto i = 0; i < _nchanels; ++i) {
-        std::fill(_in[i].begin(), _in[i].end(), 0.0f);
-        std::fill(_out[i].begin(), _out[i].end(), 0.0f);
-    }
+    _in.zero();
+    _out.zero();
     _eventIn.clear();
     _eventOut.clear();
+}
+
+void ProcessBuffer::swapInOut() {
+    std::swap(_in, _out);
+    std::swap(_eventIn, _eventOut);
 }
 

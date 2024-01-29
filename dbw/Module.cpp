@@ -62,7 +62,3 @@ void Module::render() {
     }
 }
 
-void Module::process(ProcessBuffer* /* in */, unsigned long framesPerBuffer, int64_t /* steadyTime */) {
-    _processBuffer.ensure(framesPerBuffer);
-}
-

@@ -17,7 +17,7 @@ public:
     bool load(const std::string path, uint32_t pluginIndex);
     static nlohmann::json scan(const std::string path);
     void unload();
-    clap_process* process(ProcessBuffer* in, uint32_t bufferSize, int64_t steadyTime);
+    bool process(ProcessBuffer* buffer, int64_t steadyTime);
     void openGui();
     void closeGui();
     bool canUseGui() const noexcept;

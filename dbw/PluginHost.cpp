@@ -75,7 +75,7 @@ PluginHost::PluginHost(Track* track) : _track(track) {
     _audioIn.latency = 0;
     _audioIn.constant_mask = 0;
     _process.audio_inputs = &_audioIn;
-    _audioOut.data32 = _inputs;
+    _audioOut.data32 = _outputs;
     _audioOut.data64 = nullptr;
     _audioOut.channel_count = 2;
     _audioOut.latency = 0;
@@ -306,51 +306,45 @@ void PluginHost::clapRequestCallback(const clap_host_t* host) noexcept {
 }
 
 
-clap_process* PluginHost::process(ProcessBuffer* in, uint32_t bufferSize, int64_t steadyTime) {
-    if (_allocatedSize < bufferSize) {
-        _allocatedSize = bufferSize;
-        if (_inputs[0] != nullptr) {
-            std::free(_inputs[0]);
-        }
-        _inputs[0] = (float*)std::calloc(bufferSize, sizeof(float));
-        if (_inputs[1] != nullptr) {
-            std::free(_inputs[1]);
-        }
-        _inputs[1] = (float*)std::calloc(bufferSize, sizeof(float));
+bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
+    // とりあえず 0, 1 の 2ch で
+    _inputs[0] = buffer->_in._buffer[0].data();
+    _inputs[1] = buffer->_in._buffer[1].data();
+    _outputs[0] = buffer->_out._buffer[0].data();
+    _outputs[1] = buffer->_out._buffer[1].data();
+    
+    _audioIn.channel_count = buffer->_in.getNchannels();
+    _audioOut.channel_count = buffer->_in.getNchannels();
 
-        if (_outputs[0] != nullptr) {
-            std::free(_outputs[0]);
-        }
-        _outputs[0] = (float*)std::calloc(bufferSize, sizeof(float));
-        if (_outputs[1] != nullptr) {
-            std::free(_outputs[1]);
-        }
-        _outputs[1] = (float*)std::calloc(bufferSize, sizeof(float));
-    }
-    _process.frames_count = bufferSize;
-    _process.in_events = in->_eventIn.clapInputEvents();
+    _process.frames_count = buffer->_framesPerBuffer;
+    _process.in_events = buffer->_eventIn.clapInputEvents();
     _process.out_events = _evOut.clapOutputEvents();
     _process.steady_time = steadyTime;
 
-    for (uint32_t i = 0; i < bufferSize; ++i) {
-        _inputs[0][i] = in->_out[0][i];
-        _inputs[1][i] = in->_out[1][i];
+    if (_process.in_events->size(_process.in_events) > 0) {
+        logger->debug("event");
     }
-
     try {
         clap_process_status status = _plugin->process(_plugin, &_process);
         if (status == CLAP_PROCESS_ERROR) {
             logger->error("process error");
+            return false;
         }
     } catch (const std::exception& e) {
         // 標準例外をキャッチ
         logger->error("Standard exception: {}", e.what());
+        return false;
     } catch (...) {
         // その他すべての例外をキャッチ
         logger->error("Unknown exception caught");
+        return false;
+    }
+    buffer->_out._constantp.clear();
+    for (uint32_t i = 0; i < _process.audio_outputs->channel_count; ++i) {
+        buffer->_out._constantp.push_back((_process.audio_outputs->constant_mask & (static_cast<unsigned long long>(1) << i)) != 0);
     }
 
-    return &_process;
+    return true;
 }
 
 void PluginHost::openGui() {

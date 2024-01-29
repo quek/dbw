@@ -14,17 +14,8 @@ PluginModule::~PluginModule() {
     _pluginHost->unload();
 }
 
-void PluginModule::process(ProcessBuffer* in, unsigned long framesPerBuffer, int64_t steadyTime) {
-    Module::process(in, framesPerBuffer, steadyTime);
-    auto process = _pluginHost->process(in, framesPerBuffer, steadyTime);
-
-    auto buffer = process->audio_outputs;
-    bool isLeftConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 0)) != 0;
-    bool isRightConstant = (buffer->constant_mask & (static_cast<uint64_t>(1) << 1)) != 0;
-    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-        _processBuffer._out[0][i] = buffer->data32[0][isLeftConstant ? 0 : i];
-        _processBuffer._out[1][i] = buffer->data32[1][isRightConstant ? 0 : i];
-    }
+bool PluginModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
+    return _pluginHost->process(buffer, steadyTime);
 }
 
 tinyxml2::XMLElement* PluginModule::dawProject(tinyxml2::XMLDocument* doc) {
