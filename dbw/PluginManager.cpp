@@ -1,16 +1,20 @@
 #include "PluginManager.h"
-#include "imgui.h"
-#include "misc/cpp/imgui_stdlib.h"
-#include "util.h"
-#include "Windows.h"
 #include <fstream>
 #include <filesystem>
+#include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"
+#include "windows.h"
+#include "Composer.h"
+#include "GainModule.h"
 #include "logger.h"
 #include "PluginHost.h"
-#include "Composer.h"
+#include "PluginModule.h"
 #include "Track.h"
 #include "util.h"
 
+std::map<std::string, std::function<BuiltinModule* (Track*)>> builtinModuleMap = {
+    {"Gain", [](Track* track) -> BuiltinModule* { return new GainModule("Gain", track); }},
+};
 
 void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::string& filename, std::string content) {
     std::string configPath = directory + "\\config";
@@ -22,8 +26,37 @@ void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::s
     configFile.close();
 }
 
-void PluginManager::scan()
-{
+PluginManager::PluginManager(Composer* composer) : _composer(composer) {
+}
+
+Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
+    if (strcmp(element->Name(), "ClapPlugin") == 0) {
+        auto deviceId = element->Attribute("deviceID");
+        auto plugin = _composer->_pluginManager.findPlugin(deviceId);
+        if (plugin == nullptr) {
+            return nullptr;
+        }
+        PluginHost* pluginHost = new PluginHost(track);
+        pluginHost->load((*plugin)["path"].get<std::string>(), (*plugin)["index"].get<uint32_t>());
+        Module* module = new PluginModule(pluginHost->_name, track, pluginHost);
+        auto state = element->FirstChildElement("State");
+        pluginHost->_statePath = state->Attribute("path");
+        pluginHost->loadState();
+        return module;
+    } else if (strcmp(element->Name(), "BuiltinDevice") == 0) {
+        auto deviceId = element->Attribute("deviceID");
+        auto factory = builtinModuleMap.find(deviceId);
+        if (factory == builtinModuleMap.end()) {
+            return nullptr;
+        }
+        BuiltinModule* module = (*factory).second(track);
+        module->loadParameters(element->FirstChildElement("Parameters"));
+        return module;
+    }
+    return nullptr;
+}
+
+void PluginManager::scan() {
     std::string clapPluginDir = "C:\\Program Files\\Common Files\\CLAP";
     std::vector<std::string> pluginPaths;
 
@@ -52,8 +85,7 @@ void PluginManager::scan()
     configFile.close();
 }
 
-void PluginManager::load()
-{
+void PluginManager::load() {
     auto path = configDir() / "plugin.json";
     std::ifstream in(path);
     if (in.is_open()) {
@@ -63,8 +95,7 @@ void PluginManager::load()
     }
 }
 
-void PluginManager::openModuleSelector(Track* track)
-{
+void PluginManager::openModuleSelector(Track* track) {
     ImGui::Begin("Module Selector", &track->_openModuleSelector);
     if (ImGui::IsWindowAppearing()) {
         ImGui::SetKeyboardFocusHere();
@@ -87,6 +118,21 @@ void PluginManager::openModuleSelector(Track* track)
         }
     }
 
+    for (const auto& [name, fun] : builtinModuleMap) {
+        auto q = _query.begin();
+        for (auto c = name.begin(); c != name.end() && q != _query.end(); ++c) {
+            if (std::tolower(*q) == std::tolower(*c)) {
+                ++q;
+            }
+        }
+        if (q == _query.end()) {
+            if (ImGui::Button(name.c_str())) {
+                track->_openModuleSelector = false;
+                auto module = fun(track);
+                _composer->_commandManager.executeCommand(new AddModuleCommand(track, module));
+            }
+        }
+    }
     //ImGuiStyle& style = ImGui::GetStyle();
     //int buttons_count = 20;
     //float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;

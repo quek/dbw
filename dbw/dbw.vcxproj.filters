@@ -46,6 +46,9 @@
     <ClCompile Include="tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
+    <ClCompile Include="ErrorWindow.cpp" />
+    <ClCompile Include="BuiltinModule.cpp" />
+    <ClCompile Include="GainModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -87,6 +90,9 @@
     <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="AudioBuffer.h" />
+    <ClInclude Include="ErrorWindow.h" />
+    <ClInclude Include="BuiltinModule.h" />
+    <ClInclude Include="GainModule.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

@@ -1,4 +1,9 @@
+#include "AudioEngine.h"
 #include "Command.h"
+#include "Composer.h"
+#include "Module.h"
+#include "Track.h"
+#include <mutex>
 
 CommandManager::CommandManager(Composer* composer) : _composer(composer) {
 }
@@ -45,4 +50,19 @@ void CommandManager::clear() {
     _undoStack.swap(undoStack);
     std::stack<std::shared_ptr<Command>> redoStack;
     _redoStack.swap(redoStack);
+}
+
+void AddModuleCommand::execute(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    _track->_modules.push_back(std::move(_module));
+    _track->_modules.back()->start();
+    _track->_modules.back()->openGui();
+}
+
+void AddModuleCommand::undo(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    _module = std::move(_track->_modules.back());
+    _track->_modules.pop_back();
+    _module->closeGui();
+    _module->stop();
 }

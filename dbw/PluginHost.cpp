@@ -1,6 +1,7 @@
 #include "PluginHost.h"
 #include <fstream>
 #include "Composer.h"
+#include "ErrorWindow.h"
 #include "logger.h"
 #include "util.h"
 
@@ -312,7 +313,7 @@ bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     _inputs[1] = buffer->_in._buffer[1].data();
     _outputs[0] = buffer->_out._buffer[0].data();
     _outputs[1] = buffer->_out._buffer[1].data();
-    
+
     _audioIn.channel_count = buffer->_in.getNchannels();
     _audioOut.channel_count = buffer->_in.getNchannels();
 
@@ -327,16 +328,17 @@ bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     try {
         clap_process_status status = _plugin->process(_plugin, &_process);
         if (status == CLAP_PROCESS_ERROR) {
-            logger->error("process error");
+            gErrorWindow->show(std::string("Plack plugin render return error ") + std::to_string(status));
             return false;
         }
     } catch (const std::exception& e) {
         // 標準例外をキャッチ
-        logger->error("Standard exception: {}", e.what());
+        gErrorWindow->show("Plack plugin render failed!", e);
         return false;
     } catch (...) {
         // その他すべての例外をキャッチ
         logger->error("Unknown exception caught");
+        gErrorWindow->show("Plack plugin render failed!\n\nUnknown error.");
         return false;
     }
     buffer->_out._constantp.clear();

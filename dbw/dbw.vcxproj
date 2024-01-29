@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;..\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -104,7 +104,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;..\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;..\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -140,7 +140,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;..\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:c++20 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -159,7 +159,10 @@
     <ClInclude Include="..\.imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="AudioBuffer.h" />
+    <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Column.h" />
+    <ClInclude Include="ErrorWindow.h" />
+    <ClInclude Include="GainModule.h" />
     <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="ProcessBuffer.h" />
     <ClInclude Include="AudioEngine.h" />
@@ -190,7 +193,10 @@
     <ClCompile Include="..\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\imgui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
+    <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Column.cpp" />
+    <ClCompile Include="ErrorWindow.cpp" />
+    <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />
     <ClCompile Include="AudioEngine.cpp" />

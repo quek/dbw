@@ -23,6 +23,7 @@ public:
     void addTrack();
     void changeMaxLine();
     void scanPlugin();
+    void setStatusMessage(std::string message);
 
     std::unique_ptr<Project> _project;
     AudioEngine* _audioEngine;
@@ -43,5 +44,8 @@ public:
     PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<MasterTrack> _masterTrack;
+
+private:
+    std::string _statusMessage = "";
 };
 

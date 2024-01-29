@@ -32,6 +32,7 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 
 #include "Composer.h"
+#include "ErrorWindow.h"
 #include "PluginHost.h"
 #include "util.h"
 #include "AudioEngine.h"
@@ -184,6 +185,7 @@ int main(int, char**)
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
         composer.render();
+        gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)

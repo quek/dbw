@@ -13,4 +13,5 @@ std::string generateUniqueId();
 std::string GetExecutablePath();
 std::filesystem::path getOpenFileName();
 std::filesystem::path projectDir();
+std::string yyyyMmDdHhMmSs();
 std::filesystem::path userDir();

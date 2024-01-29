@@ -12,7 +12,7 @@ std::queue<const clap_host*> gClapRequestCallbackQueue;
 std::mutex gClapRequestCallbackQueueMutex;
 
 std::filesystem::path configDir() {
-    auto dir =  userDir() / "config";
+    auto dir = userDir() / "config";
     std::filesystem::create_directories(dir);
     return dir;
 }
@@ -45,7 +45,7 @@ std::string GetExecutablePath() {
 
 std::filesystem::path getOpenFileName() {
     OPENFILENAME ofn;
-    wchar_t szFile[1024] = {0};
+    wchar_t szFile[1024] = { 0 };
 
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
@@ -68,6 +68,15 @@ std::filesystem::path getOpenFileName() {
 
 std::filesystem::path projectDir() {
     return userDir() / "projects";
+}
+
+std::string yyyyMmDdHhMmSs() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_c);
+    std::stringstream ss;
+    ss << std::put_time(&now_tm, "%Y/%m/%d %H:%M:%S");
+    return  ss.str();
 }
 
 std::filesystem::path userDir() {

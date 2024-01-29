@@ -1,21 +1,25 @@
 #include "Composer.h"
 #include <cstdlib>
 #include <map>
+#include <ranges>
 #include <sstream>
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "AudioEngine.h"
 #include "Column.h"
 #include "Command.h"
+#include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "Line.h"
 #include "Project.h"
 #include "logger.h"
 #include "Track.h"
+#include "util.h"
 
 Composer::Composer(AudioEngine* audioEngine) :
     _audioEngine(audioEngine),
     _commandManager(this),
+    _pluginManager(this),
     _project(std::make_unique<Project>("noname", this)),
     _masterTrack(std::make_unique<MasterTrack>(this)) {
     addTrack();
@@ -63,6 +67,10 @@ void Composer::scanPlugin() {
     _pluginManager.scan();
 }
 
+void Composer::setStatusMessage(std::string message) {
+    _statusMessage = message;
+}
+
 void Composer::changeMaxLine() {
     for (auto track = _tracks.begin(); track != _tracks.end(); ++track) {
         (*track)->changeMaxLine(_maxLine);
@@ -78,19 +86,17 @@ public:
     }
     void execute(Composer* composer) override {
         std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
-        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
-             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
-            (*line)->_columns.push_back(std::move(*column));
+        for (auto [line, column] : std::views::zip(_track->_lines, _columns)) {
+            line->_columns.push_back(std::move(column));
         }
         _track->_ncolumns++;
         _track->_lastKeys.push_back(0);
     }
     void undo(Composer* composer) override {
         std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
-        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
-             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
-            (*column) = std::move((*line)->_columns.back());
-            (*line)->_columns.pop_back();
+        for (auto [line, column] : std::views::zip(_track->_lines, _columns)) {
+            column = std::move(line->_columns.back());
+            line->_columns.pop_back();
         }
         _track->_ncolumns--;
         _track->_lastKeys.pop_back();
@@ -108,19 +114,17 @@ public:
     }
     void execute(Composer* composer) override {
         std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
-        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
-             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
-            (*column) = std::move((*line)->_columns.back());
-            (*line)->_columns.pop_back();
+        for (auto [line, column] : std::views::zip( _track->_lines, _columns)) {
+            column = std::move(line->_columns.back());
+            line->_columns.pop_back();
         }
         _track->_ncolumns--;
         _track->_lastKeys.pop_back();
     }
     void undo(Composer* composer) override {
         std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
-        for (auto [line, column] = std::pair{ _track->_lines.begin(), _columns.begin() };
-             line != _track->_lines.end() && column != _columns.end(); ++line, ++column) {
-            (*line)->_columns.push_back(std::move(*column));
+        for (auto [line, column] : std::views::zip( _track->_lines, _columns)) {
+            line->_columns.push_back(std::move(column));
         }
         _columns.clear();
         _track->_ncolumns++;
@@ -157,11 +161,13 @@ void Composer::render() {
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
         if (ImGui::Button("Loop")) {
             _looping = false;
+            gErrorWindow->show("Stop loop...\nHello World!\naaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccceeeeeeeeeeeeeeeeeeeeeeeee  dflaksdjf  lskdfjsda  as;ldkfjasdklf alfs;kjsadlkfa asd;flkjsadl;kfjasd;l asdlkfjsadlkf sadfklsdfjla asdfasdf");
         }
         ImGui::PopStyleColor(3);
     } else {
         if (ImGui::Button("Loop")) {
             _looping = true;
+            gErrorWindow->show("Start loop...");
         }
     }
     ImGui::SameLine();
@@ -205,6 +211,7 @@ void Composer::render() {
     ImGui::SameLine();
     if (ImGui::Button("Save")) {
         _project->save();
+        setStatusMessage(std::string("Project is saved ") + yyyyMmDdHhMmSs());
     }
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
@@ -317,6 +324,7 @@ void Composer::render() {
         addTrack();
     }
 
+    ImGui::Text(_statusMessage.c_str());
 
     {
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {

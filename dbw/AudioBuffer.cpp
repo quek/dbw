@@ -1,17 +1,14 @@
 #include "AudioBuffer.h"
+#include <ranges>
 #include "logger.h"
 
 AudioBuffer::AudioBuffer() : _framesPerBuffer(0), _nchannels(0) {
 }
 
 void AudioBuffer::add(const AudioBuffer& other) {
-    for (auto [a, b] = std::pair{ _buffer.begin(), other._buffer.begin() };
-         a != _buffer.end() && b != other._buffer.end();
-         ++a, ++b) {
-        for (auto [aa, bb] = std::pair{ a->begin(), b->begin() };
-             aa != a->end() && bb != b->end();
-             ++aa, ++bb) {
-            (*aa) += (*bb);
+    for (auto [a, b] : std::views::zip(_buffer, other._buffer)) {
+        for (auto [aa, bb] : std::views::zip(a, b)) {
+            aa += bb;
         }
     }
 }
@@ -39,7 +36,7 @@ void AudioBuffer::copyTo(float** buffer, unsigned long framesPerBuffer, int ncha
         if (_constantp[i]) {
             std::fill_n(buffer[i], framesPerBuffer, _buffer[i][0]);
         } else {
-            std::copy(_buffer[i].begin(), _buffer[i].end(), buffer[i]);
+            std::ranges::copy(_buffer[i], buffer[i]);
         }
     }
 }

@@ -42,25 +42,23 @@ void Project::open() {
          trackElement != nullptr;
          trackElement = trackElement->NextSiblingElement("Track")) {
         std::string name = trackElement->Attribute("name");
-        Track* track = new Track(name, _composer);
-        _composer->_tracks.push_back(std::unique_ptr<Track>(track));
+        Track* track;
+        if (strcmp(trackElement->Attribute("id"), "MASTER") == 0) {
+            MasterTrack* masterTrack = new MasterTrack(_composer);
+            _composer->_masterTrack.reset(masterTrack);
+            track = masterTrack;
+        } else {
+            track = new Track(name, _composer);
+            _composer->_tracks.push_back(std::unique_ptr<Track>(track));
+        }
         for (auto deviceElement = trackElement->FirstChildElement("Channel")->FirstChildElement("Devices")->FirstChildElement();
              deviceElement != nullptr;
              deviceElement = deviceElement->NextSiblingElement()) {
             if (deviceElement) {
-                if (strcmp(deviceElement->Name(), "ClapPlugin") == 0) {
-                    auto deviceId = deviceElement->Attribute("deviceID");
-                    auto plugin = _composer->_pluginManager.findPlugin(deviceId);
-                    if (plugin != nullptr) {
-                        PluginHost* pluginHost = new PluginHost(track);
-                        pluginHost->load((*plugin)["path"].get<std::string>(), (*plugin)["index"].get<uint32_t>());
-                        Module* module = new PluginModule(pluginHost->_name, track, pluginHost);
-                        track->_modules.push_back(std::unique_ptr<Module>(module));
-                        auto state = deviceElement->FirstChildElement("State");
-                        pluginHost->_statePath = state->Attribute("path");
-                        pluginHost->loadState();
-                        module->start();
-                    }
+                Module* module = _composer->_pluginManager.create(deviceElement, track);
+                if (module != nullptr) {
+                    track->_modules.push_back(std::unique_ptr<Module>(module));
+                    module->start();
                 }
             }
         }
@@ -82,6 +80,7 @@ void Project::open() {
                     line->_columns.push_back(std::make_unique<Column>(line));
                 }
                 (*track)->_ncolumns++;
+                (*track)->_lastKeys.push_back(0);
             }
 
 
@@ -100,7 +99,7 @@ void Project::open() {
                         auto& column = line->_columns.back();
                         column->_note = Midi::OFF;
                         double remainder = std::fmod(endTime, 1 / lpb);
-                        unsigned char delay =static_cast<unsigned char>(remainder / (1 / lpb / 0x100));
+                        unsigned char delay = static_cast<unsigned char>(remainder / (1 / lpb / 0x100));
                         column->_delay = delay;
                     }
                 }
@@ -157,21 +156,9 @@ void Project::save() {
         auto* structure = project->InsertNewChildElement("Structure");
         for (int i = 0; i < _composer->_tracks.size(); ++i) {
             Track* track = _composer->_tracks[i].get();
-            auto* trackElement = structure->InsertNewChildElement("Track");
-            trackElement->SetAttribute("id", std::format("track{}", i).c_str());
-            trackElement->SetAttribute("name", track->_name.c_str());
-            trackElement->SetAttribute("contentType", "notes");
-            trackElement->SetAttribute("loaded", true);
-            {
-                auto* channel = trackElement->InsertNewChildElement("Channel");
-                {
-                    auto* devices = channel->InsertNewChildElement("Devices");
-                    for (auto module = track->_modules.begin(); module != track->_modules.end(); ++module) {
-                        devices->InsertEndChild((*module)->dawProject(&doc));
-                    }
-                }
-            }
+            writeTrack(doc, structure, track, i);
         }
+        writeTrack(doc, structure, (Track*)(_composer->_masterTrack.get()), "MASTER");
     }
     {
         auto* arrangement = project->InsertNewChildElement("Arrangement");
@@ -241,4 +228,25 @@ std::filesystem::path Project::projectDir() const {
 
 std::filesystem::path Project::projectXml() const {
     return projectDir() / "project.xml";
+}
+
+void Project::writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, int index) {
+    writeTrack(doc, structure, track, std::format("track{}", index).c_str());
+}
+
+void Project::writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, const char* id) {
+    auto* trackElement = structure->InsertNewChildElement("Track");
+    trackElement->SetAttribute("id", id);
+    trackElement->SetAttribute("name", track->_name.c_str());
+    trackElement->SetAttribute("contentType", "notes");
+    trackElement->SetAttribute("loaded", true);
+    {
+        auto* channel = trackElement->InsertNewChildElement("Channel");
+        {
+            auto* devices = channel->InsertNewChildElement("Devices");
+            for (auto module = track->_modules.begin(); module != track->_modules.end(); ++module) {
+                devices->InsertEndChild((*module)->dawProject(&doc));
+            }
+        }
+    }
 }

@@ -3,8 +3,10 @@
 #include <stack>
 #include <memory>
 #include <queue>
+#include "Module.h"
 
 class Composer;
+class Track;
 
 class Command {
 public:
@@ -54,3 +56,11 @@ private:
     P _lastValue;
 };
 
+class AddModuleCommand : public Command {
+public:
+    AddModuleCommand(Track* track, Module* module) : _track(track), _module(module) {}
+    void execute(Composer* composer) override;
+    void undo(Composer* composer) override;
+    Track* _track;
+    std::unique_ptr<Module> _module;
+};
