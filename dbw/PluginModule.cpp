@@ -32,7 +32,7 @@ tinyxml2::XMLElement* PluginModule::dawProject(tinyxml2::XMLDocument* doc) {
         enabled->SetAttribute("value", true);
     }
     {
-        auto* state= element->InsertNewChildElement("State");
+        auto* state = element->InsertNewChildElement("State");
         state->SetAttribute("path", _pluginHost->_statePath.string().c_str());
         _pluginHost->saveState();
     }
@@ -43,20 +43,32 @@ tinyxml2::XMLElement* PluginModule::dawProject(tinyxml2::XMLDocument* doc) {
 void PluginModule::openGui() {
     _pluginHost->openGui();
     Module::openGui();
-};
+}
 
 void PluginModule::closeGui() {
     _pluginHost->closeGui();
     Module::closeGui();
-};
+}
+
+void PluginModule::renderContent() {
+    if (_didOpenGui) {
+        if (ImGui::Button("Close")) {
+            closeGui();
+        }
+    } else {
+        if (ImGui::Button("Open")) {
+            openGui();
+        }
+    }
+}
 
 void PluginModule::start() {
     _pluginHost->start(
         _track->_composer->_audioEngine->_sampleRate,
         _track->_composer->_audioEngine->_bufferSize
     );
-};
+}
 
 void PluginModule::stop() {
     _pluginHost->stop();
-};
+}

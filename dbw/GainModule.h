@@ -8,7 +8,7 @@ public:
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
     virtual void loadParameters(tinyxml2::XMLElement* element) override;
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
-    void render() override;
+    void renderContent() override;
 private:
     float _gain;
 };

@@ -82,3 +82,13 @@ public:
     Track* _track;
     std::vector<std::unique_ptr<Column>> _columns;
 };
+class DeleteModuleCommand : public Command {
+public:
+    DeleteModuleCommand(Module* module);
+    void execute(Composer* composer) override;
+    void undo(Composer* composer) override;
+private:
+    Module* _module;
+    size_t _index = 0;
+    std::unique_ptr<Module> _moduleUniquePtr;
+};

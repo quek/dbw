@@ -3,7 +3,6 @@
 #include "Command.h"
 #include "Composer.h"
 #include "Line.h"
-#include "Module.h"
 #include "Track.h"
 
 CommandManager::CommandManager(Composer* composer) : _composer(composer) {
@@ -117,4 +116,32 @@ void DeleteColumnCommand::undo(Composer* composer) {
     _columns.clear();
     _track->_ncolumns++;
     _track->_lastKeys.push_back(0);
+}
+
+DeleteModuleCommand::DeleteModuleCommand(Module* module) : _module(module) {
+}
+
+void DeleteModuleCommand::execute(Composer* composer) {
+    _module->closeGui();
+    _module->stop();
+    auto modules = &_module->_track->_modules;
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    auto it = std::find_if(modules->begin(), modules->end(), [this](const std::unique_ptr<Module>& ptr) {
+        return ptr.get() == _module;
+    });
+
+    // 見つかった場合
+    if (it != modules->end()) {
+        _moduleUniquePtr = std::move(*it);
+        _index = std::distance(modules->begin(), it);
+        modules->erase(it);
+    }
+}
+
+void DeleteModuleCommand::undo(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    _module->_track->_modules.insert(_module->_track->_modules.begin() + _index, std::move(_moduleUniquePtr));
+
+    _module->start();
+    _module->openGui();
 }

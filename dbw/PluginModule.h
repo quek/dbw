@@ -12,6 +12,7 @@ public:
     ~PluginModule();
     void openGui() override;
     void closeGui() override;
+    void renderContent() override;
     void start() override;
     void stop() override;
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
