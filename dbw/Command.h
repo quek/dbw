@@ -17,7 +17,6 @@ public:
 };
 
 class CommandManager {
-
 public:
     CommandManager(Composer* composer);
     void executeCommand(Command* command);
@@ -83,4 +82,3 @@ public:
     Track* _track;
     std::vector<std::unique_ptr<Column>> _columns;
 };
-

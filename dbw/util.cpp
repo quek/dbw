@@ -1,8 +1,8 @@
-#include <chrono>
-#include <random>
-#include <iostream>
-#include <sstream>
 #include "util.h"
+#include <chrono>
+#include <iostream>
+#include <random>
+#include <sstream>
 #include <windows.h>
 #include <commdlg.h>
 #include <Shlwapi.h>
@@ -73,10 +73,11 @@ std::filesystem::path projectDir() {
 std::string yyyyMmDdHhMmSs() {
     auto now = std::chrono::system_clock::now();
     std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    std::tm now_tm = *std::localtime(&now_c);
+    std::tm now_tm;
+    localtime_s(&now_tm, &now_c);
     std::stringstream ss;
     ss << std::put_time(&now_tm, "%Y/%m/%d %H:%M:%S");
-    return  ss.str();
+    return ss.str();
 }
 
 std::filesystem::path userDir() {

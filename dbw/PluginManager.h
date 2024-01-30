@@ -7,8 +7,7 @@ class Composer;
 class Module;
 class Track;
 
-class PluginManager
-{
+class PluginManager {
 public:
     PluginManager(Composer* composer);
     Module* create(tinyxml2::XMLElement* element, Track* track);
@@ -21,4 +20,3 @@ public:
     std::string _query;
     Composer* _composer;
 };
-

@@ -228,4 +228,3 @@ void ComposerWindow::render() {
 void ComposerWindow::setStatusMessage(std::string message) {
     _statusMessage = message;
 }
-

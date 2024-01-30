@@ -118,4 +118,3 @@ void DeleteColumnCommand::undo(Composer* composer) {
     _track->_ncolumns++;
     _track->_lastKeys.push_back(0);
 }
-
