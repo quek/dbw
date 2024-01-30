@@ -31,12 +31,13 @@
 #include <spdlog/async.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
+#include "AudioEngine.h"
 #include "Composer.h"
+#include "ComposerWindow.h"
 #include "ErrorWindow.h"
+#include "GuiUtil.h"
 #include "PluginHost.h"
 #include "util.h"
-#include "AudioEngine.h"
-#include "GuiUtil.h"
 
 struct FrameContext
 {
@@ -143,6 +144,7 @@ int main(int, char**)
     std::unique_ptr<AudioEngine> audioEngine = std::make_unique<AudioEngine>();
 
     Composer composer(audioEngine.get());
+    ComposerWindow composerWindow(&composer);
     audioEngine->_composer = &composer;
     composer._pluginManager.load();
 
@@ -184,7 +186,8 @@ int main(int, char**)
         TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
-        composer.render();
+        composer._commandManager.run();
+        composerWindow.render();
         gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).

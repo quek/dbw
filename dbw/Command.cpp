@@ -1,9 +1,10 @@
 #include "AudioEngine.h"
+#include <mutex>
 #include "Command.h"
 #include "Composer.h"
+#include "Line.h"
 #include "Module.h"
 #include "Track.h"
-#include <mutex>
 
 CommandManager::CommandManager(Composer* composer) : _composer(composer) {
 }
@@ -66,3 +67,55 @@ void AddModuleCommand::undo(Composer* composer) {
     _module->closeGui();
     _module->stop();
 }
+
+AddColumnCommand::AddColumnCommand(Track* track) : _track(track) {
+    for (auto line = _track->_lines.begin(); line != _track->_lines.end(); ++line) {
+        _columns.push_back(std::make_unique<Column>((*line).get()));
+    }
+}
+
+void AddColumnCommand::execute(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    for (auto [line, column] : std::views::zip(_track->_lines, _columns)) {
+        line->_columns.push_back(std::move(column));
+    }
+    _track->_ncolumns++;
+    _track->_lastKeys.push_back(0);
+}
+
+void AddColumnCommand::undo(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    for (auto [line, column] : std::views::zip(_track->_lines, _columns)) {
+        column = std::move(line->_columns.back());
+        line->_columns.pop_back();
+    }
+    _track->_ncolumns--;
+    _track->_lastKeys.pop_back();
+}
+
+DeleteColumnCommand::DeleteColumnCommand(Track* track) : _track(track) {
+    for (auto i = 0; i < _track->_composer->_maxLine; ++i) {
+        _columns.push_back(std::make_unique<Column>(nullptr));
+    }
+}
+
+void DeleteColumnCommand::execute(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    for (auto [line, column] : std::views::zip(_track->_lines, _columns)) {
+        column = std::move(line->_columns.back());
+        line->_columns.pop_back();
+    }
+    _track->_ncolumns--;
+    _track->_lastKeys.pop_back();
+}
+
+void DeleteColumnCommand::undo(Composer* composer) {
+    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    for (auto [line, column] : std::views::zip(_track->_lines, _columns)) {
+        line->_columns.push_back(std::move(column));
+    }
+    _columns.clear();
+    _track->_ncolumns++;
+    _track->_lastKeys.push_back(0);
+}
+

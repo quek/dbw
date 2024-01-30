@@ -161,6 +161,7 @@
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Column.h" />
+    <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
     <ClInclude Include="MasterTrack.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Column.cpp" />
+    <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="MasterTrack.cpp" />

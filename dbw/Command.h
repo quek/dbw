@@ -3,6 +3,7 @@
 #include <stack>
 #include <memory>
 #include <queue>
+#include "Column.h"
 #include "Module.h"
 
 class Composer;
@@ -64,3 +65,22 @@ public:
     Track* _track;
     std::unique_ptr<Module> _module;
 };
+
+class AddColumnCommand : public Command {
+public:
+    AddColumnCommand(Track* track);
+    void execute(Composer* composer) override;
+    void undo(Composer* composer) override;
+    Track* _track;
+    std::vector<std::unique_ptr<Column>> _columns;
+};
+
+class DeleteColumnCommand : public Command {
+public:
+    DeleteColumnCommand(Track* track);
+    void execute(Composer* composer) override;
+    void undo(Composer* composer) override;
+    Track* _track;
+    std::vector<std::unique_ptr<Column>> _columns;
+};
+

@@ -16,7 +16,6 @@ class Composer
 public:
     Composer(AudioEngine* audioEngine);
     void process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime);
-    void render();
 
     void play();
     void stop();
@@ -46,6 +45,5 @@ public:
     std::unique_ptr<MasterTrack> _masterTrack;
 
 private:
-    std::string _statusMessage = "";
 };
 

@@ -49,6 +49,7 @@
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="GainModule.cpp" />
+    <ClCompile Include="ComposerWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -93,6 +94,7 @@
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="GainModule.h" />
+    <ClInclude Include="ComposerWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
