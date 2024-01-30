@@ -12,7 +12,9 @@ Module::~Module() {
 
 void Module::render() {
     ImGui::PushID(this);
-    if (ImGui::BeginChild("##window", ImVec2(0, 0), ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_MenuBar)) {
+    ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
+    if (ImGui::BeginChild("##window", ImVec2(0, 0), childFlags, windowFlags)) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {

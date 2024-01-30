@@ -16,4 +16,3 @@ private:
     float _lastRacksScrollX = 0.0f;
     bool _racksScrolled = false;
 };
-
