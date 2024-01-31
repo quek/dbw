@@ -7,6 +7,7 @@
 #include <commdlg.h>
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Comdlg32.lib")
 
 std::queue<const clap_host*> gClapRequestCallbackQueue;
 std::mutex gClapRequestCallbackQueueMutex;
@@ -16,7 +17,6 @@ std::filesystem::path configDir() {
     std::filesystem::create_directories(dir);
     return dir;
 }
-
 
 std::string generateUniqueId() {
     // 現在のタイムスタンプ取得

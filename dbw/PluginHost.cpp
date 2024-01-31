@@ -22,6 +22,13 @@ const clap_host_audio_ports PluginHost::_hostAudioPorts = {
    .rescan = [](const clap_host_t* /*host*/, uint32_t /*flags*/) {}
 };
 
+const clap_host_latency PluginHost::_hostLatency = {
+    .changed = [](const clap_host_t* host) {
+        PluginHost* self = (PluginHost*)host->host_data;
+        self->changeLatency();
+    }
+};
+
 PluginHost::PluginHost(Track* track) : _track(track) {
     _clap_host = clap_host{
         // clap_version_t clap_version; // initialized to CLAP_VERSION
@@ -142,7 +149,8 @@ bool PluginHost::load(const std::string path, uint32_t pluginIndex) {
         logger->info("audio ports result: {}", result);
     }
     _pluginState = static_cast<const clap_plugin_state*>(_plugin->get_extension(_plugin, CLAP_EXT_STATE));
-
+    _pluginLatency = static_cast<const clap_plugin_latency*>(_plugin->get_extension(_plugin, CLAP_EXT_LATENCY));
+    changeLatency();
 
     _name = desc->name;
 
@@ -284,6 +292,9 @@ const void* PluginHost::clapGetExtension(const clap_host_t* /* host */, const ch
     if (!std::strcmp(extension_id, CLAP_EXT_AUDIO_PORTS)) {
         return &_hostAudioPorts;
     }
+    if (!std::strcmp(extension_id, CLAP_EXT_LATENCY)) {
+        return &_hostLatency;
+    }
 
     return nullptr;
 }
@@ -306,6 +317,14 @@ void PluginHost::clapRequestCallback(const clap_host_t* host) noexcept {
     gClapRequestCallbackQueue.push(host);
 }
 
+void PluginHost::changeLatency() {
+    if (_pluginLatency != nullptr) {
+        _latency = _pluginLatency->get(_plugin);
+        if (_latency != 0) {
+            logger->debug("Latency {}", _latency);
+        }
+    }
+}
 
 bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     // とりあえず 0, 1 の 2ch で

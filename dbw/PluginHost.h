@@ -39,9 +39,6 @@ private:
     HWND _hwnd = {};
     WNDCLASSEXW _wndClass = {};
     clap_host _clap_host;
-    const clap_plugin_gui* _pluginGui = nullptr;
-    const clap_plugin_audio_ports* _pluginAudioPorts = nullptr;
-    const clap_plugin_state* _pluginState = nullptr;
     bool _processing = false;
 
     /* process stuff */
@@ -56,12 +53,18 @@ private:
 
     Track* _track;
 
-
     static const void* clapGetExtension(const clap_host_t* host, const char* extension_id) noexcept;
     static void clapRequestRestart(const clap_host_t* host) noexcept;
     static void clapRequestProcess(const clap_host_t* host) noexcept;
     static void clapRequestCallback(const clap_host_t* host) noexcept;
 
-    static const clap_host_audio_ports _hostAudioPorts;
-};
+    const clap_plugin_gui* _pluginGui = nullptr;
+    const clap_plugin_audio_ports* _pluginAudioPorts = nullptr;
+    const clap_plugin_state* _pluginState = nullptr;
+    const clap_plugin_latency* _pluginLatency = nullptr;
+    uint32_t _latency = 0;
 
+    static const clap_host_audio_ports _hostAudioPorts;
+    static const clap_host_latency _hostLatency;
+    void changeLatency();
+};
