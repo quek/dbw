@@ -11,6 +11,7 @@ public:
     Vst3Module(std::string name, Track* track);
     virtual ~Vst3Module();
     bool load(std::string path);
+    virtual bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     virtual void start() override;
     virtual void stop() override;
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;

@@ -11,6 +11,7 @@
 #include "pluginterfaces/base/ftypes.h"
 #include "pluginterfaces/vst/vsttypes.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
+#include "pluginterfaces/vst/ivstevents.h"
 
 Vst3Module::Vst3Module(std::string name, Track* track) : Module(name, track) {
 }
@@ -216,6 +217,12 @@ bool Vst3Module::load(std::string path) {
     }
 
     return true;
+}
+
+bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
+    Steinberg::Vst::Event e;
+    e.type = Steinberg::Vst::Event::kNoteOnEvent;
+    return false;
 }
 
 void Vst3Module::start() {

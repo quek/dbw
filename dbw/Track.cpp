@@ -11,6 +11,9 @@
 #include "PluginModule.h"
 #include "PluginHost.h"
 
+// TODO DELETE?
+#include "Vst3Module.h"
+
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _ncolumns(1) {
     _lastKeys.push_back(0);
     for (auto i = 0; i < composer->_maxLine; ++i) {
@@ -113,6 +116,14 @@ void Track::render() {
     }
     if (_openModuleSelector) {
         _composer->_pluginManager.openModuleSelector(this);
+    }
+
+    // TODO DELETE
+    if (ImGui::Button("VST3")) {
+        std::unique_ptr<Vst3Module> x(new Vst3Module("foo", _composer->_tracks.back().get()));
+        if (x->load("C:\\Program Files\\Common Files\\VST3\\DS Thorn.vst3")) {
+            _modules.emplace_back(std::move(x));
+        }
     }
 }
 

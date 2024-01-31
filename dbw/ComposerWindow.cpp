@@ -4,18 +4,11 @@
 #include "GuiUtil.h"
 #include "util.h"
 
-#include "Vst3Module.h"
-
 ComposerWindow::ComposerWindow(Composer* composer) : _composer(composer) {
 }
 
 void ComposerWindow::render() {
     ImGui::Begin("main window", nullptr, ImGuiWindowFlags_NoScrollbar);
-
-    if (ImGui::Button("VST3")) {
-        Vst3Module x("foo", _composer->_tracks.back().get());
-        x.load("C:\\Program Files\\Common Files\\VST3\\DS Thorn.vst3");
-    }
 
     if (_composer->_playing) {
         ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BUTTON_ON);
