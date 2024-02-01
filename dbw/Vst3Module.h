@@ -2,6 +2,8 @@
 #include "Module.h"
 #include <windows.h>
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
+// plugproviderで必要なPluginContext用のヘッダ
+#include "public.sdk/source/vst/hosting/hostclasses.h"
 // 読み込んだVST3ファイルから各クラスを取得するため必要
 // plugprovider.cppをプロジェクトに追加すること
 #include "public.sdk/source/vst/hosting/plugprovider.h"
@@ -17,8 +19,10 @@ public:
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
 
 private:
+    Steinberg::Vst::HostApplication _pluginContext;
     VST3::Hosting::Module::Ptr _module = nullptr;
     std::unique_ptr<Steinberg::Vst::PlugProvider> _plugProvider = nullptr;
     Steinberg::Vst::IAudioProcessor* _processor = nullptr;
     Steinberg::Vst::IComponent* _component = nullptr;
+    Steinberg::Vst::IEditController* _controller = nullptr;
 };

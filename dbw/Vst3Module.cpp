@@ -3,9 +3,6 @@
 #include "ErrorWindow.h"
 #include "logger.h"
 
-// plugproviderで必要なPluginContext用のヘッダ
-#include "public.sdk/source/vst/hosting/hostclasses.h"
-
 // ここからVSTプラグイン関係(音声処理クラスやパラメーター操作クラス)のヘッダ
 #include "pluginterfaces/base/funknown.h"
 #include "pluginterfaces/base/ftypes.h"
@@ -21,8 +18,8 @@ Vst3Module::~Vst3Module() {
     if (_processor) {
         _processor->release();
     }
-    if (_plugProvider && _component) {
-        _plugProvider->releasePlugIn(_component, nullptr);
+    if (_plugProvider) {
+        _plugProvider->releasePlugIn(_component, _controller);
     }
 }
 
@@ -31,8 +28,7 @@ bool Vst3Module::load(std::string path) {
     // PluginContextを作成・セットアップする
     // PluginContextはVST3プラグインがホストアプリ名やインターフェイスの対応状況を取得したり、
     // allocateMessage()でIMessageを取得するために必要。(詳細は割愛)
-    Steinberg::Vst::HostApplication pluginContext;
-    Steinberg::Vst::PluginContextFactory::instance().setPluginContext(&pluginContext);
+    Steinberg::Vst::PluginContextFactory::instance().setPluginContext(&_pluginContext);
 
     std::string error;
     _module = VST3::Hosting::Module::create(path, error);
@@ -93,6 +89,7 @@ bool Vst3Module::load(std::string path) {
     // ---------------------------------------------------------------------------
     // PlugProviderクラスから音声処理クラスを取得する。(音声処理クラスは初期化済み)
     _component = _plugProvider->getComponent();
+    _controller = _plugProvider->getController();
 
     // 音声処理クラスはIComponentクラスとIAudioProcessorクラスを継承している
     // PlugProviderクラスから取得できるのはIComponentクラスのみなので、
