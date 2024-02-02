@@ -223,8 +223,6 @@ bool Vst3Module::load(std::string path) {
 }
 
 bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
-    Steinberg::Vst::ProcessContext processContext = {};
-
     Steinberg::Vst::ProcessData processData;
     ///< processing mode - value of \ref ProcessModes
     processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;
@@ -277,7 +275,11 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
     Steinberg::Vst::EventList outputEventList = buffer->_eventIn.vst3OutputEvents();
     processData.outputEvents = (Steinberg::Vst::IEventList*)&outputEventList;
     ///< processing context (optional, but most welcome)
-    processData.processContext = &processContext;
+
+    // TODO
+    // Steinberg::Vst::ProcessContext processContext = {};
+    // processData.processContext = &processContext;
+    processData.processContext = nullptr;
 
     _processor->process(processData);
     return true;

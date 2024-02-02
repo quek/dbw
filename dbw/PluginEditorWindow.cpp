@@ -44,18 +44,20 @@ PluginEditorWindow::PluginEditorWindow(Module* module, uint32_t width, uint32_t 
     AdjustWindowRectEx(&rect, dwStyle, false, exStyle);
 
     _wndClass = WNDCLASSEXW{ sizeof(_wndClass), CS_CLASSDC, Vsit3EditorWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"VST3 Editor", nullptr };
-    ::RegisterClassExW(&_wndClass);
-    _hwnd = ::CreateWindowEx(exStyle, _wndClass.lpszClassName, L"VST3 Editor", dwStyle,
-                             300, 300, rect.right - rect.left, rect.bottom - rect.top,
-                             nullptr, nullptr, _wndClass.hInstance, nullptr);
+    RegisterClassExW(&_wndClass);
+    _hwnd = CreateWindowEx(exStyle, _wndClass.lpszClassName, L"VST3 Editor", dwStyle,
+                           300, 300, rect.right - rect.left, rect.bottom - rect.top,
+                           nullptr, nullptr, _wndClass.hInstance, nullptr);
     if (!_hwnd) {
         printf("CreateWindosW failed!");
         return;
     }
     SetWindowLongPtr(_hwnd, GWLP_USERDATA, (LONG_PTR)module);
 
-    ::ShowWindow(_hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(_hwnd);
+    SetWindowPos(_hwnd, HWND_TOP, 0, 0, 0, 0,
+                 SWP_NOSIZE | SWP_NOMOVE | SWP_NOCOPYBITS | SWP_SHOWWINDOW);
+    // ShowWindow(_hwnd, SW_SHOWDEFAULT);
+    // UpdateWindow(_hwnd);
 }
 
 PluginEditorWindow::~PluginEditorWindow() {
@@ -65,5 +67,4 @@ PluginEditorWindow::~PluginEditorWindow() {
 
 void PluginEditorWindow::setSize(uint32_t width, uint32_t height) {
     SetWindowPos(_hwnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
-    //SetWindowPos(_hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOCOPYBITS | SWP_SHOWWINDOW);
 }
