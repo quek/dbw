@@ -1,19 +1,23 @@
 #include "Vst3Module.h"
 #include <public.sdk/source/vst/hosting/module.h>
+#include <public.sdk/source/vst/hosting/parameterchanges.h>
+#include "imgui.h"
 #include "ErrorWindow.h"
 #include "logger.h"
 
 // ここからVSTプラグイン関係(音声処理クラスやパラメーター操作クラス)のヘッダ
 #include "pluginterfaces/base/funknown.h"
-#include "pluginterfaces/base/ftypes.h"
 #include "pluginterfaces/vst/vsttypes.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/ivstevents.h"
+#include <pluginterfaces/base/ftypes.h>
 
 Vst3Module::Vst3Module(std::string name, Track* track) : Module(name, track) {
+    FUNKNOWN_CTOR
 }
 
 Vst3Module::~Vst3Module() {
+    closeGui();
     stop();
     if (_processor) {
         _processor->release();
@@ -21,6 +25,8 @@ Vst3Module::~Vst3Module() {
     if (_plugProvider) {
         _plugProvider->releasePlugIn(_component, _controller);
     }
+
+    FUNKNOWN_DTOR
 }
 
 bool Vst3Module::load(std::string path) {
@@ -107,11 +113,11 @@ bool Vst3Module::load(std::string path) {
     logger->debug("==================== 音声入出力の情報 ====================");
 
     // 音声入力情報の取得
-    Steinberg::int32 audioInNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kInput);
-    logger->debug("音声入力バスは {} 個あります。", audioInNum);
+    _audioInNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kInput);
+    logger->debug("音声入力バスは {} 個あります。", _audioInNum);
 
     // 各音声入力バスの情報を取得する
-    for (int i = 0; i < audioInNum; i++) {
+    for (int i = 0; i < _audioInNum; i++) {
         // バスの情報(名称・チャンネル数など)を取得する
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kInput, i, busInfo);
@@ -124,10 +130,10 @@ bool Vst3Module::load(std::string path) {
     }
 
     // 音声出力情報の取得(音声入力と同様の処理なので詳細なコメントは割愛)
-    Steinberg::int32 audioOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kOutput);
-    logger->debug("音声出力バスは {} 個あります。", audioOutNum);
+    _audioOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kOutput);
+    logger->debug("音声出力バスは {} 個あります。", _audioOutNum);
 
-    for (int i = 0; i < audioOutNum; i++) {
+    for (int i = 0; i < _audioOutNum; i++) {
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kOutput, i, busInfo);
 
@@ -216,10 +222,65 @@ bool Vst3Module::load(std::string path) {
     return true;
 }
 
-bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
-    Steinberg::Vst::Event e;
-    e.type = Steinberg::Vst::Event::kNoteOnEvent;
-    return false;
+bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
+    Steinberg::Vst::ProcessContext processContext = {};
+
+    Steinberg::Vst::ProcessData processData;
+    ///< processing mode - value of \ref ProcessModes
+    processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;
+    ///< sample size - value of \ref SymbolicSampleSizes
+    processData.symbolicSampleSize = Steinberg::Vst::SymbolicSampleSizes::kSample32;
+    ///< number of samples to process
+    processData.numSamples = buffer->_framesPerBuffer;
+    ///< number of audio input busses
+    processData.numInputs = _audioInNum;
+    ///< number of audio output busses
+    processData.numOutputs = _audioOutNum;
+    ///< buffers of input busses
+    // TODO 複数バス対応
+    std::vector<float*> inputChannelBuffers32;
+    for (auto& x : buffer->_in._buffer) {
+        inputChannelBuffers32.push_back(x.data());
+    }
+    std::vector<Steinberg::Vst::AudioBusBuffers> inputAudioBusBuffers;
+    for (int i = 0; i < _audioInNum; ++i) {
+        auto x = Steinberg::Vst::AudioBusBuffers();
+        x.numChannels = buffer->_nchannels;
+        x.channelBuffers32 = inputChannelBuffers32.data();
+        inputAudioBusBuffers.push_back(x);
+    }
+    processData.inputs = inputAudioBusBuffers.data();
+    ///< buffers of output busses
+    // TODO 複数バス対応
+    std::vector<float*> outputChannelBuffers32;
+    for (auto& x : buffer->_out._buffer) {
+        outputChannelBuffers32.push_back(x.data());
+    }
+    std::vector<Steinberg::Vst::AudioBusBuffers> outputAudioBusBuffers;
+    for (int i = 0; i < _audioOutNum; ++i) {
+        auto x = Steinberg::Vst::AudioBusBuffers();
+        x.numChannels = buffer->_nchannels;
+        x.channelBuffers32 = outputChannelBuffers32.data();
+        outputAudioBusBuffers.push_back(x);
+    }
+    processData.outputs = outputAudioBusBuffers.data();
+    ///< incoming parameter changes for this block
+    Steinberg::Vst::ParameterChanges inputParams;
+    processData.inputParameterChanges = &inputParams;
+    ///< outgoing parameter changes for this block (optional)
+    Steinberg::Vst::ParameterChanges outputParams;
+    processData.outputParameterChanges = &outputParams;
+    ///< incoming events for this block (optional)
+    Steinberg::Vst::EventList inputEventList = buffer->_eventIn.vst3InputEvents();
+    processData.inputEvents = (Steinberg::Vst::IEventList*)&inputEventList;
+    ///< outgoing events for this block (optional)
+    Steinberg::Vst::EventList outputEventList = buffer->_eventIn.vst3OutputEvents();
+    processData.outputEvents = (Steinberg::Vst::IEventList*)&outputEventList;
+    ///< processing context (optional, but most welcome)
+    processData.processContext = &processContext;
+
+    _processor->process(processData);
+    return true;
 }
 
 void Vst3Module::start() {
@@ -240,6 +301,76 @@ void Vst3Module::stop() {
     }
 }
 
-tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* doc) {
+void Vst3Module::openGui() {
+    _plugView = _controller->createView(Steinberg::Vst::ViewType::kEditor);
+    if (_plugView->isPlatformTypeSupported(Steinberg::kPlatformTypeHWND) != Steinberg::kResultOk) {
+        logger->debug("VST3 plugin does not support HWND.");
+        return;
+    }
+
+    _plugView->setFrame(this);
+
+    Steinberg::ViewRect size;
+    _plugView->getSize(&size);
+
+    bool resizable = _plugView->canResize() == Steinberg::kResultTrue;
+    _editorWindow = std::make_unique<PluginEditorWindow>(this, size.getWidth(), size.getHeight(), resizable);
+    if (_plugView->attached(&_editorWindow->_hwnd, Steinberg::kPlatformTypeHWND) != Steinberg::kResultOk) {
+        logger->debug("VST3 attached failed!");
+        _editorWindow.reset();
+        return;
+    }
+    _editorWindow->setSize(size.getWidth(), size.getHeight());
+
+    Module::openGui();
+}
+
+void Vst3Module::closeGui() {
+    if (_plugView != nullptr) {
+        _plugView->removed();
+        _plugView->release();
+        _plugView = nullptr;
+    }
+    if (_editorWindow != nullptr) {
+        _editorWindow.reset();
+    }
+    Module::closeGui();
+}
+
+void Vst3Module::renderContent() {
+    if (_didOpenGui) {
+        if (ImGui::Button("Close")) {
+            closeGui();
+        }
+    } else {
+        if (ImGui::Button("Open")) {
+            openGui();
+        }
+    }
+}
+
+void Vst3Module::onResize(int width, int height) {
+    if (_plugView) {
+        Steinberg::ViewRect r{};
+        r.right = width;
+        r.bottom = height;
+        Steinberg::ViewRect r2{};
+        if (_plugView->getSize(&r2) == Steinberg::kResultTrue &&
+            (r.getWidth() != r2.getWidth() || r.getHeight() != r2.getHeight())) {
+            _plugView->onSize(&r);
+        }
+    }
+}
+
+tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* /*doc*/) {
     return nullptr;
+}
+
+IMPLEMENT_FUNKNOWN_METHODS(Vst3Module, Steinberg::IPlugFrame, Steinberg::IPlugFrame::iid)
+
+Steinberg::tresult PLUGIN_API Vst3Module::resizeView(Steinberg::IPlugView* /*view*/, Steinberg::ViewRect* newSize) {
+    if (_editorWindow != nullptr) {
+        _editorWindow->setSize(newSize->getWidth(), newSize->getHeight());
+    }
+    return Steinberg::kResultTrue;
 }

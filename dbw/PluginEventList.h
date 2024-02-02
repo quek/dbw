@@ -2,6 +2,8 @@
 #include <clap/clap.h>
 #include <vector>
 #include <memory>
+#include "pluginterfaces/vst/ivstevents.h"
+#include "public.sdk/source/vst/hosting/eventlist.h"
 
 class PluginEventList {
 public:
@@ -29,8 +31,10 @@ public:
     clap_input_events_t* clapInputEvents();
     clap_output_events_t* clapOutputEvents();
 
-
     std::vector<std::unique_ptr<clap_event_note>>_event_notes;
+
+    Steinberg::Vst::EventList vst3InputEvents();
+    Steinberg::Vst::EventList vst3OutputEvents();
 
 private:
     std::vector<const clap_event_header_t* > _events;

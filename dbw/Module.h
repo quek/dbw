@@ -17,6 +17,7 @@ public:
     virtual void render();
     virtual void renderContent() {}
     virtual bool process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) { return true; }
+    virtual void onResize(int width, int height) {}
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) = 0;
 
     Track* _track;

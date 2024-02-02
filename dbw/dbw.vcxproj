@@ -169,6 +169,7 @@
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
     <ClInclude Include="MasterTrack.h" />
+    <ClInclude Include="PluginEditorWindow.h" />
     <ClInclude Include="ProcessBuffer.h" />
     <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="Command.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
+    <ClCompile Include="PluginEditorWindow.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />
     <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="Command.cpp" />

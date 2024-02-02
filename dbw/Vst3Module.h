@@ -7,8 +7,10 @@
 // 読み込んだVST3ファイルから各クラスを取得するため必要
 // plugprovider.cppをプロジェクトに追加すること
 #include "public.sdk/source/vst/hosting/plugprovider.h"
+#include <pluginterfaces/gui/iplugview.h>
+#include "PluginEditorWindow.h"
 
-class Vst3Module : public Module {
+class Vst3Module : public Module, public Steinberg::IPlugFrame {
 public:
     Vst3Module(std::string name, Track* track);
     virtual ~Vst3Module();
@@ -16,7 +18,14 @@ public:
     virtual bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     virtual void start() override;
     virtual void stop() override;
+    virtual void openGui() override;
+    virtual void closeGui() override;
+    void renderContent() override;
+    virtual void onResize(int width, int height) override;
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
+
+    DECLARE_FUNKNOWN_METHODS
+    Steinberg::tresult PLUGIN_API resizeView(Steinberg::IPlugView* view, Steinberg::ViewRect* newSize) SMTG_OVERRIDE;
 
 private:
     Steinberg::Vst::HostApplication _pluginContext;
@@ -25,4 +34,10 @@ private:
     Steinberg::Vst::IAudioProcessor* _processor = nullptr;
     Steinberg::Vst::IComponent* _component = nullptr;
     Steinberg::Vst::IEditController* _controller = nullptr;
+    Steinberg::IPlugView* _plugView = nullptr;
+
+    Steinberg::int32 _audioInNum = 0;
+    Steinberg::int32 _audioOutNum = 0;
+
+    std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
 };
