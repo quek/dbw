@@ -19,4 +19,8 @@ public:
 
     std::string _query;
     Composer* _composer;
+
+private:
+    void scanClap();
+    void scanVst3();
 };

@@ -11,6 +11,7 @@
 #include "PluginModule.h"
 #include "Track.h"
 #include "util.h"
+#include "Vst3Module.h"
 
 std::map<std::string, std::function<BuiltinModule* (Track*)>> builtinModuleMap = {
     {"Gain", [](Track* track) -> BuiltinModule* { return new GainModule("Gain", track); }},
@@ -57,32 +58,8 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
 }
 
 void PluginManager::scan() {
-    std::string clapPluginDir = "C:\\Program Files\\Common Files\\CLAP";
-    std::vector<std::string> pluginPaths;
-
-    try {
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(clapPluginDir)) {
-            if (!entry.is_directory() && entry.path().extension() == ".clap") {
-                pluginPaths.push_back(entry.path().string());
-            }
-        }
-    } catch (const std::filesystem::filesystem_error& e) {
-        // ディレクトリの探索中にエラーが発生した場合のエラー処理
-        logger->error("Filesystem error: {}", e.what());
-    }
-
-    _plugins.clear();
-    for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
-        auto x = PluginHost::scan(*i);
-        for (auto p = x.begin(); p != x.end(); ++p) {
-            _plugins["clap"].push_back(*p);
-        }
-    }
-
-    auto path = configDir() / "plugin.json";
-    std::ofstream configFile(path);
-    configFile << _plugins.dump(2) << std::endl;
-    configFile.close();
+    scanClap();
+    scanVst3();
 }
 
 void PluginManager::load() {
@@ -157,3 +134,58 @@ nlohmann::json* PluginManager::findPlugin(const std::string deviceId) {
     return nullptr;
 }
 
+void PluginManager::scanClap() {
+    std::string clapPluginDir = "C:\\Program Files\\Common Files\\CLAP";
+    std::vector<std::string> pluginPaths;
+
+    try {
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(clapPluginDir)) {
+            if (!entry.is_directory() && entry.path().extension() == ".clap") {
+                pluginPaths.push_back(entry.path().string());
+            }
+        }
+    } catch (const std::filesystem::filesystem_error& e) {
+        // ディレクトリの探索中にエラーが発生した場合のエラー処理
+        logger->error("Filesystem error: {}", e.what());
+    }
+
+    _plugins["clap"] = nlohmann::json::array();
+    for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
+        auto x = PluginHost::scan(*i);
+        for (auto p = x.begin(); p != x.end(); ++p) {
+            _plugins["clap"].push_back(*p);
+        }
+    }
+
+    auto path = configDir() / "plugin.json";
+    std::ofstream configFile(path);
+    configFile << _plugins.dump(2) << std::endl;
+    configFile.close();
+}
+
+void PluginManager::scanVst3() {
+    std::string pluginDir = "C:\\Program Files\\Common Files\\VST3";
+    std::vector<std::string> pluginPaths;
+
+    try {
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(pluginDir)) {
+            if (!entry.is_directory() && entry.path().extension() == ".vst3") {
+                pluginPaths.push_back(entry.path().string());
+            }
+        }
+    } catch (const std::filesystem::filesystem_error& e) {
+        // ディレクトリの探索中にエラーが発生した場合のエラー処理
+        logger->error("Filesystem error: {}", e.what());
+    }
+
+    _plugins["vst3"] = nlohmann::json::array();
+    for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
+        auto x = Vst3Module::scan(*i);
+        _plugins["vst3"].push_back(x);
+    }
+
+    auto path = configDir() / "plugin.json";
+    std::ofstream configFile(path);
+    configFile << _plugins.dump(2) << std::endl;
+    configFile.close();
+}

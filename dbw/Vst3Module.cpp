@@ -363,6 +363,52 @@ void Vst3Module::onResize(int width, int height) {
     }
 }
 
+nlohmann::json Vst3Module::scan(const std::string path) {
+    nlohmann::json plugins;
+    plugins["path"] = path;
+
+    std::string error;
+    auto module = VST3::Hosting::Module::create(path, error);
+    if (!module) {
+        gErrorWindow->show(error);
+        return false;
+    }
+
+    VST3::Hosting::PluginFactory factory = module->getFactory();
+    VST3::Hosting::FactoryInfo factoryInfo = factory.info();
+    plugins["Factory Info"]["Vendor"] = factoryInfo.vendor();
+    plugins["Factory Info"]["URL"] = factoryInfo.url();
+    plugins["Factory Info"]["E-Mail"] = factoryInfo.email();
+    plugins["Factory Info"]["Flags"]["Unicode"] =
+        (factoryInfo.flags() & Steinberg::PFactoryInfo::FactoryFlags::kUnicode) != 0;
+    plugins["Factory Info"]["Flags"]["Classes Discardable"] = factoryInfo.classesDiscardable();
+    plugins["Factory Info"]["Flags"]["Component Non Discardable"] = factoryInfo.componentNonDiscardable();
+
+    std::vector<VST3::Hosting::ClassInfo> audioClassInfo;
+    for (VST3::Hosting::ClassInfo classInfo : factory.classInfos()) {
+        if (classInfo.category() == "Audio Module Class") {
+            plugins["name"] = classInfo.name();
+            plugins["id"] = classInfo.ID().toString();
+        }
+        nlohmann::json json;
+        json["CID"] = classInfo.ID().toString();
+        json["Category"] = classInfo.category();
+        json["Name"] = classInfo.name();
+        json["Vendor"] = classInfo.vendor();
+        json["Version"] = classInfo.version();
+        json["SDKVersion"] = classInfo.sdkVersion();
+        auto& subCategories = classInfo.subCategories();
+        for (auto subCategory : subCategories) {
+            json["Sub Categories"].push_back(subCategory);
+        }
+        json["Class Flags"] = classInfo.classFlags();
+
+        plugins["Classes"].push_back(json);
+    }
+
+    return plugins;
+}
+
 tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* /*doc*/) {
     return nullptr;
 }

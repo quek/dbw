@@ -1,13 +1,14 @@
 #pragma once
-#include "Module.h"
 #include <windows.h>
-#include "pluginterfaces/vst/ivstaudioprocessor.h"
+#include <pluginterfaces/vst/ivstaudioprocessor.h>
 // plugproviderで必要なPluginContext用のヘッダ
-#include "public.sdk/source/vst/hosting/hostclasses.h"
+#include <public.sdk/source/vst/hosting/hostclasses.h>
 // 読み込んだVST3ファイルから各クラスを取得するため必要
 // plugprovider.cppをプロジェクトに追加すること
-#include "public.sdk/source/vst/hosting/plugprovider.h"
+#include <public.sdk/source/vst/hosting/plugprovider.h>
 #include <pluginterfaces/gui/iplugview.h>
+#include <json.hpp>
+#include "Module.h"
 #include "PluginEditorWindow.h"
 
 class Vst3Module : public Module, public Steinberg::IPlugFrame {
@@ -22,6 +23,7 @@ public:
     virtual void closeGui() override;
     void renderContent() override;
     virtual void onResize(int width, int height) override;
+    static nlohmann::json scan(const std::string path);
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
 
     DECLARE_FUNKNOWN_METHODS
