@@ -232,6 +232,7 @@
   <ItemGroup>
     <None Include="..\imgui\misc\debuggers\imgui.natstepfilter" />
     <None Include="..\README.txt" />
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\imgui\misc\debuggers\imgui.natvis" />

@@ -111,6 +111,7 @@
     <None Include="..\imgui\misc\debuggers\imgui.natstepfilter">
       <Filter>imgui</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

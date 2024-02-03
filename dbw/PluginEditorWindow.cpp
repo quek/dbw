@@ -43,8 +43,21 @@ PluginEditorWindow::PluginEditorWindow(Module* module, uint32_t width, uint32_t 
         dwStyle |= WS_SIZEBOX | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
     AdjustWindowRectEx(&rect, dwStyle, false, exStyle);
 
-    _wndClass = WNDCLASSEXW{ sizeof(_wndClass), CS_CLASSDC, Vsit3EditorWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"VST3 Editor", nullptr };
-    RegisterClassExW(&_wndClass);
+    // _wndClass = WNDCLASSEXW{ sizeof(_wndClass), CS_CLASSDC, Vsit3EditorWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"VST3 Editor", nullptr };
+    _wndClass = WNDCLASSEXW{
+        .cbSize = sizeof(_wndClass),
+        .style = CS_DBLCLKS,
+        .lpfnWndProc = Vsit3EditorWndProc,
+        .cbClsExtra = 0L,
+        .cbWndExtra = 0L,
+        .hInstance = GetModuleHandle(nullptr),
+        .hIcon = nullptr,
+        .hCursor = nullptr,
+        .hbrBackground = nullptr,
+        .lpszMenuName = nullptr,
+        .lpszClassName = L"VST3 Editor",
+        .hIconSm = nullptr };
+    RegisterClassEx(&_wndClass);
     _hwnd = CreateWindowEx(exStyle, _wndClass.lpszClassName, L"VST3 Editor", dwStyle,
                            300, 300, rect.right - rect.left, rect.bottom - rect.top,
                            nullptr, nullptr, _wndClass.hInstance, nullptr);

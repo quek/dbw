@@ -82,13 +82,12 @@ bool Vst3Module::load(std::string path) {
     // PlugProviderクラスはPluginFactoryクラスとClassInfoクラスから音声処理クラスを
     // 作成・初期化するクラス
     _plugProvider = std::make_unique<Steinberg::Vst::PlugProvider>(factory, audioClassInfo[0], true);
-
-    // PlugProviderクラスが正常に作成できたかチェック
     if (!_plugProvider) {
         // 読み込みに失敗したら終了
         logger->error("Error : PlugProviderクラスの作成に失敗");
         return false;
     }
+    _plugProvider->initialize();
 
     logger->debug("最初に見つかった音声処理クラス「{}」を作成・初期化しました。", audioClassInfo[0].name());
 
