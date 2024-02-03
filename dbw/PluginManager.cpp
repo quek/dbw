@@ -95,6 +95,27 @@ void PluginManager::openModuleSelector(Track* track) {
         }
     }
 
+    for (auto plugin : _plugins["vst3"]) {
+        auto q = _query.begin();
+        std::string name = plugin["name"].get<std::string>();
+        for (auto c = name.begin(); c != name.end() && q != _query.end(); ++c) {
+            if (std::tolower(*q) == std::tolower(*c)) {
+                ++q;
+            }
+        }
+        if (q == _query.end()) {
+            if (ImGui::Button(name.c_str())) {
+                track->_openModuleSelector = false;
+                auto name = plugin["name"].get<std::string>();
+                auto path = plugin["path"].get<std::string>();
+                auto module = new Vst3Module(name, track);
+                module->load(path);
+                // TODO UNDO
+                track->_modules.emplace_back(module);
+            }
+        }
+    }
+
     for (const auto& [name, fun] : builtinModuleMap) {
         auto q = _query.begin();
         for (auto c = name.begin(); c != name.end() && q != _query.end(); ++c) {
