@@ -37,6 +37,7 @@
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "PluginHost.h"
+#include "SceneMatrix.h"
 #include "util.h"
 
 struct FrameContext {
@@ -85,7 +86,7 @@ int main(int, char**) {
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"dbw", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"dbw", WS_OVERLAPPEDWINDOW, 100, 100, 1920, 1080, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd)) {
@@ -143,6 +144,7 @@ int main(int, char**) {
     ComposerWindow composerWindow(&composer);
     audioEngine->_composer = &composer;
     composer._pluginManager.load();
+    std::unique_ptr<SceneMatrix> sceneMatrix(new SceneMatrix(&composer));
 
     audioEngine->start();
 
@@ -182,6 +184,7 @@ int main(int, char**) {
 
         composer._commandManager.run();
         composerWindow.render();
+        sceneMatrix->render();
         gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
