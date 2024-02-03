@@ -316,7 +316,7 @@ void Vst3Module::openGui() {
 
     bool resizable = _plugView->canResize() == Steinberg::kResultTrue;
     _editorWindow = std::make_unique<PluginEditorWindow>(this, size.getWidth(), size.getHeight(), resizable);
-    if (_plugView->attached(&_editorWindow->_hwnd, Steinberg::kPlatformTypeHWND) != Steinberg::kResultOk) {
+    if (_plugView->attached(_editorWindow->_hwnd, Steinberg::kPlatformTypeHWND) != Steinberg::kResultOk) {
         logger->debug("VST3 attached failed!");
         _editorWindow.reset();
         return;
