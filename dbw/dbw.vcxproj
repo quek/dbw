@@ -164,11 +164,13 @@
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="BuiltinModule.h" />
+    <ClInclude Include="Clip.h" />
     <ClInclude Include="Column.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
     <ClInclude Include="MasterTrack.h" />
+    <ClInclude Include="Nameable.h" />
     <ClInclude Include="PluginEditorWindow.h" />
     <ClInclude Include="ProcessBuffer.h" />
     <ClInclude Include="AudioEngine.h" />
@@ -185,6 +187,9 @@
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PluginModule.h" />
     <ClInclude Include="Project.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneMatrix.h" />
+    <ClInclude Include="Sequence.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="util.h" />
@@ -203,11 +208,13 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
+    <ClCompile Include="Clip.cpp" />
     <ClCompile Include="Column.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
+    <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="PluginEditorWindow.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />
     <ClCompile Include="AudioEngine.cpp" />
@@ -224,6 +231,9 @@
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="PluginModule.cpp" />
     <ClCompile Include="Project.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneMatrix.cpp" />
+    <ClCompile Include="Sequence.cpp" />
     <ClCompile Include="tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="util.cpp" />

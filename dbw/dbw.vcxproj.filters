@@ -58,6 +58,11 @@
       <Filter>VST3</Filter>
     </ClCompile>
     <ClCompile Include="PluginEditorWindow.cpp" />
+    <ClCompile Include="SceneMatrix.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Clip.cpp" />
+    <ClCompile Include="Sequence.cpp" />
+    <ClCompile Include="Nameable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -105,6 +110,11 @@
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="Vst3Module.h" />
     <ClInclude Include="PluginEditorWindow.h" />
+    <ClInclude Include="SceneMatrix.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Clip.h" />
+    <ClInclude Include="Sequence.h" />
+    <ClInclude Include="Nameable.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
