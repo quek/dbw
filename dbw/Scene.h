@@ -1,14 +1,14 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "Clip.h"
+#include "Lane.h"
 
-class Track;
+class SceneMatrix;
 
 class Scene : public Nameable {
 public:
-    Scene(Track* track);
+    Scene(SceneMatrix* sceneMatrix);
 private:
-    Track* _track;
-    std::vector<std::unique_ptr<Clip>> _clips;
+    SceneMatrix* _sceneMatrix;
+    std::vector<std::unique_ptr<Lane>> _lanes;
 };

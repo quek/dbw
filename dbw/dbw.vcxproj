@@ -165,10 +165,12 @@
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
+    <ClInclude Include="ClipSlot.h" />
     <ClInclude Include="Column.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
+    <ClInclude Include="Lane.h" />
     <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="PluginEditorWindow.h" />
@@ -209,10 +211,12 @@
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />
+    <ClCompile Include="ClipSlot.cpp" />
     <ClCompile Include="Column.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
+    <ClCompile Include="Lane.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="PluginEditorWindow.cpp" />

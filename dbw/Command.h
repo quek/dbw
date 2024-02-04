@@ -5,15 +5,18 @@
 #include <queue>
 #include "Column.h"
 #include "Module.h"
+#include "Scene.h"
 
 class Composer;
 class Track;
 
 class Command {
 public:
+    Command(bool undoable = true);
     virtual ~Command() = default;
     virtual void execute(Composer* composer) = 0;
     virtual void undo(Composer* composer) = 0;
+    bool _undoable = true;
 };
 
 class CommandManager {

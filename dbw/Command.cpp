@@ -5,6 +5,9 @@
 #include "Line.h"
 #include "Track.h"
 
+Command::Command(bool undoable) : _undoable(undoable) {
+}
+
 CommandManager::CommandManager(Composer* composer) : _composer(composer) {
 }
 
@@ -20,7 +23,9 @@ void CommandManager::run() {
         std::shared_ptr<Command> command = _queue.front();
         _queue.pop();
         command->execute(_composer);
-        _undoStack.push(command);
+        if (command->_undoable) {
+            _undoStack.push(command);
+        }
         _redoStack = std::stack<std::shared_ptr<Command>>();
     }
 }

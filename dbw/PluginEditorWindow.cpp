@@ -35,7 +35,7 @@ LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-PluginEditorWindow::PluginEditorWindow(Module* module, uint32_t width, uint32_t height, bool resizable) : _module(module), _resizable(resizable) {
+PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bool resizable) : _module(module), _resizable(resizable) {
     RECT rect{ 0, 0, width, height };
     DWORD exStyle = WS_EX_APPWINDOW;
     DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;

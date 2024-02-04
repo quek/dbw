@@ -398,7 +398,7 @@ nlohmann::json Vst3Module::scan(const std::string path) {
         json["Version"] = classInfo.version();
         json["SDKVersion"] = classInfo.sdkVersion();
         auto& subCategories = classInfo.subCategories();
-        for (auto subCategory : subCategories) {
+        for (auto& subCategory : subCategories) {
             json["Sub Categories"].push_back(subCategory);
         }
         json["Class Flags"] = classInfo.classFlags();
