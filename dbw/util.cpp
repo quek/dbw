@@ -83,3 +83,7 @@ std::string yyyyMmDdHhMmSs() {
 std::filesystem::path userDir() {
     return std::filesystem::path(GetExecutablePath()) / "user";
 }
+
+std::filesystem::path systemDir() {
+    return std::filesystem::path(GetExecutablePath()) / "system";
+}

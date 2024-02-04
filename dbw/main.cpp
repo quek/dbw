@@ -132,6 +132,9 @@ int main(int, char**) {
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
+    ImWchar const glyph_ranges[] = { 0x0020, 0xfffd, 0, };
+    auto font = io.Fonts->AddFontFromFileTTF(std::filesystem::path(systemDir() / "font" / "NotoSansJP-Regular.ttf").string().c_str(), 16.0f, nullptr, glyph_ranges);
+    IM_ASSERT(font != nullptr);
 
     // Our state
     bool show_demo_window = true;

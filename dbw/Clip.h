@@ -5,6 +5,7 @@
 class Clip : public Nameable {
 public:
     void renderInScene();
+    void play();
 
 private:
     std::shared_ptr<Sequence> _sequences;
