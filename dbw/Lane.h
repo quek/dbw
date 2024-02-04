@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <map>
 #include <memory>
 #include "ClipSlot.h"
 #include "Nameable.h"
@@ -12,8 +13,8 @@ class Lane : public Nameable {
 public:
     Lane(Scene* scene);
     void render(Track* track);
-    Clip* findClip(Track* track);
+    std::unique_ptr<ClipSlot>& getClipSlot(Track* track);
 
     Scene* _scene;
-    std::vector<std::unique_ptr<ClipSlot>> _clipSlots;
+    std::map<Track*, std::unique_ptr<ClipSlot>> _clipSlots;
 };

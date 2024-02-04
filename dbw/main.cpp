@@ -36,6 +36,7 @@
 #include "ComposerWindow.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
+#include "PianoRoll.h"
 #include "PluginHost.h"
 #include "SceneMatrix.h"
 #include "util.h"
@@ -148,6 +149,7 @@ int main(int, char**) {
     audioEngine->_composer = &composer;
     composer._pluginManager.load();
     std::unique_ptr<SceneMatrix> sceneMatrix(new SceneMatrix(&composer));
+    gPianoRoll.reset(new PianoRoll());
 
     audioEngine->start();
 
@@ -188,6 +190,7 @@ int main(int, char**) {
         composer._commandManager.run();
         composerWindow.render();
         sceneMatrix->render();
+        gPianoRoll->render();
         gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).

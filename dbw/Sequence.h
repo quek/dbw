@@ -1,10 +1,13 @@
 #pragma once
-#include "Line.h"
+#include <memory>
+#include <vector>
 #include "Nameable.h"
+#include "Note.h"
 
 class Sequence : public Nameable {
+public:
+    Sequence();
+
 private:
-    int _ncolumns;
-    int _nlines;
-    std::vector<std::unique_ptr<Line>> _lines;
+    std::vector<std::unique_ptr<Note>> _notes;
 };

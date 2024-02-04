@@ -65,6 +65,8 @@
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="ClipSlot.cpp" />
     <ClCompile Include="Lane.cpp" />
+    <ClCompile Include="Note.cpp" />
+    <ClCompile Include="PianoRoll.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -119,6 +121,8 @@
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="ClipSlot.h" />
     <ClInclude Include="Lane.h" />
+    <ClInclude Include="Note.h" />
+    <ClInclude Include="PianoRoll.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
