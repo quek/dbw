@@ -8,7 +8,9 @@ class SceneMatrix;
 class Scene : public Nameable {
 public:
     Scene(SceneMatrix* sceneMatrix);
+
+    std::vector<std::unique_ptr<Lane>> _lanes;
+
 private:
     SceneMatrix* _sceneMatrix;
-    std::vector<std::unique_ptr<Lane>> _lanes;
 };

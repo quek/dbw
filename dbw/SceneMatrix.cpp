@@ -23,14 +23,13 @@ void SceneMatrix::render() {
             ImGui::TableSetColumnIndex(0);
             ImGui::TableHeader("#");
 
-            int i = 1;
+            int columnIndex = 0;
             for (auto& track : _composer->_tracks) {
-                ImGui::TableSetColumnIndex(i);
+                ImGui::TableSetColumnIndex(++columnIndex);
                 ImGui::PushID(track.get());
                 auto name = track->_name.c_str();
                 ImGui::TableHeader(name);
                 ImGui::PopID();
-                ++i;
             }
             ImGui::TableSetColumnIndex(static_cast<int>(_composer->_tracks.size() + 1));
             ImGui::PushID(_composer->_masterTrack.get());
@@ -41,6 +40,18 @@ void SceneMatrix::render() {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text(scene->_name.c_str());
+
+                columnIndex = 0;
+                for (const auto& track : _composer->_tracks) {
+                    ImGui::TableSetColumnIndex(++columnIndex);
+                    for (const auto& lane : scene->_lanes) {
+                        lane->render(track.get());
+                    }
+                }
+                ImGui::TableSetColumnIndex(++columnIndex);
+                for (const auto& lane : scene->_lanes) {
+                    lane->render(_composer->_masterTrack.get());
+                }
             }
             ImGui::EndTable();
         }

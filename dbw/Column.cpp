@@ -40,7 +40,6 @@ void Column::render() {
         if (_velocity > 0x7f) {
             _velocity = 0x7f;
         }
-
     }
     activep = ImGui::IsItemActive();
     if (_velocityEditing && !activep) {
