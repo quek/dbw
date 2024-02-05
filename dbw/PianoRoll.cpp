@@ -2,6 +2,7 @@
 #include <memory>
 #include "Grid.h"
 #include "Midi.h"
+#include "Note.h"
 
 std::unique_ptr<PianoRoll> gPianoRoll = nullptr;
 
@@ -87,7 +88,7 @@ void PianoRoll::render() {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         {
             if (ImGui::BeginChild("##Piano Roll Canvas",
-                                  ImVec2(0, 0),
+                                  ImVec2(0.0f, -22.0f),
                                   ImGuiChildFlags_None,
                                   ImGuiWindowFlags_HorizontalScrollbar)) {
                 ImVec2 windowPos = ImGui::GetWindowPos();
@@ -127,7 +128,7 @@ int PianoRoll::maxBar() {
     return 50;
 }
 
-void PianoRoll::renderBackgroud() {
+void PianoRoll::renderBackgroud() const {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollY = ImGui::GetScrollY();
@@ -194,7 +195,7 @@ void PianoRoll::renderKeyboard() {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     float scrollX = ImGui::GetScrollX();
     for (int i = 127; i >= 0; --i) {
-        auto note = gMidiNumToSym[i];
+        auto& note = gMidiNumToSym[i];
         auto mod = i % 12;
         if (mod == 1 || mod == 3 || mod == 6 || mod == 8 || mod == 10) {
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK);
@@ -233,30 +234,51 @@ void PianoRoll::renderTimeline() {
 
 void PianoRoll::handleCanvas() {
     ImGuiIO& io = ImGui::GetIO();
+    ImVec2& mousePos = io.MousePos;
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 windowSize = ImGui::GetWindowSize();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
     ImGui::SetCursorPos(ImVec2(KEYBOARD_WIDTH + scrollX + 10.0f, 100 + scrollY));
     ImGui::BeginGroup();
-    ImGui::Text("Mouser %f %f", io.MousePos.x, io.MousePos.y);
+    ImGui::Text("Mouse %f %f", mousePos.x, mousePos.y);
     ImGui::Text("GetWindowPos%f %f", windowPos.x, windowPos.y);
     ImGui::Text("GetWindowSize %f %f", windowSize.x, windowSize.y);
     ImGui::Text("GetScrollX/Y %f %f", scrollX, scrollY);
     ImGui::Text("Debug foo: %d", _state.foo);
-    ImGui::EndGroup();
 
-    if (windowPos <= io.MousePos && io.MousePos < windowPos + windowSize) {
+    if (windowPos <= mousePos && mousePos < windowPos + windowSize) {
         if (_state.foo == 0) {
             _state.foo = 1;
         }
         if (io.MouseDoubleClicked[0]) {
             _state.foo = 2;
         }
+        Note note = noteFromPos(mousePos);
     } else {
         _state.foo = 0;
     }
 
-    ImGui::SetCursorPos(ImVec2(1024, 1024));
-    ImGui::Text("Debug foo: %d", _state.foo);
+    ImGui::EndGroup();
+}
+
+Note PianoRoll::noteFromPos(ImVec2& pos) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    // double time = pos.x - windowPos.x - KEYBOARD_WIDTH - TIMELINE_START_OFFSET + scrollY;
+    ImVec2 canvasPos = toCanvasPos(pos);
+    float time = canvasPos.x;
+    uint16_t key = static_cast<uint16_t>(128 - canvasPos.y / KEY_HEIGHT);
+    ImGui::Text("time %f key %d %s", time, key, numberToNote(key).c_str());
+    return Note();
+}
+
+ImVec2 PianoRoll::toCanvasPos(ImVec2& pos) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    float x = (pos.x - windowPos.x - KEYBOARD_WIDTH - TIMELINE_START_OFFSET + scrollX) / _zoomX;
+    float y = (pos.y - windowPos.y - TIMELINE_HEIGHT + scrollY) / _zoomY;
+    return ImVec2(x, y);
 }
