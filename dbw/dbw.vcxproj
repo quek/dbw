@@ -170,6 +170,7 @@
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="Lane.h" />
     <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="Nameable.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Lane.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="Nameable.cpp" />

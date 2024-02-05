@@ -35,6 +35,7 @@
 #include "Composer.h"
 #include "ComposerWindow.h"
 #include "ErrorWindow.h"
+#include "Grid.h"
 #include "GuiUtil.h"
 #include "PianoRoll.h"
 #include "PluginHost.h"
@@ -142,8 +143,8 @@ int main(int, char**) {
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    Grid::init();
     std::unique_ptr<AudioEngine> audioEngine = std::make_unique<AudioEngine>();
-
     Composer composer(audioEngine.get());
     ComposerWindow composerWindow(&composer);
     audioEngine->_composer = &composer;
