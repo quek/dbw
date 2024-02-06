@@ -7,6 +7,7 @@
 class Clip;
 class Grid;
 class Note;
+struct Bounds;
 
 class PianoRoll {
 public:
@@ -24,6 +25,7 @@ private:
     void renderNotes();
     void renderTimeline();
 
+    Bounds boundOfNote(Note* note);
     void handleCanvas();
     Note* noteFromMousePos();
     double noteTimeFromMouserPos();
@@ -50,15 +52,12 @@ private:
         std::set<Note*> _selectedNotes;
         Note* _draggingNote = nullptr;
         bool _unselectClickedNoteIfMouserReleased = false;
-        NoteClickedPart _noteClickedPart;
+        NoteClickedPart _noteClickedPart = Middle;
+        bool _rangeSelecting = false;
 
         bool _consumedDoubleClick = false;
         bool _consumedClicked = false;
         void reset();
-
-        int foo;
-        int bar;
-        int baz;
     };
     State _state;
 };

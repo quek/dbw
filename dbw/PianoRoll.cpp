@@ -2,6 +2,7 @@
 #include <memory>
 #include "Clip.h"
 #include "Grid.h"
+#include "GuiUtil.h"
 #include "Midi.h"
 #include "Note.h"
 
@@ -21,48 +22,7 @@ ImU32 BACKGROUD_WHITE_KEY_COLOR = IM_COL32(0x22, 0x22, 0x22, 0x88);
 ImU32 BACKGROUD_BLACK_KEY_COLOR = IM_COL32(0x00, 0x00, 0x00, 0x88);
 ImU32 NOTE_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
 ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
-
-ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-
-ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs) {
-    lhs.x += rhs.x;
-    lhs.y += rhs.y;
-    return lhs;
-}
-
-ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y);
-}
-
-ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y);
-}
-
-bool operator==(const ImVec2& lhs, const ImVec2& rhs) {
-    return lhs.x == rhs.x && lhs.y == rhs.y;
-}
-
-bool operator!=(const ImVec2& lhs, const ImVec2& rhs) {
-    return !(lhs == rhs);
-}
-
-bool operator<(const ImVec2& lhs, const ImVec2& rhs) {
-    return lhs.x < rhs.x && lhs.y < rhs.y;
-}
-
-bool operator<=(const ImVec2& lhs, const ImVec2& rhs) {
-    return lhs.x <= rhs.x && lhs.y <= rhs.y;
-}
-
-bool operator>(const ImVec2& lhs, const ImVec2& rhs) {
-    return lhs.x > rhs.x && lhs.y > rhs.y;
-}
-
-bool operator>=(const ImVec2& lhs, const ImVec2& rhs) {
-    return lhs.x >= rhs.x && lhs.y >= rhs.y;
-}
+ImU32 RANGE_SELECTING_COLOR = IM_COL32(0x66, 0x22, 0x22, 0x88);
 
 PianoRoll::PianoRoll() {
     _grid = gGrids[1].get();
@@ -251,10 +211,11 @@ void PianoRoll::renderNotes() {
         drawList->AddRectFilled(pos1, pos2,
                                 noteColor,
                                 2.0f, ImDrawFlags_RoundCornersAll);
-        //auto label = numberToNote(note->_key) + " " + std::to_string(note->_time) + " " + std::to_string(note->_duration);
         auto label = numberToNote(note->_key);
         drawList->AddText(pos1 + ImVec2(2.0f, 0.0f), IM_COL32_WHITE, label.c_str());
-        if (pos1 <= mousePos && mousePos <= pos2) {
+
+        Bounds noteBounds(pos1, pos2);
+        if (noteBounds.contains(mousePos)) {
             if (!_state._draggingNote) {
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                     _state._unselectClickedNoteIfMouserReleased = io.KeyCtrl && _state._selectedNotes.contains(note.get());
@@ -288,6 +249,20 @@ void PianoRoll::renderNotes() {
 
         ImGui::PopID();
     }
+}
+
+Bounds PianoRoll::boundOfNote(Note* note) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    ImVec2 scrollPos(scrollX, scrollY);
+    float x1 = static_cast<float>(note->_time * BEAT_WIDTH * _zoomX + KEYBOARD_WIDTH + TIMELINE_START_OFFSET);
+    float y1 = (127 - note->_key) * KEY_HEIGHT * _zoomY + TIMELINE_HEIGHT;
+    float x2 = static_cast<float>(x1 + note->_duration * BEAT_WIDTH * _zoomX);
+    float y2 = y1 + KEY_HEIGHT * _zoomY;
+    ImVec2 pos1 = ImVec2(x1, y1) + windowPos - scrollPos + ImVec2(0.0f, 1.0f);
+    ImVec2 pos2 = ImVec2(x2, y2) + windowPos - scrollPos + ImVec2(0.0f, -1.0f);
+    return Bounds(pos1, pos2);
 }
 
 void PianoRoll::handleCanvas() {
@@ -363,11 +338,35 @@ void PianoRoll::handleCanvas() {
                 ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
             }
             if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+                // ノートのドラッグ解除
                 _state._draggingNote = nullptr;
+            }
+        } else if (_state._rangeSelecting) {
+            ImVec2 pos1 = io.MouseClickedPos[ImGuiMouseButton_Left];
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            drawList->AddRect(pos1, mousePos, RANGE_SELECTING_COLOR, 0.0f, ImDrawFlags_None, 3.0f);
+            _state._selectedNotes.clear();
+            Bounds bounds(pos1, mousePos);
+            for (auto& note : _clip->_sequence->_notes) {
+                Bounds noteBounds = boundOfNote(note.get());
+                if (bounds.overlaped(noteBounds)) {
+                    _state._selectedNotes.insert(note.get());
+                }
+            }
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+                // 範囲選択解除
+                _state._rangeSelecting = false;
             }
         } else {
             if (ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.1f)) {
-                _state._draggingNote = _state._clickedNote;
+                // ここがノートのドラッグの開始
+                if (!_state._selectedNotes.empty()) {
+                    // ノートの移動 or 長さ変更
+                    _state._draggingNote = _state._clickedNote;
+                } else {
+                    // 範囲選択
+                    _state._rangeSelecting = true;
+                }
             }
             if (!_state._consumedClicked && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 _state._selectedNotes.clear();
