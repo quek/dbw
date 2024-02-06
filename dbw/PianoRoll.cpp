@@ -317,6 +317,12 @@ void PianoRoll::handleCanvas() {
             Note* note = noteFromMousePos();
             if (note) {
                 _clip->_sequence->_notes.emplace_back(note);
+                if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                    _state._clickedNote = note;
+                    _state._selectedNotes.insert(note);
+                    _state._draggingNote = note;
+                    _state._noteClickedPart = Right;
+                }
             }
         }
 
