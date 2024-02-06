@@ -342,15 +342,26 @@ void PianoRoll::handleCanvas() {
                 _state._draggingNote = nullptr;
             }
         } else if (_state._rangeSelecting) {
+            // Ctrl でトグル、Shift で追加 Reason の仕様がいいと思う
             ImVec2 pos1 = io.MouseClickedPos[ImGuiMouseButton_Left];
             ImDrawList* drawList = ImGui::GetWindowDrawList();
             drawList->AddRect(pos1, mousePos, RANGE_SELECTING_COLOR, 0.0f, ImDrawFlags_None, 3.0f);
-            _state._selectedNotes.clear();
+            if (!io.KeyShift && !io.KeyCtrl) {
+                _state._selectedNotes.clear();
+            }
             Bounds bounds(pos1, mousePos);
             for (auto& note : _clip->_sequence->_notes) {
                 Bounds noteBounds = boundOfNote(note.get());
                 if (bounds.overlaped(noteBounds)) {
-                    _state._selectedNotes.insert(note.get());
+                    if (io.KeyCtrl) {
+                        if (_state._selectedNotes.contains(note.get())) {
+                            _state._selectedNotes.erase(note.get());
+                        } else {
+                            _state._selectedNotes.insert(note.get());
+                        }
+                    } else {
+                        _state._selectedNotes.insert(note.get());
+                    }
                 }
             }
             if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -360,23 +371,26 @@ void PianoRoll::handleCanvas() {
         } else {
             if (ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.1f)) {
                 // ここがノートのドラッグの開始
-                if (!_state._selectedNotes.empty()) {
+                if (!_state._selectedNotes.empty() && _state._clickedNote) {
                     // ノートの移動 or 長さ変更
                     _state._draggingNote = _state._clickedNote;
                 } else {
                     // 範囲選択
                     _state._rangeSelecting = true;
                 }
-            }
-            if (!_state._consumedClicked && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                _state._selectedNotes.clear();
+            } else if (!_state._consumedClicked) {
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !io.KeyCtrl && !io.KeyShift) {
+                    _state._selectedNotes.clear();
+                }
+                if (!ImGui::IsAnyMouseDown()) {
+                    _state._clickedNote = nullptr;
+                }
             }
         }
     }
     {   // FOR Debug
-        if (!_state._draggingNote) {
-            ImGui::Text("draggingNote nullptr");
-        }
+        ImGui::Text("draggingNote %p", _state._clickedNote);
+        ImGui::Text("draggingNote %p", _state._draggingNote);
         ImGui::EndGroup();
     }
 }
