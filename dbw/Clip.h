@@ -4,8 +4,9 @@
 
 class Clip : public Nameable {
 public:
+    Clip();
+    Clip(std::shared_ptr<Sequence> sequence);
     void renderInScene();
 
-private:
-    std::shared_ptr<Sequence> _sequences;
+    std::shared_ptr<Sequence> _sequence;
 };

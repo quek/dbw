@@ -10,7 +10,7 @@ SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
 
 void SceneMatrix::render() {
     if (ImGui::Begin("Scene Matrix")) {
-        int ncolumns = _composer->_tracks.size() + 2;
+        int ncolumns = static_cast<int>(_composer->_tracks.size() + 2);
         if (ImGui::BeginTable("Scene Matrix Table", ncolumns)) {
             ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize);

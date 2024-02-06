@@ -5,6 +5,8 @@
 #include "Line.h"
 #include "Track.h"
 
+CommandManager* gCommandManager = nullptr;
+
 Command::Command(bool undoable) : _undoable(undoable) {
 }
 

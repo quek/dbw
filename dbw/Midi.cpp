@@ -37,7 +37,7 @@ std::map<std::string, int> gMidiSymToNum = {
 };
 
 std::map<int, std::string> gMidiNumToSym = {
-        {NOTE_OFF, "OFF"},
+    {NOTE_OFF, "OFF"},
     {0, "C-1"}, {1, "C-1#"}, {1, "D-1b"}, {2, "D-1"}, {3, "D-1#"}, {3, "E-1b"}, {4, "E-1"},
     {5, "F-1"}, {6, "F-1#"}, {6, "G-1b"}, {7, "G-1"}, {8, "G-1#"}, {8, "A-1b"}, {9, "A-1"},
     {10, "A-1#"}, {10, "B-1b"}, {11, "B-1"},

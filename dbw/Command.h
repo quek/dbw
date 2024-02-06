@@ -5,7 +5,9 @@
 #include <queue>
 #include "Column.h"
 #include "Module.h"
-#include "Scene.h"
+
+class CommandManager;
+extern CommandManager* gCommandManager;
 
 class Composer;
 class Track;

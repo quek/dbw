@@ -20,6 +20,7 @@ Composer::Composer(AudioEngine* audioEngine) :
     _pluginManager(this),
     _project(std::make_unique<Project>("noname", this)),
     _masterTrack(std::make_unique<MasterTrack>(this)) {
+    gCommandManager = &_commandManager;
     addTrack();
 }
 
@@ -95,7 +96,6 @@ public:
     }
 
     std::unique_ptr<Track> _track;
-
 };
 
 void Composer::addTrack() {
