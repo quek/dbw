@@ -269,32 +269,24 @@ void PianoRoll::renderNotes() {
                         _state._selectedNotes.erase(_state._clickedNote);
                     }
                     _state._unselectClickedNoteIfMouserReleased = false;
-                } else if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                }
+                if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                     gCommandManager->executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), note.get()));
                     _state._consumedDoubleClick = true;
+                }
+                if (mousePos.x - pos1.x <= 5) {
+                    _state._noteClickedPart = Left;
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                } else if (pos2.x - mousePos.x <= 5) {
+                    _state._noteClickedPart = Right;
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                } else {
+                    _state._noteClickedPart = Middle;
                 }
             }
         }
 
         ImGui::PopID();
-    }
-}
-
-void PianoRoll::renderTimeline() {
-    float leftPadding = 2.0f;
-    float scrollY = ImGui::GetScrollY();
-    float lastX = -GRID_SKIP_WIDTH;
-    for (int i = 0; i < maxBar(); ++i) {
-        float x = (BEAT_WIDTH * 4 * i * _zoomX) + KEYBOARD_WIDTH + TIMELINE_START_OFFSET;
-        if (x - lastX < GRID_SKIP_WIDTH) {
-            continue;
-        } else {
-            lastX = x;
-        }
-        float y = scrollY;
-        ImVec2 pos = ImVec2(x + leftPadding, y);
-        ImGui::SetCursorPos(pos);
-        ImGui::Text(std::to_string(i + 1).c_str());
     }
 }
 
@@ -330,17 +322,39 @@ void PianoRoll::handleCanvas() {
 
         if (_state._draggingNote) {
             float time = noteTimeFromMouserPos();
-            int16_t key = noteKeyFromMouserPos();
-            float timeDelta = time - _state._draggingNote->_time;
-            int16_t keyDelta = key - _state._draggingNote->_key;
-            _state._draggingNote->_time = time;
-            _state._draggingNote->_key = key;
-            ImGui::Text("draggingNote %p time %f key %s", _state._draggingNote, time, numberToNote(key).c_str());
-            for (auto note : _state._selectedNotes) {
-                if (note != _state._draggingNote) {
-                    note->_time += timeDelta;
-                    note->_key += keyDelta;
+            if (_state._noteClickedPart == Middle) {
+                float timeDelta = time - _state._draggingNote->_time;
+                int16_t key = noteKeyFromMouserPos();
+                int16_t keyDelta = key - _state._draggingNote->_key;
+                _state._draggingNote->_time = time;
+                _state._draggingNote->_key = key;
+                ImGui::Text("draggingNote %p time %f key %s", _state._draggingNote, time, numberToNote(key).c_str());
+                for (auto note : _state._selectedNotes) {
+                    if (note != _state._draggingNote) {
+                        note->_time += timeDelta;
+                        note->_key += keyDelta;
+                    }
                 }
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+            } else if (_state._noteClickedPart == Left) {
+                float timeDelta = time - _state._draggingNote->_time;
+                if (std::ranges::all_of(_state._selectedNotes,
+                                        [timeDelta](auto x) { return x->_duration > timeDelta; })) {
+                    for (auto note : _state._selectedNotes) {
+                        note->_time += timeDelta;
+                        note->_duration += -timeDelta;
+                    }
+                }
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+            } else if (_state._noteClickedPart == Right) {
+                float timeDelta = time - _state._draggingNote->_time - _state._draggingNote->_duration;
+                if (std::ranges::all_of(_state._selectedNotes,
+                                        [timeDelta](auto x) { return x->_duration > -timeDelta; })) {
+                    for (auto note : _state._selectedNotes) {
+                        note->_duration += timeDelta;
+                    }
+                }
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
             }
             if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
                 _state._draggingNote = nullptr;
@@ -359,6 +373,24 @@ void PianoRoll::handleCanvas() {
             ImGui::Text("draggingNote nullptr");
         }
         ImGui::EndGroup();
+    }
+}
+
+void PianoRoll::renderTimeline() {
+    float leftPadding = 2.0f;
+    float scrollY = ImGui::GetScrollY();
+    float lastX = -GRID_SKIP_WIDTH;
+    for (int i = 0; i < maxBar(); ++i) {
+        float x = (BEAT_WIDTH * 4 * i * _zoomX) + KEYBOARD_WIDTH + TIMELINE_START_OFFSET;
+        if (x - lastX < GRID_SKIP_WIDTH) {
+            continue;
+        } else {
+            lastX = x;
+        }
+        float y = scrollY;
+        ImVec2 pos = ImVec2(x + leftPadding, y);
+        ImGui::SetCursorPos(pos);
+        ImGui::Text(std::to_string(i + 1).c_str());
     }
 }
 

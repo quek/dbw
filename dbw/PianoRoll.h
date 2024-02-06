@@ -40,11 +40,17 @@ private:
     float _zoomY = 0.5f;
     std::string _scrollHereYKey = "";
 
+    enum NoteClickedPart {
+        Left,
+        Middle,
+        Right
+    };
     struct State {
         Note* _clickedNote = nullptr;
         std::set<Note*> _selectedNotes;
         Note* _draggingNote = nullptr;
         bool _unselectClickedNoteIfMouserReleased = false;
+        NoteClickedPart _noteClickedPart;
 
         bool _consumedDoubleClick = false;
         bool _consumedClicked = false;
