@@ -147,7 +147,6 @@ int main(int, char**) {
     Grid::init();
     std::unique_ptr<AudioEngine> audioEngine = std::make_unique<AudioEngine>();
     Composer composer(audioEngine.get());
-    ComposerWindow composerWindow(&composer);
     audioEngine->_composer = &composer;
     composer._pluginManager.load();
     gPianoRoll.reset(new PianoRoll());
@@ -189,7 +188,7 @@ int main(int, char**) {
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
         composer._commandManager.run();
-        composerWindow.render();
+        composer._composerWindow->render();
         composer._sceneMatrix->render();
         gPianoRoll->render();
         gErrorWindow->render();

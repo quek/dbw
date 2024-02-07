@@ -77,8 +77,12 @@ void ComposerWindow::render() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Save")) {
-        _composer->_project->save();
-        setStatusMessage(std::string("Project is saved ") + yyyyMmDdHhMmSs());
+        if (_composer->_project->_isNew) {
+            if (_saveWindow == nullptr) {
+                _saveWindow = std::make_unique<SaveWindow>(_composer);
+            }
+            _showSaveWindow = true;
+        }
     }
 
     ImVec2 mainWindowSize = ImGui::GetWindowSize();
@@ -234,6 +238,10 @@ void ComposerWindow::render() {
     }
 
     ImGui::End();
+
+    if (_saveWindow != nullptr) {
+        _saveWindow->render();
+    }
 }
 
 void ComposerWindow::setStatusMessage(std::string message) {

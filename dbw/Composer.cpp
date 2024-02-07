@@ -20,6 +20,7 @@ Composer::Composer(AudioEngine* audioEngine) :
     _pluginManager(this),
     _project(std::make_unique<Project>("noname", this)),
     _masterTrack(std::make_unique<MasterTrack>(this)),
+    _composerWindow(std::make_unique<ComposerWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)) {
     gCommandManager = &_commandManager;
     addTrack();

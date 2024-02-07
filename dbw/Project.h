@@ -14,9 +14,12 @@ public:
     void save();
     std::filesystem::path projectDir() const;
     std::filesystem::path projectXml() const;
+    Composer* _composer;
+
+    bool _isNew = true;
     std::filesystem::path _dir;
     std::filesystem::path _name;
-    Composer* _composer;
+
 private:
     void writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, const char* role = "regular");
     bool contaisId(void* x);

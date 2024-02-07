@@ -2,6 +2,7 @@
 #include <memory>
 #include "ProcessBuffer.h"
 #include "Command.h"
+#include "ComposerWindow.h"
 #include "MasterTrack.h"
 #include "Midi.h"
 #include "PlayPosition.h"
@@ -50,6 +51,7 @@ public:
     std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<MasterTrack> _masterTrack;
 
+    std::unique_ptr<ComposerWindow> _composerWindow;
     std::unique_ptr<SceneMatrix> _sceneMatrix;
 private:
 };

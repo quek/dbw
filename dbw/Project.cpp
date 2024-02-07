@@ -174,6 +174,7 @@ void Project::open() {
     }
 
     _composer->_audioEngine->start();
+    _isNew = false;
 }
 
 void Project::save() {
@@ -298,6 +299,8 @@ void Project::save() {
         // TODO
         logger->error("Save error!");
     }
+
+    _isNew = false;
 }
 
 std::filesystem::path Project::projectDir() const {

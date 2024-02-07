@@ -192,6 +192,7 @@
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PluginModule.h" />
     <ClInclude Include="Project.h" />
+    <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMatrix.h" />
     <ClInclude Include="Sequence.h" />
@@ -241,6 +242,7 @@
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="PluginModule.cpp" />
     <ClCompile Include="Project.cpp" />
+    <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneMatrix.cpp" />
     <ClCompile Include="Sequence.cpp" />
