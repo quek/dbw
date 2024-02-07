@@ -7,15 +7,16 @@
 #include "PlayPosition.h"
 #include "PluginManager.h"
 #include "Project.h"
+#include "SceneMatrix.h"
 #include "Track.h"
 
 class AudioEngine;
 
-class Composer
-{
+class Composer {
 public:
     Composer(AudioEngine* audioEngine);
     void process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime);
+    void computeNextPlayTime(unsigned long framesPerBuffer);
 
     void play();
     void stop();
@@ -35,15 +36,20 @@ public:
     bool _scrollLock = false;
     int _maxLine = 0x40;
     PlayPosition _playStartPosition{};
+    double _playStartTime = 0.0;
     PlayPosition _playPosition{};
+    double _playTime = 0.0;
     PlayPosition _nextPlayPosition{};
+    double _nextPlayTime = 0.0;
     PlayPosition _loopStartPosition{};
+    double _loopStartTime = 0.0;
     PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
+    double _loopEndTime = 17.0;
     CommandManager _commandManager;
     PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<MasterTrack> _masterTrack;
 
+    std::unique_ptr<SceneMatrix> _sceneMatrix;
 private:
 };
-

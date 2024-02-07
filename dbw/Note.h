@@ -7,5 +7,6 @@ public:
     double _duration;
     int16_t _channel;
     int16_t _key;
-    float _velocity;
+    double _velocity;
+    double _rel;
 };

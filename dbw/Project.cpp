@@ -16,6 +16,9 @@ Project::Project(std::string name, Composer* composer) : _dir(::projectDir()), _
 }
 
 void Project::open() {
+    _idMap.clear();
+    _idMapRev.clear();
+
     auto path = getOpenFileName();
     if (path.empty()) {
         return;
@@ -30,6 +33,7 @@ void Project::open() {
     _composer->_audioEngine->stop();
     _composer->_tracks.clear();
     _composer->_commandManager.clear();
+    _composer->_sceneMatrix->_scenes.clear();
 
     tinyxml2::XMLElement* tempo = doc.FirstChildElement("Project")->FirstChildElement("Transport")->FirstChildElement("Tempo");
     if (tempo != nullptr) {
@@ -42,8 +46,10 @@ void Project::open() {
          trackElement != nullptr;
          trackElement = trackElement->NextSiblingElement("Track")) {
         std::string name = trackElement->Attribute("name");
+        auto channelElement = trackElement->FirstChildElement("Channel");
+        std::string role = channelElement->Attribute("role");
         Track* track;
-        if (strcmp(trackElement->Attribute("id"), "MASTER") == 0) {
+        if (role == "master") {
             MasterTrack* masterTrack = new MasterTrack(_composer);
             _composer->_masterTrack.reset(masterTrack);
             track = masterTrack;
@@ -51,7 +57,9 @@ void Project::open() {
             track = new Track(name, _composer);
             _composer->_tracks.push_back(std::unique_ptr<Track>(track));
         }
-        for (auto deviceElement = trackElement->FirstChildElement("Channel")->FirstChildElement("Devices")->FirstChildElement();
+        setId(track, trackElement->Attribute("id"));
+
+        for (auto deviceElement = channelElement->FirstChildElement("Devices")->FirstChildElement();
              deviceElement != nullptr;
              deviceElement = deviceElement->NextSiblingElement()) {
             if (deviceElement) {
@@ -82,7 +90,6 @@ void Project::open() {
                 (*track)->_ncolumns++;
                 (*track)->_lastKeys.push_back(0);
             }
-
 
             double lpb = _composer->_lpb;
             double endTime = std::numeric_limits<double>::max();
@@ -126,10 +133,53 @@ void Project::open() {
         }
     }
 
+    auto sceneMatrix = _composer->_sceneMatrix.get();
+    for (auto sceneElement = doc.FirstChildElement("Project")->FirstChildElement("Scenes")->FirstChildElement("Scene");
+         sceneElement != nullptr;
+         sceneElement = sceneElement->NextSiblingElement()) {
+        Scene* scene = new Scene(sceneMatrix);
+        scene->_lanes.clear();
+        scene->_name = sceneElement->Attribute("name");
+        sceneMatrix->_scenes.emplace_back(scene);
+        for (auto lanesElement = sceneElement->FirstChildElement("Lanes");
+             lanesElement != nullptr;
+             lanesElement = lanesElement->NextSiblingElement("Lanes")) {
+            Lane* lane = new Lane(scene);
+            scene->_lanes.emplace_back(lane);
+            for (auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
+                 clipSlotElement != nullptr;
+                 clipSlotElement = clipSlotElement->NextSiblingElement("ClipSlot")) {
+                Track* track = (Track*)getObject(clipSlotElement->Attribute("track"));
+                Clip* clip = new Clip();
+                Sequence* sequence = clip->_sequence.get();
+                for (auto noteElement = clipSlotElement->FirstChildElement("Clip")->FirstChildElement("Notes")->FirstChildElement("Note");
+                     noteElement != nullptr;
+                     noteElement = noteElement->NextSiblingElement("Note")) {
+                    Note* note = new Note();
+                    noteElement->QueryDoubleAttribute("time", &note->_time);
+                    noteElement->QueryDoubleAttribute("duration", &note->_duration);
+                    int intValue;
+                    noteElement->QueryIntAttribute("channel", &intValue);
+                    note->_channel = intValue;
+                    noteElement->QueryIntAttribute("key", &intValue);
+                    note->_key = intValue;
+                    noteElement->QueryDoubleAttribute("vel", &note->_velocity);
+                    noteElement->QueryDoubleAttribute("rel", &note->_rel);
+                    sequence->_notes.emplace_back(note);
+                }
+                ClipSlot* clipSlot = new ClipSlot(track, lane, clip);
+                lane->_clipSlots[track] = std::unique_ptr<ClipSlot>(clipSlot);
+            }
+        }
+    }
+
     _composer->_audioEngine->start();
 }
 
 void Project::save() {
+    _idMap.clear();
+    _idMapRev.clear();
+
     tinyxml2::XMLDocument doc;
     auto* project = doc.NewElement("Project");
     doc.InsertEndChild(project);
@@ -156,9 +206,9 @@ void Project::save() {
         auto* structure = project->InsertNewChildElement("Structure");
         for (int i = 0; i < _composer->_tracks.size(); ++i) {
             Track* track = _composer->_tracks[i].get();
-            writeTrack(doc, structure, track, i);
+            writeTrack(doc, structure, track);
         }
-        writeTrack(doc, structure, (Track*)(_composer->_masterTrack.get()), "MASTER");
+        writeTrack(doc, structure, (Track*)(_composer->_masterTrack.get()), "master");
     }
     {
         auto* arrangement = project->InsertNewChildElement("Arrangement");
@@ -168,7 +218,7 @@ void Project::save() {
             for (int trackIndex = 0; trackIndex < _composer->_tracks.size(); ++trackIndex) {
                 Track* track = _composer->_tracks[trackIndex].get();
                 auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
-                lanes->SetAttribute("track", std::format("track{}", trackIndex).c_str());
+                lanes->SetAttribute("track", getId(track).c_str());
                 for (int columnIndex = 0; columnIndex < track->_ncolumns; ++columnIndex) {
                     auto* notes = lanes->InsertNewChildElement("Notes");
 
@@ -212,6 +262,34 @@ void Project::save() {
             }
         }
     }
+    {
+        auto* scenesElement = project->InsertNewChildElement("Scenes");
+        for (auto& scene : _composer->_sceneMatrix->_scenes) {
+            auto* sceneElement = scenesElement->InsertNewChildElement("Scene");
+            sceneElement->SetAttribute("name", scene->_name.c_str());
+            for (auto& lane : scene->_lanes) {
+                auto lanesElement = sceneElement->InsertNewChildElement("Lanes");
+                for (auto& track : _composer->_tracks) {
+                    auto& clipSlot = lane->getClipSlot(track.get());
+                    auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
+                    clipSlotElement->SetAttribute("track", getId(track.get()).c_str());
+                    if (clipSlot->_clip != nullptr) {
+                        auto clipElement = clipSlotElement->InsertNewChildElement("Clip");
+                        auto notesElement = clipElement->InsertNewChildElement("Notes");
+                        for (auto& note : clipSlot->_clip->_sequence->_notes) {
+                            auto noteElement = notesElement->InsertNewChildElement("Note");
+                            noteElement->SetAttribute("time", note->_time);
+                            noteElement->SetAttribute("duration", note->_duration);
+                            noteElement->SetAttribute("channel", note->_channel);
+                            noteElement->SetAttribute("key", note->_key);
+                            noteElement->SetAttribute("vel", note->_velocity);
+                            noteElement->SetAttribute("rel", note->_rel);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     auto path = projectXml();
     std::filesystem::create_directories(path.parent_path());
@@ -230,23 +308,42 @@ std::filesystem::path Project::projectXml() const {
     return projectDir() / "project.xml";
 }
 
-void Project::writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, int index) {
-    writeTrack(doc, structure, track, std::format("track{}", index).c_str());
-}
-
-void Project::writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, const char* id) {
+void Project::writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, const char* role) {
     auto* trackElement = structure->InsertNewChildElement("Track");
-    trackElement->SetAttribute("id", id);
+    trackElement->SetAttribute("id", generateId(track, "track").c_str());
     trackElement->SetAttribute("name", track->_name.c_str());
     trackElement->SetAttribute("contentType", "notes");
     trackElement->SetAttribute("loaded", true);
     {
         auto* channel = trackElement->InsertNewChildElement("Channel");
         {
+            channel->SetAttribute("role", role);
             auto* devices = channel->InsertNewChildElement("Devices");
             for (auto module = track->_modules.begin(); module != track->_modules.end(); ++module) {
                 devices->InsertEndChild((*module)->dawProject(&doc));
             }
         }
     }
+}
+
+bool Project::contaisId(void* x) {
+    return _idMap.contains(x);
+}
+
+std::string Project::generateId(void* x, std::string prefix) {
+    std::string id = prefix + std::to_string(_idMap.size());
+    _idMap[x] = id;
+    _idMapRev[id] = x;
+    return id;
+}
+
+std::string Project::getId(void* x) {
+    return _idMap[x];
+}
+void Project::setId(void* x, std::string id) {
+    _idMap[x] = id;
+    _idMapRev[id] = x;
+}
+void* Project::getObject(std::string id) {
+    return _idMapRev[id];
 }

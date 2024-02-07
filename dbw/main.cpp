@@ -150,7 +150,6 @@ int main(int, char**) {
     ComposerWindow composerWindow(&composer);
     audioEngine->_composer = &composer;
     composer._pluginManager.load();
-    std::unique_ptr<SceneMatrix> sceneMatrix(new SceneMatrix(&composer));
     gPianoRoll.reset(new PianoRoll());
 
     audioEngine->start();
@@ -191,7 +190,7 @@ int main(int, char**) {
 
         composer._commandManager.run();
         composerWindow.render();
-        sceneMatrix->render();
+        composer._sceneMatrix->render();
         gPianoRoll->render();
         gErrorWindow->render();
 

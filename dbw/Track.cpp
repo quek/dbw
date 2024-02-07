@@ -61,8 +61,7 @@ void Track::changeMaxLine(int value) {
 }
 
 void Track::process(int64_t steadyTime) {
-    PlayPosition* from = &_composer->_playPosition;
-    PlayPosition* to = &_composer->_nextPlayPosition;
+    /*
     int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
     for (int lineIndex = from->_line; lineIndex <= toLine && lineIndex < _lines.size(); ++lineIndex) {
         auto& line = _lines[lineIndex];
@@ -94,6 +93,9 @@ void Track::process(int64_t steadyTime) {
             _lastKeys[columnIndex] = key;
         }
     }
+    */
+
+    _composer->_sceneMatrix->process(this);
 
     for (auto module = _modules.begin(); module != _modules.end(); ++module) {
         (*module)->process(&_processBuffer, steadyTime);

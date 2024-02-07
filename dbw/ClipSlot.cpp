@@ -1,5 +1,7 @@
 #include "ClipSlot.h"
 #include <imgui.h>
+#include "Composer.h"
+#include "Track.h"
 
 ClipSlot::ClipSlot(Track* track, Lane* lane, Clip* clip) : _track(track), _lane(lane), _clip(clip) {
 }
@@ -32,6 +34,7 @@ void ClipSlot::play() {
         return;
     }
     _playing = true;
+    _track->_composer->play();
 }
 
 void ClipSlot::stop() {

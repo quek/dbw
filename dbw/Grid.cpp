@@ -6,7 +6,11 @@ std::vector<std::unique_ptr<Grid>> gGrids;
 Grid::Grid(std::string name, double unit) : _name(name), _unit(unit) {
 }
 
-double Grid::snap(double time) {
+double Grid::snapFloor(double time) {
+    return std::floor(time / _unit) * _unit;
+}
+
+double Grid::snapRound(double time) {
     return std::round(time / _unit) * _unit;
 }
 

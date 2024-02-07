@@ -31,7 +31,8 @@ private:
     double noteTimeFromMouserPos();
     int16_t noteKeyFromMouserPos();
     ImVec2 toCanvasPos(ImVec2& pos) const;
-    double toSnap(const double time);
+    double toSnapFloor(const double time);
+    double toSnapRound(const double time);
     bool isInCanvas(ImVec2& pos);
 
     bool _show = false;
@@ -53,6 +54,7 @@ private:
         Note* _draggingNote = nullptr;
         bool _unselectClickedNoteIfMouserReleased = false;
         NoteClickedPart _noteClickedPart = Middle;
+        float _noteClickedOffset = 0.0f;
         bool _rangeSelecting = false;
 
         bool _consumedDoubleClick = false;

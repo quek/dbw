@@ -63,6 +63,58 @@ void SceneMatrix::render() {
     ImGui::End();
 }
 
+void SceneMatrix::process(Track* track) {
+    double oneBeatSec = 60.0 / track->_composer->_bpm;
+    double sampleRate = track->_composer->_audioEngine->_sampleRate;
+    for (auto& scene : _scenes) {
+        for (auto& lane : scene->_lanes) {
+            auto& clipSlot = lane->getClipSlot(track);
+            if (!clipSlot->_playing) {
+                continue;
+            }
+            double sequenceDuration = clipSlot->_clip->_sequence->_duration;
+            double begin = fmod(_composer->_playTime, sequenceDuration);
+            double end = fmod(_composer->_nextPlayTime, sequenceDuration);
+            for (auto& note : clipSlot->_clip->_sequence->_notes) {
+                double time = note->_time;
+                if ((begin <= time && time < end) || (end < begin && (begin <= time || time < end))) {
+                    int16_t channel = 0;
+                    uint32_t sampleOffsetDouble = 0;
+                    if (begin < end) {
+                        sampleOffsetDouble = (time - begin) * oneBeatSec * sampleRate;
+                    } else {
+                        sampleOffsetDouble = (time + sequenceDuration - begin) * oneBeatSec * sampleRate;
+                    }
+                    uint32_t sampleOffset = std::round(sampleOffsetDouble);
+                    track->_processBuffer._eventIn.noteOn(note->_key, channel, note->_velocity, sampleOffset);
+                }
+                time = note->_time + note->_duration;
+                if ((begin <= time && time < end) || (end < begin && (begin <= time || time < end))) {
+                    int16_t channel = 0;
+                    uint32_t sampleOffsetDouble = 0;
+                    if (begin < end) {
+                        sampleOffsetDouble = (time - begin) * oneBeatSec * sampleRate;
+                    } else {
+                        sampleOffsetDouble = (time + sequenceDuration - begin) * oneBeatSec * sampleRate;
+                    }
+                    uint32_t sampleOffset = std::round(sampleOffsetDouble);
+                    track->_processBuffer._eventIn.noteOff(note->_key, channel, 1.0f, sampleOffset);
+                }
+            }
+        }
+    }
+}
+
+void SceneMatrix::stop() {
+    for (auto& scene : _scenes) {
+        for (auto& lane : scene->_lanes) {
+            for (auto& x : lane->_clipSlots) {
+                x.second->stop();
+            }
+        }
+    }
+}
+
 void SceneMatrix::addScene(bool undoable) {
     _composer->_commandManager.executeCommand(new AddSceneCommand(this, undoable));
 }

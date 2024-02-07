@@ -5,12 +5,15 @@
 #include "Scene.h"
 
 class Composer;
+class Track;
 
 class SceneMatrix {
 public:
     SceneMatrix(Composer* composer);
     Composer* composer() { return _composer; }
     void render();
+    void process(Track* track);
+    void stop();
     void addScene(bool undoable = true);
 
     std::vector<std::unique_ptr<Scene>> _scenes;

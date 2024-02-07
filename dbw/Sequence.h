@@ -13,6 +13,7 @@ public:
     void deleteNote(Note* note);
 
     std::vector<std::unique_ptr<Note>> _notes;
+    double _duration = 16.0;
 };
 
 class DeleteNoteCommand : public Command {

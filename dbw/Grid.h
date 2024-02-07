@@ -9,7 +9,8 @@ public:
     std::string _name;
     double _unit;
 
-    double snap(double time);
+    double snapFloor(double time);
+    double snapRound(double time);
 
     static void init();
 };

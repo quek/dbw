@@ -243,26 +243,13 @@ void PianoRoll::renderNotes() {
                     ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
                 } else {
                     _state._noteClickedPart = Middle;
+                    _state._noteClickedOffset = mousePos.x - pos1.x;
                 }
             }
         }
 
         ImGui::PopID();
     }
-}
-
-Bounds PianoRoll::boundOfNote(Note* note) {
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    float scrollX = ImGui::GetScrollX();
-    float scrollY = ImGui::GetScrollY();
-    ImVec2 scrollPos(scrollX, scrollY);
-    float x1 = static_cast<float>(note->_time * BEAT_WIDTH * _zoomX + KEYBOARD_WIDTH + TIMELINE_START_OFFSET);
-    float y1 = (127 - note->_key) * KEY_HEIGHT * _zoomY + TIMELINE_HEIGHT;
-    float x2 = static_cast<float>(x1 + note->_duration * BEAT_WIDTH * _zoomX);
-    float y2 = y1 + KEY_HEIGHT * _zoomY;
-    ImVec2 pos1 = ImVec2(x1, y1) + windowPos - scrollPos + ImVec2(0.0f, 1.0f);
-    ImVec2 pos2 = ImVec2(x2, y2) + windowPos - scrollPos + ImVec2(0.0f, -1.0f);
-    return Bounds(pos1, pos2);
 }
 
 void PianoRoll::handleCanvas() {
@@ -285,6 +272,7 @@ void PianoRoll::handleCanvas() {
         float time = canvasPos.x / BEAT_WIDTH;
         int16_t key = static_cast<int16_t>(128 - canvasPos.y / KEY_HEIGHT);
         ImGui::Text("time %f key %d %s", time, key, numberToNote(key).c_str());
+        ImGui::Text("_noteClickedOffset %f", _state._noteClickedOffset);
     }
 
     if (isInCanvas(mousePos)) {
@@ -395,6 +383,20 @@ void PianoRoll::handleCanvas() {
     }
 }
 
+Bounds PianoRoll::boundOfNote(Note* note) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    ImVec2 scrollPos(scrollX, scrollY);
+    float x1 = static_cast<float>(note->_time * BEAT_WIDTH * _zoomX + KEYBOARD_WIDTH + TIMELINE_START_OFFSET);
+    float y1 = (127 - note->_key) * KEY_HEIGHT * _zoomY + TIMELINE_HEIGHT;
+    float x2 = static_cast<float>(x1 + note->_duration * BEAT_WIDTH * _zoomX);
+    float y2 = y1 + KEY_HEIGHT * _zoomY;
+    ImVec2 pos1 = ImVec2(x1, y1) + windowPos - scrollPos + ImVec2(0.0f, 1.0f);
+    ImVec2 pos2 = ImVec2(x2, y2) + windowPos - scrollPos + ImVec2(0.0f, -1.0f);
+    return Bounds(pos1, pos2);
+}
+
 void PianoRoll::renderTimeline() {
     float leftPadding = 2.0f;
     float scrollY = ImGui::GetScrollY();
@@ -418,7 +420,8 @@ Note* PianoRoll::noteFromMousePos() {
     ImVec2& mousePos = io.MousePos;
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 canvasPos = toCanvasPos(mousePos);
-    float time = toSnap(canvasPos.x / BEAT_WIDTH);
+    // FL の動きは toSnapRound だけど、それ以外はこっち。升目を埋めるイメージ
+    float time = toSnapFloor(canvasPos.x / BEAT_WIDTH);
     int16_t key = static_cast<int16_t>(128 - canvasPos.y / KEY_HEIGHT);
     if (0 <= key && key <= 127) {
         Note* note = new Note{ ._time = time, ._duration = 1, ._channel = 0, ._key = key, ._velocity = 0.8f };
@@ -430,9 +433,9 @@ Note* PianoRoll::noteFromMousePos() {
 
 double PianoRoll::noteTimeFromMouserPos() {
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2& mousePos = io.MousePos;
+    ImVec2 mousePos = io.MousePos - ImVec2(_state._noteClickedOffset, 0.0f);
     ImVec2 canvasPos = toCanvasPos(mousePos);
-    double time = toSnap(canvasPos.x / BEAT_WIDTH);
+    double time = toSnapRound(canvasPos.x / BEAT_WIDTH);
     return time;
 }
 
@@ -453,11 +456,18 @@ ImVec2 PianoRoll::toCanvasPos(ImVec2& pos) const {
     return ImVec2(x, y);
 }
 
-double PianoRoll::toSnap(const double time) {
+double PianoRoll::toSnapFloor(const double time) {
     if (!_snap) {
         return time;
     }
-    return _grid->snap(time);
+    return _grid->snapFloor(time);
+}
+
+double PianoRoll::toSnapRound(const double time) {
+    if (!_snap) {
+        return time;
+    }
+    return _grid->snapRound(time);
 }
 
 bool PianoRoll::isInCanvas(ImVec2& pos) {

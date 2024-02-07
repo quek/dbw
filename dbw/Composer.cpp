@@ -19,7 +19,8 @@ Composer::Composer(AudioEngine* audioEngine) :
     _commandManager(this),
     _pluginManager(this),
     _project(std::make_unique<Project>("noname", this)),
-    _masterTrack(std::make_unique<MasterTrack>(this)) {
+    _masterTrack(std::make_unique<MasterTrack>(this)),
+    _sceneMatrix(std::make_unique<SceneMatrix>(this)) {
     gCommandManager = &_commandManager;
     addTrack();
 }
@@ -30,6 +31,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
 
     if (_playing) {
         _nextPlayPosition = _playPosition.nextPlayPosition(_audioEngine->_sampleRate, framesPerBuffer, _bpm, _lpb, &_samplePerDelay);
+        computeNextPlayTime(framesPerBuffer);
     }
 
     _processBuffer.clear();
@@ -50,16 +52,26 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
 
     if (_playing) {
         _playPosition = _nextPlayPosition;
+        _playTime = _nextPlayTime;
     }
     if (_looping) {
         if (_playPosition >= _loopEndPosition) {
             _playPosition = _loopStartPosition;
+        }
+        if (_playTime >= _loopEndTime) {
+            _playTime = _loopStartTime;
         }
     }
     if (_playPosition._line > _maxLine) {
         _playPosition._line = 0;
         _playPosition._delay = 0;
     }
+}
+
+void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
+    double deltaSec = framesPerBuffer / _audioEngine->_sampleRate;
+    double oneBeatSec = 60.0 / _bpm;
+    _nextPlayTime = deltaSec / oneBeatSec + _playTime;
 }
 
 void Composer::scanPlugin() {
@@ -73,13 +85,23 @@ void Composer::changeMaxLine() {
 }
 
 void Composer::play() {
+    if (_playing) {
+        return;
+    }
     _playing = true;
+    _playStartTime = _playTime;
 }
 
 void Composer::stop() {
+    if (!_playing) {
+        return;
+    }
     _playing = false;
     _playPosition = PlayPosition{ ._line = 0, ._delay = 0 };
+    _playTime = _playStartTime;
     _nextPlayPosition = PlayPosition{ ._line = 0, ._delay = 0 };
+    _nextPlayTime = _playStartTime;
+    _sceneMatrix->stop();
 }
 
 class AddTrackCommand : public Command {
