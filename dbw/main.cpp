@@ -33,13 +33,10 @@
 
 #include "AudioEngine.h"
 #include "Composer.h"
-#include "ComposerWindow.h"
 #include "ErrorWindow.h"
 #include "Grid.h"
 #include "GuiUtil.h"
-#include "PianoRoll.h"
 #include "PluginHost.h"
-#include "SceneMatrix.h"
 #include "util.h"
 
 struct FrameContext {
@@ -148,9 +145,6 @@ int main(int, char**) {
     std::unique_ptr<AudioEngine> audioEngine = std::make_unique<AudioEngine>();
     Composer composer(audioEngine.get());
     audioEngine->_composer = &composer;
-    composer._pluginManager.load();
-    gPianoRoll.reset(new PianoRoll());
-
     audioEngine->start();
 
     // Main loop
@@ -188,10 +182,8 @@ int main(int, char**) {
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
         composer._commandManager.run();
-        composer._composerWindow->render();
-        composer._sceneMatrix->render();
-        gPianoRoll->render();
         gErrorWindow->render();
+        composer.render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)

@@ -70,6 +70,16 @@ std::filesystem::path projectDir() {
     return userDir() / "projects";
 }
 
+std::string yyyyMmDd() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm;
+    localtime_s(&now_tm, &now_c);
+    std::stringstream ss;
+    ss << std::put_time(&now_tm, "%Y%m%d");
+    return ss.str();
+}
+
 std::string yyyyMmDdHhMmSs() {
     auto now = std::chrono::system_clock::now();
     std::time_t now_c = std::chrono::system_clock::to_time_t(now);

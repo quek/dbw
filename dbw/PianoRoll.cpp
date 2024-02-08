@@ -1,12 +1,11 @@
 #include "PianoRoll.h"
 #include <memory>
 #include "Clip.h"
+#include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "Midi.h"
 #include "Note.h"
-
-std::unique_ptr<PianoRoll> gPianoRoll = nullptr;
 
 constexpr float BEAT_WIDTH = 10.0f;
 constexpr float KEYBOARD_WIDTH = 30.0f;
@@ -15,16 +14,13 @@ constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float GRID_SKIP_WIDTH = 20.0f;
 float KEY_HEIGHT = 50.0f;
 
-ImU32 BAR_LINE_COLOR = IM_COL32(0x88, 0x88, 0x88, 0x88);
-ImU32 BEAT_LINE_COLOR = IM_COL32(0x55, 0x55, 0x55, 0x88);
-ImU32 BEAT16TH_LINE_COLOR = IM_COL32(0x33, 0x33, 0x33, 0x88);
 ImU32 BACKGROUD_WHITE_KEY_COLOR = IM_COL32(0x22, 0x22, 0x22, 0x88);
 ImU32 BACKGROUD_BLACK_KEY_COLOR = IM_COL32(0x00, 0x00, 0x00, 0x88);
 ImU32 NOTE_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
 ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
 ImU32 RANGE_SELECTING_COLOR = IM_COL32(0x66, 0x22, 0x22, 0x88);
 
-PianoRoll::PianoRoll() {
+PianoRoll::PianoRoll(Composer* composer) : ZoomMixin(4.0f, 0.5f), _composer(composer) {
     _grid = gGrids[1].get();
 }
 
@@ -34,21 +30,7 @@ void PianoRoll::render() {
     _state.reset();
 
     if (ImGui::Begin("Piano Roll", &_show)) {
-        int gridIndex = 0;
-        for (; gridIndex < gGrids.size(); ++gridIndex) {
-            if (gGrids[gridIndex].get() == _grid) {
-                break;
-            }
-        }
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 3.5f);
-        auto pred = [](void* x, int i) {
-            return (*(std::vector<std::unique_ptr<Grid>>*)x)[i]->_name.c_str();
-        };
-        if (ImGui::Combo("Grid", &gridIndex, pred, &gGrids, static_cast<int>(gGrids.size()))) {
-            _grid = gGrids[gridIndex].get();
-        }
-        ImGui::SameLine();
-        ImGui::Checkbox("Snap", &_snap);
+        renderGridSnap();
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         {
@@ -75,11 +57,7 @@ void PianoRoll::render() {
         ImGui::PopStyleVar();
 
         // TODO マウスホイールとかでスクロールするようにする
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 5);
-        ImGui::DragFloat("Zoom X", &_zoomX, 0.01f, 0.001f);
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 5);
-        ImGui::DragFloat("Zoom Y", &_zoomY, 0.01f, 0.001f);
+        renderDebugZoomSlider();
     }
     ImGui::End();
 }
@@ -92,8 +70,7 @@ void PianoRoll::edit(Clip* clip) {
 }
 
 int PianoRoll::maxBar() {
-    // TODO
-    return 50;
+    return _composer->maxBar();
 }
 
 void PianoRoll::renderBackgroud() const {
@@ -232,7 +209,7 @@ void PianoRoll::renderNotes() {
                     _state._unselectClickedNoteIfMouserReleased = false;
                 }
                 if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                    gCommandManager->executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), note.get()));
+                    _composer->_commandManager.executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), note.get()));
                     _state._consumedDoubleClick = true;
                 }
                 if (mousePos.x - pos1.x <= 5) {
@@ -290,8 +267,8 @@ void PianoRoll::handleCanvas() {
         }
 
         if (_state._draggingNote) {
-            float time = noteTimeFromMouserPos();
             if (_state._noteClickedPart == Middle) {
+                float time = noteTimeFromMouserPos(_state._noteClickedOffset);
                 float timeDelta = time - _state._draggingNote->_time;
                 int16_t key = noteKeyFromMouserPos();
                 int16_t keyDelta = key - _state._draggingNote->_key;
@@ -306,6 +283,7 @@ void PianoRoll::handleCanvas() {
                 }
                 ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
             } else if (_state._noteClickedPart == Left) {
+                float time = noteTimeFromMouserPos();
                 float timeDelta = time - _state._draggingNote->_time;
                 if (std::ranges::all_of(_state._selectedNotes,
                                         [timeDelta](auto x) { return x->_duration > timeDelta; })) {
@@ -316,6 +294,7 @@ void PianoRoll::handleCanvas() {
                 }
                 ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
             } else if (_state._noteClickedPart == Right) {
+                float time = noteTimeFromMouserPos();
                 float timeDelta = time - _state._draggingNote->_time - _state._draggingNote->_duration;
                 if (std::ranges::all_of(_state._selectedNotes,
                                         [timeDelta](auto x) { return x->_duration > -timeDelta; })) {
@@ -431,9 +410,9 @@ Note* PianoRoll::noteFromMousePos() {
     }
 }
 
-double PianoRoll::noteTimeFromMouserPos() {
+double PianoRoll::noteTimeFromMouserPos(float offset) {
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2 mousePos = io.MousePos - ImVec2(_state._noteClickedOffset, 0.0f);
+    ImVec2 mousePos = io.MousePos - ImVec2(offset, 0.0f);
     ImVec2 canvasPos = toCanvasPos(mousePos);
     double time = toSnapRound(canvasPos.x / BEAT_WIDTH);
     return time;

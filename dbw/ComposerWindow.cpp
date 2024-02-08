@@ -1,6 +1,8 @@
 #include "ComposerWindow.h"
 #include <imgui.h>
+#include "../ImGuiFileDialog/ImGuiFileDialog.h"
 #include "Composer.h"
+#include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "util.h"
 
@@ -8,7 +10,10 @@ ComposerWindow::ComposerWindow(Composer* composer) : _composer(composer) {
 }
 
 void ComposerWindow::render() {
-    ImGui::Begin("main window", nullptr, ImGuiWindowFlags_NoScrollbar);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
+
+    auto composerWindowName = _composer->_project->_name.string() + "##Composer";
+    ImGui::Begin(composerWindowName.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar);
 
     if (_composer->_playing) {
         ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BUTTON_ON);
@@ -30,11 +35,13 @@ void ComposerWindow::render() {
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
         if (ImGui::Button("Loop")) {
             _composer->_looping = false;
+            gErrorWindow->show("y");
         }
         ImGui::PopStyleColor(3);
     } else {
         if (ImGui::Button("Loop")) {
             _composer->_looping = true;
+            gErrorWindow->show("xxxxxxxxxxx\nyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
         }
     }
     ImGui::SameLine();
@@ -71,10 +78,22 @@ void ComposerWindow::render() {
     if (ImGui::Button("Scan Plugin")) {
         _composer->scanPlugin();
     }
+
     ImGui::SameLine();
     if (ImGui::Button("Open")) {
-        _composer->_project->open();
+        IGFD::FileDialogConfig config;
+        config.path = _composer->_project->_dir.string();
+        config.flags = ImGuiFileDialogFlags_Modal;
+        ImGuiFileDialog::Instance()->OpenDialog("Open Project", "Choose File", nullptr, config);
     }
+    if (ImGuiFileDialog::Instance()->Display("Open Project")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+            _composer->_project->open(std::filesystem::path(filePath));
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
     ImGui::SameLine();
     if (ImGui::Button("Save")) {
         if (_composer->_project->_isNew) {
@@ -82,6 +101,8 @@ void ComposerWindow::render() {
                 _saveWindow = std::make_unique<SaveWindow>(_composer);
             }
             _showSaveWindow = true;
+        } else {
+            _composer->_project->save();
         }
     }
 

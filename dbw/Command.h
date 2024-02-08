@@ -6,9 +6,6 @@
 #include "Column.h"
 #include "Module.h"
 
-class CommandManager;
-extern CommandManager* gCommandManager;
-
 class Composer;
 class Track;
 

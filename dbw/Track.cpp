@@ -10,42 +10,15 @@
 #include "Module.h"
 #include "PluginModule.h"
 #include "PluginHost.h"
+#include "TrackLane.h"
 
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _ncolumns(1) {
+    _trackLanes.emplace_back(new TrackLane());
     _lastKeys.push_back(0);
+    // TODO delete
     for (auto i = 0; i < composer->_maxLine; ++i) {
         _lines.push_back(std::make_unique<Line>(this, _ncolumns));
     }
-    //_lines[0x00].reset(new Line(Midi::C4, 0x64, 0, this));
-    //_lines[0x01].reset(new Line(Midi::C4, 0x64, 0x80, this));
-    //_lines[0x02].reset(new Line(Midi::C4, 0x40, 0x00, this));
-    //_lines[0x03].reset(new Line(Midi::C4, 0x7f, 0x00, this));
-    //_lines[0x04].reset(new Line(Midi::E4, 0x64, 0x00, this));
-    //_lines[0x06].reset(new Line(Midi::G4, 0x64, 0x00, this));
-    //_lines[0x07].reset(new Line(Midi::A4, 0x64, 0x00, this));
-    //_lines[0x08].reset(new Line(Midi::OFF, 0x64, 0x00, this));
-    //_lines[0x10].reset(new Line(Midi::E4, 0x64, 0x00, this));
-    //_lines[0x14].reset(new Line(Midi::G4, 0x64, 0x00, this));
-    //_lines[0x16].reset(new Line(Midi::A4, 0x64, 0x00, this));
-    //_lines[0x17].reset(new Line(Midi::B4, 0x64, 0x00, this));
-    //_lines[0x18].reset(new Line(Midi::OFF, 0x64, 0x00, this));
-    //_lines[0x20].reset(new Line(Midi::C4, 0x64, 0x00, this));
-    //_lines[0x21].reset(new Line(Midi::C4, 0x64, 0x00, this));
-    //_lines[0x22].reset(new Line(Midi::OFF, 0x64, 0x00, this));
-    //_lines[0x24].reset(new Line(Midi::E4, 0x64, 0x00, this));
-    //_lines[0x26].reset(new Line(Midi::G4, 0x64, 0x00, this));
-    //_lines[0x27].reset(new Line(Midi::A4, 0x64, 0x00, this));
-    //_lines[0x28].reset(new Line(Midi::OFF, 0x64, 0x00, this));
-    //_lines[0x30].reset(new Line(Midi::D4, 0x64, 0x00, this));
-    //_lines[0x34].reset(new Line(Midi::F4, 0x64, 0x00, this));
-    //_lines[0x36].reset(new Line(Midi::G4, 0x64, 0x00, this));
-    //_lines[0x37].reset(new Line(Midi::C5, 0x64, 0x00, this));
-    //_lines[0x38].reset(new Line(Midi::OFF, 0x64, 0x00, this));
-    //_lines[0x3a].reset(new Line(Midi::C5, 0x70, 0x00, this));
-    //_lines[0x3c].reset(new Line(Midi::C5, 0x74, 0x00, this));
-    //_lines[0x3d].reset(new Line(Midi::D5, 0x78, 0x00, this));
-    //_lines[0x3e].reset(new Line(Midi::B4, 0x7f, 0x00, this));
-    //_lines[0x3f].reset(new Line(Midi::OFF, 0x64, 0x00, this));
 }
 
 Track::~Track() {

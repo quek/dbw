@@ -7,6 +7,7 @@
 
 class ProcessBuffer;
 class Composer;
+class TrackLane;
 class Line;
 class Module;
 
@@ -24,11 +25,12 @@ public:
 
     std::string _name;
     size_t _ncolumns;
+    // TODO delete
     std::vector<std::unique_ptr<Line>> _lines;
+    std::vector<std::unique_ptr<TrackLane>> _trackLanes;
     std::vector<std::unique_ptr<Module>> _modules;
     std::vector<int16_t> _lastKeys;
 
     Composer* _composer;
     bool _openModuleSelector = false;
 };
-

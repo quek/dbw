@@ -2,18 +2,18 @@
 #include <imgui.h>
 #include "PianoRoll.h"
 
-Clip::Clip() {
-    _sequence = std::make_shared<Sequence>();
+Clip::Clip(double time, double duration) :
+    _time(time), _duration(duration), _sequence(std::make_shared<Sequence>(duration)) {
 }
 
-Clip::Clip(std::shared_ptr<Sequence> sequence) : _sequence(sequence) {
+Clip::Clip(std::shared_ptr<Sequence> sequence) : _time(0), _duration(sequence->_duration), _sequence(sequence) {
 }
 
-void Clip::renderInScene() {
+void Clip::renderInScene(PianoRoll* pianoRoll) {
     ImGui::PushID(this);
     if (ImGui::Selectable("clip", false, ImGuiSelectableFlags_AllowDoubleClick)) {
         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            gPianoRoll->edit(this);
+            pianoRoll->edit(this);
         }
     }
     ImGui::PopID();

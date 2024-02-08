@@ -18,12 +18,21 @@ Composer::Composer(AudioEngine* audioEngine) :
     _audioEngine(audioEngine),
     _commandManager(this),
     _pluginManager(this),
-    _project(std::make_unique<Project>("noname", this)),
+    _project(std::make_unique<Project>(yyyyMmDd(), this)),
     _masterTrack(std::make_unique<MasterTrack>(this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
-    _sceneMatrix(std::make_unique<SceneMatrix>(this)) {
-    gCommandManager = &_commandManager;
+    _sceneMatrix(std::make_unique<SceneMatrix>(this)),
+    _timelineWindow(std::make_unique<TimelineWindow>(this)),
+    _pianoRoll(std::make_unique<PianoRoll>(this)) {
     addTrack();
+    _pluginManager.load();
+}
+
+void Composer::render() const {
+    _composerWindow->render();
+    _sceneMatrix->render();
+    _timelineWindow->render();
+    _pianoRoll->render();
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
@@ -77,6 +86,11 @@ void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
 
 void Composer::scanPlugin() {
     _pluginManager.scan();
+}
+
+int Composer::maxBar() {
+    // TODO
+    return 50;
 }
 
 void Composer::changeMaxLine() {

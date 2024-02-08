@@ -3,7 +3,7 @@
 #include "Clip.h"
 #include "ClipSlot.h"
 
-Lane::Lane(Scene* scene) : _scene(scene) {
+Lane::Lane() {
 }
 
 void Lane::render(Track* track) {

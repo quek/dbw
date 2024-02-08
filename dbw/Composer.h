@@ -5,10 +5,12 @@
 #include "ComposerWindow.h"
 #include "MasterTrack.h"
 #include "Midi.h"
+#include "PianoRoll.h"
 #include "PlayPosition.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "SceneMatrix.h"
+#include "TimelineWindow.h"
 #include "Track.h"
 
 class AudioEngine;
@@ -16,6 +18,7 @@ class AudioEngine;
 class Composer {
 public:
     Composer(AudioEngine* audioEngine);
+    void render() const;
     void process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime);
     void computeNextPlayTime(unsigned long framesPerBuffer);
 
@@ -25,6 +28,7 @@ public:
     void changeMaxLine();
     void scanPlugin();
     void setStatusMessage(std::string message);
+    int maxBar();
 
     std::unique_ptr<Project> _project;
     AudioEngine* _audioEngine;
@@ -53,5 +57,7 @@ public:
 
     std::unique_ptr<ComposerWindow> _composerWindow;
     std::unique_ptr<SceneMatrix> _sceneMatrix;
+    std::unique_ptr<TimelineWindow> _timelineWindow;
+    std::unique_ptr<PianoRoll> _pianoRoll;
 private:
 };

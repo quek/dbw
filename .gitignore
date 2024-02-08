@@ -11,6 +11,7 @@ portaudio
 spdlog
 nlohmann
 VST_SDK
+ImGuiFileDialog
 
 # User-specific files
 *.rsuser

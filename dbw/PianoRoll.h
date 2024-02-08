@@ -3,15 +3,18 @@
 #include <string>
 #include <imgui.h>
 #include <set>
+#include "GridMixin.h"
+#include "ZoomMixin.h"
 
 class Clip;
+class Composer;
 class Grid;
 class Note;
 struct Bounds;
 
-class PianoRoll {
+class PianoRoll : public GridMixin, public ZoomMixin {
 public:
-    PianoRoll();
+    PianoRoll(Composer* composer);
     virtual ~PianoRoll() = default;
     void render();
     void edit(Clip* clip);
@@ -28,19 +31,16 @@ private:
     Bounds boundOfNote(Note* note);
     void handleCanvas();
     Note* noteFromMousePos();
-    double noteTimeFromMouserPos();
+    double noteTimeFromMouserPos(float offset=0.0f);
     int16_t noteKeyFromMouserPos();
     ImVec2 toCanvasPos(ImVec2& pos) const;
     double toSnapFloor(const double time);
     double toSnapRound(const double time);
     bool isInCanvas(ImVec2& pos);
 
+    Composer* _composer;
     bool _show = false;
     Clip* _clip = nullptr;
-    Grid* _grid;
-    bool _snap = true;
-    float _zoomX = 4.0f;
-    float _zoomY = 0.5f;
     std::string _scrollHereYKey = "";
 
     enum NoteClickedPart {

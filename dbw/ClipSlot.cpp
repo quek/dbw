@@ -19,7 +19,7 @@ void ClipSlot::render() {
             }
         }
         ImGui::SameLine();
-        _clip->renderInScene();
+        _clip->renderInScene(_track->_composer->_pianoRoll.get());
         ImGui::PopID();
     } else {
         if (ImGui::Button("+")) {

@@ -10,7 +10,7 @@ class Track;
 class Project {
 public:
     Project(std::string name, Composer* composer);
-    void open();
+    void open(std::filesystem::path dir);
     void save();
     std::filesystem::path projectDir() const;
     std::filesystem::path projectXml() const;

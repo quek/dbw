@@ -15,17 +15,15 @@ Project::Project(std::string name, Composer* composer) : _dir(::projectDir()), _
     std::filesystem::create_directories(_dir);
 }
 
-void Project::open() {
+void Project::open(std::filesystem::path dir) {
     _idMap.clear();
     _idMapRev.clear();
 
-    auto path = getOpenFileName();
-    if (path.empty()) {
-        return;
-    }
+    auto path = dir / "project.xml";
     auto parent_path = path.parent_path();
     _dir = parent_path.parent_path();
     _name = parent_path.filename();
+
     tinyxml2::XMLDocument doc;
     doc.LoadFile(path.string().c_str());
 
@@ -144,28 +142,32 @@ void Project::open() {
         for (auto lanesElement = sceneElement->FirstChildElement("Lanes");
              lanesElement != nullptr;
              lanesElement = lanesElement->NextSiblingElement("Lanes")) {
-            Lane* lane = new Lane(scene);
+            Lane* lane = new Lane();
             scene->_lanes.emplace_back(lane);
             for (auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
                  clipSlotElement != nullptr;
                  clipSlotElement = clipSlotElement->NextSiblingElement("ClipSlot")) {
                 Track* track = (Track*)getObject(clipSlotElement->Attribute("track"));
-                Clip* clip = new Clip();
-                Sequence* sequence = clip->_sequence.get();
-                for (auto noteElement = clipSlotElement->FirstChildElement("Clip")->FirstChildElement("Notes")->FirstChildElement("Note");
-                     noteElement != nullptr;
-                     noteElement = noteElement->NextSiblingElement("Note")) {
-                    Note* note = new Note();
-                    noteElement->QueryDoubleAttribute("time", &note->_time);
-                    noteElement->QueryDoubleAttribute("duration", &note->_duration);
-                    int intValue;
-                    noteElement->QueryIntAttribute("channel", &intValue);
-                    note->_channel = intValue;
-                    noteElement->QueryIntAttribute("key", &intValue);
-                    note->_key = intValue;
-                    noteElement->QueryDoubleAttribute("vel", &note->_velocity);
-                    noteElement->QueryDoubleAttribute("rel", &note->_rel);
-                    sequence->_notes.emplace_back(note);
+                Clip* clip = nullptr;
+                auto clipElement = clipSlotElement->FirstChildElement("Clip");
+                if (clipElement != nullptr) {
+                    clip = new Clip();
+                    Sequence* sequence = clip->_sequence.get();
+                    for (auto noteElement = clipElement->FirstChildElement("Notes")->FirstChildElement("Note");
+                         noteElement != nullptr;
+                         noteElement = noteElement->NextSiblingElement("Note")) {
+                        Note* note = new Note();
+                        noteElement->QueryDoubleAttribute("time", &note->_time);
+                        noteElement->QueryDoubleAttribute("duration", &note->_duration);
+                        int intValue;
+                        noteElement->QueryIntAttribute("channel", &intValue);
+                        note->_channel = intValue;
+                        noteElement->QueryIntAttribute("key", &intValue);
+                        note->_key = intValue;
+                        noteElement->QueryDoubleAttribute("vel", &note->_velocity);
+                        noteElement->QueryDoubleAttribute("rel", &note->_rel);
+                        sequence->_notes.emplace_back(note);
+                    }
                 }
                 ClipSlot* clipSlot = new ClipSlot(track, lane, clip);
                 lane->_clipSlots[track] = std::unique_ptr<ClipSlot>(clipSlot);

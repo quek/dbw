@@ -69,6 +69,13 @@
     <ClCompile Include="PianoRoll.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="SaveWindow.cpp" />
+    <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="TimelineWindow.cpp" />
+    <ClCompile Include="GridMixin.cpp" />
+    <ClCompile Include="ZoomMixin.cpp" />
+    <ClCompile Include="TrackLane.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -127,6 +134,16 @@
     <ClInclude Include="PianoRoll.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="SaveWindow.h" />
+    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="TimelineWindow.h" />
+    <ClInclude Include="GridMixin.h" />
+    <ClInclude Include="ZoomMixin.h" />
+    <ClInclude Include="TrackLane.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
@@ -141,6 +158,9 @@
     </Filter>
     <Filter Include="VST3">
       <UniqueIdentifier>{c978aee4-2a1b-4fe1-a71b-fd4d4c239cc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{403f78d7-3209-475c-81a1-db5beb55e875}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

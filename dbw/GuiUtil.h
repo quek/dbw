@@ -10,6 +10,10 @@ extern ImVec4 COLOR_BUTTON_ON;
 extern ImVec4 COLOR_BUTTON_ON_HOVERED;
 extern ImVec4 COLOR_BUTTON_ON_ACTIVE;
 
+extern ImU32 BAR_LINE_COLOR;
+extern ImU32 BEAT_LINE_COLOR;
+extern ImU32 BEAT16TH_LINE_COLOR;
+
 extern float widthWithPadding(int nchars);
 
 ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs);

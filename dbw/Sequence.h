@@ -9,11 +9,10 @@ class Composer;
 
 class Sequence : public Nameable {
 public:
-    Sequence();
-    void deleteNote(Note* note);
+    Sequence(double duration = 16.0);
 
     std::vector<std::unique_ptr<Note>> _notes;
-    double _duration = 16.0;
+    double _duration;
 };
 
 class DeleteNoteCommand : public Command {
