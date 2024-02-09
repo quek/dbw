@@ -35,13 +35,11 @@ void ComposerWindow::render() {
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
         if (ImGui::Button("Loop")) {
             _composer->_looping = false;
-            gErrorWindow->show("y");
         }
         ImGui::PopStyleColor(3);
     } else {
         if (ImGui::Button("Loop")) {
             _composer->_looping = true;
-            gErrorWindow->show("xxxxxxxxxxx\nyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
         }
     }
     ImGui::SameLine();

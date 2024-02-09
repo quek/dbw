@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <set>
 #include "ProcessBuffer.h"
 #include "Command.h"
 #include "ComposerWindow.h"
@@ -27,8 +28,9 @@ public:
     void addTrack();
     void changeMaxLine();
     void scanPlugin();
-    void setStatusMessage(std::string message);
     int maxBar();
+
+    void deleteClips(std::set<Clip*> clips);
 
     std::unique_ptr<Project> _project;
     AudioEngine* _audioEngine;
@@ -49,7 +51,7 @@ public:
     PlayPosition _loopStartPosition{};
     double _loopStartTime = 0.0;
     PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
-    double _loopEndTime = 17.0;
+    double _loopEndTime = 16.0;
     CommandManager _commandManager;
     PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;

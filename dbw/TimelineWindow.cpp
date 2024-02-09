@@ -10,11 +10,16 @@ constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float TIMELINE_WIDTH = 15.0f;
 constexpr float TRACK_HEADER_HEIGHT = 20.0f;
 
+ImU32 CLIP_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
+ImU32 SELECTED_CLIP_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
+
 TimelineWindow::TimelineWindow(Composer* composer) : ZoomMixin(1.0f, 10.0f), _composer(composer) {
     _grid = gGrids[0].get();
 }
 
 void TimelineWindow::render() {
+    _state.reset();
+
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
     auto windowName = _composer->_project->_name.string() + "##Timeline";
     if (ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar)) {
@@ -38,6 +43,7 @@ void TimelineWindow::render() {
             ImGui::PushClipRect(clipRectMin, clipRectMax, true);
             renderClips(windowPos);
             handleCanvas(clipRectMin, clipRectMax);
+            handleShortcut();
             ImGui::PopClipRect();
         }
         ImGui::EndChild();
@@ -51,6 +57,10 @@ void TimelineWindow::render() {
 }
 
 void TimelineWindow::handleCanvas(ImVec2& clipRectMin, ImVec2& clipRectMax) {
+    if (!ImGui::IsWindowFocused()) {
+        return;
+    }
+
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
     if (!Bounds(clipRectMin, clipRectMax).contains(mousePos)) {
@@ -62,26 +72,38 @@ void TimelineWindow::handleCanvas(ImVec2& clipRectMin, ImVec2& clipRectMax) {
         return;
     }
 
-    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-        float scrollX = ImGui::GetScrollX();
-        float scrollY = ImGui::GetScrollY();
-        float time = (mousePos.y - windowPos.y + scrollY - TRACK_HEADER_HEIGHT) / _zoomY;
-        time = _grid->snapFloor(time);
+    if (!_state._consumedDoubleClick) {
+        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            float scrollX = ImGui::GetScrollX();
+            float scrollY = ImGui::GetScrollY();
+            float time = (mousePos.y - windowPos.y + scrollY - TRACK_HEADER_HEIGHT) / _zoomY;
+            time = _grid->snapFloor(time);
 
-        float x = (mousePos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
-        TrackLane* lane = nullptr;
-        for (auto& track : _composer->_tracks) {
-            float trackWidth = getTrackWidth(track.get());
-            if (trackWidth > x) {
-                // TODO 複数レーン対応
-                lane = track->_trackLanes[0].get();
-                break;
+            float x = (mousePos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
+            TrackLane* lane = nullptr;
+            for (auto& track : _composer->_tracks) {
+                float trackWidth = getTrackWidth(track.get());
+                if (trackWidth > x) {
+                    // TODO 複数レーン対応
+                    lane = track->_trackLanes[0].get();
+                    break;
+                }
+                x -= trackWidth;
             }
-            x -= trackWidth;
+            if (lane != nullptr) {
+                lane->_clips.emplace_back(new Clip(time));
+            }
         }
-        if (lane != nullptr) {
-            lane->_clips.emplace_back(new Clip(time));
-        }
+    }
+}
+
+void TimelineWindow::handleShortcut() {
+    if (!ImGui::IsWindowFocused()) {
+        return;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.KeysDown[ImGuiKey_Delete] || io.KeyCtrl && io.KeysDown[ImGuiKey_D]) {
+        _composer->deleteClips(_state._selectedClips);
     }
 }
 
@@ -97,7 +119,7 @@ void TimelineWindow::renderTimeline() {
     ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight());
     ImGui::PushClipRect(clipRectMin, clipRectMax, true);
     for (int i = 0; i < _composer->maxBar(); ++i) {
-        float y = (4 * i * _zoomY) + TRACK_HEADER_HEIGHT;
+        float y = (i * 4 * _zoomY) + TRACK_HEADER_HEIGHT;
         if (y - lastY < GRID_SKIP_WIDTH) {
             continue;
         }
@@ -111,6 +133,12 @@ void TimelineWindow::renderTimeline() {
 
         lastY = y;
     }
+
+    float y = (_composer->_playTime * 4 * _zoomY) + TRACK_HEADER_HEIGHT;
+    ImVec2 pos1 = ImVec2(0.0f, y - scrollY) + windowPos;
+    ImVec2 pos2 = ImVec2(lineX, y - scrollY) + windowPos;
+    drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
+
     ImGui::PopClipRect();
 }
 
@@ -147,6 +175,8 @@ void TimelineWindow::renderTrackHeader() {
 }
 
 void TimelineWindow::renderClips(ImVec2& windowPos) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos;
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
@@ -158,7 +188,48 @@ void TimelineWindow::renderClips(ImVec2& windowPos) {
             float y2 = y1 + clip->_duration * _zoomY;
             ImVec2 pos1 = ImVec2(x - scrollX + 2.0f, y1);
             ImVec2 pos2 = ImVec2(x - scrollX + trackWidth - 1.0f, y2);
-            drawList->AddRectFilled(pos1, pos2, IM_COL32_WHITE);
+            ImU32 clipColor;
+            if (_state._selectedClips.contains(clip.get())) {
+                clipColor = SELECTED_CLIP_COLOR;
+            } else {
+                clipColor = CLIP_COLOR;
+            }
+            drawList->AddRectFilled(pos1, pos2, clipColor);
+
+            if (!ImGui::IsWindowFocused() || _state._draggingClip || !Bounds(pos1, pos2).contains(mousePos)) {
+                continue;
+            }
+
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                _state._unselectClickedClipIfMouserReleased = io.KeyCtrl && _state._selectedClips.contains(clip.get());
+                if (!io.KeyCtrl && !_state._selectedClips.contains(clip.get())) {
+                    _state._selectedClips.clear();
+                }
+                _state._selectedClips.insert(clip.get());
+                _state._clickedClip = clip.get();
+                _state._consumedClicked = true;
+            } else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+                if (_state._unselectClickedClipIfMouserReleased) {
+                    _state._selectedClips.erase(_state._clickedClip);
+                }
+                _state._unselectClickedClipIfMouserReleased = false;
+            }
+
+            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                _composer->_pianoRoll->edit(clip.get());
+                _state._consumedDoubleClick = true;
+            }
+
+            if (mousePos.y - pos1.y <= 5) {
+                _state._clipClickedPart = Top;
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+            } else if (pos2.y - mousePos.y <= 5) {
+                _state._clipClickedPart = Bottom;
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+            } else {
+                _state._clipClickedPart = Middle;
+                _state._clipClickedOffset = mousePos.y - pos1.y;
+            }
         }
         x += trackWidth;
     }
@@ -177,4 +248,9 @@ float TimelineWindow::allTracksWidth() {
         width += getTrackWidth(track.get());
     }
     return width + getTrackWidth(_composer->_masterTrack.get());
+}
+
+void TimelineWindow::State::reset() {
+    _consumedDoubleClick = false;
+    _consumedClicked = false;
 }

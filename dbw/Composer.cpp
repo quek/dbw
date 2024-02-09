@@ -12,6 +12,7 @@
 #include "Project.h"
 #include "logger.h"
 #include "Track.h"
+#include "TrackLane.h"
 #include "util.h"
 
 Composer::Composer(AudioEngine* audioEngine) :
@@ -65,6 +66,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         _playTime = _nextPlayTime;
     }
     if (_looping) {
+        // TODO ループ時の端数処理
         if (_playPosition >= _loopEndPosition) {
             _playPosition = _loopStartPosition;
         }
@@ -91,6 +93,21 @@ void Composer::scanPlugin() {
 int Composer::maxBar() {
     // TODO
     return 50;
+}
+
+void Composer::deleteClips(std::set<Clip*> clips) {
+    // TODO undo
+    for (auto clip : clips) {
+        for (auto& track : _tracks) {
+            for (auto& lane : track->_trackLanes) {
+                auto it = std::ranges::find_if(lane->_clips, [clip](const auto& x) { return x.get() == clip; });
+                if (it != lane->_clips.end()) {
+                    lane->_clips.erase(it);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void Composer::changeMaxLine() {

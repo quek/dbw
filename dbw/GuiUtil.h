@@ -13,6 +13,7 @@ extern ImVec4 COLOR_BUTTON_ON_ACTIVE;
 extern ImU32 BAR_LINE_COLOR;
 extern ImU32 BEAT_LINE_COLOR;
 extern ImU32 BEAT16TH_LINE_COLOR;
+extern ImU32 PLAY_CURSOR_COLOR;
 
 extern float widthWithPadding(int nchars);
 
