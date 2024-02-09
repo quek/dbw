@@ -28,10 +28,10 @@ private:
     void renderNotes();
     void renderTimeline();
 
-    Bounds boundOfNote(Note* note);
+    Bounds boundsOfNote(Note* note);
     void handleCanvas();
     Note* noteFromMousePos();
-    double noteTimeFromMouserPos(float offset=0.0f);
+    double noteTimeFromMouserPos(float offset = 0.0f);
     int16_t noteKeyFromMouserPos();
     ImVec2 toCanvasPos(ImVec2& pos) const;
     double toSnapFloor(const double time);

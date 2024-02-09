@@ -95,6 +95,58 @@ void TimelineWindow::handleCanvas(ImVec2& clipRectMin, ImVec2& clipRectMax) {
             }
         }
     }
+    if (_state._draggingClip) {
+        if (_state._clipClickedPart == Middle) {
+        } else if (_state._clipClickedPart == Middle) {
+        } else if (_state._clipClickedPart == Middle) {
+        }
+    } else if (_state._rangeSelecting) {
+        // Ctrl でトグル、Shift で追加 Reason の仕様がいいと思う
+        ImVec2 pos1 = io.MouseClickedPos[ImGuiMouseButton_Left];
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddRect(pos1, mousePos, RANGE_SELECTING_COLOR, 0.0f, ImDrawFlags_None, 3.0f);
+        if (!io.KeyShift && !io.KeyCtrl) {
+            _state._selectedClips.clear();
+        }
+        Bounds bounds(pos1, mousePos);
+        for (auto& track : _composer->_tracks) {
+            for (auto& clip : track->_trackLanes[0]->_clips) {
+                if (bounds.overlaped(_clipBoundsMap[clip.get()])) {
+                    if (io.KeyCtrl) {
+                        if (_state._selectedClips.contains(clip.get())) {
+                            _state._selectedClips.erase(clip.get());
+                        } else {
+                            _state._selectedClips.insert(clip.get());
+                        }
+                    } else {
+                        _state._selectedClips.insert(clip.get());
+                    }
+                }
+            }
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            // 範囲選択解除
+            _state._rangeSelecting = false;
+        }
+    } else {
+        if (ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.1f)) {
+            // ここがノートのドラッグの開始
+            if (!_state._selectedClips.empty() && _state._clickedClip) {
+                // ノートの移動 or 長さ変更
+                _state._draggingClip = _state._clickedClip;
+            } else {
+                // 範囲選択
+                _state._rangeSelecting = true;
+            }
+        } else if (!_state._consumedClicked) {
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !io.KeyCtrl && !io.KeyShift) {
+                _state._selectedClips.clear();
+            }
+            if (!ImGui::IsAnyMouseDown()) {
+                _state._clickedClip = nullptr;
+            }
+        }
+    }
 }
 
 void TimelineWindow::handleShortcut() {
@@ -175,6 +227,7 @@ void TimelineWindow::renderTrackHeader() {
 }
 
 void TimelineWindow::renderClips(ImVec2& windowPos) {
+    _clipBoundsMap.clear();
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
     ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -183,7 +236,7 @@ void TimelineWindow::renderClips(ImVec2& windowPos) {
     float x = TIMELINE_WIDTH + windowPos.x;
     for (auto& track : _composer->_tracks) {
         float trackWidth = getTrackWidth(track.get());
-        for (auto& clip : track->_trackLanes[0]->_clips) {
+        for (const auto& clip : track->_trackLanes[0]->_clips) {
             float y1 = clip->_time * _zoomY - scrollY + TRACK_HEADER_HEIGHT + windowPos.y;
             float y2 = y1 + clip->_duration * _zoomY;
             ImVec2 pos1 = ImVec2(x - scrollX + 2.0f, y1);
@@ -195,6 +248,7 @@ void TimelineWindow::renderClips(ImVec2& windowPos) {
                 clipColor = CLIP_COLOR;
             }
             drawList->AddRectFilled(pos1, pos2, clipColor);
+            _clipBoundsMap[clip.get()] = Bounds(pos1, pos2);
 
             if (!ImGui::IsWindowFocused() || _state._draggingClip || !Bounds(pos1, pos2).contains(mousePos)) {
                 continue;

@@ -18,7 +18,6 @@ ImU32 BACKGROUD_WHITE_KEY_COLOR = IM_COL32(0x22, 0x22, 0x22, 0x88);
 ImU32 BACKGROUD_BLACK_KEY_COLOR = IM_COL32(0x00, 0x00, 0x00, 0x88);
 ImU32 NOTE_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
 ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
-ImU32 RANGE_SELECTING_COLOR = IM_COL32(0x66, 0x22, 0x22, 0x88);
 
 PianoRoll::PianoRoll(Composer* composer) : ZoomMixin(4.0f, 0.5f), _composer(composer) {
     _grid = gGrids[1].get();
@@ -318,7 +317,7 @@ void PianoRoll::handleCanvas() {
             }
             Bounds bounds(pos1, mousePos);
             for (auto& note : _clip->_sequence->_notes) {
-                Bounds noteBounds = boundOfNote(note.get());
+                Bounds noteBounds = boundsOfNote(note.get());
                 if (bounds.overlaped(noteBounds)) {
                     if (io.KeyCtrl) {
                         if (_state._selectedNotes.contains(note.get())) {
@@ -362,7 +361,7 @@ void PianoRoll::handleCanvas() {
     }
 }
 
-Bounds PianoRoll::boundOfNote(Note* note) {
+Bounds PianoRoll::boundsOfNote(Note* note) {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();

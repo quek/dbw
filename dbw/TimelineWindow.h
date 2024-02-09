@@ -6,6 +6,7 @@
 
 class Clip;
 class Composer;
+struct Bounds;
 struct ImVec2;
 class Track;
 
@@ -25,6 +26,7 @@ private:
 
     Composer* _composer;
     std::map<Track*, float> _trackWidthMap;
+    std::map < Clip*, Bounds> _clipBoundsMap;
 
     enum ClipClickedPart {
         Top,

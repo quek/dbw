@@ -13,6 +13,7 @@ ImU32 BAR_LINE_COLOR = IM_COL32(0x88, 0x88, 0x88, 0x88);
 ImU32 BEAT_LINE_COLOR = IM_COL32(0x55, 0x55, 0x55, 0x88);
 ImU32 BEAT16TH_LINE_COLOR = IM_COL32(0x33, 0x33, 0x33, 0x88);
 ImU32 PLAY_CURSOR_COLOR = IM_COL32(0x33, 0x33, 0xff, 0xcc);
+ImU32 RANGE_SELECTING_COLOR = IM_COL32(0x66, 0x22, 0x22, 0x88);
 
 float widthWithPadding(int nchars) {
     ImGuiStyle& style = ImGui::GetStyle();
@@ -59,6 +60,9 @@ bool operator>(const ImVec2& lhs, const ImVec2& rhs) {
 
 bool operator>=(const ImVec2& lhs, const ImVec2& rhs) {
     return lhs.x >= rhs.x && lhs.y >= rhs.y;
+}
+
+Bounds::Bounds() {
 }
 
 Bounds::Bounds(const ImVec2& a, const ImVec2& b) {
