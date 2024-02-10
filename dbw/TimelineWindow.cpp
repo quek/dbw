@@ -79,17 +79,7 @@ void TimelineWindow::handleCanvas(ImVec2& clipRectMin, ImVec2& clipRectMax) {
             float time = (mousePos.y - windowPos.y + scrollY - TRACK_HEADER_HEIGHT) / _zoomY;
             time = _grid->snapFloor(time);
 
-            float x = (mousePos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
-            TrackLane* lane = nullptr;
-            for (auto& track : _composer->_tracks) {
-                float trackWidth = getTrackWidth(track.get());
-                if (trackWidth > x) {
-                    // TODO 複数レーン対応
-                    lane = track->_trackLanes[0].get();
-                    break;
-                }
-                x -= trackWidth;
-            }
+            TrackLane* lane = laneFromMousePos();
             if (lane != nullptr) {
                 lane->_clips.emplace_back(new Clip(time));
             }
@@ -97,8 +87,46 @@ void TimelineWindow::handleCanvas(ImVec2& clipRectMin, ImVec2& clipRectMax) {
     }
     if (_state._draggingClip) {
         if (_state._clipClickedPart == Middle) {
-        } else if (_state._clipClickedPart == Middle) {
-        } else if (_state._clipClickedPart == Middle) {
+            float time = clipTimeFromMouserPos(_state._clipClickedOffset);
+            float timeDelta = time - _state._draggingClip->_time;
+            TrackLane* lane = laneFromMousePos();
+            // TODO laneDelta pointer?
+            //int16_t key = noteKeyFromMouserPos();
+            //int16_t keyDelta = key - _state._draggingClip->_key;
+            _state._draggingClip->_time = time;
+            //_state._draggingClip->_key = key;
+            for (auto note : _state._selectedClips) {
+                if (note != _state._draggingClip) {
+                    note->_time += timeDelta;
+                    // TODO lane note->_key += keyDelta;
+                }
+            }
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+        } else if (_state._clipClickedPart == Top) {
+            float time = clipTimeFromMouserPos();
+            float timeDelta = time - _state._draggingClip->_time;
+            if (std::ranges::all_of(_state._selectedClips,
+                                    [timeDelta](auto x) { return x->_duration > timeDelta; })) {
+                for (auto clip : _state._selectedClips) {
+                    clip->_time += timeDelta;
+                    clip->_duration += -timeDelta;
+                }
+            }
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+        } else if (_state._clipClickedPart == Bottom) {
+            float time = clipTimeFromMouserPos();
+            float timeDelta = time - _state._draggingClip->_time - _state._draggingClip->_duration;
+            if (std::ranges::all_of(_state._selectedClips,
+                                    [timeDelta](auto x) { return x->_duration > -timeDelta; })) {
+                for (auto clip : _state._selectedClips) {
+                    clip->_duration += timeDelta;
+                }
+            }
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            // ノートのドラッグ解除
+            _state._draggingClip = nullptr;
         }
     } else if (_state._rangeSelecting) {
         // Ctrl でトグル、Shift で追加 Reason の仕様がいいと思う
@@ -302,6 +330,56 @@ float TimelineWindow::allTracksWidth() {
         width += getTrackWidth(track.get());
     }
     return width + getTrackWidth(_composer->_masterTrack.get());
+}
+
+ImVec2 TimelineWindow::toCanvasPos(ImVec2& pos) const {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    float x = (pos.x - windowPos.x - TIMELINE_WIDTH - TIMELINE_START_OFFSET + scrollX) / _zoomX;
+    float y = (pos.y - windowPos.y - TRACK_HEADER_HEIGHT + scrollY) / _zoomY;
+    return ImVec2(x, y);
+}
+
+double TimelineWindow::clipTimeFromMouserPos(float offset) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos - ImVec2(offset, 0.0f);
+    ImVec2 canvasPos = toCanvasPos(mousePos);
+    double time = toSnapRound(canvasPos.y);
+    return time;
+}
+
+double TimelineWindow::toSnapFloor(const double time) {
+    if (!_snap) {
+        return time;
+    }
+    return _grid->snapFloor(time);
+}
+
+double TimelineWindow::toSnapRound(const double time) {
+    if (!_snap) {
+        return time;
+    }
+    return _grid->snapRound(time);
+}
+
+TrackLane* TimelineWindow::laneFromMousePos() {
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos;
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float x = (mousePos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
+    TrackLane* lane = nullptr;
+    for (auto& track : _composer->_tracks) {
+        float trackWidth = getTrackWidth(track.get());
+        if (trackWidth > x) {
+            // TODO 複数レーン対応
+            lane = track->_trackLanes[0].get();
+            return lane;
+        }
+        x -= trackWidth;
+    }
+    return nullptr;
 }
 
 void TimelineWindow::State::reset() {

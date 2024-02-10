@@ -9,6 +9,7 @@ class Composer;
 struct Bounds;
 struct ImVec2;
 class Track;
+class TrackLane;
 
 class TimelineWindow : public GridMixin, public ZoomMixin {
 public:
@@ -23,6 +24,11 @@ private:
     void renderClips(ImVec2& windowPos);
     float getTrackWidth(Track* track);
     float allTracksWidth();
+    ImVec2 toCanvasPos(ImVec2& pos) const;
+    double clipTimeFromMouserPos(float offset = 0.0f);
+    double toSnapFloor(const double time);
+    double toSnapRound(const double time);
+    TrackLane* laneFromMousePos();
 
     Composer* _composer;
     std::map<Track*, float> _trackWidthMap;
