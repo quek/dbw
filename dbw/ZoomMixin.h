@@ -1,9 +1,12 @@
 #pragma once
 
 class ZoomMixin {
-protected:
-    ZoomMixin(float zoomX, float zoomY);
+public:
+    ZoomMixin(float zoomX = 1.0f, float zoomY = 10.0f);
+    virtual ~ZoomMixin();
+
     void renderDebugZoomSlider();
-    float _zoomX = 4.0f;
-    float _zoomY = 0.5f;
+
+    float _zoomX;
+    float _zoomY;
 };

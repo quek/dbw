@@ -402,7 +402,7 @@ Note* PianoRoll::noteFromMousePos() {
     float time = toSnapFloor(canvasPos.x / BEAT_WIDTH);
     int16_t key = static_cast<int16_t>(128 - canvasPos.y / KEY_HEIGHT);
     if (0 <= key && key <= 127) {
-        Note* note = new Note{ ._time = time, ._duration = 1, ._channel = 0, ._key = key, ._velocity = 0.8f };
+        Note* note = new Note(time, 1, key, 0.8f);
         return note;
     } else {
         return nullptr;

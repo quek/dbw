@@ -76,6 +76,9 @@
     <ClCompile Include="GridMixin.cpp" />
     <ClCompile Include="ZoomMixin.cpp" />
     <ClCompile Include="TrackLane.cpp" />
+    <ClCompile Include="TimelineCanvasMixin.cpp" />
+    <ClCompile Include="PianorollWindow.cpp" />
+    <ClCompile Include="Thing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -144,6 +147,9 @@
     <ClInclude Include="GridMixin.h" />
     <ClInclude Include="ZoomMixin.h" />
     <ClInclude Include="TrackLane.h" />
+    <ClInclude Include="TimelineCanvasMixin.h" />
+    <ClInclude Include="PianorollWindow.h" />
+    <ClInclude Include="Thing.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
