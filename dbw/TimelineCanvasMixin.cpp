@@ -74,21 +74,26 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
             _state._selectedThings.clear();
         }
         Bounds bounds(pos1, mousePos);
-        //for (auto& track : _composer->_tracks) {
-        //    for (auto& thing : track->_trackLanes[0]->_things) {
-        //        if (bounds.overlaped(_state._thingBoundsMap[thing.get()])) {
-        //            if (io.KeyCtrl) {
-        //                if (_state._selectedThings.contains(thing.get())) {
-        //                    _state._selectedThings.erase(thing.get());
-        //                } else {
-        //                    _state._selectedThings.insert(thing.get());
-        //                }
-        //            } else {
-        //                _state._selectedThings.insert(thing.get());
-        //            }
-        //        }
-        //    }
-        //}
+        std::set<THING*> inRangeThings;
+        for (auto& thing : _allThings) {
+            if (bounds.overlaped(_state._thingBoundsMap[thing])) {
+                inRangeThings.insert(thing);
+            }
+        }
+        if (io.KeyCtrl) {
+            _state._selectedThings = _state._selectedThingsAtStartRangeSelecting;
+            for (auto thing : inRangeThings) {
+                if (_state._selectedThings.contains(thing)) {
+                    _state._selectedThings.erase(thing);
+                } else {
+                    _state._selectedThings.insert(thing);
+                }
+            }
+        } else if (io.KeyShift) {
+            _state._selectedThings.insert(inRangeThings.begin(), inRangeThings.end());
+        } else {
+            _state._selectedThings = inRangeThings;
+        }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             // 範囲選択解除
             _state._rangeSelecting = false;
@@ -101,6 +106,7 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
         } else {
             // 範囲選択
             _state._rangeSelecting = true;
+            _state._selectedThingsAtStartRangeSelecting = _state._selectedThings;
         }
     } else if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
         THING* thing = thingAtPos(mousePos);

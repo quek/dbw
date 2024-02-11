@@ -52,6 +52,7 @@ public:
     struct State {
         THING* _clickedThing = nullptr;
         std::set<THING*> _selectedThings;
+        std::set<THING*> _selectedThingsAtStartRangeSelecting;
         THING* _draggingThing = nullptr;
         bool _unselectClickedThingIfMouserReleased = false;
         ClickedPart _thingClickedPart = Middle;
