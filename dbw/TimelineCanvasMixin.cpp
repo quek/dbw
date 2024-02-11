@@ -27,17 +27,23 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
 
     if (_state._draggingThing) {
         if (_state._thingClickedPart == Middle) {
-            float time = timeFromMousePos(_state._thingClickedOffset);
-            float timeDelta = time - _state._draggingThing->_time;
-            // TODO TrackLane* lane = laneFromMousePos();
-            // TODO laneDelta pointer?
-            //int16_t key = noteKeyFromMouserPos();
-            //int16_t keyDelta = key - _state._draggingthing->_key;
-            //_state._draggingthing->_key = key;
-            for (auto thing : _state._selectedThings) {
-                thing->_time += timeDelta;
-                // TODO lane note->_key += keyDelta;
-            }
+            float oldTime = _state._draggingThing->_time;
+            float newTime = timeFromMousePos(_state._thingClickedOffset);
+            LANE* oldLane = laneFromPos(_state._thingBoundsMap[_state._draggingThing].p);
+            LANE* newLane = laneFromPos(mousePos);
+            handleMove(oldTime, newTime, oldLane, newLane);
+
+            // TODO DELETE THESE
+            //float time = timeFromMousePos(_state._thingClickedOffset);
+            //float timeDelta = time - _state._draggingThing->_time;
+            //LANE* oldLane = laneFromPos(_state._thingBoundsMap[_state._draggingThing].p);
+            //LANE* newLane = laneFromPos(mousePos);
+            //for (auto thing : _state._selectedThings) {
+            //    thing->_time += timeDelta;
+            //    if (newLane) {
+            //        handleChangeLane(thing, oldLane, newLane);
+            //    }
+            //}
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
         } else if (_state._thingClickedPart == Top) {
             float time = timeFromMousePos();
@@ -114,7 +120,7 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
             handleDoubleClick(thing);
         } else {
             float time = timeFromMousePos(_state._thingClickedOffset);
-            LANE* lane = laneFromMousePos();
+            LANE* lane = laneFromPos(mousePos);
             handleDoubleClick(time, lane);
         }
     } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {

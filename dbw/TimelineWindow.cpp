@@ -59,6 +59,32 @@ void TimelineWindow::render() {
     ImGui::End();
 }
 
+void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) {
+    double timeDelta = newTime - oldTime;
+
+    auto oldIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), oldLane));
+    auto newIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), newLane));
+    auto indexDelta = newIndex - oldIndex;
+
+    for (auto clip : _state._selectedThings) {
+        clip->_time += timeDelta;
+
+        if (indexDelta == 0) {
+            continue;
+        }
+        TrackLane* from = _clipLaneMap[clip];
+        auto fromIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), from));
+        auto toIndex = fromIndex + indexDelta;
+        if (toIndex >= _allLanes.size()) {
+            continue;
+        }
+        TrackLane* to = _allLanes[toIndex];
+        auto it = std::ranges::find_if(from->_clips, [clip](const auto& x) { return x.get() == clip; });
+        to->_clips.push_back(std::move(*it));
+        from->_clips.erase(it);
+    }
+}
+
 void TimelineWindow::handleDoubleClick(Clip* clip) {
     _composer->_pianoRoll->edit(clip);
 }
@@ -70,9 +96,11 @@ void TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
 
 void TimelineWindow::prepareAllThings() {
     _allThings.clear();
+    _allLanes.clear();
     _clipLaneMap.clear();
     for (auto& track : _composer->_tracks) {
         for (auto& lane : track->_trackLanes) {
+            _allLanes.push_back(lane.get());
             for (auto& clip : lane->_clips) {
                 _allThings.push_back(clip.get());
                 _clipLaneMap[clip.get()] = lane.get();
@@ -104,13 +132,11 @@ ImU32 TimelineWindow::colorThing() {
 float TimelineWindow::xFromThing(Clip* clip) {
     TrackLane* lane = _clipLaneMap[clip];
     float x = 0.0f;
-    for (auto& track : _composer->_tracks) {
-        for (auto& laneItr : track->_trackLanes) {
-            if (laneItr.get() == lane) {
-                return x;
-            }
-            x += getLaneWidth(laneItr.get());
+    for (auto it : _allLanes) {
+        if (it == lane) {
+            return x;
         }
+        x += getLaneWidth(it);
     }
     return x;
 }
@@ -220,21 +246,18 @@ float TimelineWindow::allTracksWidth() {
     return width + getTrackWidth(_composer->_masterTrack.get());
 }
 
-TrackLane* TimelineWindow::laneFromMousePos() {
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 mousePos = io.MousePos;
+TrackLane* TimelineWindow::laneFromPos(ImVec2& pos) {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
-    float x = (mousePos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
-    TrackLane* lane = nullptr;
+    float x = (pos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
     for (auto& track : _composer->_tracks) {
-        float trackWidth = getTrackWidth(track.get());
-        if (trackWidth > x) {
-            // TODO 複数レーン対応
-            lane = track->_trackLanes[0].get();
-            return lane;
+        for (auto& lane : track->_trackLanes) {
+            float laneWidth = getLaneWidth(lane.get());
+            if (laneWidth > x) {
+                return lane.get();
+            }
+            x -= laneWidth;
         }
-        x -= trackWidth;
     }
     return nullptr;
 }

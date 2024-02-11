@@ -17,6 +17,7 @@ public:
 
     virtual void handleDoubleClick(Clip* thing) override;
     virtual void handleDoubleClick(double time, TrackLane* lane) override;
+    virtual void handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) override;
 
     virtual void prepareAllThings() override;
 
@@ -27,7 +28,7 @@ public:
     virtual ImU32 colorSlectedThing() override;
     virtual ImU32 colorThing() override;
 
-    virtual TrackLane* laneFromMousePos() override;
+    virtual TrackLane* laneFromPos(ImVec2& pos) override;
     virtual float xFromThing(Clip* clip) override;
     virtual float getLaneWidth(Clip* clip) override;
     float getLaneWidth(TrackLane* lane);

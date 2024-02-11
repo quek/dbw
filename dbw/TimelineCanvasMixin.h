@@ -17,9 +17,11 @@ public:
 
     virtual void handleDoubleClick(THING* thing) = 0;
     virtual void handleDoubleClick(double time, LANE* lane) = 0;
+    virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     void handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax);
 
     std::vector<THING*> _allThings;
+    std::vector<LANE*> _allLanes;
     virtual void prepareAllThings() = 0;
 
     void renderThing(ImVec2& windowPos);
@@ -33,7 +35,7 @@ public:
 
     double timeFromMousePos(float offset = 0.0f);
 
-    virtual LANE* laneFromMousePos() = 0;
+    virtual LANE* laneFromPos(ImVec2& pos) = 0;
     THING* thingAtPos(ImVec2& pos);
     virtual float xFromThing(THING* thing) = 0;
     virtual float getLaneWidth(THING* lane) = 0;
