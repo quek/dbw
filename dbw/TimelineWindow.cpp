@@ -75,7 +75,7 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
         TrackLane* from = _clipLaneMap[clip];
         auto fromIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), from));
         auto toIndex = fromIndex + indexDelta;
-        if (toIndex >= _allLanes.size()) {
+        if (toIndex < 0 || toIndex >= static_cast<int>(_allLanes.size())) {
             continue;
         }
         TrackLane* to = _allLanes[toIndex];
@@ -178,9 +178,19 @@ void TimelineWindow::renderTimeline() {
         lastY = y;
     }
 
-    float y = (_composer->_playTime * 4 * _zoomY) + TRACK_HEADER_HEIGHT;
-    ImVec2 pos1 = ImVec2(0.0f, y - scrollY) + windowPos;
-    ImVec2 pos2 = ImVec2(lineX, y - scrollY) + windowPos;
+    float y = (_composer->_playTime * _zoomY) + TRACK_HEADER_HEIGHT;
+    if (_composer->_playing) {
+        if (y < ImGui::GetWindowHeight() / 2.0f) {
+            ImGui::SetScrollY(0);
+        } else {
+            ImGui::SetScrollY(y);
+        }
+        y = std::min(y, ImGui::GetWindowHeight() / 2.0f);
+    } else {
+        y -= scrollY;
+    }
+    ImVec2 pos1 = ImVec2(0.0f, y) + windowPos;
+    ImVec2 pos2 = ImVec2(lineX, y) + windowPos;
     drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
 
     ImGui::PopClipRect();
