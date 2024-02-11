@@ -33,7 +33,7 @@ PluginManager::PluginManager(Composer* composer) : _composer(composer) {
 Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
     if (strcmp(element->Name(), "ClapPlugin") == 0) {
         auto deviceId = element->Attribute("deviceID");
-        auto plugin = _composer->_pluginManager.findPlugin(deviceId);
+        auto plugin = _composer->_pluginManager.findPlugin("clap", deviceId);
         if (plugin == nullptr) {
             return nullptr;
         }
@@ -43,6 +43,19 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
         auto state = element->FirstChildElement("State");
         pluginHost->_statePath = state->Attribute("path");
         pluginHost->loadState();
+        return module;
+    } else if (strcmp(element->Name(), "Vst3Plugin") == 0) {
+        auto deviceId = element->Attribute("deviceID");
+        auto plugin = _composer->_pluginManager.findPlugin("vst3", deviceId);
+        if (plugin == nullptr) {
+            return nullptr;
+        }
+        auto path = (*plugin)["path"].get<std::string>();
+        auto module = new Vst3Module((*plugin)["name"], track);
+        module->load(path);
+        auto state = element->FirstChildElement("State");
+        auto statePath = _composer->_project->projectDir() / state->Attribute("path");
+        module->loadState(statePath);
         return module;
     } else if (strcmp(element->Name(), "BuiltinDevice") == 0) {
         auto deviceId = element->Attribute("deviceID");
@@ -146,9 +159,9 @@ void PluginManager::openModuleSelector(Track* track) {
     ImGui::End();
 }
 
-nlohmann::json* PluginManager::findPlugin(const std::string deviceId) {
-    auto plugin = std::find_if(_plugins["clap"].begin(), _plugins["clap"].end(), [&deviceId](auto x) { return x["id"] == deviceId; });
-    if (plugin != _plugins["clap"].end()) {
+nlohmann::json* PluginManager::findPlugin(const char* pluginType, const std::string deviceId) {
+    auto plugin = std::find_if(_plugins[pluginType].begin(), _plugins[pluginType].end(), [&deviceId](auto x) { return x["id"] == deviceId; });
+    if (plugin != _plugins[pluginType].end()) {
         return &*plugin;
     }
     return nullptr;

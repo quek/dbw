@@ -217,6 +217,7 @@
     <ClCompile Include="..\imgui\backends\imgui_impl_dx12.cpp" />
     <ClCompile Include="..\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\imgui\misc\cpp\imgui_stdlib.cpp" />
+    <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />

@@ -14,7 +14,7 @@ public:
     void scan();
     void load();
     void openModuleSelector(Track* track);
-    nlohmann::json* findPlugin(const std::string deviceId);
+    nlohmann::json* findPlugin(const char* pluginType, const std::string deviceId);
     nlohmann::json _plugins;
 
     std::string _query;

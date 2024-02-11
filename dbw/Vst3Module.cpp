@@ -1,9 +1,14 @@
 #include "Vst3Module.h"
+#include <fstream>
 #include <public.sdk/source/vst/hosting/module.h>
 #include <public.sdk/source/vst/hosting/parameterchanges.h>
 #include "imgui.h"
+#include "Composer.h"
 #include "ErrorWindow.h"
 #include "logger.h"
+#include "Project.h"
+#include "Track.h"
+#include "util.h"
 
 // ここからVSTプラグイン関係(音声処理クラスやパラメーター操作クラス)のヘッダ
 #include "pluginterfaces/base/funknown.h"
@@ -11,6 +16,7 @@
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/ivstevents.h"
 #include <pluginterfaces/base/ftypes.h>
+#include <public.sdk/source/common/memorystream.h>
 
 Vst3Module::Vst3Module(std::string name, Track* track) : Module(name, track) {
     FUNKNOWN_CTOR
@@ -90,6 +96,7 @@ bool Vst3Module::load(std::string path) {
     _plugProvider->initialize();
 
     logger->debug("最初に見つかった音声処理クラス「{}」を作成・初期化しました。", audioClassInfo[0].name());
+    _id = audioClassInfo[0].ID().toString();
 
     // ---------------------------------------------------------------------------
     // PlugProviderクラスから音声処理クラスを取得する。(音声処理クラスは初期化済み)
@@ -363,6 +370,61 @@ void Vst3Module::onResize(int width, int height) {
     }
 }
 
+void Vst3Module::loadState(std::filesystem::path path) {
+    std::ifstream in(path);
+    int64_t size;
+    in >> size;
+    std::unique_ptr<char[]> buffer(new char[size]);
+    in.read(buffer.get(), size);
+    {
+        Steinberg::MemoryStream processorStream(buffer.get(), size);
+        _component->setState(&processorStream);
+    }
+    {
+        Steinberg::MemoryStream processorStream(buffer.get(), size);
+        _controller->setComponentState(&processorStream);
+    }
+    in >> size;
+    buffer.reset(new char[size]);
+    in.read(buffer.get(), size);
+    Steinberg::MemoryStream controllerStream(buffer.get(), size);
+    _controller->setState(&controllerStream);
+}
+
+tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* doc) {
+    Steinberg::MemoryStream processorStream;
+    _component->getState(&processorStream);
+    Steinberg::MemoryStream controllerStream;
+    _controller->getState(&controllerStream);
+
+    auto* element = doc->NewElement("Vst3Plugin");
+    // TODO Possible values: instrument, noteFX, audioFX, analyzer
+    element->SetAttribute("deviceRole", "instrument");
+    element->SetAttribute("deviceName", _name.c_str());
+    element->SetAttribute("deviceID", _id.c_str());
+
+    element->InsertNewChildElement("Parameters");
+
+    auto* enabled = element->InsertNewChildElement("Enabled");
+    enabled->SetAttribute("value", true);
+
+    auto* state = element->InsertNewChildElement("State");
+    auto statePath = std::filesystem::path("plugins") / (generateUniqueId() + ".vstpreset");
+    state->SetAttribute("path", statePath.string().c_str());
+
+    auto path = _track->_composer->_project->projectDir() / statePath;
+    std::filesystem::create_directories(path.parent_path());
+    std::ofstream out(path);
+    int64_t size = processorStream.getSize();
+    out << size;
+    out.write(processorStream.getData(), size);
+    size = controllerStream.getSize();
+    out.write(controllerStream.getData(), size);
+    out.close();
+
+    return element;
+}
+
 nlohmann::json Vst3Module::scan(const std::string path) {
     nlohmann::json plugins;
     plugins["path"] = path;
@@ -407,10 +469,6 @@ nlohmann::json Vst3Module::scan(const std::string path) {
     }
 
     return plugins;
-}
-
-tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* /*doc*/) {
-    return nullptr;
 }
 
 IMPLEMENT_FUNKNOWN_METHODS(Vst3Module, Steinberg::IPlugFrame, Steinberg::IPlugFrame::iid)

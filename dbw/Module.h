@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <string>
 #include <clap/clap.h>
 #include "tinyxml2/tinyxml2.h"
@@ -18,6 +19,7 @@ public:
     virtual void renderContent() {}
     virtual bool process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) { return true; }
     virtual void onResize(int /*width*/, int /*height*/) {}
+    virtual void loadState(std::filesystem::path /*path*/) {}
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) = 0;
 
     Track* _track;

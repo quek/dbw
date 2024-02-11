@@ -76,6 +76,9 @@
     <ClCompile Include="TimelineCanvasMixin.cpp" />
     <ClCompile Include="PianorollWindow.cpp" />
     <ClCompile Include="Thing.cpp" />
+    <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp">
+      <Filter>VST3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">

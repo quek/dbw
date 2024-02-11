@@ -23,13 +23,16 @@ public:
     virtual void closeGui() override;
     void renderContent() override;
     virtual void onResize(int width, int height) override;
-    static nlohmann::json scan(const std::string path);
+    virtual void loadState(std::filesystem::path path) override;
     virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
+
+    static nlohmann::json scan(const std::string path);
 
     DECLARE_FUNKNOWN_METHODS
     Steinberg::tresult PLUGIN_API resizeView(Steinberg::IPlugView* view, Steinberg::ViewRect* newSize) SMTG_OVERRIDE;
 
 private:
+    std::string _id;
     Steinberg::Vst::HostApplication _pluginContext;
     VST3::Hosting::Module::Ptr _module = nullptr;
     std::unique_ptr<Steinberg::Vst::PlugProvider> _plugProvider = nullptr;
