@@ -13,6 +13,8 @@ nlohmann
 VST_SDK
 ImGuiFileDialog
 
+dbw/imgui.ini
+
 # User-specific files
 *.rsuser
 *.suo
