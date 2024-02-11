@@ -18,7 +18,6 @@ public:
     virtual void render();
     void addModule(std::string path, uint32_t index);
     ProcessBuffer _processBuffer;
-    float* _out = nullptr;
 
     std::string _name;
     std::vector<std::unique_ptr<TrackLane>> _trackLanes;

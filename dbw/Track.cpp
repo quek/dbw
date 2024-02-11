@@ -16,45 +16,38 @@ Track::Track(std::string name, Composer* composer) : _name(name), _composer(comp
 }
 
 Track::~Track() {
-    if (_out != nullptr) {
-        free(_out);
-    }
 }
 
 void Track::process(int64_t steadyTime) {
-    /*
-    int toLine = to->_delay == 0 ? to->_line : to->_line + 1;
-    for (int lineIndex = from->_line; lineIndex <= toLine && lineIndex < _lines.size(); ++lineIndex) {
-        auto& line = _lines[lineIndex];
-        for (int columnIndex = 0; columnIndex < _ncolumns; ++columnIndex) {
-            auto& column = line->_columns[columnIndex];
-            auto lastKey = _lastKeys[columnIndex];
-            PlayPosition linePosition{ ._line = lineIndex, ._delay = static_cast<unsigned char>(column->_delay) };
-            if (linePosition < *from || *to <= linePosition) {
-                continue;
+    double oneBeatSec = 60.0 / _composer->_bpm;
+    double sampleRate = _composer->_audioEngine->_sampleRate;
+    for (auto& lane : _trackLanes) {
+        for (auto& clip : lane->_clips) {
+            double clipTime = clip->_time;
+            double clipDuration = clip->_duration;
+            double begin = _composer->_playTime;
+            double end = _composer->_nextPlayTime;
+            // TODO Loop
+            if (begin < clipTime + clipDuration && clipTime < end) {
+                for (auto& note : clip->_sequence->_notes) {
+                    double noteTime = clipTime + note->_time;
+                    if (begin <= noteTime && noteTime < end) {
+                        int16_t channel = 0;
+                        uint32_t sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
+                        uint32_t sampleOffset = std::round(sampleOffsetDouble);
+                        _processBuffer._eventIn.noteOn(note->_key, channel, note->_velocity, sampleOffset);
+                    }
+                    double noteDuration = noteTime + note->_duration;
+                    if (begin <= noteDuration && noteDuration < end) {
+                        int16_t channel = 0;
+                        uint32_t sampleOffsetDouble = (noteDuration - begin) * oneBeatSec * sampleRate;
+                        uint32_t sampleOffset = std::round(sampleOffsetDouble);
+                        _processBuffer._eventIn.noteOff(note->_key, channel, 1.0f, sampleOffset);
+                    }
+                }
             }
-            auto delay = linePosition.diffInDelay(*from);
-            uint32_t sampleOffset = delay * _composer->_samplePerDelay;
-
-            if (column->_note.empty()) {
-                continue;
-            }
-            int16_t key = noteToNumber(column->_note);
-            if (key == NOTE_NONE) {
-                continue;
-            }
-            if (key == NOTE_OFF) {
-                _processBuffer._eventIn.noteOff(lastKey, 0, 0x7f, sampleOffset);
-                continue;
-            }
-            if (lastKey != NOTE_NONE) {
-                _processBuffer._eventIn.noteOff(lastKey, 0, 0x7f, sampleOffset);
-            }
-            _processBuffer._eventIn.noteOn(key, 0, column->_velocity, sampleOffset);
-            _lastKeys[columnIndex] = key;
         }
     }
-    */
 
     _composer->_sceneMatrix->process(this);
 
