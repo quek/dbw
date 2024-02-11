@@ -2,14 +2,35 @@
 #include <format>
 #include "tinyxml2/tinyxml2.h"
 #include "AudioEngine.h"
-#include "Column.h"
 #include "Composer.h"
-#include "Line.h"
 #include "logger.h"
 #include "Module.h"
 #include "PluginHost.h"
 #include "PluginModule.h"
+#include "TrackLane.h"
 #include "util.h"
+
+std::vector<std::unique_ptr<Note>> notesFromElement(tinyxml2::XMLElement* notesElement) {
+    std::vector<std::unique_ptr<Note>> notes;
+
+    for (auto noteElement = notesElement->FirstChildElement("Note");
+         noteElement != nullptr;
+         noteElement = noteElement->NextSiblingElement("Note")) {
+        Note* note = new Note();
+        noteElement->QueryDoubleAttribute("time", &note->_time);
+        noteElement->QueryDoubleAttribute("duration", &note->_duration);
+        int intValue;
+        noteElement->QueryIntAttribute("channel", &intValue);
+        note->_channel = intValue;
+        noteElement->QueryIntAttribute("key", &intValue);
+        note->_key = intValue;
+        noteElement->QueryDoubleAttribute("vel", &note->_velocity);
+        noteElement->QueryDoubleAttribute("rel", &note->_rel);
+
+        notes.emplace_back(note);
+    }
+    return notes;
+}
 
 Project::Project(std::string name, Composer* composer) : _dir(::projectDir()), _name(name), _composer(composer) {
     std::filesystem::create_directories(_dir);
@@ -53,6 +74,7 @@ void Project::open(std::filesystem::path dir) {
             track = masterTrack;
         } else {
             track = new Track(name, _composer);
+            track->_trackLanes.clear();
             _composer->_tracks.push_back(std::unique_ptr<Track>(track));
         }
         setId(track, trackElement->Attribute("id"));
@@ -70,64 +92,22 @@ void Project::open(std::filesystem::path dir) {
         }
     }
     auto* lanesWrap = doc.FirstChildElement("Project")->FirstChildElement("Arrangement")->FirstChildElement("Lanes");
-    for (auto [lanes, track] = std::pair{ lanesWrap->FirstChildElement("Lanes"), _composer->_tracks.begin() };
-         lanes != nullptr && track != _composer->_tracks.end();
-         lanes = lanes->NextSiblingElement("Lanes"), ++track) {
-        // FIXME see save
-        bool first = true;
-        for (auto* notes = lanes->FirstChildElement("Notes");
-             notes != nullptr;
-             notes = notes->NextSiblingElement("Notes")) {
-            if (first) {
-                first = false;
-            } else {
-                for (int i = 0; i < _composer->_maxLine; ++i) {
-                    auto line = (*track)->_lines[i].get();
-                    line->_columns.push_back(std::make_unique<Column>(line));
-                }
-                (*track)->_ncolumns++;
-                (*track)->_lastKeys.push_back(0);
-            }
-
-            double lpb = _composer->_lpb;
-            double endTime = std::numeric_limits<double>::max();
-            for (auto note = notes->FirstChildElement("Note");
-                 note != nullptr;
-                 note = note->NextSiblingElement("Note")) {
-                double time;
-                note->QueryDoubleAttribute("time", &time);
-                int lineIndex = static_cast<int>(time * 4);
-                if (time > endTime) {
-                    int endLineIndex = static_cast<int>(endTime * 4);
-                    if (lineIndex > endLineIndex) {
-                        auto& line = (*track)->_lines[endLineIndex];
-                        auto& column = line->_columns.back();
-                        column->_note = Midi::OFF;
-                        double remainder = std::fmod(endTime, 1 / lpb);
-                        unsigned char delay = static_cast<unsigned char>(remainder / (1 / lpb / 0x100));
-                        column->_delay = delay;
-                    }
-                }
-
-                int key;
-                note->QueryIntAttribute("key", &key);
-                double vel;
-                note->QueryDoubleAttribute("vel", &vel);
-                double remainder = std::fmod(time, 1 / lpb);
-                unsigned char delay = static_cast<unsigned char>(remainder / (1 / lpb / 0x100));
-                double duration;
-                note->QueryDoubleAttribute("duration", &duration);
-                endTime = time + duration;
-
-                if ((*track)->_lines.size() <= lineIndex) {
-                    continue;
-                }
-                auto& line = (*track)->_lines[lineIndex];
-                auto& column = line->_columns.back();
-                column->_note = numberToNote(static_cast<int16_t>(key));
-                column->_velocity = static_cast<unsigned char>(vel * 127);
-                column->_delay = delay;
-            }
+    for (auto lanesElement = lanesWrap->FirstChildElement("Lanes");
+         lanesElement != nullptr;
+         lanesElement = lanesElement->NextSiblingElement("Lanes")) {
+        Track* track = (Track*)getObject(lanesElement->Attribute("track"));
+        TrackLane* lane = new TrackLane();
+        track->_trackLanes.emplace_back(lane);
+        for (auto clipElement = lanesElement->FirstChildElement("Clips")->FirstChildElement("Clip");
+             clipElement != nullptr;
+             clipElement = clipElement->NextSiblingElement("Clips")) {
+            double time, duration;
+            clipElement->QueryDoubleAttribute("time", &time);
+            clipElement->QueryDoubleAttribute("duration", &duration);
+            Clip* clip = new Clip(time, duration);
+            lane->_clips.emplace_back(clip);
+            clip->_sequence->_duration = duration;
+            clip->_sequence->_notes = notesFromElement(clipElement->FirstChildElement("Notes"));
         }
     }
 
@@ -152,22 +132,7 @@ void Project::open(std::filesystem::path dir) {
                 auto clipElement = clipSlotElement->FirstChildElement("Clip");
                 if (clipElement != nullptr) {
                     clip = new Clip();
-                    Sequence* sequence = clip->_sequence.get();
-                    for (auto noteElement = clipElement->FirstChildElement("Notes")->FirstChildElement("Note");
-                         noteElement != nullptr;
-                         noteElement = noteElement->NextSiblingElement("Note")) {
-                        Note* note = new Note();
-                        noteElement->QueryDoubleAttribute("time", &note->_time);
-                        noteElement->QueryDoubleAttribute("duration", &note->_duration);
-                        int intValue;
-                        noteElement->QueryIntAttribute("channel", &intValue);
-                        note->_channel = intValue;
-                        noteElement->QueryIntAttribute("key", &intValue);
-                        note->_key = intValue;
-                        noteElement->QueryDoubleAttribute("vel", &note->_velocity);
-                        noteElement->QueryDoubleAttribute("rel", &note->_rel);
-                        sequence->_notes.emplace_back(note);
-                    }
+                    clip->_sequence->_notes = notesFromElement(clipElement->FirstChildElement("Notes"));
                 }
                 ClipSlot* clipSlot = new ClipSlot(track, lane, clip);
                 lane->_clipSlots[track] = std::unique_ptr<ClipSlot>(clipSlot);
@@ -220,46 +185,23 @@ void Project::save() {
             lanesWrap->SetAttribute("timeUnit", "beats");
             for (int trackIndex = 0; trackIndex < _composer->_tracks.size(); ++trackIndex) {
                 Track* track = _composer->_tracks[trackIndex].get();
-                auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
-                lanes->SetAttribute("track", getId(track).c_str());
-                for (int columnIndex = 0; columnIndex < track->_ncolumns; ++columnIndex) {
-                    auto* notes = lanes->InsertNewChildElement("Notes");
-
-                    auto lastKey = NOTE_NONE;
-                    double startTime = 0.0;
-                    double velocity = 0.0;
-                    double delay = 0;
-                    double lpb = _composer->_lpb;
-                    for (int lineIndex = 0; lineIndex < _composer->_maxLine; ++lineIndex) {
-                        Column* column = track->_lines[lineIndex]->_columns[columnIndex].get();
-                        int16_t key = noteToNumber(column->_note);
-                        if (key == NOTE_NONE) {
-                            continue;
+                for (auto& lane : track->_trackLanes) {
+                    auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
+                    lanes->SetAttribute("track", getId(track).c_str());
+                    auto* clipsElement = lanes->InsertNewChildElement("Clips");
+                    for (auto& clip : lane->_clips) {
+                        auto* clipElement = clipsElement->InsertNewChildElement("Clip");
+                        clipElement->SetAttribute("time", clip->_time);
+                        clipElement->SetAttribute("duration", clip->_duration);
+                        auto* notesElement = clipElement->InsertNewChildElement("Notes");
+                        for (auto& note : clip->_sequence->_notes) {
+                            auto* noteElement = notesElement->InsertNewChildElement("Note");
+                            noteElement->SetAttribute("key", note->_key);
+                            noteElement->SetAttribute("time", note->_time);
+                            noteElement->SetAttribute("duration", note->_duration);
+                            noteElement->SetAttribute("vel", note->_velocity);
+                            noteElement->SetAttribute("rel", note->_rel);
                         }
-                        double time = lineIndex / lpb + column->_delay / (lpb * 256.0);
-                        if (lastKey != NOTE_NONE) {
-                            auto* note = notes->InsertNewChildElement("Note");
-                            note->SetAttribute("key", lastKey);
-                            note->SetAttribute("time", startTime);
-                            note->SetAttribute("duration", time - startTime);
-                            note->SetAttribute("vel", velocity);
-                            startTime = time;
-                        }
-                        if (key == NOTE_OFF) {
-                            lastKey = NOTE_NONE;
-                        } else {
-                            lastKey = key;
-                            startTime = time;
-                            velocity = column->_velocity / 127.0;
-                            delay = column->_delay;
-                        }
-                    }
-                    if (lastKey != NOTE_NONE) {
-                        auto* note = notes->InsertNewChildElement("Note");
-                        note->SetAttribute("key", lastKey);
-                        note->SetAttribute("time", startTime);
-                        note->SetAttribute("duration", 1 / lpb - (delay / (lpb * 256.0)));
-                        note->SetAttribute("vel", velocity);
                     }
                 }
             }

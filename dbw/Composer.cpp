@@ -4,11 +4,9 @@
 #include <ranges>
 #include <sstream>
 #include "AudioEngine.h"
-#include "Column.h"
 #include "Command.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
-#include "Line.h"
 #include "Project.h"
 #include "logger.h"
 #include "Track.h"
@@ -41,7 +39,6 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     _masterTrack->_processBuffer.ensure(framesPerBuffer, 2);
 
     if (_playing) {
-        _nextPlayPosition = _playPosition.nextPlayPosition(_audioEngine->_sampleRate, framesPerBuffer, _bpm, _lpb, &_samplePerDelay);
         computeNextPlayTime(framesPerBuffer);
     }
 
@@ -62,21 +59,13 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     _masterTrack->_processBuffer._out.copyTo(out, framesPerBuffer, 2);
 
     if (_playing) {
-        _playPosition = _nextPlayPosition;
         _playTime = _nextPlayTime;
     }
     if (_looping) {
         // TODO ループ時の端数処理
-        if (_playPosition >= _loopEndPosition) {
-            _playPosition = _loopStartPosition;
-        }
         if (_playTime >= _loopEndTime) {
             _playTime = _loopStartTime;
         }
-    }
-    if (_playPosition._line > _maxLine) {
-        _playPosition._line = 0;
-        _playPosition._delay = 0;
     }
 }
 
@@ -110,12 +99,6 @@ void Composer::deleteClips(std::set<Clip*> clips) {
     }
 }
 
-void Composer::changeMaxLine() {
-    for (auto track = _tracks.begin(); track != _tracks.end(); ++track) {
-        (*track)->changeMaxLine(_maxLine);
-    }
-}
-
 void Composer::play() {
     if (_playing) {
         return;
@@ -129,9 +112,7 @@ void Composer::stop() {
         return;
     }
     _playing = false;
-    _playPosition = PlayPosition{ ._line = 0, ._delay = 0 };
     _playTime = _playStartTime;
-    _nextPlayPosition = PlayPosition{ ._line = 0, ._delay = 0 };
     _nextPlayTime = _playStartTime;
     _sceneMatrix->stop();
 }

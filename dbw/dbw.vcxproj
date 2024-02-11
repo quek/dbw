@@ -168,7 +168,6 @@
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
     <ClInclude Include="ClipSlot.h" />
-    <ClInclude Include="Column.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
@@ -186,11 +185,9 @@
     <ClInclude Include="Command.h" />
     <ClInclude Include="Composer.h" />
     <ClInclude Include="GuiUtil.h" />
-    <ClInclude Include="Line.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="Midi.h" />
     <ClInclude Include="Module.h" />
-    <ClInclude Include="PlayPosition.h" />
     <ClInclude Include="PluginEventList.h" />
     <ClInclude Include="PluginHost.h" />
     <ClInclude Include="PluginManager.h" />
@@ -226,7 +223,6 @@
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />
     <ClCompile Include="ClipSlot.cpp" />
-    <ClCompile Include="Column.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
@@ -243,12 +239,10 @@
     <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="GuiUtil.cpp" />
-    <ClCompile Include="Line.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Composer.cpp" />
     <ClCompile Include="Midi.cpp" />
     <ClCompile Include="Module.cpp" />
-    <ClCompile Include="PlayPosition.cpp" />
     <ClCompile Include="PluginEventList.cpp" />
     <ClCompile Include="PluginHost.cpp" />
     <ClCompile Include="PluginManager.cpp" />

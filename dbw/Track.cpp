@@ -2,34 +2,22 @@
 #include <mutex>
 #include "imgui.h"
 #include "AudioEngine.h"
-#include "Column.h"
 #include "Command.h"
 #include "Composer.h"
-#include "Line.h"
 #include "Midi.h"
 #include "Module.h"
 #include "PluginModule.h"
 #include "PluginHost.h"
 #include "TrackLane.h"
 
-Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer), _ncolumns(1) {
+Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer) {
     _trackLanes.emplace_back(new TrackLane());
     _lastKeys.push_back(0);
-    // TODO delete
-    for (auto i = 0; i < composer->_maxLine; ++i) {
-        _lines.push_back(std::make_unique<Line>(this, _ncolumns));
-    }
 }
 
 Track::~Track() {
     if (_out != nullptr) {
         free(_out);
-    }
-}
-
-void Track::changeMaxLine(int value) {
-    for (auto i = _lines.size(); i < value; ++i) {
-        _lines.push_back(std::make_unique<Line>(this, _ncolumns));
     }
 }
 
@@ -89,10 +77,6 @@ void Track::render() {
     if (_openModuleSelector) {
         _composer->_pluginManager.openModuleSelector(this);
     }
-}
-
-void Track::renderLine(int line) {
-    _lines[line]->render();
 }
 
 void Track::addModule(std::string path, uint32_t index) {

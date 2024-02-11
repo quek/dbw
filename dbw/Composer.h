@@ -7,7 +7,6 @@
 #include "MasterTrack.h"
 #include "Midi.h"
 #include "PianoRoll.h"
-#include "PlayPosition.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "SceneMatrix.h"
@@ -26,7 +25,6 @@ public:
     void play();
     void stop();
     void addTrack();
-    void changeMaxLine();
     void scanPlugin();
     int maxBar();
 
@@ -36,21 +34,14 @@ public:
     AudioEngine* _audioEngine;
     ProcessBuffer _processBuffer;
     float _bpm = 128.0;
-    int _lpb = 4;
     int _samplePerDelay;
     bool _playing = false;
     bool _looping = false;
     bool _scrollLock = false;
-    int _maxLine = 0x40;
-    PlayPosition _playStartPosition{};
     double _playStartTime = 0.0;
-    PlayPosition _playPosition{};
     double _playTime = 0.0;
-    PlayPosition _nextPlayPosition{};
     double _nextPlayTime = 0.0;
-    PlayPosition _loopStartPosition{};
     double _loopStartTime = 0.0;
-    PlayPosition _loopEndPosition{ ._line = 0x41, ._delay = 0 };
     double _loopEndTime = 16.0;
     CommandManager _commandManager;
     PluginManager _pluginManager;

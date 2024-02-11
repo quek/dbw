@@ -31,8 +31,6 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="Midi.cpp" />
-    <ClCompile Include="PlayPosition.cpp" />
-    <ClCompile Include="Line.cpp" />
     <ClCompile Include="GuiUtil.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="PluginManager.cpp" />
@@ -41,7 +39,6 @@
     <ClCompile Include="ProcessBuffer.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="PluginModule.cpp" />
-    <ClCompile Include="Column.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
@@ -105,8 +102,6 @@
     </ClInclude>
     <ClInclude Include="logger.h" />
     <ClInclude Include="Midi.h" />
-    <ClInclude Include="PlayPosition.h" />
-    <ClInclude Include="Line.h" />
     <ClInclude Include="GuiUtil.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="PluginManager.h" />
@@ -115,7 +110,6 @@
     <ClInclude Include="ProcessBuffer.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="PluginModule.h" />
-    <ClInclude Include="Column.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="MasterTrack.h" />
