@@ -15,7 +15,7 @@ public:
     TimelineWindow(Composer* composer);
 
     virtual void handleDoubleClick(Clip* thing) override;
-    virtual void handleDoubleClick(double time, TrackLane* lane) override;
+    virtual Clip* handleDoubleClick(double time, TrackLane* lane) override;
     virtual void handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) override;
 
     virtual void prepareAllThings() override;

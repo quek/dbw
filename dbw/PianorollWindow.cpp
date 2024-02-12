@@ -1,6 +1,7 @@
 #include "PianoRollWindow.h"
 #include <imgui.h>
 #include "Clip.h"
+#include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "Midi.h"
@@ -10,10 +11,16 @@ constexpr float TIMELINE_WIDTH = 20.0f;
 constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float KEY_WIDTH = 30.0f;
 
+static int16_t allLanes[128];
+
 PianoRollWindow::PianoRollWindow(Composer* composer) : TimelineCanvasMixin(composer) {
     _zoomX = 1.0f;
-    _zoomY = 10.0f;
+    _zoomY = 20.0f;
     _grid = gGrids[1].get();
+    for (int16_t i = 0; i < 128; ++i) {
+        allLanes[i] = i;
+        _allLanes.push_back(&allLanes[i]);
+    }
 }
 
 void PianoRollWindow::render() {
@@ -28,6 +35,35 @@ void PianoRollWindow::edit(Clip* clip) {
     _show = true;
     _scrollHereXKey = "C4";
     _state = State{};
+}
+
+void PianoRollWindow::handleDoubleClick(Note* thing) {
+    _composer->_commandManager.executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), thing));
+}
+
+Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane) {
+    // TODO undo
+    Note* note = new Note();
+    note->_time = time;
+    note->_key = *lane;
+    _clip->_sequence->_notes.emplace_back(note);
+    return note;
+}
+
+void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) {
+    double timeDelta = newTime - oldTime;
+    double keyDelta = *newLane - *oldLane;
+    for (auto& note : _state._selectedThings) {
+        note->_time += timeDelta;
+        note->_key += keyDelta;
+    }
+}
+
+void PianoRollWindow::prepareAllThings() {
+    _allThings.clear();
+    for (auto& note : _clip->_sequence->_notes) {
+        _allThings.push_back(note.get());
+    }
 }
 
 float PianoRollWindow::offsetTop() const {
@@ -48,6 +84,23 @@ ImU32 PianoRollWindow::colorSlectedThing() {
 
 ImU32 PianoRollWindow::colorThing() {
     return NOTE_COLOR;
+}
+
+int16_t* PianoRollWindow::laneFromPos(ImVec2& pos) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float x = (pos.x - windowPos.x - offsetLeft() + scrollX);
+    x = x / KEY_WIDTH / _zoomX;
+    int16_t key = static_cast<int16_t>(x);
+    return _allLanes[key];
+}
+
+float PianoRollWindow::xFromThing(Note* thing) {
+    return thing->_key * KEY_WIDTH;
+}
+
+float PianoRollWindow::getLaneWidth(Note* /*thing*/) {
+    return KEY_WIDTH;
 }
 
 void PianoRollWindow::handleShortcut() {

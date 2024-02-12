@@ -19,7 +19,7 @@ public:
     virtual void render();
 
     virtual void handleDoubleClick(THING* thing) = 0;
-    virtual void handleDoubleClick(double time, LANE* lane) = 0;
+    virtual THING* handleDoubleClick(double time, LANE* lane) = 0;
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     void handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax);
 
@@ -38,7 +38,7 @@ public:
     virtual ImU32 colorSlectedThing() = 0;
     virtual ImU32 colorThing() = 0;
 
-    double timeFromMousePos(float offset = 0.0f);
+    double timeFromMousePos(float offset = 0.0f, bool floor = false);
 
     virtual LANE* laneFromPos(ImVec2& pos) = 0;
     THING* thingAtPos(ImVec2& pos);

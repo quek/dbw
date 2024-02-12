@@ -49,9 +49,11 @@ void TimelineWindow::handleDoubleClick(Clip* clip) {
     _composer->_pianoRollWindow->edit(clip);
 }
 
-void TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
+Clip* TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
     // TODO undo
-    lane->_clips.emplace_back(new Clip(time));
+    Clip* clip = new Clip(time);
+    lane->_clips.emplace_back(clip);
+    return clip;
 }
 
 void TimelineWindow::prepareAllThings() {
