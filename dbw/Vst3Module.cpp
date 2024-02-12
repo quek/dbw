@@ -281,19 +281,26 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     ///< outgoing events for this block (optional)
     Steinberg::Vst::EventList outputEventList = buffer->_eventIn.vst3OutputEvents();
     processData.outputEvents = (Steinberg::Vst::IEventList*)&outputEventList;
-    ///< processing context (optional, but most welcome)
 
-    // TODO
+    ///< processing context (optional, but most welcome)
     Steinberg::uint32 statesAndFlangs = 0;
     if (_track->_composer->_playing) {
         statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kPlaying;
     }
     statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kTempoValid;
+    statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kProjectTimeMusicValid;
+    statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kBarPositionValid;
     Steinberg::Vst::ProcessContext processContext = {};
     processContext.state = statesAndFlangs;
-    processContext.sampleRate = _track->_composer->_audioEngine->_sampleRate;
-    processContext.projectTimeSamples = steadyTime;
-    processContext.tempo = _track->_composer->_bpm;
+    double sampleRate = _track->_composer->_audioEngine->_sampleRate;
+    processContext.sampleRate = sampleRate;
+    double playTime = _track->_composer->_playTime;
+    processContext.projectTimeMusic = playTime;
+    processContext.barPositionMusic = static_cast<int>(playTime / 4);
+    double bpm = _track->_composer->_bpm;
+    // TODO これあってる？
+    processContext.projectTimeSamples = playTime / (bpm / 60.0) * sampleRate;
+    processContext.tempo = bpm;
     processContext.timeSigNumerator = 4;
     processContext.timeSigDenominator = 4;
 
