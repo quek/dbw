@@ -6,7 +6,7 @@
 #include "TrackLane.h"
 
 constexpr float TIMELINE_START_OFFSET = 10.0f;
-constexpr float TIMELINE_WIDTH = 15.0f;
+constexpr float TIMELINE_WIDTH = 20.0f;
 constexpr float TRACK_HEADER_HEIGHT = 20.0f;
 
 ImU32 CLIP_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
@@ -16,47 +16,6 @@ TimelineWindow::TimelineWindow(Composer* composer) : TimelineCanvasMixin(compose
     _zoomX = 1.0f;
     _zoomY = 10.0f;
     _grid = gGrids[0].get();
-}
-
-void TimelineWindow::render() {
-    _state.reset();
-    prepareAllThings();
-
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
-    auto windowName = _composer->_project->_name.string() + "##Timeline";
-    if (ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar)) {
-        renderGridSnap();
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-        if (ImGui::BeginChild("##TimelineWindow Timeline",
-                              ImVec2(0.0f, -22.0f),
-                              ImGuiChildFlags_None,
-                              ImGuiWindowFlags_HorizontalScrollbar)) {
-            ImVec2 windowPos = ImGui::GetWindowPos();
-            ImVec2 windowSize = ImGui::GetWindowSize();
-            ImVec2 clipRectMin = windowPos;
-            ImVec2 clipRectMax = clipRectMin + ImGui::GetWindowSize();
-            ImGui::PushClipRect(clipRectMin, clipRectMax, true);
-
-            renderTimeline();
-            renderPalyCursor();
-            renderTrackHeader();
-            ImGui::PopClipRect();
-
-            clipRectMin += ImVec2(TIMELINE_WIDTH, TRACK_HEADER_HEIGHT);
-            ImGui::PushClipRect(clipRectMin, clipRectMax, true);
-            renderThing(windowPos);
-            handleMouse(clipRectMin, clipRectMax);
-            handleShortcut();
-            ImGui::PopClipRect();
-        }
-        ImGui::EndChild();
-        ImVec2 windowPos = ImGui::GetWindowPos();
-        ImGui::PopStyleVar();
-
-        // TODO マウスホイールとかでスクロールするようにする
-        renderDebugZoomSlider();
-    }
-    ImGui::End();
 }
 
 void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) {
@@ -87,6 +46,7 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
     _composer->_pianoRoll->edit(clip);
+    _composer->_pianoRollWindow->edit(clip);
 }
 
 void TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
@@ -171,7 +131,7 @@ void TimelineWindow::renderPalyCursor() {
     drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
 }
 
-void TimelineWindow::renderTrackHeader() {
+void TimelineWindow::renderHeader() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
@@ -201,6 +161,14 @@ void TimelineWindow::renderTrackHeader() {
     ImVec2 pos2 = pos1 + ImVec2(0, _composer->maxBar() * 4 * _zoomY);
     drawList->AddLine(pos1, pos2, BAR_LINE_COLOR);
     ImGui::PopClipRect();
+}
+
+std::string TimelineWindow::windowName() {
+    return _composer->_project->_name.string() + "##Timeline";
+}
+
+std::string TimelineWindow::canvasName() {
+    return "##Timeline Canvas";
 }
 
 float TimelineWindow::getLaneWidth(Clip* clip) {

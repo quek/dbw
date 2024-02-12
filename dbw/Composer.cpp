@@ -22,7 +22,8 @@ Composer::Composer(AudioEngine* audioEngine) :
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
-    _pianoRoll(std::make_unique<PianoRollH>(this)) {
+    _pianoRoll(std::make_unique<PianoRollH>(this)),
+    _pianoRollWindow(std::make_unique<PianoRollWindow>(this)) {
     addTrack();
     _pluginManager.load();
 }
@@ -32,6 +33,7 @@ void Composer::render() const {
     _sceneMatrix->render();
     _timelineWindow->render();
     _pianoRoll->render();
+    _pianoRollWindow->render();
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {

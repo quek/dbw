@@ -12,6 +12,48 @@ TimelineCanvasMixin<THING, LANE>::TimelineCanvasMixin(Composer* composer) : _com
 }
 
 template<class THING, typename LANE>
+void TimelineCanvasMixin<THING, LANE>::render() {
+    _state.reset();
+    prepareAllThings();
+
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
+    if (ImGui::Begin(windowName().c_str(), nullptr, ImGuiWindowFlags_NoScrollbar)) {
+        renderGridSnap();
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+        if (ImGui::BeginChild(canvasName().c_str(),
+                              ImVec2(0.0f, -22.0f),
+                              ImGuiChildFlags_None,
+                              ImGuiWindowFlags_HorizontalScrollbar)) {
+            ImVec2 windowPos = ImGui::GetWindowPos();
+            ImVec2 clipRectMin = windowPos;
+            ImVec2 clipRectMax = clipRectMin + ImGui::GetWindowSize();
+
+            ImGui::PushClipRect(clipRectMin + ImVec2(0.0f, offsetTop()), clipRectMax, true);
+            renderTimeline();
+            renderPalyCursor();
+            ImGui::PopClipRect();
+
+            ImGui::PushClipRect(clipRectMin + ImVec2(offsetLeft(), 0.0f), clipRectMax, true);
+            renderHeader();
+            ImGui::PopClipRect();
+
+            clipRectMin += ImVec2(offsetLeft(), offsetTop());
+            ImGui::PushClipRect(clipRectMin, clipRectMax, true);
+            renderThing(windowPos);
+            handleMouse(clipRectMin, clipRectMax);
+            handleShortcut();
+            ImGui::PopClipRect();
+        }
+        ImGui::EndChild();
+        ImVec2 windowPos = ImGui::GetWindowPos();
+        ImGui::PopStyleVar();
+
+        // TODO マウスホイールとかでスクロールするようにする
+        renderDebugZoomSlider();
+    }
+    ImGui::End();
+}
+template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax) {
     if (!ImGui::IsWindowFocused()) {
         return;
@@ -176,8 +218,8 @@ void TimelineCanvasMixin<THING, LANE>::renderThing(ImVec2& windowPos) {
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
     for (auto& thing : _allThings) {
-        float x1 = xFromThing(thing) + offsetLeft();
-        float x2 = x1 + getLaneWidth(thing);
+        float x1 = xFromThing(thing) * _zoomX + offsetLeft();
+        float x2 = x1 + getLaneWidth(thing) * _zoomX;
         float y1 = thing->_time * _zoomY - scrollY + offsetTop();
         float y2 = y1 + thing->_duration * _zoomY;
         ImVec2 pos1 = ImVec2(x1 - scrollX + 2.0f, y1) + windowPos;

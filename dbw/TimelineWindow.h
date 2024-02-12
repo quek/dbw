@@ -13,7 +13,6 @@ class TrackLane;
 class TimelineWindow : public TimelineCanvasMixin<Clip, TrackLane> {
 public:
     TimelineWindow(Composer* composer);
-    void render();
 
     virtual void handleDoubleClick(Clip* thing) override;
     virtual void handleDoubleClick(double time, TrackLane* lane) override;
@@ -32,10 +31,15 @@ public:
     virtual float xFromThing(Clip* clip) override;
     virtual float getLaneWidth(Clip* clip) override;
     float getLaneWidth(TrackLane* lane);
+
+protected:
+    void handleShortcut() override;
+    void renderPalyCursor()override;
+    void renderHeader()override;
+    std::string windowName() override;
+    std::string canvasName() override;
+
 private:
-    void handleShortcut();
-    void renderPalyCursor();
-    void renderTrackHeader();
     float getTrackWidth(Track* track);
     float allTracksWidth();
 

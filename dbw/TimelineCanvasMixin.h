@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
 #include <imgui.h>
 #include "GridMixin.h"
@@ -14,6 +15,8 @@ class TimelineCanvasMixin : public GridMixin, public ZoomMixin {
 public:
     TimelineCanvasMixin(Composer* composer);
     virtual ~TimelineCanvasMixin() = default;
+
+    virtual void render();
 
     virtual void handleDoubleClick(THING* thing) = 0;
     virtual void handleDoubleClick(double time, LANE* lane) = 0;
@@ -40,7 +43,7 @@ public:
     virtual LANE* laneFromPos(ImVec2& pos) = 0;
     THING* thingAtPos(ImVec2& pos);
     virtual float xFromThing(THING* thing) = 0;
-    virtual float getLaneWidth(THING* lane) = 0;
+    virtual float getLaneWidth(THING* thing) = 0;
     ImVec2 toCanvasPos(ImVec2& pos) const;
     double toSnapFloor(const double time);
     double toSnapRound(const double time);
@@ -74,4 +77,11 @@ public:
     };
 
     State _state;
+
+protected:
+    virtual void handleShortcut() = 0;
+    virtual void renderPalyCursor() = 0;
+    virtual void renderHeader() = 0;
+    virtual std::string windowName() = 0;
+    virtual std::string canvasName() = 0;
 };

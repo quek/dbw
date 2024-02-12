@@ -14,11 +14,6 @@ constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float GRID_SKIP_WIDTH = 20.0f;
 float KEY_HEIGHT = 50.0f;
 
-ImU32 BACKGROUD_WHITE_KEY_COLOR = IM_COL32(0x22, 0x22, 0x22, 0x88);
-ImU32 BACKGROUD_BLACK_KEY_COLOR = IM_COL32(0x00, 0x00, 0x00, 0x88);
-ImU32 NOTE_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
-ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
-
 PianoRollH::PianoRollH(Composer* composer) : ZoomMixin(4.0f, 0.5f), _composer(composer) {
     _grid = gGrids[1].get();
 }
@@ -28,12 +23,12 @@ void PianoRollH::render() {
 
     _state.reset();
 
-    if (ImGui::Begin("Piano Roll", &_show)) {
+    if (ImGui::Begin("Piano Roll H", &_show)) {
         renderGridSnap();
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         {
-            if (ImGui::BeginChild("##Piano Roll Canvas",
+            if (ImGui::BeginChild("##Piano Roll H Canvas",
                                   ImVec2(0.0f, -22.0f),
                                   ImGuiChildFlags_None,
                                   ImGuiWindowFlags_HorizontalScrollbar)) {

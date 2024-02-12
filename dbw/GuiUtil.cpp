@@ -15,6 +15,11 @@ ImU32 BEAT16TH_LINE_COLOR = IM_COL32(0x33, 0x33, 0x33, 0x88);
 ImU32 PLAY_CURSOR_COLOR = IM_COL32(0x33, 0x33, 0xff, 0xcc);
 ImU32 RANGE_SELECTING_COLOR = IM_COL32(0x66, 0x22, 0x22, 0x88);
 
+ImU32 BACKGROUD_WHITE_KEY_COLOR = IM_COL32(0x22, 0x22, 0x22, 0x88);
+ImU32 BACKGROUD_BLACK_KEY_COLOR = IM_COL32(0x00, 0x00, 0x00, 0x88);
+ImU32 NOTE_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
+ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
+
 float widthWithPadding(int nchars) {
     ImGuiStyle& style = ImGui::GetStyle();
     return TEXT_BASE_WIDTH * nchars + style.FramePadding.x * 2;
