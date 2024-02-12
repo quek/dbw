@@ -3,6 +3,7 @@
 #include <public.sdk/source/vst/hosting/module.h>
 #include <public.sdk/source/vst/hosting/parameterchanges.h>
 #include "imgui.h"
+#include "AudioEngine.h"
 #include "Composer.h"
 #include "ErrorWindow.h"
 #include "logger.h"
@@ -228,7 +229,7 @@ bool Vst3Module::load(std::string path) {
     return true;
 }
 
-bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
+bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     Steinberg::Vst::ProcessData processData;
     ///< processing mode - value of \ref ProcessModes
     processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;
@@ -283,9 +284,20 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
     ///< processing context (optional, but most welcome)
 
     // TODO
-    // Steinberg::Vst::ProcessContext processContext = {};
-    // processData.processContext = &processContext;
-    processData.processContext = nullptr;
+    Steinberg::uint32 statesAndFlangs = 0;
+    if (_track->_composer->_playing) {
+        statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kPlaying;
+    }
+    statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kTempoValid;
+    Steinberg::Vst::ProcessContext processContext = {};
+    processContext.state = statesAndFlangs;
+    processContext.sampleRate = _track->_composer->_audioEngine->_sampleRate;
+    processContext.projectTimeSamples = steadyTime;
+    processContext.tempo = _track->_composer->_bpm;
+    processContext.timeSigNumerator = 4;
+    processContext.timeSigDenominator = 4;
+
+    processData.processContext = &processContext;
 
     _processor->process(processData);
     return true;

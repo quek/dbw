@@ -22,6 +22,8 @@ public:
     virtual THING* handleDoubleClick(double time, LANE* lane) = 0;
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     void handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax);
+    virtual THING* copyThing(THING*) = 0;
+    virtual void deleteThing(THING*) = 0;
 
     std::vector<THING*> _allThings;
     std::vector<LANE*> _allLanes;
@@ -61,17 +63,14 @@ public:
         std::set<THING*> _selectedThings;
         std::set<THING*> _selectedThingsAtStartRangeSelecting;
         THING* _draggingThing = nullptr;
+        std::set<THING*> _draggingThings;
         bool _unselectClickedThingIfMouserReleased = false;
         ClickedPart _thingClickedPart = Middle;
         float _thingClickedOffset = 0.0f;
         bool _rangeSelecting = false;
 
-        bool _consumedDoubleClick = false;
-        bool _consumedClicked = false;
         std::map <THING*, Bounds> _thingBoundsMap;
         void reset() {
-            _consumedDoubleClick = false;
-            _consumedClicked = false;
             _thingBoundsMap.clear();
         }
     };

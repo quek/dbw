@@ -59,6 +59,20 @@ void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLan
     }
 }
 
+Note* PianoRollWindow::copyThing(Note* other) {
+    Note* note = new Note(*other);
+    _clip->_sequence->_notes.emplace_back(note);
+    return note;
+}
+
+void PianoRollWindow::deleteThing(Note* note) {
+    auto& notes = _clip->_sequence->_notes;
+    auto it = std::ranges::find_if(notes, [note](const auto& x) { return x.get() == note; });
+    if (it != notes.end()) {
+        notes.erase(it);
+    }
+}
+
 void PianoRollWindow::prepareAllThings() {
     _allThings.clear();
     for (auto& note : _clip->_sequence->_notes) {

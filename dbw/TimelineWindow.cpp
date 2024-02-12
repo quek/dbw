@@ -44,6 +44,21 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
     }
 }
 
+Clip* TimelineWindow::copyThing(Clip* other) {
+    Clip* clip = new Clip(*other);
+    _clipLaneMap[other]->_clips.emplace_back(clip);
+    return clip;
+}
+
+void TimelineWindow::deleteThing(Clip* clip) {
+    auto lane = _clipLaneMap[clip];
+    auto it = std::ranges::find_if(lane->_clips,
+                                   [clip](const auto& x) { return x.get() == clip; });
+    if (it != lane->_clips.end()) {
+        lane->_clips.erase(it);
+    }
+}
+
 void TimelineWindow::handleDoubleClick(Clip* clip) {
     _composer->_pianoRoll->edit(clip);
     _composer->_pianoRollWindow->edit(clip);
@@ -117,7 +132,7 @@ void TimelineWindow::renderPalyCursor() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollY = ImGui::GetScrollY();
-    float y = (_composer->_playTime * _zoomY) + TRACK_HEADER_HEIGHT;
+    float y = (_composer->_playTime * _zoomY) + offsetTop() + offsetStart();
     if (_composer->_playing) {
         if (y < ImGui::GetWindowHeight() / 2.0f) {
             ImGui::SetScrollY(0);

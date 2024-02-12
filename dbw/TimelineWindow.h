@@ -17,6 +17,8 @@ public:
     virtual void handleDoubleClick(Clip* thing) override;
     virtual Clip* handleDoubleClick(double time, TrackLane* lane) override;
     virtual void handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) override;
+    virtual Clip* copyThing(Clip* clip) override;
+    virtual void deleteThing(Clip* clip) override;
 
     virtual void prepareAllThings() override;
 

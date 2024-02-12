@@ -122,6 +122,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);
                 module->load(path);
+                module->openGui();
                 // TODO UNDO
                 track->_modules.emplace_back(module);
             }

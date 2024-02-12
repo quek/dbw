@@ -1,4 +1,5 @@
 #include "TimelineCanvasMixin.h"
+#include <algorithm>
 #include "Clip.h"
 #include "Composer.h"
 #include "Grid.h"
@@ -74,8 +75,8 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
 
     if (_state._draggingThing) {
         if (_state._thingClickedPart == Middle) {
-            float oldTime = _state._draggingThing->_time;
-            float newTime = timeFromMousePos(_state._thingClickedOffset);
+            double oldTime = _state._draggingThing->_time;
+            double newTime = std::max(timeFromMousePos(_state._thingClickedOffset), 0.0);
             LANE* oldLane = laneFromPos(_state._thingBoundsMap[_state._draggingThing].p);
             LANE* newLane = laneFromPos(mousePos);
             handleMove(oldTime, newTime, oldLane, newLane);
@@ -172,7 +173,6 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
             }
             _state._selectedThings.insert(thingAtMouse);
             _state._clickedThing = thingAtMouse;
-            _state._consumedClicked = true;
         } else {
             _state._clickedThing = nullptr;
             if (!io.KeyCtrl && !io.KeyShift) {
