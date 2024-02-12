@@ -34,7 +34,7 @@ public:
     float getLaneWidth(TrackLane* lane);
 private:
     void handleShortcut();
-    void renderTimeline();
+    void renderPalyCursor();
     void renderTrackHeader();
     float getTrackWidth(Track* track);
     float allTracksWidth();

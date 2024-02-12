@@ -5,7 +5,6 @@
 #include "GuiUtil.h"
 #include "TrackLane.h"
 
-constexpr float GRID_SKIP_WIDTH = 20.0f;
 constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float TIMELINE_WIDTH = 15.0f;
 constexpr float TRACK_HEADER_HEIGHT = 20.0f;
@@ -39,6 +38,7 @@ void TimelineWindow::render() {
             ImGui::PushClipRect(clipRectMin, clipRectMax, true);
 
             renderTimeline();
+            renderPalyCursor();
             renderTrackHeader();
             ImGui::PopClipRect();
 
@@ -151,33 +151,10 @@ void TimelineWindow::handleShortcut() {
     }
 }
 
-void TimelineWindow::renderTimeline() {
+void TimelineWindow::renderPalyCursor() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
-    float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
-    float leftPadding = 2.0f;
-    float lastY = -GRID_SKIP_WIDTH;
-    float lineX = allTracksWidth() * _zoomX + TIMELINE_WIDTH;
-    ImVec2 clipRectMin = windowPos + ImVec2(0.0f, TRACK_HEADER_HEIGHT);
-    ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight());
-    ImGui::PushClipRect(clipRectMin, clipRectMax, true);
-    for (int i = 0; i < _composer->maxBar(); ++i) {
-        float y = (i * 4 * _zoomY) + TRACK_HEADER_HEIGHT;
-        if (y - lastY < GRID_SKIP_WIDTH) {
-            continue;
-        }
-        ImVec2 pos = ImVec2(scrollX + leftPadding, y);
-        ImGui::SetCursorPos(pos);
-        ImGui::Text(std::to_string(i + 1).c_str());
-
-        ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
-        ImVec2 pos2 = pos + ImVec2(lineX - scrollX, -scrollY) + windowPos;
-        drawList->AddLine(pos1, pos2, BAR_LINE_COLOR);
-
-        lastY = y;
-    }
-
     float y = (_composer->_playTime * _zoomY) + TRACK_HEADER_HEIGHT;
     if (_composer->_playing) {
         if (y < ImGui::GetWindowHeight() / 2.0f) {
@@ -190,10 +167,8 @@ void TimelineWindow::renderTimeline() {
         y -= scrollY;
     }
     ImVec2 pos1 = ImVec2(0.0f, y) + windowPos;
-    ImVec2 pos2 = ImVec2(lineX, y) + windowPos;
+    ImVec2 pos2 = ImVec2(ImGui::GetWindowWidth(), y) + windowPos;
     drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
-
-    ImGui::PopClipRect();
 }
 
 void TimelineWindow::renderTrackHeader() {

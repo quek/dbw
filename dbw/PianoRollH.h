@@ -12,10 +12,10 @@ class Grid;
 class Note;
 struct Bounds;
 
-class PianoRoll : public GridMixin, public ZoomMixin {
+class PianoRollH : public GridMixin, public ZoomMixin {
 public:
-    PianoRoll(Composer* composer);
-    virtual ~PianoRoll() = default;
+    PianoRollH(Composer* composer);
+    virtual ~PianoRollH() = default;
     void render();
     void edit(Clip* clip);
 
@@ -28,7 +28,7 @@ private:
     void renderNotes();
     void renderTimeline();
 
-    Bounds boundsOfNote(Note* note);
+    Bounds boundsOfNote(Note* note) const;
     void handleCanvas();
     Note* noteFromMousePos();
     double noteTimeFromMouserPos(float offset = 0.0f);
@@ -64,4 +64,4 @@ private:
     State _state;
 };
 
-extern std::unique_ptr<PianoRoll> gPianoRoll;
+extern std::unique_ptr<PianoRollH> gPianoRoll;

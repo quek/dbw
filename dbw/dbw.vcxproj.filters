@@ -63,7 +63,7 @@
     <ClCompile Include="ClipSlot.cpp" />
     <ClCompile Include="Lane.cpp" />
     <ClCompile Include="Note.cpp" />
-    <ClCompile Include="PianoRoll.cpp" />
+    <ClCompile Include="PianoRollH.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp">
@@ -74,7 +74,7 @@
     <ClCompile Include="ZoomMixin.cpp" />
     <ClCompile Include="TrackLane.cpp" />
     <ClCompile Include="TimelineCanvasMixin.cpp" />
-    <ClCompile Include="PianorollWindow.cpp" />
+    <ClCompile Include="PianoRollWindow.cpp" />
     <ClCompile Include="Thing.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp">
       <Filter>VST3</Filter>
@@ -131,7 +131,7 @@
     <ClInclude Include="ClipSlot.h" />
     <ClInclude Include="Lane.h" />
     <ClInclude Include="Note.h" />
-    <ClInclude Include="PianoRoll.h" />
+    <ClInclude Include="PianoRollH.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h">
@@ -145,7 +145,7 @@
     <ClInclude Include="ZoomMixin.h" />
     <ClInclude Include="TrackLane.h" />
     <ClInclude Include="TimelineCanvasMixin.h" />
-    <ClInclude Include="PianorollWindow.h" />
+    <ClInclude Include="PianoRollWindow.h" />
     <ClInclude Include="Thing.h" />
   </ItemGroup>
   <ItemGroup>

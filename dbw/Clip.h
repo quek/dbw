@@ -3,7 +3,7 @@
 #include "Sequence.h"
 #include "Thing.h"
 
-class PianoRoll;
+class PianoRollH;
 
 class Clip : public Nameable, public Thing {
 public:
@@ -11,7 +11,7 @@ public:
     Clip(std::shared_ptr<Sequence> sequence);
     virtual ~Clip() = default;
 
-    void renderInScene(PianoRoll* pianoRoll);
+    void renderInScene(PianoRollH* pianoRoll);
 
     std::shared_ptr<Sequence> _sequence;
 };

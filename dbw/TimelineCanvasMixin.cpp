@@ -1,8 +1,11 @@
 #include "TimelineCanvasMixin.h"
 #include "Clip.h"
+#include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "TrackLane.h"
+
+constexpr float GRID_SKIP_WIDTH = 20.0f;
 
 template<class THING, typename LANE>
 TimelineCanvasMixin<THING, LANE>::TimelineCanvasMixin(Composer* composer) : _composer(composer) {
@@ -187,6 +190,59 @@ void TimelineCanvasMixin<THING, LANE>::renderThing(ImVec2& windowPos) {
         }
         drawList->AddRectFilled(pos1, pos2, thingColor);
         _state._thingBoundsMap[thing] = Bounds(pos1, pos2);
+    }
+}
+
+template<class THING, typename LANE>
+void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    float leftPadding = 2.0f;
+    float lastY = -GRID_SKIP_WIDTH;
+    ImVec2 clipRectMin = windowPos + ImVec2(0.0f, offsetTop());
+    ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight());
+    ImGui::PushClipRect(clipRectMin, clipRectMax, true);
+    for (int i = 0; i < _composer->maxBar(); ++i) {
+        float y = (i * 4 * _zoomY) + offsetTop();
+        if (y - lastY < GRID_SKIP_WIDTH) {
+            continue;
+        }
+        ImVec2 pos = ImVec2(scrollX + leftPadding, y);
+        ImGui::SetCursorPos(pos);
+        ImGui::Text(std::to_string(i + 1).c_str());
+
+        ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
+        ImVec2 pos2 = pos + ImVec2(ImGui::GetWindowWidth() - scrollX, -scrollY) + windowPos;
+        drawList->AddLine(pos1, pos2, BAR_LINE_COLOR);
+
+        if (_zoomY >= GRID_SKIP_WIDTH) {
+            renderGridBeat16th(drawList, pos1.y, pos1.x, pos2.x);
+            for (int beat = 1; beat < 4; ++beat) {
+                float beatY = pos1.y + (beat * _zoomY);
+                drawList->AddLine(ImVec2(pos1.x + offsetLeft(), beatY), ImVec2(pos2.x, beatY), BEAT_LINE_COLOR);
+
+                renderGridBeat16th(drawList, beatY, pos1.x, pos2.x);
+            }
+        } else if (2 * _zoomY >= GRID_SKIP_WIDTH) {
+            float beatY = pos1.y + (2 * _zoomY);
+            drawList->AddLine(ImVec2(pos1.x + offsetLeft(), beatY), ImVec2(pos2.x, beatY), BEAT_LINE_COLOR);
+        }
+
+        lastY = y;
+    }
+
+    ImGui::PopClipRect();
+}
+
+template<class THING, typename LANE>
+void TimelineCanvasMixin<THING, LANE>::renderGridBeat16th(ImDrawList* drawList, float beatY, float x1, float x2) {
+    if (4 * _zoomY >= GRID_SKIP_WIDTH) {
+        for (int beat16th = 1; beat16th < 4; ++beat16th) {
+            float beat16thY = beatY + (1.0f / 4.0f * beat16th * _zoomY);
+            drawList->AddLine(ImVec2(x1 + offsetLeft(), beat16thY), ImVec2(x2, beat16thY), BEAT16TH_LINE_COLOR, 1.0f);
+        }
     }
 }
 

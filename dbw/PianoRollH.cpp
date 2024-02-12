@@ -1,4 +1,4 @@
-#include "PianoRoll.h"
+#include "PianoRollH.h"
 #include <memory>
 #include "Clip.h"
 #include "Composer.h"
@@ -19,11 +19,11 @@ ImU32 BACKGROUD_BLACK_KEY_COLOR = IM_COL32(0x00, 0x00, 0x00, 0x88);
 ImU32 NOTE_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
 ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
 
-PianoRoll::PianoRoll(Composer* composer) : ZoomMixin(4.0f, 0.5f), _composer(composer) {
+PianoRollH::PianoRollH(Composer* composer) : ZoomMixin(4.0f, 0.5f), _composer(composer) {
     _grid = gGrids[1].get();
 }
 
-void PianoRoll::render() {
+void PianoRollH::render() {
     if (!_show) return;
 
     _state.reset();
@@ -61,18 +61,18 @@ void PianoRoll::render() {
     ImGui::End();
 }
 
-void PianoRoll::edit(Clip* clip) {
+void PianoRollH::edit(Clip* clip) {
     _clip = clip;
     _show = true;
     _scrollHereYKey = "C4";
     _state = State{};
 }
 
-int PianoRoll::maxBar() {
+int PianoRollH::maxBar() {
     return _composer->maxBar();
 }
 
-void PianoRoll::renderBackgroud() const {
+void PianoRollH::renderBackgroud() const {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollY = ImGui::GetScrollY();
@@ -91,7 +91,7 @@ void PianoRoll::renderBackgroud() const {
     }
 }
 
-void PianoRoll::renderGrid() {
+void PianoRollH::renderGrid() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
     float windowHeight = ImGui::GetWindowHeight();
@@ -124,7 +124,7 @@ void PianoRoll::renderGrid() {
     }
 }
 
-void PianoRoll::renderGridBeat16th(ImDrawList* drawList, float beatX, float y1, float y2) const {
+void PianoRollH::renderGridBeat16th(ImDrawList* drawList, float beatX, float y1, float y2) const {
     if (BEAT_WIDTH / 4 * _zoomX >= GRID_SKIP_WIDTH) {
         for (int beat16th = 1; beat16th < 4; ++beat16th) {
             float beat16thX = beatX + (BEAT_WIDTH / 4 * beat16th * _zoomX);
@@ -133,7 +133,7 @@ void PianoRoll::renderGridBeat16th(ImDrawList* drawList, float beatX, float y1, 
     }
 }
 
-void PianoRoll::renderKeyboard() {
+void PianoRollH::renderKeyboard() {
     ImGui::BeginGroup();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
@@ -162,7 +162,7 @@ void PianoRoll::renderKeyboard() {
     ImGui::EndGroup();
 }
 
-void PianoRoll::renderNotes() {
+void PianoRollH::renderNotes() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2& mousePos = io.MousePos;
     ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -228,7 +228,7 @@ void PianoRoll::renderNotes() {
     }
 }
 
-void PianoRoll::handleCanvas() {
+void PianoRollH::handleCanvas() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2& mousePos = io.MousePos;
     ImVec2 windowPos = ImGui::GetWindowPos();
@@ -361,7 +361,7 @@ void PianoRoll::handleCanvas() {
     }
 }
 
-Bounds PianoRoll::boundsOfNote(Note* note) {
+Bounds PianoRollH::boundsOfNote(Note* note) const {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
@@ -375,7 +375,7 @@ Bounds PianoRoll::boundsOfNote(Note* note) {
     return Bounds(pos1, pos2);
 }
 
-void PianoRoll::renderTimeline() {
+void PianoRollH::renderTimeline() {
     float leftPadding = 2.0f;
     float scrollY = ImGui::GetScrollY();
     float lastX = -GRID_SKIP_WIDTH;
@@ -393,7 +393,7 @@ void PianoRoll::renderTimeline() {
     }
 }
 
-Note* PianoRoll::noteFromMousePos() {
+Note* PianoRollH::noteFromMousePos() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2& mousePos = io.MousePos;
     ImVec2 windowPos = ImGui::GetWindowPos();
@@ -409,7 +409,7 @@ Note* PianoRoll::noteFromMousePos() {
     }
 }
 
-double PianoRoll::noteTimeFromMouserPos(float offset) {
+double PianoRollH::noteTimeFromMouserPos(float offset) {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos - ImVec2(offset, 0.0f);
     ImVec2 canvasPos = toCanvasPos(mousePos);
@@ -417,7 +417,7 @@ double PianoRoll::noteTimeFromMouserPos(float offset) {
     return time;
 }
 
-int16_t PianoRoll::noteKeyFromMouserPos() {
+int16_t PianoRollH::noteKeyFromMouserPos() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2& mousePos = io.MousePos;
     ImVec2 canvasPos = toCanvasPos(mousePos);
@@ -425,7 +425,7 @@ int16_t PianoRoll::noteKeyFromMouserPos() {
     return key;
 }
 
-ImVec2 PianoRoll::toCanvasPos(ImVec2& pos) const {
+ImVec2 PianoRollH::toCanvasPos(ImVec2& pos) const {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
@@ -434,27 +434,27 @@ ImVec2 PianoRoll::toCanvasPos(ImVec2& pos) const {
     return ImVec2(x, y);
 }
 
-double PianoRoll::toSnapFloor(const double time) {
+double PianoRollH::toSnapFloor(const double time) {
     if (!_snap) {
         return time;
     }
     return _grid->snapFloor(time);
 }
 
-double PianoRoll::toSnapRound(const double time) {
+double PianoRollH::toSnapRound(const double time) {
     if (!_snap) {
         return time;
     }
     return _grid->snapRound(time);
 }
 
-bool PianoRoll::isInCanvas(ImVec2& pos) {
+bool PianoRollH::isInCanvas(ImVec2& pos) {
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 windowSize = ImGui::GetWindowSize();
     return  (windowPos <= pos && pos < windowPos + windowSize);
 }
 
-void PianoRoll::State::reset() {
+void PianoRollH::State::reset() {
     _consumedDoubleClick = false;
     _consumedClicked = false;
 }

@@ -25,6 +25,8 @@ public:
     virtual void prepareAllThings() = 0;
 
     void renderThing(ImVec2& windowPos);
+    virtual void renderTimeline();
+    virtual void renderGridBeat16th(ImDrawList* drawList, float beatY, float x1, float x2);
 
     virtual float offsetTop() const = 0;
     virtual float offsetLeft() const = 0;

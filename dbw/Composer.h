@@ -6,7 +6,8 @@
 #include "ComposerWindow.h"
 #include "MasterTrack.h"
 #include "Midi.h"
-#include "PianoRoll.h"
+#include "PianoRollH.h"
+#include "PianoRollWindow.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "SceneMatrix.h"
@@ -51,6 +52,7 @@ public:
     std::unique_ptr<ComposerWindow> _composerWindow;
     std::unique_ptr<SceneMatrix> _sceneMatrix;
     std::unique_ptr<TimelineWindow> _timelineWindow;
-    std::unique_ptr<PianoRoll> _pianoRoll;
+    std::unique_ptr<PianoRollH> _pianoRoll;
+    std::unique_ptr<PianoRollWindow> _pianoRollWindow;
 private:
 };
