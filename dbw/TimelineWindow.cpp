@@ -137,7 +137,7 @@ void TimelineWindow::renderPalyCursor() {
         if (y < ImGui::GetWindowHeight() / 2.0f) {
             ImGui::SetScrollY(0);
         } else {
-            ImGui::SetScrollY(y);
+            ImGui::SetScrollY(y - ImGui::GetWindowHeight() / 2.0f);
         }
         y = std::min(y, ImGui::GetWindowHeight() / 2.0f);
     } else {
