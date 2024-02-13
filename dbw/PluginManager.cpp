@@ -92,18 +92,19 @@ void PluginManager::openModuleSelector(Track* track) {
     }
     ImGui::InputText("##query", &_query, ImGuiInputTextFlags_AutoSelectAll);
 
-    for (auto plugin = _plugins["clap"].begin(); plugin != _plugins["clap"].end(); ++plugin) {
+    for (auto& plugin : _plugins["clap"]) {
         auto q = _query.begin();
-        std::string name = (*plugin)["name"].get<std::string>();
+        std::string name = plugin["name"].get<std::string>();
         for (auto c = name.begin(); c != name.end() && q != _query.end(); ++c) {
             if (std::tolower(*q) == std::tolower(*c)) {
                 ++q;
             }
         }
         if (q == _query.end()) {
-            if (ImGui::Button(name.c_str())) {
+            std::string id = plugin["id"].get<std::string>();
+            if (ImGui::Button((name + " clap##" + id).c_str())) {
                 track->_openModuleSelector = false;
-                track->addModule((*plugin)["path"].get<std::string>(), (*plugin)["index"].get<uint32_t>());
+                track->addModule(plugin["path"].get<std::string>(), plugin["index"].get<uint32_t>());
             }
         }
     }
@@ -117,7 +118,8 @@ void PluginManager::openModuleSelector(Track* track) {
             }
         }
         if (q == _query.end()) {
-            if (ImGui::Button(name.c_str())) {
+            std::string id = plugin["id"].get<std::string>();
+            if (ImGui::Button((name + " vst3##" + id).c_str())) {
                 track->_openModuleSelector = false;
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);

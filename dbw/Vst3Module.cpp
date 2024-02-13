@@ -157,11 +157,11 @@ bool Vst3Module::load(std::string path) {
     logger->debug("================== イベント入出力の情報 ==================");
 
     // イベント(MIDI等)入力情報の取得
-    Steinberg::int32 eventInNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput);
-    logger->debug("イベント入力バスは {} 個あります。", eventInNum);
+    _eventInNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput);
+    logger->debug("イベント入力バスは {} 個あります。", _eventInNum);
 
     // 各イベント入力バスの情報を取得する
-    for (int i = 0; i < eventInNum; i++) {
+    for (int i = 0; i < _eventInNum; i++) {
         // バスの情報(名称・チャンネル数など)を取得する
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput, i, busInfo);
@@ -170,10 +170,10 @@ bool Vst3Module::load(std::string path) {
     }
 
     // イベント(MIDI等)出力情報の取得(イベント入力と同様の処理なので詳細なコメントは割愛)
-    Steinberg::int32 eventOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kOutput);
-    logger->debug("イベント出力バスは {} 個あります。", eventOutNum);
+    _eventOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kOutput);
+    logger->debug("イベント出力バスは {} 個あります。", _eventOutNum);
 
-    for (int i = 0; i < eventOutNum; i++) {
+    for (int i = 0; i < _eventOutNum; i++) {
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput, i, busInfo);
 
@@ -232,10 +232,31 @@ bool Vst3Module::load(std::string path) {
         logger->debug("プラグインは32bit、サンプリングレート {}Hz、ブロックサイズ {}に対応", sampleRate, blockSize);
     }
 
+    for (auto index = 0; index < _audioInNum; ++index) {
+        _component->activateBus(Steinberg::Vst::MediaTypes::kAudio,
+                                Steinberg::Vst::BusDirections::kInput,
+                                index, true);
+    }
+    for (auto index = 0; index < _audioOutNum; ++index) {
+        _component->activateBus(Steinberg::Vst::MediaTypes::kAudio,
+                                Steinberg::Vst::BusDirections::kOutput,
+                                index, true);
+    }
+    for (auto index = 0; index < _eventInNum; ++index) {
+        _component->activateBus(Steinberg::Vst::MediaTypes::kEvent,
+                                Steinberg::Vst::BusDirections::kInput,
+                                index, true);
+    }
+    for (auto index = 0; index < _eventOutNum; ++index) {
+        _component->activateBus(Steinberg::Vst::MediaTypes::kEvent,
+                                Steinberg::Vst::BusDirections::kOutput,
+                                index, true);
+    }
+
     return true;
 }
 
-bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
+bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
     Steinberg::Vst::ProcessData processData;
     ///< processing mode - value of \ref ProcessModes
     processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;

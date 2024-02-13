@@ -37,7 +37,7 @@ LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bool resizable) : _module(module), _resizable(resizable) {
     RECT rect{ 0, 0, width, height };
-    DWORD exStyle = WS_EX_APPWINDOW;
+    DWORD exStyle = WS_EX_APPWINDOW | WS_EX_TOPMOST;
     DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
     if (_resizable)
         dwStyle |= WS_SIZEBOX | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
@@ -69,8 +69,6 @@ PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bo
 
     SetWindowPos(_hwnd, HWND_TOP, 0, 0, 0, 0,
                  SWP_NOSIZE | SWP_NOMOVE | SWP_NOCOPYBITS | SWP_SHOWWINDOW);
-    // ShowWindow(_hwnd, SW_SHOWDEFAULT);
-    // UpdateWindow(_hwnd);
 }
 
 PluginEditorWindow::~PluginEditorWindow() {
