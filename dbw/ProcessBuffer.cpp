@@ -25,3 +25,12 @@ void ProcessBuffer::swapInOut() {
     std::swap(_eventIn, _eventOut);
 }
 
+void ProcessBuffer::ensure32() {
+    _in.ensure32();
+    _out.ensure32();
+}
+
+void ProcessBuffer::ensure64() {
+    _in.ensure64();
+    _out.ensure64();
+}

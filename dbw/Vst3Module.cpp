@@ -173,7 +173,7 @@ bool Vst3Module::load(std::string path) {
     Steinberg::int32 eventOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kOutput);
     logger->debug("イベント出力バスは {} 個あります。", eventOutNum);
 
-    for (int i = 0; i < eventInNum; i++) {
+    for (int i = 0; i < eventOutNum; i++) {
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput, i, busInfo);
 
@@ -190,7 +190,13 @@ bool Vst3Module::load(std::string path) {
     logger->debug("音声入出力の対応ビット数");
 
     Steinberg::tresult resSampleBit32 = _processor->canProcessSampleSize(Steinberg::Vst::SymbolicSampleSizes::kSample32);
+    if (resSampleBit32 == Steinberg::kResultTrue) {
+        _symbolicSampleSizes = Steinberg::Vst::SymbolicSampleSizes::kSample32;
+    }
     Steinberg::tresult resSampleBit64 = _processor->canProcessSampleSize(Steinberg::Vst::SymbolicSampleSizes::kSample64);
+    if (resSampleBit64 == Steinberg::kResultTrue) {
+        _symbolicSampleSizes = Steinberg::Vst::SymbolicSampleSizes::kSample64;
+    }
 
     logger->debug("　32bit対応 … {}  64bit対応 … {}", (resSampleBit32 != Steinberg::kResultFalse) ? "対応" : "非対応", (resSampleBit64 != Steinberg::kResultFalse) ? "対応" : "非対応");
 
@@ -216,7 +222,7 @@ bool Vst3Module::load(std::string path) {
     // setupProcessing()でkResultOkとなるパターンを探す必要がある。
     Steinberg::Vst::SampleRate sampleRate = 48000.0;
     Steinberg::int32 blockSize = 1024;
-    Steinberg::Vst::ProcessSetup setup{ Steinberg::Vst::ProcessModes::kRealtime, Steinberg::Vst::SymbolicSampleSizes::kSample32, blockSize, sampleRate };
+    Steinberg::Vst::ProcessSetup setup{ Steinberg::Vst::ProcessModes::kRealtime, _symbolicSampleSizes, blockSize, sampleRate };
 
     if (_processor->setupProcessing(setup) != Steinberg::kResultOk) {
         logger->debug("Error : 音声処理クラスのセットアップに失敗");
@@ -234,7 +240,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     ///< processing mode - value of \ref ProcessModes
     processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;
     ///< sample size - value of \ref SymbolicSampleSizes
-    processData.symbolicSampleSize = Steinberg::Vst::SymbolicSampleSizes::kSample32;
+    processData.symbolicSampleSize = _symbolicSampleSizes;
     ///< number of samples to process
     processData.numSamples = buffer->_framesPerBuffer;
     ///< number of audio input busses
@@ -244,31 +250,54 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     ///< buffers of input busses
     // TODO 複数バス対応
     std::vector<float*> inputChannelBuffers32;
-    for (auto& x : buffer->_in._buffer) {
-        inputChannelBuffers32.push_back(x.data());
+    std::vector<double*> inputChannelBuffers64;
+    std::vector<float*> outputChannelBuffers32;
+    std::vector<double*> outputChannelBuffers64;
+    if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
+        buffer->ensure32();
+        for (auto& x : buffer->_in.buffer32()) {
+            inputChannelBuffers32.push_back(x.data());
+        }
+        for (auto& x : buffer->_out.buffer32()) {
+            outputChannelBuffers32.push_back(x.data());
+        }
+    } else {
+        buffer->ensure64();
+        for (auto& x : buffer->_in.buffer64()) {
+            inputChannelBuffers64.push_back(x.data());
+        }
+        for (auto& x : buffer->_out.buffer64()) {
+            outputChannelBuffers64.push_back(x.data());
+        }
     }
     std::vector<Steinberg::Vst::AudioBusBuffers> inputAudioBusBuffers;
     for (int i = 0; i < _audioInNum; ++i) {
-        auto x = Steinberg::Vst::AudioBusBuffers();
+        Steinberg::Vst::AudioBusBuffers x;
         x.numChannels = buffer->_nchannels;
-        x.channelBuffers32 = inputChannelBuffers32.data();
-        inputAudioBusBuffers.push_back(x);
+        if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
+            x.channelBuffers32 = inputChannelBuffers32.data();
+        } else {
+            x.channelBuffers64 = inputChannelBuffers64.data();
+        }
+        inputAudioBusBuffers.emplace_back(x);
     }
     processData.inputs = inputAudioBusBuffers.data();
+
     ///< buffers of output busses
     // TODO 複数バス対応
-    std::vector<float*> outputChannelBuffers32;
-    for (auto& x : buffer->_out._buffer) {
-        outputChannelBuffers32.push_back(x.data());
-    }
     std::vector<Steinberg::Vst::AudioBusBuffers> outputAudioBusBuffers;
     for (int i = 0; i < _audioOutNum; ++i) {
-        auto x = Steinberg::Vst::AudioBusBuffers();
+        Steinberg::Vst::AudioBusBuffers x;
         x.numChannels = buffer->_nchannels;
-        x.channelBuffers32 = outputChannelBuffers32.data();
-        outputAudioBusBuffers.push_back(x);
+        if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
+            x.channelBuffers32 = outputChannelBuffers32.data();
+        } else {
+            x.channelBuffers64 = outputChannelBuffers64.data();
+        }
+        outputAudioBusBuffers.emplace_back(x);
     }
     processData.outputs = outputAudioBusBuffers.data();
+
     ///< incoming parameter changes for this block
     Steinberg::Vst::ParameterChanges inputParams;
     processData.inputParameterChanges = &inputParams;
@@ -317,6 +346,7 @@ void Vst3Module::start() {
     if (_processor) {
         _processor->setProcessing(true);
     }
+    _isStarting = true;
 }
 
 void Vst3Module::stop() {
@@ -326,6 +356,7 @@ void Vst3Module::stop() {
     if (_component) {
         _component->setActive(false);
     }
+    _isStarting = false;
 }
 
 void Vst3Module::openGui() {

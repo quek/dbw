@@ -5,25 +5,40 @@
 AudioBuffer::AudioBuffer() : _framesPerBuffer(0), _nchannels(0) {
 }
 
-void AudioBuffer::add(const AudioBuffer& other) {
-    for (auto [a, b] : std::views::zip(_buffer, other._buffer)) {
-        for (auto [aa, bb] : std::views::zip(a, b)) {
-            aa += bb;
-        }
+template<typename T, typename U>
+void addBuffers(std::vector<std::vector<T>>& dest, const std::vector<std::vector<U>>& src) {
+    for (auto [a, b] : std::views::zip(dest, src)) {
+        std::transform(a.begin(), a.end(), b.begin(), a.begin(), [](T& aa, const U& bb) { return aa += static_cast<T>(bb); });
     }
 }
 
-void AudioBuffer::copyFrom(const AudioBuffer& other) {
-    _buffer = other._buffer;
-    _constantp = other._constantp;
-    _framesPerBuffer = other._framesPerBuffer;
-    _nchannels = other._nchannels;
+void AudioBuffer::add(const AudioBuffer& other) {
+    if (_dataType == Float) {
+        if (other._dataType == Float) {
+            addBuffers(_buffer32, other._buffer32);
+        } else {
+            addBuffers(_buffer32, other._buffer64);
+        }
+    } else {
+        if (other._dataType == Float) {
+            addBuffers(_buffer64, other._buffer32);
+        } else {
+            addBuffers(_buffer64, other._buffer64);
+        }
+    }
 }
 
 void AudioBuffer::copyFrom(const float** buffer, unsigned long framesPerBuffer, int nchannels) {
     ensure(framesPerBuffer, nchannels);
     for (int i = 0; i < nchannels; ++i) {
-        _buffer[i] = std::vector<float>(buffer[i], buffer[i] + framesPerBuffer);
+        _buffer32[i] = std::vector<float>(buffer[i], buffer[i] + framesPerBuffer);
+    }
+}
+
+void AudioBuffer::copyFrom(const double** buffer, unsigned long framesPerBuffer, int nchannels) {
+    ensure(framesPerBuffer, nchannels);
+    for (int i = 0; i < nchannels; ++i) {
+        _buffer64[i] = std::vector<double>(buffer[i], buffer[i] + framesPerBuffer);
     }
 }
 
@@ -34,9 +49,9 @@ void AudioBuffer::copyTo(float** buffer, unsigned long framesPerBuffer, int ncha
     }
     for (int i = 0; i < nchannels; ++i) {
         if (_constantp[i]) {
-            std::fill_n(buffer[i], framesPerBuffer, _buffer[i][0]);
+            std::fill_n(buffer[i], framesPerBuffer, _buffer32[i][0]);
         } else {
-            std::ranges::copy(_buffer[i], buffer[i]);
+            std::ranges::copy(_buffer32[i], buffer[i]);
         }
     }
 }
@@ -49,9 +64,17 @@ void AudioBuffer::copyTo(float* buffer, unsigned long framesPerBuffer, int nchan
     for (unsigned long i = 0; i < framesPerBuffer; ++i) {
         for (int channel = 0; channel < nchannels; ++channel) {
             if (_constantp[channel]) {
-                buffer[i * nchannels + channel] = _buffer[channel][0];
+                if (_dataType == Float) {
+                    buffer[i * nchannels + channel] = _buffer32[channel][0];
+                } else {
+                    buffer[i * nchannels + channel] = static_cast<float>(_buffer64[channel][0]);
+                }
             } else {
-                buffer[i * nchannels + channel] = _buffer[channel][i];
+                if (_dataType == Float) {
+                    buffer[i * nchannels + channel] = _buffer32[channel][i];
+                } else {
+                    buffer[i * nchannels + channel] = static_cast<float>(_buffer64[channel][i]);
+                }
             }
         }
     }
@@ -63,17 +86,69 @@ void AudioBuffer::ensure(unsigned long framesPerBuffer, int nchannels) {
     }
     _framesPerBuffer = framesPerBuffer;
     _nchannels = nchannels;
-    _buffer.clear();
-    for (int i = 0; i < _nchannels; ++i) {
-        _buffer.push_back(std::vector<float>(framesPerBuffer, 0.0f));
+    if (_dataType == Float) {
+        _buffer32.clear();
+        for (int i = 0; i < _nchannels; ++i) {
+            _buffer32.push_back(std::vector<float>(framesPerBuffer, 0.0f));
+        }
+    } else {
+        _buffer64.clear();
+        for (int i = 0; i < _nchannels; ++i) {
+            _buffer64.push_back(std::vector<double>(framesPerBuffer, 0.0));
+        }
     }
     _constantp = std::vector<bool>(nchannels, false);
 }
 
-void AudioBuffer::zero() {
-    for (int i = 0; i < _nchannels; ++i) {
-        std::fill(_buffer[i].begin(), _buffer[i].end(), 0.0f);
+void AudioBuffer::ensure32() {
+    if (_dataType == Float) {
+        return;
     }
-    std::fill(_constantp.begin(), _constantp.end(), false);
+    _buffer32.clear();
+    for (auto& x : _buffer64) {
+        std::vector<float> yy;
+        for (double xx : x) {
+            yy.push_back(static_cast<float>(xx));
+        }
+        _buffer32.push_back(yy);
+    }
+    _dataType = Float;
 }
 
+void AudioBuffer::ensure64() {
+    if (_dataType == Double) {
+        return;
+    }
+    _buffer64.clear();
+    for (auto& x : _buffer32) {
+        std::vector<double> yy;
+        for (float xx : x) {
+            yy.push_back(xx);
+        }
+        _buffer64.push_back(yy);
+    }
+    _dataType = Double;
+}
+
+void AudioBuffer::zero() {
+    if (_dataType == Float) {
+        for (auto& x : _buffer32) {
+            std::ranges::fill(x, 0.0f);
+        }
+    } else {
+        for (auto& x : _buffer64) {
+            std::ranges::fill(x, 0.0);
+        }
+    }
+    std::ranges::fill(_constantp, false);
+}
+
+std::vector<std::vector<float>>& AudioBuffer::buffer32() {
+    ensure32();
+    return _buffer32;
+}
+
+std::vector<std::vector<double>>& AudioBuffer::buffer64() {
+    ensure64();
+    return _buffer64;
+}

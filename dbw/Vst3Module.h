@@ -43,6 +43,7 @@ private:
 
     Steinberg::int32 _audioInNum = 0;
     Steinberg::int32 _audioOutNum = 0;
+    Steinberg::Vst::SymbolicSampleSizes _symbolicSampleSizes = Steinberg::Vst::SymbolicSampleSizes::kSample32;
 
     std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
 };

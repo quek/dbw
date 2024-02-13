@@ -11,10 +11,11 @@ class Module {
 public:
     Module(std::string name, Track* track) : _name(name), _track(track) {}
     virtual ~Module();
-    virtual void openGui() { _didOpenGui = true; };
-    virtual void closeGui() { _didOpenGui = false; };
-    virtual void start() {};
-    virtual void stop() {};
+    virtual void openGui() { _didOpenGui = true; }
+    virtual void closeGui() { _didOpenGui = false; }
+    virtual void start() { _isStarting = true;};
+    virtual bool isStarting() { return _isStarting; }
+    virtual void stop() { _isStarting = false; }
     virtual void render();
     virtual void renderContent() {}
     virtual bool process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) { return true; }
@@ -25,4 +26,7 @@ public:
     Track* _track;
     std::string _name;
     bool _didOpenGui = false;
+
+protected:
+    bool _isStarting = false;
 };

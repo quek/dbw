@@ -45,6 +45,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     }
 
     _processBuffer.clear();
+    _processBuffer.ensure32();
     _processBuffer.ensure(framesPerBuffer, 2);
 
     _masterTrack->_processBuffer.ensure(framesPerBuffer, 2);

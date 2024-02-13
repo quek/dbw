@@ -51,9 +51,11 @@ void Track::process(int64_t steadyTime) {
 
     _composer->_sceneMatrix->process(this);
 
-    for (auto module = _modules.begin(); module != _modules.end(); ++module) {
-        (*module)->process(&_processBuffer, steadyTime);
-        _processBuffer.swapInOut();
+    for (auto& module : _modules) {
+        if (module->isStarting()) {
+            module->process(&_processBuffer, steadyTime);
+            _processBuffer.swapInOut();
+        }
     }
     _processBuffer.swapInOut();
 }

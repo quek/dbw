@@ -328,10 +328,11 @@ void PluginHost::changeLatency() {
 
 bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     // とりあえず 0, 1 の 2ch で
-    _inputs[0] = buffer->_in._buffer[0].data();
-    _inputs[1] = buffer->_in._buffer[1].data();
-    _outputs[0] = buffer->_out._buffer[0].data();
-    _outputs[1] = buffer->_out._buffer[1].data();
+    buffer->ensure32();
+    _inputs[0] = buffer->_in.buffer32()[0].data();
+    _inputs[1] = buffer->_in.buffer32()[1].data();
+    _outputs[0] = buffer->_out.buffer32()[0].data();
+    _outputs[1] = buffer->_out.buffer32()[1].data();
 
     _audioIn.channel_count = buffer->_in.getNchannels();
     _audioOut.channel_count = buffer->_in.getNchannels();
