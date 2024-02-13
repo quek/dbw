@@ -37,6 +37,7 @@ LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bool resizable) : _module(module), _resizable(resizable) {
     RECT rect{ 0, 0, width, height };
+    // WS_EX_TOPMOST 関係ない他のウインドよりも前面になるので微妙
     DWORD exStyle = WS_EX_APPWINDOW | WS_EX_TOPMOST;
     DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
     if (_resizable)
@@ -77,5 +78,18 @@ PluginEditorWindow::~PluginEditorWindow() {
 }
 
 void PluginEditorWindow::setSize(uint32_t width, uint32_t height) {
-    SetWindowPos(_hwnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
+    RECT r;
+    GetClientRect(_hwnd, &r);
+    if (r.right - r.left == static_cast<LONG>(width) && r.bottom - r.top == static_cast<LONG>(height)) {
+        return;
+    }
+    WINDOWINFO windowInfo{ 0 };
+    GetWindowInfo(_hwnd, &windowInfo);
+    RECT clientRect{};
+    clientRect.right = width;
+    clientRect.bottom = height;
+    AdjustWindowRectEx(&clientRect, windowInfo.dwStyle, false, windowInfo.dwExStyle);
+    SetWindowPos(_hwnd, HWND_TOP, 0, 0, clientRect.right - clientRect.left,
+                 clientRect.bottom - clientRect.top, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOACTIVATE);
+
 }

@@ -399,7 +399,6 @@ void Vst3Module::openGui() {
         _editorWindow.reset();
         return;
     }
-    _editorWindow->setSize(size.getWidth(), size.getHeight());
 
     Module::openGui();
 }
