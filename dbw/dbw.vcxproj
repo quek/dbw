@@ -168,7 +168,9 @@
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
     <ClInclude Include="ClipSlot.h" />
+    <ClInclude Include="Command\OpenProject.h" />
     <ClInclude Include="ComposerWindow.h" />
+    <ClInclude Include="Error.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="GainModule.h" />
     <ClInclude Include="Grid.h" />
@@ -224,7 +226,9 @@
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />
     <ClCompile Include="ClipSlot.cpp" />
+    <ClCompile Include="Command\OpenProject.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
+    <ClCompile Include="Error.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="Grid.cpp" />

@@ -128,12 +128,12 @@ void TimelineWindow::handleShortcut() {
     }
 }
 
-void TimelineWindow::renderPalyCursor() {
+void TimelineWindow::renderPalyhead() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollY = ImGui::GetScrollY();
     float y = (_composer->_playTime * _zoomY) + offsetTop() + offsetStart();
-    if (_composer->_playing) {
+    if (_composer->_playing && _composer->_isScrollFolloPlayhead) {
         if (y < ImGui::GetWindowHeight() / 2.0f) {
             ImGui::SetScrollY(0);
         } else {

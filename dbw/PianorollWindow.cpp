@@ -120,7 +120,7 @@ float PianoRollWindow::getLaneWidth(Note* /*thing*/) {
 void PianoRollWindow::handleShortcut() {
 }
 
-void PianoRollWindow::renderPalyCursor() {
+void PianoRollWindow::renderPalyhead() {
 }
 
 void PianoRollWindow::renderHeader() {

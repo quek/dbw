@@ -20,6 +20,10 @@ void TimelineCanvasMixin<THING, LANE>::render() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
     if (ImGui::Begin(windowName().c_str(), nullptr, ImGuiWindowFlags_NoScrollbar)) {
         renderGridSnap();
+
+        ImGui::SameLine();
+        ImGui::Checkbox("Follow Playhead", &_composer->_isScrollFolloPlayhead);
+
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         if (ImGui::BeginChild(canvasName().c_str(),
                               ImVec2(0.0f, -22.0f),
@@ -31,7 +35,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
 
             ImGui::PushClipRect(clipRectMin + ImVec2(0.0f, offsetTop()), clipRectMax, true);
             renderTimeline();
-            renderPalyCursor();
+            renderPalyhead();
             ImGui::PopClipRect();
 
             ImGui::PushClipRect(clipRectMin + ImVec2(offsetLeft(), 0.0f), clipRectMax, true);
@@ -236,21 +240,31 @@ void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
+    float windowHeight = ImGui::GetWindowHeight();
     float leftPadding = 2.0f;
     float lastY = -GRID_SKIP_WIDTH;
     ImVec2 clipRectMin = windowPos + ImVec2(0.0f, offsetTop());
-    ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight());
+    ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + windowHeight);
+
     ImGui::PushClipRect(clipRectMin, clipRectMax, true);
-    for (int i = 0; i < _composer->maxBar(); ++i) {
+    for (int i = 0; ; ++i) {
         float y = (i * 4 * _zoomY) + offsetTop() + offsetStart();
         if (y - lastY < GRID_SKIP_WIDTH) {
             continue;
         }
         ImVec2 pos = ImVec2(scrollX + leftPadding, y);
+        ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
+        if (pos1.y < clipRectMin.y - windowHeight) {
+            continue;
+        }
+        if (clipRectMax.y < pos1.y) {
+            ImGui::SetCursorPos(pos + ImVec2(0, windowHeight));
+            ImGui::Text(" ");
+            break;
+        }
         ImGui::SetCursorPos(pos);
         ImGui::Text(std::to_string(i + 1).c_str());
 
-        ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
         ImVec2 pos2 = pos + ImVec2(ImGui::GetWindowWidth() - scrollX, -scrollY) + windowPos;
         drawList->AddLine(pos1, pos2, BAR_LINE_COLOR);
 
@@ -269,8 +283,17 @@ void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
 
         lastY = y;
     }
-
     ImGui::PopClipRect();
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos;
+    if (!ImGui::IsWindowFocused() || !Bounds(clipRectMin, clipRectMax).contains(mousePos)) {
+        return;
+    }
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        double time = timeFromMousePos();
+        _composer->_playTime = time;
+    }
 }
 
 template<class THING, typename LANE>

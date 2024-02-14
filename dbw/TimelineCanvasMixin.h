@@ -79,7 +79,7 @@ public:
 
 protected:
     virtual void handleShortcut() = 0;
-    virtual void renderPalyCursor() = 0;
+    virtual void renderPalyhead() = 0;
     virtual void renderHeader() = 0;
     virtual std::string windowName() = 0;
     virtual std::string canvasName() = 0;

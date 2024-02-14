@@ -34,12 +34,12 @@ void SaveWindow::render() {
         if (exists) {
             ImGui::Text("Already exists.");
         }
-        ImGui::BeginDisabled(exists);
+        //ImGui::BeginDisabled(exists);
         if (ImGui::Button("Save")) {
             _composer->_composerWindow->_showSaveWindow = false;
             save();
         }
-        ImGui::EndDisabled();
+        //ImGui::EndDisabled();
 
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {

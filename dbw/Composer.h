@@ -44,6 +44,7 @@ public:
     double _nextPlayTime = 0.0;
     double _loopStartTime = 0.0;
     double _loopEndTime = 16.0;
+    bool _isScrollFolloPlayhead = true;
     CommandManager _commandManager;
     PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;

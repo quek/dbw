@@ -79,6 +79,10 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp">
       <Filter>VST3</Filter>
     </ClCompile>
+    <ClCompile Include="Error.cpp" />
+    <ClCompile Include="Command\OpenProject.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -147,6 +151,10 @@
     <ClInclude Include="TimelineCanvasMixin.h" />
     <ClInclude Include="PianoRollWindow.h" />
     <ClInclude Include="Thing.h" />
+    <ClInclude Include="Error.h" />
+    <ClInclude Include="Command\OpenProject.h">
+      <Filter>command</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
@@ -164,6 +172,9 @@
     </Filter>
     <Filter Include="lib">
       <UniqueIdentifier>{403f78d7-3209-475c-81a1-db5beb55e875}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="command">
+      <UniqueIdentifier>{aff0781d-9f84-4228-98a1-2c60fec426f9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

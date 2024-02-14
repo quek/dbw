@@ -2,22 +2,22 @@
 #include <fstream>
 #include <public.sdk/source/vst/hosting/module.h>
 #include <public.sdk/source/vst/hosting/parameterchanges.h>
+#include <pluginterfaces/base/funknown.h>
+#include <pluginterfaces/vst/vsttypes.h>
+#include <pluginterfaces/vst/ivsteditcontroller.h>
+#include <pluginterfaces/vst/ivstevents.h>
+#include <pluginterfaces/base/ftypes.h>
+#include <public.sdk/source/common/memorystream.h>
 #include "imgui.h"
 #include "AudioEngine.h"
 #include "Composer.h"
-#include "ErrorWindow.h"
+#include "Error.h"
 #include "logger.h"
 #include "Project.h"
 #include "Track.h"
 #include "util.h"
 
 // ここからVSTプラグイン関係(音声処理クラスやパラメーター操作クラス)のヘッダ
-#include "pluginterfaces/base/funknown.h"
-#include "pluginterfaces/vst/vsttypes.h"
-#include "pluginterfaces/vst/ivsteditcontroller.h"
-#include "pluginterfaces/vst/ivstevents.h"
-#include <pluginterfaces/base/ftypes.h>
-#include <public.sdk/source/common/memorystream.h>
 
 Vst3Module::Vst3Module(std::string name, Track* track) : Module(name, track) {
     FUNKNOWN_CTOR
@@ -46,7 +46,7 @@ bool Vst3Module::load(std::string path) {
     std::string error;
     _module = VST3::Hosting::Module::create(path, error);
     if (!_module) {
-        gErrorWindow->show(error);
+        Error(error);
         return false;
     }
 
@@ -103,6 +103,17 @@ bool Vst3Module::load(std::string path) {
     // PlugProviderクラスから音声処理クラスを取得する。(音声処理クラスは初期化済み)
     _component = _plugProvider->getComponent();
     _controller = _plugProvider->getController();
+
+    // https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/API+Documentation/Index.html?highlight=setComponentState#initialization-of-communication-from-host-point-of-view
+    Steinberg::MemoryStream processorStream;
+    if (_component->getState(&processorStream) != Steinberg::kResultOk) {
+        Error(_name + "のプロセスステータスの取得に失敗しました。");
+    }
+    processorStream.seek(0, Steinberg::IBStream::IStreamSeekMode::kIBSeekSet, 0);
+    Steinberg::tresult result = _controller->setComponentState(&processorStream);
+    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
+        Error(_name + "のステータス設定に失敗しました。" + std::to_string(result));
+    }
 
     // 音声処理クラスはIComponentクラスとIAudioProcessorクラスを継承している
     // PlugProviderクラスから取得できるのはIComponentクラスのみなので、
@@ -367,7 +378,7 @@ void Vst3Module::start() {
     if (_processor) {
         _processor->setProcessing(true);
     }
-    _isStarting = true;
+    Module::start();
 }
 
 void Vst3Module::stop() {
@@ -377,7 +388,7 @@ void Vst3Module::stop() {
     if (_component) {
         _component->setActive(false);
     }
-    _isStarting = false;
+    Module::stop();
 }
 
 void Vst3Module::openGui() {
@@ -441,31 +452,70 @@ void Vst3Module::onResize(int width, int height) {
 }
 
 void Vst3Module::loadState(std::filesystem::path path) {
-    std::ifstream in(path);
+    std::ifstream in(path, std::ios::binary);
+    if (!in) {
+        Error(_name + "のステートファイルをオープンできませんでした。" + path.string());
+    }
+
     int64_t size;
-    in >> size;
+    in.read((char*)&size, sizeof(int64_t));
+    if (!in) {
+        Error(_name + "のステートサイズを取得できませんでした。" + path.string());
+    }
+
     std::unique_ptr<char[]> buffer(new char[size]);
     in.read(buffer.get(), size);
-    {
-        Steinberg::MemoryStream processorStream(buffer.get(), size);
-        _component->setState(&processorStream);
+    if (!in) {
+        Error(_name + "のステートを読み込めませんでした。" + path.string());
     }
-    {
-        Steinberg::MemoryStream processorStream(buffer.get(), size);
-        _controller->setComponentState(&processorStream);
+    auto readSize = in.gcount();
+    if (readSize != size) {
+        Error(_name + "のステートの読み込みサイズ不正。" + std::to_string(readSize) + "/" + std::to_string(size) + " " + path.string());
     }
-    in >> size;
+
+    Steinberg::MemoryStream processorStream(buffer.get(), size);
+    Steinberg::tresult result = _component->setState(&processorStream);
+    if (result != Steinberg::kResultOk) {
+        Error(_name + "のステータス設定に失敗しました。" + std::to_string(result));
+    }
+    processorStream.seek(0, Steinberg::IBStream::IStreamSeekMode::kIBSeekSet, 0);
+    result = _controller->setComponentState(&processorStream);
+    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
+        Error(_name + "のステータス設定に失敗しました。" + std::to_string(result));
+    }
+
+    in.read((char*)&size, sizeof(int64_t));
+    if (!in) {
+        Error(_name + "のコントロールステートサイズを取得できませんでした。" + path.string());
+    }
+
     buffer.reset(new char[size]);
     in.read(buffer.get(), size);
+    if (!in) {
+        Error(_name + "のコントロールステートを読み込めませんでした。" + path.string());
+    }
+    readSize = in.gcount();
+    if (readSize != size) {
+        Error(_name + "のコントロールステートの読み込みサイズ不正。" + std::to_string(readSize) + "/" + std::to_string(size) + " " + path.string());
+    }
+
     Steinberg::MemoryStream controllerStream(buffer.get(), size);
-    _controller->setState(&controllerStream);
+    result = _controller->setState(&controllerStream);
+    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
+        Error(_name + "のステータス設定に失敗しました。" + std::to_string(result));
+    }
 }
 
 tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* doc) {
     Steinberg::MemoryStream processorStream;
-    _component->getState(&processorStream);
+    if (_component->getState(&processorStream) != Steinberg::kResultOk) {
+        Error(_name + "のプロセスステータスの取得に失敗しました。");
+    }
     Steinberg::MemoryStream controllerStream;
-    _controller->getState(&controllerStream);
+    auto result = _controller->getState(&controllerStream);
+    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
+        Error(_name + "のコントロールステータスの取得に失敗しました。" + std::to_string(result));
+    }
 
     auto* element = doc->NewElement("Vst3Plugin");
     // TODO Possible values: instrument, noteFX, audioFX, analyzer
@@ -484,13 +534,32 @@ tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* doc) {
 
     auto path = _track->_composer->_project->projectDir() / statePath;
     std::filesystem::create_directories(path.parent_path());
-    std::ofstream out(path);
+    std::ofstream out(path, std::ios::binary);
+    if (!out) {
+        Error(_name + "のステータス保存に失敗しました。");
+    }
     int64_t size = processorStream.getSize();
-    out << size;
+    out.write((const char*)&size, sizeof(int64_t));
+    if (!out) {
+        Error(_name + "のステータス保存に失敗しました。");
+    }
     out.write(processorStream.getData(), size);
+    if (!out) {
+        Error(_name + "のステータス保存に失敗しました。");
+    }
     size = controllerStream.getSize();
+    out.write((const char*)&size, sizeof(int64_t));
+    if (!out) {
+        Error(_name + "のステータス保存に失敗しました。");
+    }
     out.write(controllerStream.getData(), size);
+    if (!out) {
+        Error(_name + "のステータス保存に失敗しました。");
+    }
     out.close();
+    if (out.fail()) {
+        Error(_name + "のステータス保存に失敗しました。");
+    }
 
     return element;
 }
@@ -502,7 +571,7 @@ nlohmann::json Vst3Module::scan(const std::string path) {
     std::string error;
     auto module = VST3::Hosting::Module::create(path, error);
     if (!module) {
-        gErrorWindow->show(error);
+        Error(error);
         return false;
     }
 

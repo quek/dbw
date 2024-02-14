@@ -36,7 +36,7 @@ public:
 
 protected:
     void handleShortcut() override;
-    void renderPalyCursor()override;
+    void renderPalyhead()override;
     void renderHeader()override;
     std::string windowName() override;
     std::string canvasName() override;

@@ -1,7 +1,7 @@
 #include "PluginHost.h"
 #include <fstream>
 #include "Composer.h"
-#include "ErrorWindow.h"
+#include "Error.h"
 #include "logger.h"
 #include "util.h"
 
@@ -278,7 +278,7 @@ void PluginHost::saveState() {
         .write = [](const struct clap_ostream* stream, const void* buffer, uint64_t size) -> int64_t {
             ((std::ofstream*)stream->ctx)->write(static_cast<const char*>(buffer), size);
             if (((std::ofstream*)stream->ctx)->fail()) {
-                // TODO
+                Error("ステート保存に失敗しました。");
             }
             return size;
         }
@@ -348,17 +348,14 @@ bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     try {
         clap_process_status status = _plugin->process(_plugin, &_process);
         if (status == CLAP_PROCESS_ERROR) {
-            gErrorWindow->show(std::string("Plack plugin render return error ") + std::to_string(status));
+            Error(std::string("Plack plugin render return error ") + std::to_string(status));
             return false;
         }
     } catch (const std::exception& e) {
-        // 標準例外をキャッチ
-        gErrorWindow->show("Plack plugin render failed!", e);
+        Error(std::string("Plack plugin render failed!") +  e.what());
         return false;
     } catch (...) {
-        // その他すべての例外をキャッチ
-        logger->error("Unknown exception caught");
-        gErrorWindow->show("Plack plugin render failed!\n\nUnknown error.");
+        Error("Plack plugin render failed!\n\nUnknown error.");
         return false;
     }
     buffer->_out._constantp.clear();

@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include "../ImGuiFileDialog/ImGuiFileDialog.h"
 #include "Composer.h"
+#include "Command/OpenProject.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "util.h"
@@ -82,7 +83,7 @@ void ComposerWindow::render() {
     if (ImGuiFileDialog::Instance()->Display("Open Project")) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            _composer->_project->open(std::filesystem::path(filePath));
+            _composer->_commandManager.executeCommand(new command::OpenProject(std::filesystem::path(filePath)));
         }
         ImGuiFileDialog::Instance()->Close();
     }

@@ -67,10 +67,10 @@ void PluginModule::start() {
         _track->_composer->_audioEngine->_sampleRate,
         _track->_composer->_audioEngine->_bufferSize
     );
-    _isStarting = true;
+    Module::start();
 }
 
 void PluginModule::stop() {
     _pluginHost->stop();
-    _isStarting = false;
+    Module::stop();
 }
