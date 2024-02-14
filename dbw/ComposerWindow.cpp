@@ -104,45 +104,31 @@ void ComposerWindow::render() {
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
-    if (ImGui::BeginTable("racks", 2 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
-        ImGui::TableSetupScrollFreeze(1, 1);
-        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
+    if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
+        ImGui::TableSetupScrollFreeze(0, 1);
         for (size_t i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str());
         }
-        ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
         ImGui::TableHeadersRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TableHeader("#");
         for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetColumnIndex(i + 1);
+            ImGui::TableSetColumnIndex(i);
             auto name = _composer->_tracks[i]->_name.c_str();
             ImGui::TableHeader(name);
         }
 
-        ImGui::TableSetColumnIndex(0);
         ImGui::TableNextRow();
         for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetColumnIndex(i + 1);
+            ImGui::TableSetColumnIndex(i);
             ImGui::PushID(i);
             _composer->_tracks[i]->render();
             ImGui::PopID();
         }
 
-        ImGui::TableSetColumnIndex(static_cast<int>(_composer->_tracks.size() + 1));
+        ImGui::TableSetColumnIndex(static_cast<int>(_composer->_tracks.size()));
         ImGui::PushID("MASTER RACK");
         _composer->_masterTrack->render();
         ImGui::PopID();
-
-        if (_tracksScrolled) {
-            ImGui::SetScrollX(_lastTracksScrollX);
-            _tracksScrolled = false;
-            _lastRacksScrollX = _lastTracksScrollX;
-        } else {
-            float x = ImGui::GetScrollX();
-            _racksScrolled = _lastRacksScrollX != x;
-            _lastRacksScrollX = x;
-        }
 
         ImGui::EndTable();
     }

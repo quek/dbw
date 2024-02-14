@@ -130,7 +130,7 @@ void PianoRollWindow::handleShortcut() {
 void PianoRollWindow::renderPalyhead() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     float scrollX = ImGui::GetScrollX();
-    ImVec2 pos1 = canvasToScreen(ImVec2(scrollX, _composer->_playTime));
+    ImVec2 pos1 = canvasToScreen(ImVec2(scrollX, fmod(_composer->_playTime, _clip->_sequence->_duration)));
     ImVec2 pos2 = pos1 + ImVec2(ImGui::GetWindowWidth(), 0.0f);
     drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
 }
