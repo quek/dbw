@@ -22,7 +22,6 @@ Composer::Composer(AudioEngine* audioEngine) :
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
-    _pianoRoll(std::make_unique<PianoRollH>(this)),
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)) {
     addTrack();
     _pluginManager.load();
@@ -32,7 +31,6 @@ void Composer::render() const {
     _composerWindow->render();
     _sceneMatrix->render();
     _timelineWindow->render();
-    _pianoRoll->render();
     _pianoRollWindow->render();
 }
 
@@ -85,6 +83,13 @@ void Composer::scanPlugin() {
 int Composer::maxBar() {
     // TODO
     return 50;
+}
+
+void Composer::clear() {
+    _tracks.clear();
+    _commandManager.clear();
+    _sceneMatrix->_scenes.clear();
+    _pianoRollWindow->_show = false;
 }
 
 void Composer::deleteClips(std::set<Clip*> clips) {

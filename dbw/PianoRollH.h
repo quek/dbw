@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <set>
 #include "GridMixin.h"

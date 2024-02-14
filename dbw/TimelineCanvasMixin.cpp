@@ -60,7 +60,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
 }
 template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax) {
-    if (!ImGui::IsWindowHovered()) {
+    if (!canHandleInput()) {
         return;
     }
 
@@ -288,7 +288,7 @@ void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
 
-    if (!ImGui::IsWindowHovered() ||
+    if (!canHandleInput() ||
         !Bounds(clipRectMin, clipRectMax - ImVec2(ImGui::GetWindowWidth() - offsetLeft(), 0.0f)).contains(mousePos)) {
         return;
     }
@@ -312,7 +312,7 @@ template<class THING, typename LANE>
 double TimelineCanvasMixin<THING, LANE>::timeFromMousePos(float offset, bool floor) {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos - ImVec2(0.0f, offset);
-    ImVec2 canvasPos = toCanvasPos(mousePos);
+    ImVec2 canvasPos = screenToCanvas(mousePos);
     if (floor) {
         return toSnapFloor(canvasPos.y);
     }
@@ -329,16 +329,6 @@ THING* TimelineCanvasMixin<THING, LANE>::thingAtPos(ImVec2& pos) {
 }
 
 template<class THING, typename LANE>
-ImVec2 TimelineCanvasMixin<THING, LANE>::toCanvasPos(ImVec2& pos) const {
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    float scrollX = ImGui::GetScrollX();
-    float scrollY = ImGui::GetScrollY();
-    float x = (pos.x - windowPos.x - offsetLeft() + scrollX) / _zoomX;
-    float y = (pos.y - windowPos.y - offsetTop() + scrollY - offsetStart()) / _zoomY;
-    return ImVec2(x, y);
-}
-
-template<class THING, typename LANE>
 double TimelineCanvasMixin<THING, LANE>::toSnapFloor(const double time) {
     if (!_snap) {
         return time;
@@ -352,6 +342,26 @@ double TimelineCanvasMixin<THING, LANE>::toSnapRound(const double time) {
         return time;
     }
     return _grid->snapRound(time);
+}
+
+template<class THING, typename LANE>
+ImVec2 TimelineCanvasMixin<THING, LANE>::screenToCanvas(const ImVec2& pos) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    float x = (pos.x - windowPos.x - offsetLeft() + scrollX) / _zoomX;
+    float y = (pos.y - windowPos.y - offsetTop() + scrollY - offsetStart()) / _zoomY;
+    return ImVec2(x, y);
+}
+
+template<class THING, typename LANE>
+inline ImVec2 TimelineCanvasMixin<THING, LANE>::canvasToScreen(const ImVec2& pos) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollX = ImGui::GetScrollX();
+    float scrollY = ImGui::GetScrollY();
+    float x = pos.x * _zoomX + windowPos.x + offsetLeft() - scrollX;
+    float y = pos.y * _zoomY + windowPos.y + offsetTop() - scrollY + offsetStart();
+    return ImVec2(x, y);
 }
 
 template class TimelineCanvasMixin<Clip, TrackLane>;

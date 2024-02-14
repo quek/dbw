@@ -3,7 +3,9 @@
 #include <set>
 #include <string>
 #include <vector>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include "BaseWindow.h"
 #include "GridMixin.h"
 #include "ZoomMixin.h"
 
@@ -11,7 +13,7 @@ struct Bounds;
 class Composer;
 
 template<class THING, typename LANE>
-class TimelineCanvasMixin : public GridMixin, public ZoomMixin {
+class TimelineCanvasMixin : public BaseWindow, public GridMixin, public ZoomMixin {
 public:
     TimelineCanvasMixin(Composer* composer);
     virtual ~TimelineCanvasMixin() = default;
@@ -47,7 +49,6 @@ public:
     THING* thingAtPos(ImVec2& pos);
     virtual float xFromThing(THING* thing) = 0;
     virtual float getLaneWidth(THING* thing) = 0;
-    ImVec2 toCanvasPos(ImVec2& pos) const;
     double toSnapFloor(const double time);
     double toSnapRound(const double time);
 
@@ -79,6 +80,8 @@ public:
     State _state;
 
 protected:
+    ImVec2 screenToCanvas(const ImVec2& pos);
+    ImVec2 canvasToScreen(const ImVec2& pos);
     virtual void handleShortcut() = 0;
     virtual void renderPalyhead() = 0;
     virtual void renderHeader() = 0;

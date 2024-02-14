@@ -50,9 +50,7 @@ void Project::open(std::filesystem::path dir) {
 
     _composer->stop();
     _composer->_audioEngine->stop();
-    _composer->_tracks.clear();
-    _composer->_commandManager.clear();
-    _composer->_sceneMatrix->_scenes.clear();
+    _composer->clear();
 
     tinyxml2::XMLElement* tempo = doc.FirstChildElement("Project")->FirstChildElement("Transport")->FirstChildElement("Tempo");
     if (tempo != nullptr) {

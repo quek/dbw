@@ -1,5 +1,7 @@
 #include "TimelineWindow.h"
+#include <mutex>
 #include <imgui.h>
+#include "AudioEngine.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
@@ -45,6 +47,7 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
 }
 
 void TimelineWindow::handleClickTimeline(double time) {
+    std::lock_guard<std::mutex> lock(_composer->_audioEngine->mtx);
     _composer->_playTime = time;
 }
 
@@ -64,7 +67,6 @@ void TimelineWindow::deleteThing(Clip* clip) {
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
-    _composer->_pianoRoll->edit(clip);
     _composer->_pianoRollWindow->edit(clip);
 }
 

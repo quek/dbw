@@ -23,12 +23,6 @@ extern ImU32 SELECTED_NOTE_COLOR;
 
 extern float widthWithPadding(int nchars);
 
-ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs);
-ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs);
-ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs);
-ImVec2 operator* (const ImVec2& lhs, const ImVec2& rhs);
-bool operator==(const ImVec2& lhs, const ImVec2& rhs);
-bool operator!=(const ImVec2& lhs, const ImVec2& rhs);
 bool operator<(const ImVec2& lhs, const ImVec2& rhs);
 bool operator<=(const ImVec2& lhs, const ImVec2& rhs);
 bool operator>(const ImVec2& lhs, const ImVec2& rhs);

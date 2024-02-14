@@ -165,6 +165,7 @@
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="AudioBuffer.h" />
+    <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
     <ClInclude Include="ClipSlot.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
+    <ClCompile Include="BaseWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />
     <ClCompile Include="ClipSlot.cpp" />

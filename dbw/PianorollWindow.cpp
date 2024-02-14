@@ -1,6 +1,8 @@
 #include "PianoRollWindow.h"
+#include <mutex>
 #include <imgui.h>
 #include "Clip.h"
+#include "AudioEngine.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
@@ -15,7 +17,7 @@ static int16_t allLanes[128];
 
 PianoRollWindow::PianoRollWindow(Composer* composer) : TimelineCanvasMixin(composer) {
     _zoomX = 1.0f;
-    _zoomY = 20.0f;
+    _zoomY = 40.0f;
     _grid = gGrids[1].get();
     for (int16_t i = 0; i < 128; ++i) {
         allLanes[i] = i;
@@ -60,6 +62,7 @@ void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLan
 }
 
 void PianoRollWindow::handleClickTimeline(double time) {
+    std::lock_guard<std::mutex> lock(_composer->_audioEngine->mtx);
     _composer->_playTime = time + _clip->_time;
 }
 
@@ -125,6 +128,11 @@ void PianoRollWindow::handleShortcut() {
 }
 
 void PianoRollWindow::renderPalyhead() {
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    float scrollX = ImGui::GetScrollX();
+    ImVec2 pos1 = canvasToScreen(ImVec2(scrollX, _composer->_playTime));
+    ImVec2 pos2 = pos1 + ImVec2(ImGui::GetWindowWidth(), 0.0f);
+    drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
 }
 
 void PianoRollWindow::renderHeader() {

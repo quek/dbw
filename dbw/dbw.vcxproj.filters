@@ -83,6 +83,7 @@
     <ClCompile Include="Command\OpenProject.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="BaseWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -155,6 +156,7 @@
     <ClInclude Include="Command\OpenProject.h">
       <Filter>command</Filter>
     </ClInclude>
+    <ClInclude Include="BaseWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
