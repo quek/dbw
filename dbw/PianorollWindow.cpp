@@ -59,6 +59,10 @@ void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLan
     }
 }
 
+void PianoRollWindow::handleClickTimeline(double time) {
+    _composer->_playTime = time + _clip->_time;
+}
+
 Note* PianoRollWindow::copyThing(Note* other) {
     Note* note = new Note(*other);
     _clip->_sequence->_notes.emplace_back(note);

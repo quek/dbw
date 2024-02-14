@@ -22,6 +22,7 @@ public:
     virtual THING* handleDoubleClick(double time, LANE* lane) = 0;
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     void handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax);
+    virtual void handleClickTimeline(double time) = 0;
     virtual THING* copyThing(THING*) = 0;
     virtual void deleteThing(THING*) = 0;
 

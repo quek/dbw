@@ -44,6 +44,10 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
     }
 }
 
+void TimelineWindow::handleClickTimeline(double time) {
+    _composer->_playTime = time;
+}
+
 Clip* TimelineWindow::copyThing(Clip* other) {
     Clip* clip = new Clip(*other);
     _clipLaneMap[other]->_clips.emplace_back(clip);

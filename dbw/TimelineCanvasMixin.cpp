@@ -60,7 +60,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
 }
 template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax) {
-    if (!ImGui::IsWindowFocused()) {
+    if (!ImGui::IsWindowHovered()) {
         return;
     }
 
@@ -287,12 +287,14 @@ void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
-    if (!ImGui::IsWindowFocused() || !Bounds(clipRectMin, clipRectMax).contains(mousePos)) {
+
+    if (!ImGui::IsWindowHovered() ||
+        !Bounds(clipRectMin, clipRectMax - ImVec2(ImGui::GetWindowWidth() - offsetLeft(), 0.0f)).contains(mousePos)) {
         return;
     }
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         double time = timeFromMousePos();
-        _composer->_playTime = time;
+        handleClickTimeline(time);
     }
 }
 
