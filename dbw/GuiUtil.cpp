@@ -1,5 +1,5 @@
-#include "imgui.h"
 #include "GuiUtil.h"
+#include <algorithm>
 
 float TEXT_BASE_WIDTH;
 float TEXT_BASE_HEIGHT;
@@ -23,32 +23,6 @@ ImU32 SELECTED_NOTE_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
 float widthWithPadding(int nchars) {
     ImGuiStyle& style = ImGui::GetStyle();
     return TEXT_BASE_WIDTH * nchars + style.FramePadding.x * 2;
-}
-
-ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-
-ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs) {
-    lhs.x += rhs.x;
-    lhs.y += rhs.y;
-    return lhs;
-}
-
-ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y);
-}
-
-ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y);
-}
-
-bool operator==(const ImVec2& lhs, const ImVec2& rhs) {
-    return lhs.x == rhs.x && lhs.y == rhs.y;
-}
-
-bool operator!=(const ImVec2& lhs, const ImVec2& rhs) {
-    return !(lhs == rhs);
 }
 
 bool operator<(const ImVec2& lhs, const ImVec2& rhs) {

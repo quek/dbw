@@ -1,6 +1,8 @@
 #include "PluginEditorWindow.h"
 #include "Module.h"
 
+extern HWND gHwnd;
+
 LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
     case WM_ERASEBKGND:
@@ -31,6 +33,10 @@ LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
         }
         break;
     }
+    //case WM_WINDOWPOSCHANGED: {
+    //    SetWindowPos(gHwnd, hWnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    //    break;
+    //}
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
@@ -38,8 +44,8 @@ LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bool resizable) : _module(module), _resizable(resizable) {
     RECT rect{ 0, 0, width, height };
     // WS_EX_TOPMOST 関係ない他のウインドよりも前面になるので微妙
-    DWORD exStyle = WS_EX_APPWINDOW | WS_EX_TOPMOST;
-    DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+    DWORD exStyle = WS_EX_APPWINDOW;
+    DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS;
     if (_resizable)
         dwStyle |= WS_SIZEBOX | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
     AdjustWindowRectEx(&rect, dwStyle, false, exStyle);

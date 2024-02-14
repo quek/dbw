@@ -71,7 +71,8 @@ void CleanupRenderTarget();
 void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
+HWND gHwnd;
+  
 std::shared_ptr<spdlog::logger> logger;
 
 // Main code
@@ -85,18 +86,18 @@ int main(int, char**) {
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"dbw", WS_OVERLAPPEDWINDOW, 100, 100, 1920, 1080, nullptr, nullptr, wc.hInstance, nullptr);
+    gHwnd = ::CreateWindowW(wc.lpszClassName, L"dbw", WS_OVERLAPPEDWINDOW, 100, 100, 1920, 1080, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize Direct3D
-    if (!CreateDeviceD3D(hwnd)) {
+    if (!CreateDeviceD3D(gHwnd)) {
         CleanupDeviceD3D();
         ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         return 1;
     }
 
     // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(hwnd);
+    ::ShowWindow(gHwnd, SW_SHOWDEFAULT);
+    ::UpdateWindow(gHwnd);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -112,7 +113,7 @@ int main(int, char**) {
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplWin32_Init(gHwnd);
     ImGui_ImplDX12_Init(g_pd3dDevice, NUM_FRAMES_IN_FLIGHT,
                         DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
                         g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
@@ -273,7 +274,7 @@ int main(int, char**) {
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();
-    ::DestroyWindow(hwnd);
+    ::DestroyWindow(gHwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
     spdlog::drop_all();
