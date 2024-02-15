@@ -7,6 +7,7 @@
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "Midi.h"
+#include "command/AddNotes.h"
 
 constexpr float KEYBOARD_HEIGHT = 30.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -44,11 +45,12 @@ void PianoRollWindow::handleDoubleClick(Note* thing) {
 }
 
 Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane) {
-    // TODO undo
     Note* note = new Note();
     note->_time = time;
     note->_key = *lane;
-    _clip->_sequence->_notes.emplace_back(note);
+    std::set<Note*> notes;
+    notes.insert(note);
+    _composer->_commandManager.executeCommand(new command::AddNotes(_clip->_sequence.get(), notes, true));
     return note;
 }
 
@@ -66,18 +68,20 @@ void PianoRollWindow::handleClickTimeline(double time) {
     _composer->_playTime = time + _clip->_time;
 }
 
-Note* PianoRollWindow::copyThing(Note* other) {
-    Note* note = new Note(*other);
-    _clip->_sequence->_notes.emplace_back(note);
-    return note;
+std::set<Note*> PianoRollWindow::copyThings(std::set<Note*> srcs) {
+    std::set<Note*> notes;
+    for (auto& it : srcs) {
+        Note* note = new Note(*it);
+        notes.insert(note);
+    }
+    _composer->_commandManager.executeCommand(new command::AddNotes(_clip->_sequence.get(), notes, true));
+    return notes;
 }
 
-void PianoRollWindow::deleteThing(Note* note) {
-    auto& notes = _clip->_sequence->_notes;
-    auto it = std::ranges::find_if(notes, [note](const auto& x) { return x.get() == note; });
-    if (it != notes.end()) {
-        notes.erase(it);
-    }
+void PianoRollWindow::deleteThings(std::set<Note*> notes) {
+    _composer->_commandManager.executeCommand(
+        new ReversedCommand(
+            new command::AddNotes(_clip->_sequence.get(), notes, true), true));
 }
 
 void PianoRollWindow::prepareAllThings() {

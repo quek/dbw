@@ -72,21 +72,26 @@ void TimelineWindow::handleClickTimeline(double time) {
     _composer->_playTime = time;
 }
 
-Clip* TimelineWindow::copyThing(Clip* other) {
-    Clip* clip = new Clip(*other);
-    std::vector<std::pair<TrackLane*, Clip*>> clips;
-    clips.push_back(std::pair(_clipLaneMap[other], clip));
-    _composer->_commandManager.executeCommand(new command::AddClips(clips, false));
-    return clip;
+std::set<Clip*> TimelineWindow::copyThings(std::set<Clip*> srcs) {
+    std::set<Clip*> clips;
+    std::set<std::pair<TrackLane*, Clip*>> targets;
+    for (auto& it : srcs) {
+        Clip* clip = new Clip(*it);
+        clips.insert(clip);
+        targets.insert(std::pair(_clipLaneMap[it], clip));
+    }
+    _composer->_commandManager.executeCommand(new command::AddClips(targets, false));
+    return clips;
 }
 
-void TimelineWindow::deleteThing(Clip* clip) {
-    auto lane = _clipLaneMap[clip];
-    auto it = std::ranges::find_if(lane->_clips,
-                                   [clip](const auto& x) { return x.get() == clip; });
-    if (it != lane->_clips.end()) {
-        lane->_clips.erase(it);
+void TimelineWindow::deleteThings(std::set<Clip*> clips) {
+    std::set<std::pair<TrackLane*, Clip*>> targets;
+    for (auto& it : clips) {
+        targets.insert(std::pair(_clipLaneMap[it], it));
     }
+    _composer->_commandManager.executeCommand(
+        new ReversedCommand(
+            new command::AddClips(targets, true), true));
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
@@ -94,10 +99,9 @@ void TimelineWindow::handleDoubleClick(Clip* clip) {
 }
 
 Clip* TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
-    // TODO undo
     Clip* clip = new Clip(time);
-    std::vector<std::pair<TrackLane*, Clip*>> clips;
-    clips.push_back(std::pair(lane, clip));
+    std::set<std::pair<TrackLane*, Clip*>> clips;
+    clips.insert(std::pair(lane, clip));
     _composer->_commandManager.executeCommand(new command::AddClips(clips, true));
     return clip;
 }

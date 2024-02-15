@@ -25,8 +25,8 @@ public:
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax);
     virtual void handleClickTimeline(double time) = 0;
-    virtual THING* copyThing(THING*) = 0;
-    virtual void deleteThing(THING*) = 0;
+    virtual std::set<THING*> copyThings(std::set<THING*> srscs) = 0;
+    virtual void deleteThings(std::set<THING*>) = 0;
 
     std::vector<THING*> _allThings;
     std::vector<LANE*> _allLanes;

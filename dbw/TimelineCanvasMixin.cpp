@@ -107,9 +107,7 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
             // ノートのドラッグ解除
             if (_state._thingClickedPart == Middle) {
                 if (!io.KeyCtrl) {
-                    for (auto& thing : _state._selectedThings) {
-                        deleteThing(thing);
-                    }
+                    deleteThings(_state._selectedThings);
                 }
             }
             _state._clickedThing = _state._draggingThing;
@@ -156,13 +154,16 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
             // ノートの移動 or 長さ変更
             _state._draggingThings.clear();
             if (_state._thingClickedPart == Middle) {
-                for (auto& thing : _state._selectedThings) {
-                    THING* x = copyThing(thing);
-                    _state._draggingThings.insert(x);
-                    if (thing == _state._clickedThing) {
-                        _state._draggingThing = x;
-                    }
-                }
+                std::set<THING*> x;
+                x.insert(_state._clickedThing);
+                x = copyThings(x);
+                _state._draggingThing = *x.begin();
+
+                _state._selectedThings.erase(_state._clickedThing);
+                _state._draggingThings = copyThings(_state._selectedThings);
+                _state._selectedThings.insert(_state._clickedThing);
+
+                _state._draggingThings.insert(_state._draggingThing);
             }
         } else {
             // 範囲選択

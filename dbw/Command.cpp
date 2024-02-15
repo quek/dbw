@@ -7,6 +7,17 @@
 Command::Command(bool undoable) : _undoable(undoable) {
 }
 
+ReversedCommand::ReversedCommand(Command* command, bool undoable) : Command(undoable), _command(command) {
+}
+
+void ReversedCommand::execute(Composer* composer) {
+    _command->undo(composer);
+}
+
+void ReversedCommand::undo(Composer* composer) {
+    _command->execute(composer);
+}
+
 CommandManager::CommandManager(Composer* composer) : _composer(composer) {
 }
 
@@ -98,3 +109,4 @@ void DeleteModuleCommand::undo(Composer* composer) {
     _module->start();
     _module->openGui();
 }
+

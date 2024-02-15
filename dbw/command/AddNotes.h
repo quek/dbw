@@ -1,18 +1,21 @@
 #pragma once
+#include <set>
 #include "../Command.h"
 
-class Clip;
-class TrackLane;
+class Note;
+class Sequence;
 
 namespace command {
 
 class AddNotes : public Command {
 public:
-    AddNotes(std::vector<std::pair<TrackLane*, Clip*>> notes, bool undoable);
+    AddNotes(Sequence* sequence, std::set<Note*> notes, bool undoable);
     void execute(Composer* composer) override;
     void undo(Composer*) override;
 private:
-    std::filesystem::path _path;
+    Sequence* _sequence;
+    std::vector<std::unique_ptr<Note>> _notes;
+    std::set<Note*> _targets;
 };
 
 };

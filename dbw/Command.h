@@ -17,6 +17,15 @@ public:
     bool _undoable = true;
 };
 
+class ReversedCommand : public Command {
+public:
+    ReversedCommand(Command* command, bool undoable);
+    virtual void execute(Composer* composer) override;
+    virtual void undo(Composer* composer) override;
+private:
+    std::unique_ptr<Command> _command;
+};
+
 class CommandManager {
 public:
     CommandManager(Composer* composer);

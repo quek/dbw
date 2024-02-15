@@ -17,8 +17,8 @@ public:
     virtual Note* handleDoubleClick(double time, int16_t* lane) override;
     virtual void handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) override;
     virtual void handleClickTimeline(double time) override;
-    virtual Note* copyThing(Note* note) override;
-    virtual void deleteThing(Note* note) override;
+    virtual std::set<Note*> copyThings(std::set<Note*> srcs) override;
+    virtual void deleteThings(std::set<Note*> notes) override;
 
     virtual void prepareAllThings() override;
 

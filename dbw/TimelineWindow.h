@@ -19,8 +19,8 @@ public:
     virtual void handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) override;
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) override;
     virtual void handleClickTimeline(double time) override;
-    virtual Clip* copyThing(Clip* clip) override;
-    virtual void deleteThing(Clip* clip) override;
+    virtual std::set<Clip*> copyThings(std::set<Clip*> clips) override;
+    virtual void deleteThings(std::set<Clip*> clips) override;
 
     virtual void prepareAllThings() override;
     virtual void renderThing(Clip* thing, const ImVec2& pos1, const ImVec2& pos2);
