@@ -10,7 +10,7 @@ Clip::Clip(double time, double duration) :
 Clip::Clip(std::shared_ptr<Sequence> sequence) : Thing(0.0f, sequence->_duration), _sequence(sequence) {
 }
 
-std::string Clip::name() {
+std::string Clip::name() const {
     std::string name = (_sequence.use_count() > 1 ? "∞" : "") + _sequence->_name;
     return name;
 }

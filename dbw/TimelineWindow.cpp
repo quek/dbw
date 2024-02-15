@@ -6,6 +6,7 @@
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "TrackLane.h"
+#include "command/AddClips.h"
 
 constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -27,7 +28,7 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
     auto newIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), newLane));
     auto indexDelta = newIndex - oldIndex;
 
-    for (auto clip : _state._selectedThings) {
+    for (auto clip : _state._draggingThings) {
         clip->_time += timeDelta;
 
         if (indexDelta == 0) {
@@ -73,7 +74,9 @@ void TimelineWindow::handleClickTimeline(double time) {
 
 Clip* TimelineWindow::copyThing(Clip* other) {
     Clip* clip = new Clip(*other);
-    _clipLaneMap[other]->_clips.emplace_back(clip);
+    std::vector<std::pair<TrackLane*, Clip*>> clips;
+    clips.push_back(std::pair(_clipLaneMap[other], clip));
+    _composer->_commandManager.executeCommand(new command::AddClips(clips, false));
     return clip;
 }
 
@@ -93,7 +96,9 @@ void TimelineWindow::handleDoubleClick(Clip* clip) {
 Clip* TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
     // TODO undo
     Clip* clip = new Clip(time);
-    lane->_clips.emplace_back(clip);
+    std::vector<std::pair<TrackLane*, Clip*>> clips;
+    clips.push_back(std::pair(lane, clip));
+    _composer->_commandManager.executeCommand(new command::AddClips(clips, true));
     return clip;
 }
 

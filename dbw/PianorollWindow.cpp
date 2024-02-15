@@ -55,7 +55,7 @@ Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane) {
 void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) {
     double timeDelta = newTime - oldTime;
     double keyDelta = *newLane - *oldLane;
-    for (auto& note : _state._selectedThings) {
+    for (auto& note : _state._draggingThings) {
         note->_time += timeDelta;
         note->_key += keyDelta;
     }

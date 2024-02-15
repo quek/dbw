@@ -42,15 +42,6 @@ void TimelineCanvasMixin<THING, LANE>::render() {
             renderHeader();
             ImGui::PopClipRect();
 
-            //ImGui::SetCursorPos(ImVec2(offsetLeft(), offsetTop()));
-            //ImGui::InvisibleButton("##Drop Target", ImGui::GetWindowSize());
-            //if (ImGui::BeginDragDropTarget()) {
-            //    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
-            //        const Clip* clip = (Clip*)payload->Data;
-            //    }
-            //    ImGui::EndDragDropTarget();
-            //}
-
             clipRectMin += ImVec2(offsetLeft(), offsetTop());
             ImGui::PushClipRect(clipRectMin, clipRectMax, true);
             renderThings(windowPos);
@@ -114,7 +105,17 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             // ノートのドラッグ解除
+            if (_state._thingClickedPart == Middle) {
+                if (!io.KeyCtrl) {
+                    for (auto& thing : _state._selectedThings) {
+                        deleteThing(thing);
+                    }
+                }
+            }
+            _state._clickedThing = _state._draggingThing;
+            _state._selectedThings = _state._draggingThings;
             _state._draggingThing = nullptr;
+            _state._draggingThings.clear();
         }
     } else if (_state._rangeSelecting) {
         // Ctrl でトグル、Shift で追加 Reason の仕様がいいと思う
@@ -153,7 +154,16 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
         // ここがノートのドラッグの開始
         if (!_state._selectedThings.empty() && _state._clickedThing) {
             // ノートの移動 or 長さ変更
-            _state._draggingThing = _state._clickedThing;
+            _state._draggingThings.clear();
+            if (_state._thingClickedPart == Middle) {
+                for (auto& thing : _state._selectedThings) {
+                    THING* x = copyThing(thing);
+                    _state._draggingThings.insert(x);
+                    if (thing == _state._clickedThing) {
+                        _state._draggingThing = x;
+                    }
+                }
+            }
         } else {
             // 範囲選択
             _state._rangeSelecting = true;

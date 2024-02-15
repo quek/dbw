@@ -84,6 +84,12 @@
       <Filter>command</Filter>
     </ClCompile>
     <ClCompile Include="BaseWindow.cpp" />
+    <ClCompile Include="command\AddNotes.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="command\AddClips.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -157,6 +163,12 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="BaseWindow.h" />
+    <ClInclude Include="command\AddNotes.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\AddClips.h">
+      <Filter>command</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
