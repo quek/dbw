@@ -33,24 +33,18 @@ LRESULT WINAPI Vsit3EditorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
         }
         break;
     }
-    //case WM_WINDOWPOSCHANGED: {
-    //    SetWindowPos(gHwnd, hWnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    //    break;
-    //}
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bool resizable) : _module(module), _resizable(resizable) {
     RECT rect{ 0, 0, width, height };
-    // WS_EX_TOPMOST 関係ない他のウインドよりも前面になるので微妙
     DWORD exStyle = WS_EX_APPWINDOW;
     DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS;
     if (_resizable)
         dwStyle |= WS_SIZEBOX | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
     AdjustWindowRectEx(&rect, dwStyle, false, exStyle);
 
-    // _wndClass = WNDCLASSEXW{ sizeof(_wndClass), CS_CLASSDC, Vsit3EditorWndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"VST3 Editor", nullptr };
     _wndClass = WNDCLASSEXW{
         .cbSize = sizeof(_wndClass),
         .style = CS_DBLCLKS,
@@ -65,9 +59,10 @@ PluginEditorWindow::PluginEditorWindow(Module* module, int width, int height, bo
         .lpszClassName = L"VST3 Editor",
         .hIconSm = nullptr };
     RegisterClassEx(&_wndClass);
+    // gHwnd を設定するとプラグイン編集ウインドが前面に表示され
     _hwnd = CreateWindowEx(exStyle, _wndClass.lpszClassName, L"VST3 Editor", dwStyle,
-                           300, 300, rect.right - rect.left, rect.bottom - rect.top,
-                           nullptr, nullptr, _wndClass.hInstance, nullptr);
+                           CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
+                           gHwnd, nullptr, _wndClass.hInstance, nullptr);
     if (!_hwnd) {
         printf("CreateWindosW failed!");
         return;
