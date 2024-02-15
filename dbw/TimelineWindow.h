@@ -17,11 +17,13 @@ public:
     virtual void handleDoubleClick(Clip* thing) override;
     virtual Clip* handleDoubleClick(double time, TrackLane* lane) override;
     virtual void handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) override;
+    virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) override;
     virtual void handleClickTimeline(double time) override;
     virtual Clip* copyThing(Clip* clip) override;
     virtual void deleteThing(Clip* clip) override;
 
     virtual void prepareAllThings() override;
+    virtual void renderThing(Clip* thing, const ImVec2& pos1, const ImVec2& pos2);
 
     virtual float offsetTop() const override;
     virtual float offsetLeft() const override;

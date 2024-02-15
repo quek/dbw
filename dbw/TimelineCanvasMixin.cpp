@@ -42,9 +42,18 @@ void TimelineCanvasMixin<THING, LANE>::render() {
             renderHeader();
             ImGui::PopClipRect();
 
+            //ImGui::SetCursorPos(ImVec2(offsetLeft(), offsetTop()));
+            //ImGui::InvisibleButton("##Drop Target", ImGui::GetWindowSize());
+            //if (ImGui::BeginDragDropTarget()) {
+            //    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
+            //        const Clip* clip = (Clip*)payload->Data;
+            //    }
+            //    ImGui::EndDragDropTarget();
+            //}
+
             clipRectMin += ImVec2(offsetLeft(), offsetTop());
             ImGui::PushClipRect(clipRectMin, clipRectMax, true);
-            renderThing(windowPos);
+            renderThings(windowPos);
             handleMouse(clipRectMin, clipRectMax);
             handleShortcut();
             ImGui::PopClipRect();
@@ -59,7 +68,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
     ImGui::End();
 }
 template<class THING, typename LANE>
-void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax) {
+void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) {
     if (!canHandleInput()) {
         return;
     }
@@ -67,11 +76,6 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
     if (!Bounds(clipRectMin, clipRectMax).contains(mousePos)) {
-        return;
-    }
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    ImVec2 windowSize = ImGui::GetWindowSize();
-    if (!(windowPos <= mousePos && mousePos < windowPos + windowSize)) {
         return;
     }
 
@@ -162,12 +166,10 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
             float time = timeFromMousePos(0.0f, true);
             LANE* lane = laneFromPos(mousePos);
             THING* thing = handleDoubleClick(time, lane);
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                _state._clickedThing = thing;
-                _state._selectedThings.insert(thing);
-                _state._draggingThing = thing;
-                _state._thingClickedPart = Bottom;
-            }
+            _state._clickedThing = thing;
+            _state._selectedThings.insert(thing);
+            // マウス離さなかったらドラッグで長さを変えられる
+            _state._thingClickedPart = Bottom;
         }
     } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         if (thingAtMouse) {
@@ -177,6 +179,15 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
             }
             _state._selectedThings.insert(thingAtMouse);
             _state._clickedThing = thingAtMouse;
+            Bounds& bounds = _state._thingBoundsMap[thingAtMouse];
+            if (mousePos.y - bounds.p.y <= 5) {
+                _state._thingClickedPart = Top;
+            } else if (bounds.q.y - mousePos.y <= 5) {
+                _state._thingClickedPart = Bottom;
+            } else {
+                _state._thingClickedPart = Middle;
+                _state._thingClickedOffset = mousePos.y - bounds.p.y;
+            }
         } else {
             _state._clickedThing = nullptr;
             if (!io.KeyCtrl && !io.KeyShift) {
@@ -196,42 +207,42 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(ImVec2& clipRectMin, ImVec2& 
     } else if (thingAtMouse != nullptr) {
         Bounds& bounds = _state._thingBoundsMap[thingAtMouse];
         if (mousePos.y - bounds.p.y <= 5) {
-            _state._thingClickedPart = Top;
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
         } else if (bounds.q.y - mousePos.y <= 5) {
-            _state._thingClickedPart = Bottom;
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-        } else {
-            _state._thingClickedPart = Middle;
-            _state._thingClickedOffset = mousePos.y - bounds.p.y;
         }
     }
 }
 
 template<class THING, typename LANE>
-void TimelineCanvasMixin<THING, LANE>::renderThing(ImVec2& windowPos) {
+void TimelineCanvasMixin<THING, LANE>::renderThings(ImVec2& windowPos) {
     _state._thingBoundsMap.clear();
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
     float scrollX = ImGui::GetScrollX();
     float scrollY = ImGui::GetScrollY();
-    for (auto& thing : _allThings) {
+    for (const auto& thing : _allThings) {
         float x1 = xFromThing(thing) * _zoomX + offsetLeft();
         float x2 = x1 + getLaneWidth(thing) * _zoomX;
         float y1 = thing->_time * _zoomY - scrollY + offsetTop() + offsetStart();
         float y2 = y1 + thing->_duration * _zoomY;
         ImVec2 pos1 = ImVec2(x1 - scrollX + 2.0f, y1) + windowPos;
         ImVec2 pos2 = ImVec2(x2 - scrollX - 1.0f, y2) + windowPos;
-        ImU32 thingColor;
-        if (_state._selectedThings.contains(thing)) {
-            thingColor = colorSlectedThing();
-        } else {
-            thingColor = colorThing();
-        }
-        drawList->AddRectFilled(pos1, pos2, thingColor);
+        renderThing(thing, pos1, pos2);
         _state._thingBoundsMap[thing] = Bounds(pos1, pos2);
     }
+}
+
+template<class THING, typename LANE>
+void TimelineCanvasMixin<THING, LANE>::renderThing(THING* thing, const ImVec2& pos1, const ImVec2& pos2) {
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImU32 thingColor;
+    if (_state._selectedThings.contains(thing)) {
+        thingColor = colorSlectedThing();
+    } else {
+        thingColor = colorThing();
+    }
+    drawList->AddRectFilled(pos1, pos2, thingColor);
 }
 
 template<class THING, typename LANE>

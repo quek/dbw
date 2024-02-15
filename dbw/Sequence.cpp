@@ -1,6 +1,8 @@
 #include "Sequence.h"
 
-Sequence::Sequence(double duration) : _duration(duration) {
+int Sequence::_no = 0;
+
+Sequence::Sequence(double duration) : Nameable("Seq"+std::to_string(++_no)), _duration(duration) {
 }
 
 DeleteNoteCommand::DeleteNoteCommand(Sequence* sequence, Note* note, bool undoable) : Command(undoable), _sequence(sequence), _note(note) {

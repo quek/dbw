@@ -3,6 +3,7 @@
 
 class Nameable {
 public:
+    Nameable(const Nameable& other) = default;
     Nameable(std::string name = "");
     virtual ~Nameable() = default;
 

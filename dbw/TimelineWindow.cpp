@@ -46,6 +46,26 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
     }
 }
 
+void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos;
+    if (!Bounds(clipRectMin, clipRectMax).contains(mousePos)) {
+        return;
+    }
+    const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+    if (payload && payload->IsDataType("Sequence Matrix Clip")) {
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            Clip* clip = new Clip(*(const Clip*)payload->Data);
+            float time = timeFromMousePos(0.0f, false);
+            TrackLane* lane = laneFromPos(mousePos);
+            clip->_time = time;
+            lane->_clips.emplace_back(clip);
+        }
+    }
+
+    TimelineCanvasMixin::handleMouse(clipRectMin, clipRectMax);
+}
+
 void TimelineWindow::handleClickTimeline(double time) {
     std::lock_guard<std::mutex> lock(_composer->_audioEngine->mtx);
     _composer->_playTime = time;
@@ -90,6 +110,13 @@ void TimelineWindow::prepareAllThings() {
             }
         }
     }
+}
+
+void TimelineWindow::renderThing(Clip* clip, const ImVec2& pos1, const ImVec2& pos2) {
+    TimelineCanvasMixin::renderThing(clip, pos1, pos2);
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    drawList->AddText(pos1, IM_COL32_WHITE, clip->name().c_str());
 }
 
 float TimelineWindow::offsetTop() const {

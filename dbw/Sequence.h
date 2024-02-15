@@ -13,6 +13,8 @@ public:
 
     std::vector<std::unique_ptr<Note>> _notes;
     double _duration;
+
+    static int _no;
 };
 
 class DeleteNoteCommand : public Command {

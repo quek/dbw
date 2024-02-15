@@ -11,17 +11,19 @@ SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
 void SceneMatrix::render() {
     if (ImGui::Begin("Scene Matrix")) {
         int ncolumns = static_cast<int>(_composer->_tracks.size() + 2);
-        if (ImGui::BeginTable("Scene Matrix Table", ncolumns)) {
+        if (ImGui::BeginTable("Scene Matrix Table", ncolumns,
+                              ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY,
+                              ImVec2(-1.0f, -20.0f))) {
             ImGui::TableSetupScrollFreeze(1, 1);
-            ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide);
             for (auto& track : _composer->_tracks) {
-                ImGui::TableSetupColumn(track->_name.c_str(), ImGuiTableColumnFlags_NoResize);
+                ImGui::TableSetupColumn(track->_name.c_str());
             }
-            ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str(), ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
 
             ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
             ImGui::TableSetColumnIndex(0);
-            ImGui::TableHeader("#");
+            ImGui::TableHeader("");
 
             int columnIndex = 0;
             for (auto& track : _composer->_tracks) {
@@ -46,6 +48,13 @@ void SceneMatrix::render() {
                     ImGui::TableSetColumnIndex(++columnIndex);
                     for (const auto& lane : scene->_lanes) {
                         lane->render(track.get());
+                        if (ImGui::BeginDragDropTarget()) {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
+                                const Clip* clip = (Clip*)payload->Data;
+                                lane->getClipSlot(track.get())->_clip.reset(new Clip(*clip));
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
                     }
                 }
                 ImGui::TableSetColumnIndex(++columnIndex);
@@ -56,7 +65,7 @@ void SceneMatrix::render() {
             ImGui::EndTable();
         }
 
-        if (ImGui::Button("+##addScene")) {
+        if (ImGui::Button("Add Scene##addScene")) {
             addScene();
         }
     }

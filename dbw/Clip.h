@@ -12,7 +12,10 @@ public:
     Clip(std::shared_ptr<Sequence> sequence);
     virtual ~Clip() = default;
 
+    std::string name();
     void renderInScene(PianoRollWindow* pianoRollWindow);
 
     std::shared_ptr<Sequence> _sequence;
+
+    bool _selected = false;
 };

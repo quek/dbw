@@ -23,7 +23,7 @@ public:
     virtual void handleDoubleClick(THING* thing) = 0;
     virtual THING* handleDoubleClick(double time, LANE* lane) = 0;
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
-    void handleMouse(ImVec2& clipRectMin, ImVec2& clipRectMax);
+    virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax);
     virtual void handleClickTimeline(double time) = 0;
     virtual THING* copyThing(THING*) = 0;
     virtual void deleteThing(THING*) = 0;
@@ -32,7 +32,8 @@ public:
     std::vector<LANE*> _allLanes;
     virtual void prepareAllThings() = 0;
 
-    void renderThing(ImVec2& windowPos);
+    void renderThings(ImVec2& windowPos);
+    virtual void renderThing(THING* thing, const ImVec2& pos1, const ImVec2& pos2);
     virtual void renderTimeline();
     virtual void renderGridBeat16th(ImDrawList* drawList, float beatY, float x1, float x2);
 

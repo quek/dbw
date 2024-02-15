@@ -457,7 +457,7 @@ void Vst3Module::loadState(std::filesystem::path path) {
         Error(_name + "のステートファイルをオープンできませんでした。" + path.string());
     }
 
-    int64_t size;
+    int64_t size = 0;
     in.read((char*)&size, sizeof(int64_t));
     if (!in) {
         Error(_name + "のステートサイズを取得できませんでした。" + path.string());
