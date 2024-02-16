@@ -140,23 +140,35 @@ void ComposerWindow::render() {
     ImGui::SameLine();
     ImGui::Text(_statusMessage.c_str());
 
-    {
-        if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
-            if (_composer->_playing) {
-                _composer->stop();
-            } else {
-                _composer->play();
-            }
-        }
-    }
-
     ImGui::End();
 
     if (_saveWindow != nullptr) {
         _saveWindow->render();
     }
+
+    handleGlobalShortcut();
 }
 
 void ComposerWindow::setStatusMessage(std::string message) {
     _statusMessage = message;
+}
+
+void ComposerWindow::handleGlobalShortcut() {
+    if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
+        if (_composer->_playing) {
+            _composer->stop();
+        } else {
+            _composer->play();
+        }
+        return;
+    }
+
+    auto& io = ImGui::GetIO();
+    if (io.KeyCtrl) {
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z))) {
+            _composer->_commandManager.undo();
+        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y))) {
+            _composer->_commandManager.redo();
+        }
+    }
 }

@@ -1,8 +1,8 @@
 #include "AddClips.h"
 #include "../Clip.h"
-#include "../TrackLane.h"
+#include "../Lane.h"
 
-command::AddClips::AddClips(std::set<std::pair<TrackLane*, Clip*>> clips, bool undoable) : Command(undoable), _clipsRaw(clips) {
+command::AddClips::AddClips(std::set<std::pair<Lane*, Clip*>> clips, bool undoable) : Command(undoable), _clipsRaw(clips) {
     for (auto& x : _clipsRaw) {
         _clips.push_back(std::pair(x.first, std::unique_ptr<Clip>(x.second)));
     }

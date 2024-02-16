@@ -72,7 +72,7 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 HWND gHwnd;
-  
+
 std::shared_ptr<spdlog::logger> logger;
 
 // Main code
@@ -106,6 +106,7 @@ int main(int, char**) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigDockingWithShift = true; // you instead need to hold SHIFT to enable docking.
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     // Setup Dear ImGui style

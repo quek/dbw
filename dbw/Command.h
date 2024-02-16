@@ -3,6 +3,7 @@
 #include <stack>
 #include <memory>
 #include <queue>
+#include <vector>
 #include "Module.h"
 
 class Composer;
@@ -17,19 +18,21 @@ public:
     bool _undoable = true;
 };
 
-class ReversedCommand : public Command {
+class GroupCommand : public Command {
+
 public:
-    ReversedCommand(Command* command, bool undoable);
+    GroupCommand(std::vector<Command*> commands, bool undoable = true);
+    virtual ~GroupCommand() = default;
     virtual void execute(Composer* composer) override;
     virtual void undo(Composer* composer) override;
-private:
-    std::unique_ptr<Command> _command;
+    std::vector<std::unique_ptr<Command>> _commands;
 };
 
 class CommandManager {
 public:
     CommandManager(Composer* composer);
     void executeCommand(Command* command);
+    void executeCommand(std::vector<Command*> commands, bool undoable);
     void run();
     void undo();
     void redo();

@@ -17,7 +17,6 @@ public:
     void addScene(bool undoable = true);
 
     std::vector<std::unique_ptr<Scene>> _scenes;
-private:
     Composer* _composer;
 };
 

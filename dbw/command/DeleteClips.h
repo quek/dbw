@@ -7,9 +7,9 @@ class Lane;
 
 namespace command {
 
-class AddClips : public Command {
+class DeleteClips : public Command {
 public:
-    AddClips(std::set<std::pair<Lane*, Clip*>> clips, bool undoable);
+    DeleteClips(std::set<std::pair<Lane*, Clip*>> clips, bool undoable);
     void execute(Composer* composer) override;
     void undo(Composer*) override;
 private:

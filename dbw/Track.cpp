@@ -2,16 +2,17 @@
 #include <mutex>
 #include "imgui.h"
 #include "AudioEngine.h"
+#include "Clip.h"
 #include "Command.h"
 #include "Composer.h"
 #include "Midi.h"
 #include "Module.h"
 #include "PluginModule.h"
 #include "PluginHost.h"
-#include "TrackLane.h"
+#include "Lane.h"
 
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer) {
-    _trackLanes.emplace_back(new TrackLane());
+    _trackLanes.emplace_back(new Lane());
     _lastKeys.push_back(0);
 }
 

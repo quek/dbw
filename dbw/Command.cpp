@@ -1,5 +1,6 @@
 #include "AudioEngine.h"
 #include <mutex>
+#include <ranges>
 #include "Command.h"
 #include "Composer.h"
 #include "Track.h"
@@ -7,15 +8,22 @@
 Command::Command(bool undoable) : _undoable(undoable) {
 }
 
-ReversedCommand::ReversedCommand(Command* command, bool undoable) : Command(undoable), _command(command) {
+GroupCommand::GroupCommand(std::vector<Command*> commands, bool undoable) : Command(undoable) {
+    for (auto command : commands) {
+        _commands.emplace_back(command);
+    }
 }
 
-void ReversedCommand::execute(Composer* composer) {
-    _command->undo(composer);
+void GroupCommand::execute(Composer* composer) {
+    for (auto& command : _commands) {
+        command->execute(composer);
+    }
 }
 
-void ReversedCommand::undo(Composer* composer) {
-    _command->execute(composer);
+void GroupCommand::undo(Composer* composer) {
+    for (auto& command : _commands | std::views::reverse) {
+        command->undo(composer);
+    }
 }
 
 CommandManager::CommandManager(Composer* composer) : _composer(composer) {
@@ -26,6 +34,11 @@ CommandManager::CommandManager(Composer* composer) : _composer(composer) {
 void CommandManager::executeCommand(Command* command) {
     std::shared_ptr<Command> p(command);
     _queue.push(p);
+}
+
+void CommandManager::executeCommand(std::vector<Command*> commands, bool undoable) {
+    Command* command = new GroupCommand(commands, undoable);
+    executeCommand(command);
 }
 
 void CommandManager::run() {

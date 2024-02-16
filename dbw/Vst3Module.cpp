@@ -131,11 +131,11 @@ bool Vst3Module::load(std::string path) {
     logger->debug("==================== 音声入出力の情報 ====================");
 
     // 音声入力情報の取得
-    _audioInNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kInput);
-    logger->debug("音声入力バスは {} 個あります。", _audioInNum);
+    _ninputs = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kInput);
+    logger->debug("音声入力バスは {} 個あります。", _ninputs);
 
     // 各音声入力バスの情報を取得する
-    for (int i = 0; i < _audioInNum; i++) {
+    for (int i = 0; i < _ninputs; i++) {
         // バスの情報(名称・チャンネル数など)を取得する
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kInput, i, busInfo);
@@ -148,10 +148,10 @@ bool Vst3Module::load(std::string path) {
     }
 
     // 音声出力情報の取得(音声入力と同様の処理なので詳細なコメントは割愛)
-    _audioOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kOutput);
-    logger->debug("音声出力バスは {} 個あります。", _audioOutNum);
+    _noutputs = _component->getBusCount(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kOutput);
+    logger->debug("音声出力バスは {} 個あります。", _noutputs);
 
-    for (int i = 0; i < _audioOutNum; i++) {
+    for (int i = 0; i < _noutputs; i++) {
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kAudio, Steinberg::Vst::BusDirections::kOutput, i, busInfo);
 
@@ -168,11 +168,11 @@ bool Vst3Module::load(std::string path) {
     logger->debug("================== イベント入出力の情報 ==================");
 
     // イベント(MIDI等)入力情報の取得
-    _eventInNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput);
-    logger->debug("イベント入力バスは {} 個あります。", _eventInNum);
+    _neventInputs = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput);
+    logger->debug("イベント入力バスは {} 個あります。", _neventInputs);
 
     // 各イベント入力バスの情報を取得する
-    for (int i = 0; i < _eventInNum; i++) {
+    for (int i = 0; i < _neventInputs; i++) {
         // バスの情報(名称・チャンネル数など)を取得する
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput, i, busInfo);
@@ -181,10 +181,10 @@ bool Vst3Module::load(std::string path) {
     }
 
     // イベント(MIDI等)出力情報の取得(イベント入力と同様の処理なので詳細なコメントは割愛)
-    _eventOutNum = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kOutput);
-    logger->debug("イベント出力バスは {} 個あります。", _eventOutNum);
+    _neventOutputs = _component->getBusCount(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kOutput);
+    logger->debug("イベント出力バスは {} 個あります。", _neventOutputs);
 
-    for (int i = 0; i < _eventOutNum; i++) {
+    for (int i = 0; i < _neventOutputs; i++) {
         Steinberg::Vst::BusInfo busInfo;
         _component->getBusInfo(Steinberg::Vst::MediaTypes::kEvent, Steinberg::Vst::BusDirections::kInput, i, busInfo);
 
@@ -243,22 +243,22 @@ bool Vst3Module::load(std::string path) {
         logger->debug("プラグインは32bit、サンプリングレート {}Hz、ブロックサイズ {}に対応", sampleRate, blockSize);
     }
 
-    for (auto index = 0; index < _audioInNum; ++index) {
+    for (auto index = 0; index < _ninputs; ++index) {
         _component->activateBus(Steinberg::Vst::MediaTypes::kAudio,
                                 Steinberg::Vst::BusDirections::kInput,
                                 index, true);
     }
-    for (auto index = 0; index < _audioOutNum; ++index) {
+    for (auto index = 0; index < _noutputs; ++index) {
         _component->activateBus(Steinberg::Vst::MediaTypes::kAudio,
                                 Steinberg::Vst::BusDirections::kOutput,
                                 index, true);
     }
-    for (auto index = 0; index < _eventInNum; ++index) {
+    for (auto index = 0; index < _neventInputs; ++index) {
         _component->activateBus(Steinberg::Vst::MediaTypes::kEvent,
                                 Steinberg::Vst::BusDirections::kInput,
                                 index, true);
     }
-    for (auto index = 0; index < _eventOutNum; ++index) {
+    for (auto index = 0; index < _neventOutputs; ++index) {
         _component->activateBus(Steinberg::Vst::MediaTypes::kEvent,
                                 Steinberg::Vst::BusDirections::kOutput,
                                 index, true);
@@ -276,9 +276,9 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
     ///< number of samples to process
     processData.numSamples = buffer->_framesPerBuffer;
     ///< number of audio input busses
-    processData.numInputs = _audioInNum;
+    processData.numInputs = _ninputs;
     ///< number of audio output busses
-    processData.numOutputs = _audioOutNum;
+    processData.numOutputs = _noutputs;
     ///< buffers of input busses
     // TODO 複数バス対応
     std::vector<float*> inputChannelBuffers32;
@@ -303,7 +303,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
         }
     }
     std::vector<Steinberg::Vst::AudioBusBuffers> inputAudioBusBuffers;
-    for (int i = 0; i < _audioInNum; ++i) {
+    for (int i = 0; i < _ninputs; ++i) {
         Steinberg::Vst::AudioBusBuffers x;
         x.numChannels = buffer->_nchannels;
         if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
@@ -318,7 +318,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
     ///< buffers of output busses
     // TODO 複数バス対応
     std::vector<Steinberg::Vst::AudioBusBuffers> outputAudioBusBuffers;
-    for (int i = 0; i < _audioOutNum; ++i) {
+    for (int i = 0; i < _noutputs; ++i) {
         Steinberg::Vst::AudioBusBuffers x;
         x.numChannels = buffer->_nchannels;
         if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {

@@ -10,6 +10,7 @@ namespace command {
 class AddNotes : public Command {
 public:
     AddNotes(Sequence* sequence, std::set<Note*> notes, bool undoable);
+    virtual ~AddNotes();
     void execute(Composer* composer) override;
     void undo(Composer*) override;
 private:

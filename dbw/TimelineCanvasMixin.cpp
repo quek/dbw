@@ -4,7 +4,7 @@
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
-#include "TrackLane.h"
+#include "Lane.h"
 
 constexpr float GRID_SKIP_WIDTH = 20.0f;
 
@@ -105,12 +105,18 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             // ノートのドラッグ解除
+            std::vector<Command*> commands;
             if (_state._thingClickedPart == Middle) {
                 if (!io.KeyCtrl) {
-                    deleteThings(_state._selectedThings);
+                    commands.push_back(deleteThings(_state._selectedThings, true));
                 }
+                auto [copiedThings, copyCommand] = copyThings(_state._draggingThings, true);
+                commands.push_back(copyCommand);
+                _composer->_commandManager.executeCommand(commands, true);
+                auto deleteCommand = deleteThings(_state._draggingThings, false);
+                _composer->_commandManager.executeCommand(deleteCommand);
+                _state._draggingThings = copiedThings;
             }
-            _state._clickedThing = _state._draggingThing;
             _state._selectedThings = _state._draggingThings;
             _state._draggingThing = nullptr;
             _state._draggingThings.clear();
@@ -156,14 +162,21 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
             if (_state._thingClickedPart == Middle) {
                 std::set<THING*> x;
                 x.insert(_state._clickedThing);
-                x = copyThings(x);
-                _state._draggingThing = *x.begin();
+                auto [x1, c1] = copyThings(x, false);
+                _state._draggingThing = *x1.begin();
 
                 _state._selectedThings.erase(_state._clickedThing);
-                _state._draggingThings = copyThings(_state._selectedThings);
+                auto [x2, c2] = copyThings(_state._selectedThings, false);
+                _state._draggingThings = x2;
                 _state._selectedThings.insert(_state._clickedThing);
 
                 _state._draggingThings.insert(_state._draggingThing);
+
+                _composer->_commandManager.executeCommand(c1);
+                _composer->_commandManager.executeCommand(c2);
+            } else {
+                _state._draggingThing = _state._clickedThing;
+                _state._draggingThings = _state._selectedThings;
             }
         } else {
             // 範囲選択
@@ -386,5 +399,5 @@ inline ImVec2 TimelineCanvasMixin<THING, LANE>::canvasToScreen(const ImVec2& pos
     return ImVec2(x, y);
 }
 
-template class TimelineCanvasMixin<Clip, TrackLane>;
+template class TimelineCanvasMixin<Clip, Lane>;
 template class TimelineCanvasMixin<Note, int16_t>;

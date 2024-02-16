@@ -14,7 +14,7 @@ void Module::render() {
     ImGui::PushID(this);
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
-    if (ImGui::BeginChild("##window", ImVec2(0, 0), childFlags, windowFlags)) {
+    if (ImGui::BeginChild("##module", ImVec2(0, 0), childFlags, windowFlags)) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {
@@ -23,6 +23,11 @@ void Module::render() {
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
+        }
+        if (_ninputs > 1) {
+            if (ImGui::Button("Sidechain")) {
+                _track->_composer->_sideChainInputSelector->open(this);
+            }
         }
         renderContent();
     }

@@ -1,7 +1,10 @@
 #include "SceneMatrix.h"
 #include <mutex>
+#include <ranges>
 #include <imgui.h>
 #include "AudioEngine.h"
+#include "Clip.h"
+#include "ClipSlot.h"
 #include "Composer.h"
 
 SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
@@ -41,25 +44,48 @@ void SceneMatrix::render() {
             for (const auto& scene : _scenes) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+                ImGui::BeginDisabled(scene->isAllLanePlaying());
+                if (ImGui::Button("▶")) {
+                    scene->play();
+                }
+                ImGui::EndDisabled();
+                ImGui::SameLine();
+                ImGui::BeginDisabled(scene->isAllLaneStoped());
+                if (ImGui::Button("■")) {
+                    scene->stop();
+                }
+                ImGui::EndDisabled();
+                ImGui::PopStyleVar();
+                ImGui::SameLine();
                 ImGui::Text(scene->_name.c_str());
 
                 columnIndex = 0;
                 for (const auto& track : _composer->_tracks) {
-                    ImGui::TableSetColumnIndex(++columnIndex);
-                    for (const auto& lane : scene->_lanes) {
-                        lane->render(track.get());
+                    for (const auto& lane : track->_trackLanes) {
+                        ImGui::TableSetColumnIndex(++columnIndex);
+                        auto& clipSlot = scene->getClipSlot(lane.get());
+                        clipSlot->render(_composer->_pianoRollWindow.get());
                         if (ImGui::BeginDragDropTarget()) {
                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
                                 const Clip* clip = (Clip*)payload->Data;
-                                lane->getClipSlot(track.get())->_clip.reset(new Clip(*clip));
+                                clipSlot->_clip.reset(new Clip(*clip));
                             }
                             ImGui::EndDragDropTarget();
                         }
                     }
                 }
                 ImGui::TableSetColumnIndex(++columnIndex);
-                for (const auto& lane : scene->_lanes) {
-                    lane->render(_composer->_masterTrack.get());
+                for (const auto& lane : _composer->_masterTrack->_trackLanes) {
+                    auto& clipSlot = scene->getClipSlot(lane.get());
+                    clipSlot->render(_composer->_pianoRollWindow.get());
+                    if (ImGui::BeginDragDropTarget()) {
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
+                            const Clip* clip = (Clip*)payload->Data;
+                            clipSlot->_clip.reset(new Clip(*clip));
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
                 }
             }
             ImGui::EndTable();
@@ -76,8 +102,8 @@ void SceneMatrix::process(Track* track) {
     double oneBeatSec = 60.0 / track->_composer->_bpm;
     double sampleRate = track->_composer->_audioEngine->_sampleRate;
     for (auto& scene : _scenes) {
-        for (auto& lane : scene->_lanes) {
-            auto& clipSlot = lane->getClipSlot(track);
+        for (auto& lane : track->_trackLanes) {
+            auto& clipSlot = scene->getClipSlot(lane.get());
             if (!clipSlot->_playing) {
                 continue;
             }
@@ -116,11 +142,7 @@ void SceneMatrix::process(Track* track) {
 
 void SceneMatrix::stop() {
     for (auto& scene : _scenes) {
-        for (auto& lane : scene->_lanes) {
-            for (auto& x : lane->_clipSlots) {
-                x.second->stop();
-            }
-        }
+        scene->stop();
     }
 }
 

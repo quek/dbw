@@ -4,13 +4,14 @@
 #include <ranges>
 #include <sstream>
 #include "AudioEngine.h"
+#include "Clip.h"
 #include "Command.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "Project.h"
 #include "logger.h"
 #include "Track.h"
-#include "TrackLane.h"
+#include "Lane.h"
 #include "util.h"
 
 Composer::Composer(AudioEngine* audioEngine) :
@@ -22,7 +23,8 @@ Composer::Composer(AudioEngine* audioEngine) :
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
-    _pianoRollWindow(std::make_unique<PianoRollWindow>(this)) {
+    _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
+    _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
     addTrack();
     _pluginManager.load();
 }
@@ -32,6 +34,7 @@ void Composer::render() const {
     _sceneMatrix->render();
     _timelineWindow->render();
     _pianoRollWindow->render();
+    _sideChainInputSelector->render();
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {

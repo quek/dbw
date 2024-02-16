@@ -3,6 +3,7 @@
 #include "TimelineCanvasMixin.h"
 
 class Clip;
+class Command;
 class Composer;
 class Note;
 
@@ -17,8 +18,8 @@ public:
     virtual Note* handleDoubleClick(double time, int16_t* lane) override;
     virtual void handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) override;
     virtual void handleClickTimeline(double time) override;
-    virtual std::set<Note*> copyThings(std::set<Note*> srcs) override;
-    virtual void deleteThings(std::set<Note*> notes) override;
+    virtual std::pair<std::set<Note*>, Command*> copyThings(std::set<Note*> srcs, bool redoable) override;
+    virtual Command* deleteThings(std::set<Note*> notes, bool undoable) override;
 
     virtual void prepareAllThings() override;
 

@@ -8,19 +8,19 @@ class Composer;
 struct Bounds;
 struct ImVec2;
 class Track;
-class TrackLane;
+class Lane;
 
-class TimelineWindow : public TimelineCanvasMixin<Clip, TrackLane> {
+class TimelineWindow : public TimelineCanvasMixin<Clip, Lane> {
 public:
     TimelineWindow(Composer* composer);
 
     virtual void handleDoubleClick(Clip* thing) override;
-    virtual Clip* handleDoubleClick(double time, TrackLane* lane) override;
-    virtual void handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) override;
+    virtual Clip* handleDoubleClick(double time, Lane* lane) override;
+    virtual void handleMove(double oldTime, double newTime, Lane* oldLane, Lane* newLane) override;
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) override;
     virtual void handleClickTimeline(double time) override;
-    virtual std::set<Clip*> copyThings(std::set<Clip*> clips) override;
-    virtual void deleteThings(std::set<Clip*> clips) override;
+    virtual std::pair<std::set<Clip*>, Command*> copyThings(std::set<Clip*> clips, bool redoable) override;
+    virtual Command* deleteThings(std::set<Clip*> clips, bool undoable) override;
 
     virtual void prepareAllThings() override;
     virtual void renderThing(Clip* thing, const ImVec2& pos1, const ImVec2& pos2);
@@ -32,10 +32,10 @@ public:
     virtual ImU32 colorSlectedThing() override;
     virtual ImU32 colorThing() override;
 
-    virtual TrackLane* laneFromPos(ImVec2& pos) override;
+    virtual Lane* laneFromPos(ImVec2& pos) override;
     virtual float xFromThing(Clip* clip) override;
     virtual float getLaneWidth(Clip* clip) override;
-    float getLaneWidth(TrackLane* lane);
+    float getLaneWidth(Lane* lane);
 
 protected:
     void handleShortcut() override;
@@ -48,6 +48,6 @@ private:
     float getTrackWidth(Track* track);
     float allTracksWidth();
 
-    std::map<TrackLane*, float> _laneWidthMap;
-    std::map<Clip*, TrackLane*> _clipLaneMap;
+    std::map<Lane*, float> _laneWidthMap;
+    std::map<Clip*, Lane*> _clipLaneMap;
 };

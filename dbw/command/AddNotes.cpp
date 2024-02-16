@@ -8,9 +8,12 @@ command::AddNotes::AddNotes(Sequence* sequence, std::set<Note*> notes, bool undo
     }
 }
 
+command::AddNotes::~AddNotes() {
+}
+
 void command::AddNotes::execute(Composer*) {
     for (auto& note : _notes) {
-        _sequence->_notes.push_back(std::move(note));
+        _sequence->_notes.emplace_back(std::move(note));
     }
     _notes.clear();
 }
@@ -19,7 +22,7 @@ void command::AddNotes::undo(Composer*) {
     for (auto& note : _targets) {
         auto it = std::ranges::find_if(_sequence->_notes, [&note](const auto& x) { return x.get() == note; });
         if (it != _sequence->_notes.end()) {
-            _notes.push_back(std::move(*it));
+            _notes.emplace_back(std::move(*it));
             _sequence->_notes.erase(it);
         }
     }

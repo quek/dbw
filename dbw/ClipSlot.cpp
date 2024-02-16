@@ -3,10 +3,10 @@
 #include "Composer.h"
 #include "Track.h"
 
-ClipSlot::ClipSlot(Track* track, Lane* lane, Clip* clip) : _track(track), _lane(lane), _clip(clip) {
+ClipSlot::ClipSlot() {
 }
 
-void ClipSlot::render() {
+void ClipSlot::render(PianoRollWindow* pianoRollWindow) {
     ImGui::PushID(this);
     if (_clip) {
         if (_playing) {
@@ -19,7 +19,7 @@ void ClipSlot::render() {
             }
         }
         ImGui::SameLine();
-        _clip->renderInScene(_track->_composer->_pianoRollWindow.get());
+        _clip->renderInScene(pianoRollWindow);
     } else {
         ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
         if (ImGui::Button("+", ImVec2(-FLT_MIN, 0.0f))) {
@@ -36,7 +36,6 @@ void ClipSlot::play() {
         return;
     }
     _playing = true;
-    _track->_composer->play();
 }
 
 void ClipSlot::stop() {

@@ -8,6 +8,7 @@
 #include "GuiUtil.h"
 #include "Midi.h"
 #include "command/AddNotes.h"
+#include "command/DeleteNotes.h"
 
 constexpr float KEYBOARD_HEIGHT = 30.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -68,20 +69,17 @@ void PianoRollWindow::handleClickTimeline(double time) {
     _composer->_playTime = time + _clip->_time;
 }
 
-std::set<Note*> PianoRollWindow::copyThings(std::set<Note*> srcs) {
+std::pair<std::set<Note*>, Command*> PianoRollWindow::copyThings(std::set<Note*> srcs, bool redoable) {
     std::set<Note*> notes;
     for (auto& it : srcs) {
         Note* note = new Note(*it);
         notes.insert(note);
     }
-    _composer->_commandManager.executeCommand(new command::AddNotes(_clip->_sequence.get(), notes, true));
-    return notes;
+    return { notes, new command::AddNotes(_clip->_sequence.get(), notes, redoable) };
 }
 
-void PianoRollWindow::deleteThings(std::set<Note*> notes) {
-    _composer->_commandManager.executeCommand(
-        new ReversedCommand(
-            new command::AddNotes(_clip->_sequence.get(), notes, true), true));
+Command* PianoRollWindow::deleteThings(std::set<Note*> notes, bool undoable) {
+    return new command::DeleteNotes(_clip->_sequence.get(), notes, undoable);
 }
 
 void PianoRollWindow::prepareAllThings() {
@@ -129,6 +127,15 @@ float PianoRollWindow::getLaneWidth(Note* /*thing*/) {
 }
 
 void PianoRollWindow::handleShortcut() {
+    if (!canHandleInput()) {
+        return;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)) ||
+        io.KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D))) {
+        _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
+        _state._selectedThings.clear();
+    }
 }
 
 void PianoRollWindow::renderPalyhead() {

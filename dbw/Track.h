@@ -7,7 +7,7 @@
 
 class ProcessBuffer;
 class Composer;
-class TrackLane;
+class Lane;
 class Module;
 
 class Track {
@@ -20,7 +20,7 @@ public:
     ProcessBuffer _processBuffer;
 
     std::string _name;
-    std::vector<std::unique_ptr<TrackLane>> _trackLanes;
+    std::vector<std::unique_ptr<Lane>> _trackLanes;
     std::vector<std::unique_ptr<Module>> _modules;
     std::vector<int16_t> _lastKeys;
 

@@ -3,17 +3,17 @@
 
 class Clip;
 class Lane;
+class PianoRollWindow;
 class Track;
+class Lane;
 
 class ClipSlot {
 public:
-    ClipSlot(Track* track, Lane* lane, Clip* clip = nullptr);
-    void render();
+    ClipSlot();
+    void render(PianoRollWindow*);
     void play();
     void stop();
 
-    Track* _track;
-    Lane* _lane;
     std::unique_ptr<Clip> _clip;
     bool _playing = false;
 };

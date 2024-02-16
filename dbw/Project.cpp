@@ -2,12 +2,15 @@
 #include <format>
 #include "tinyxml2/tinyxml2.h"
 #include "AudioEngine.h"
+#include "Clip.h"
+#include "ClipSlot.h"
 #include "Composer.h"
 #include "logger.h"
 #include "Module.h"
+#include "Note.h"
 #include "PluginHost.h"
 #include "PluginModule.h"
-#include "TrackLane.h"
+#include "Lane.h"
 #include "util.h"
 
 std::vector<std::unique_ptr<Note>> notesFromElement(tinyxml2::XMLElement* notesElement) {
@@ -94,7 +97,7 @@ void Project::open(std::filesystem::path dir) {
          lanesElement != nullptr;
          lanesElement = lanesElement->NextSiblingElement("Lanes")) {
         Track* track = (Track*)getObject(lanesElement->Attribute("track"));
-        TrackLane* lane = new TrackLane();
+        Lane* lane = new Lane();
         track->_trackLanes.emplace_back(lane);
         for (auto clipElement = lanesElement->FirstChildElement("Clips")->FirstChildElement("Clip");
              clipElement != nullptr;
@@ -114,26 +117,21 @@ void Project::open(std::filesystem::path dir) {
          sceneElement != nullptr;
          sceneElement = sceneElement->NextSiblingElement()) {
         Scene* scene = new Scene(sceneMatrix);
-        scene->_lanes.clear();
         scene->_name = sceneElement->Attribute("name");
         sceneMatrix->_scenes.emplace_back(scene);
-        for (auto lanesElement = sceneElement->FirstChildElement("Lanes");
-             lanesElement != nullptr;
-             lanesElement = lanesElement->NextSiblingElement("Lanes")) {
-            Lane* lane = new Lane();
-            scene->_lanes.emplace_back(lane);
-            for (auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
-                 clipSlotElement != nullptr;
-                 clipSlotElement = clipSlotElement->NextSiblingElement("ClipSlot")) {
-                Track* track = (Track*)getObject(clipSlotElement->Attribute("track"));
+        auto lanesElement = sceneElement->FirstChildElement("Lanes");
+        auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
+        for (auto& track : _composer->_tracks) {
+            for (auto& lane : track->_trackLanes) {
                 Clip* clip = nullptr;
                 auto clipElement = clipSlotElement->FirstChildElement("Clip");
                 if (clipElement != nullptr) {
                     clip = new Clip();
                     clip->_sequence->_notes = notesFromElement(clipElement->FirstChildElement("Notes"));
                 }
-                ClipSlot* clipSlot = new ClipSlot(track, lane, clip);
-                lane->_clipSlots[track] = std::unique_ptr<ClipSlot>(clipSlot);
+                auto& clipSlot = scene->getClipSlot(lane.get());
+                clipSlot->_clip.reset(clip);
+                clipSlotElement = clipSlotElement->NextSiblingElement("ClipSlot");
             }
         }
     }
@@ -210,12 +208,11 @@ void Project::save() {
         for (auto& scene : _composer->_sceneMatrix->_scenes) {
             auto* sceneElement = scenesElement->InsertNewChildElement("Scene");
             sceneElement->SetAttribute("name", scene->_name.c_str());
-            for (auto& lane : scene->_lanes) {
-                auto lanesElement = sceneElement->InsertNewChildElement("Lanes");
-                for (auto& track : _composer->_tracks) {
-                    auto& clipSlot = lane->getClipSlot(track.get());
+            auto lanesElement = sceneElement->InsertNewChildElement("Lanes");
+            for (auto& track : _composer->_tracks) {
+                for (auto& lane : track->_trackLanes) {
+                    auto& clipSlot = scene->getClipSlot(lane.get());
                     auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
-                    clipSlotElement->SetAttribute("track", getId(track.get()).c_str());
                     if (clipSlot->_clip != nullptr) {
                         auto clipElement = clipSlotElement->InsertNewChildElement("Clip");
                         auto notesElement = clipElement->InsertNewChildElement("Notes");

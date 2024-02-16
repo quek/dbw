@@ -2,11 +2,13 @@
 #include <mutex>
 #include <imgui.h>
 #include "AudioEngine.h"
+#include "Clip.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
-#include "TrackLane.h"
+#include "Lane.h"
 #include "command/AddClips.h"
+#include "command/DeleteClips.h"
 
 constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -21,7 +23,7 @@ TimelineWindow::TimelineWindow(Composer* composer) : TimelineCanvasMixin(compose
     _grid = gGrids[0].get();
 }
 
-void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLane, TrackLane* newLane) {
+void TimelineWindow::handleMove(double oldTime, double newTime, Lane* oldLane, Lane* newLane) {
     double timeDelta = newTime - oldTime;
 
     auto oldIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), oldLane));
@@ -34,13 +36,13 @@ void TimelineWindow::handleMove(double oldTime, double newTime, TrackLane* oldLa
         if (indexDelta == 0) {
             continue;
         }
-        TrackLane* from = _clipLaneMap[clip];
+        Lane* from = _clipLaneMap[clip];
         auto fromIndex = std::distance(_allLanes.begin(), std::find(_allLanes.begin(), _allLanes.end(), from));
         auto toIndex = fromIndex + indexDelta;
         if (toIndex < 0 || toIndex >= static_cast<int>(_allLanes.size())) {
             continue;
         }
-        TrackLane* to = _allLanes[toIndex];
+        Lane* to = _allLanes[toIndex];
         auto it = std::ranges::find_if(from->_clips, [clip](const auto& x) { return x.get() == clip; });
         to->_clips.push_back(std::move(*it));
         from->_clips.erase(it);
@@ -58,7 +60,7 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             Clip* clip = new Clip(*(const Clip*)payload->Data);
             float time = timeFromMousePos(0.0f, false);
-            TrackLane* lane = laneFromPos(mousePos);
+            Lane* lane = laneFromPos(mousePos);
             clip->_time = time;
             lane->_clips.emplace_back(clip);
         }
@@ -72,35 +74,32 @@ void TimelineWindow::handleClickTimeline(double time) {
     _composer->_playTime = time;
 }
 
-std::set<Clip*> TimelineWindow::copyThings(std::set<Clip*> srcs) {
+std::pair<std::set<Clip*>, Command*> TimelineWindow::copyThings(std::set<Clip*> srcs, bool redoable) {
     std::set<Clip*> clips;
-    std::set<std::pair<TrackLane*, Clip*>> targets;
+    std::set<std::pair<Lane*, Clip*>> targets;
     for (auto& it : srcs) {
         Clip* clip = new Clip(*it);
         clips.insert(clip);
         targets.insert(std::pair(_clipLaneMap[it], clip));
     }
-    _composer->_commandManager.executeCommand(new command::AddClips(targets, false));
-    return clips;
+    return { clips,new command::AddClips(targets, redoable) };
 }
 
-void TimelineWindow::deleteThings(std::set<Clip*> clips) {
-    std::set<std::pair<TrackLane*, Clip*>> targets;
+Command* TimelineWindow::deleteThings(std::set<Clip*> clips, bool undoable) {
+    std::set<std::pair<Lane*, Clip*>> targets;
     for (auto& it : clips) {
         targets.insert(std::pair(_clipLaneMap[it], it));
     }
-    _composer->_commandManager.executeCommand(
-        new ReversedCommand(
-            new command::AddClips(targets, true), true));
+    return new command::DeleteClips(targets, undoable);
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
     _composer->_pianoRollWindow->edit(clip);
 }
 
-Clip* TimelineWindow::handleDoubleClick(double time, TrackLane* lane) {
+Clip* TimelineWindow::handleDoubleClick(double time, Lane* lane) {
     Clip* clip = new Clip(time);
-    std::set<std::pair<TrackLane*, Clip*>> clips;
+    std::set<std::pair<Lane*, Clip*>> clips;
     clips.insert(std::pair(lane, clip));
     _composer->_commandManager.executeCommand(new command::AddClips(clips, true));
     return clip;
@@ -149,7 +148,7 @@ ImU32 TimelineWindow::colorThing() {
 }
 
 float TimelineWindow::xFromThing(Clip* clip) {
-    TrackLane* lane = _clipLaneMap[clip];
+    Lane* lane = _clipLaneMap[clip];
     float x = 0.0f;
     for (auto it : _allLanes) {
         if (it == lane) {
@@ -161,12 +160,14 @@ float TimelineWindow::xFromThing(Clip* clip) {
 }
 
 void TimelineWindow::handleShortcut() {
-    if (!ImGui::IsWindowFocused()) {
+    if (!canHandleInput()) {
         return;
     }
     ImGuiIO& io = ImGui::GetIO();
-    if (io.KeysDown[ImGuiKey_Delete] || io.KeyCtrl && io.KeysDown[ImGuiKey_D]) {
-        _composer->deleteClips(_state._selectedThings);
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)) ||
+        io.KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D))) {
+        _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
+        _state._selectedThings.clear();
     }
 }
 
@@ -231,11 +232,11 @@ std::string TimelineWindow::canvasName() {
 }
 
 float TimelineWindow::getLaneWidth(Clip* clip) {
-    TrackLane* lane = _clipLaneMap[clip];
+    Lane* lane = _clipLaneMap[clip];
     return getLaneWidth(lane);
 }
 
-float TimelineWindow::getLaneWidth(TrackLane* lane) {
+float TimelineWindow::getLaneWidth(Lane* lane) {
     if (!_laneWidthMap.contains(lane)) {
         _laneWidthMap[lane] = 100.0f;
     }
@@ -258,7 +259,7 @@ float TimelineWindow::allTracksWidth() {
     return width + getTrackWidth(_composer->_masterTrack.get());
 }
 
-TrackLane* TimelineWindow::laneFromPos(ImVec2& pos) {
+Lane* TimelineWindow::laneFromPos(ImVec2& pos) {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
     float x = (pos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;

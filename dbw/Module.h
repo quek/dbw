@@ -27,6 +27,11 @@ public:
     std::string _name;
     bool _didOpenGui = false;
 
+
 protected:
     bool _isStarting = false;
+    int _ninputs = 0;
+    int _noutputs = 0;
+    int _neventInputs = 0;
+    int _neventOutputs = 0;
 };

@@ -10,6 +10,7 @@
 #include "PluginManager.h"
 #include "Project.h"
 #include "SceneMatrix.h"
+#include "SidechainInputSelector.h"
 #include "TimelineWindow.h"
 #include "Track.h"
 
@@ -54,5 +55,6 @@ public:
     std::unique_ptr<SceneMatrix> _sceneMatrix;
     std::unique_ptr<TimelineWindow> _timelineWindow;
     std::unique_ptr<PianoRollWindow> _pianoRollWindow;
+    std::unique_ptr<SidechainInputSelector> _sideChainInputSelector;
 private:
 };

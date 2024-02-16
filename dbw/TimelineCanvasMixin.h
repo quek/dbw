@@ -10,6 +10,7 @@
 #include "ZoomMixin.h"
 
 struct Bounds;
+class Command;
 class Composer;
 
 template<class THING, typename LANE>
@@ -25,8 +26,8 @@ public:
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax);
     virtual void handleClickTimeline(double time) = 0;
-    virtual std::set<THING*> copyThings(std::set<THING*> srscs) = 0;
-    virtual void deleteThings(std::set<THING*>) = 0;
+    virtual std::pair<std::set<THING*>, Command*> copyThings(std::set<THING*> srscs, bool redoable) = 0;
+    virtual Command* deleteThings(std::set<THING*> things, bool undoable) = 0;
 
     std::vector<THING*> _allThings;
     std::vector<LANE*> _allLanes;

@@ -14,6 +14,8 @@ public:
     Composer* _composer;
     bool _showSaveWindow = false;
 private:
+    void handleGlobalShortcut();
+
     std::unique_ptr<SaveWindow> _saveWindow = nullptr;
     std::string _statusMessage = "";
 };
