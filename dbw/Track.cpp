@@ -5,6 +5,7 @@
 #include "Clip.h"
 #include "Command.h"
 #include "Composer.h"
+#include "Fader.h"
 #include "Midi.h"
 #include "Module.h"
 #include "PluginModule.h"
@@ -14,6 +15,9 @@
 Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer) {
     _trackLanes.emplace_back(new Lane());
     _lastKeys.push_back(0);
+    auto fader = new Fader("Fader", this);
+    _modules.emplace_back(fader);
+    fader->start();
 }
 
 Track::~Track() {
@@ -80,4 +84,13 @@ void Track::addModule(std::string path, uint32_t index) {
     pluginHost->load(path.c_str(), index);
     Module* module = new PluginModule(pluginHost->_name, this, pluginHost);
     _composer->_commandManager.executeCommand(new AddModuleCommand(this, module));
+}
+
+bool Track::isAvailableSidechainSrc(Track* dst) {
+    if (this == dst) {
+        // 当該モジュールより前のは使える
+        return true;
+    }
+    // TODO
+    return true;
 }

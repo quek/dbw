@@ -1,6 +1,7 @@
 #include "SidechainInputSelector.h"
 #include <imgui.h>
 #include "Composer.h"
+#include "Module.h"
 #include "Track.h"
 
 SidechainInputSelector::SidechainInputSelector(Composer* composer) : _composer(composer) {
@@ -18,6 +19,9 @@ void SidechainInputSelector::render() {
     ImGui::OpenPopup(NAME);
     if (ImGui::BeginPopupModal(NAME, &_show)) {
         for (auto& track : _composer->_tracks) {
+            if (!track->isAvailableSidechainSrc(_module->_track)) {
+                continue;
+            }
             if (ImGui::TreeNode(track->_name.c_str())) {
                 if (track.get() != _module->_track) {
                     if (ImGui::Button("PRE")) {

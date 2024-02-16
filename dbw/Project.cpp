@@ -75,9 +75,10 @@ void Project::open(std::filesystem::path dir) {
             track = masterTrack;
         } else {
             track = new Track(name, _composer);
-            track->_trackLanes.clear();
             _composer->_tracks.push_back(std::unique_ptr<Track>(track));
         }
+        track->_trackLanes.clear();
+        track->_modules.clear();
         setId(track, trackElement->Attribute("id"));
 
         for (auto deviceElement = channelElement->FirstChildElement("Devices")->FirstChildElement();

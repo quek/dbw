@@ -17,6 +17,8 @@ public:
     virtual void process(int64_t steadyTime);
     virtual void render();
     void addModule(std::string path, uint32_t index);
+    bool isAvailableSidechainSrc(Track* dst);
+
     ProcessBuffer _processBuffer;
 
     std::string _name;

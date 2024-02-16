@@ -82,9 +82,10 @@ void CommandManager::clear() {
 
 void AddModuleCommand::execute(Composer* composer) {
     std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
-    _track->_modules.push_back(std::move(_module));
-    _track->_modules.back()->start();
-    _track->_modules.back()->openGui();
+    auto module = _module.get();
+    _track->_modules.insert(_track->_modules.end() - 1, std::move(_module));
+    module->start();
+    module->openGui();
 }
 
 void AddModuleCommand::undo(Composer* composer) {

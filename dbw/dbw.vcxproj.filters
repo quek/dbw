@@ -96,6 +96,7 @@
       <Filter>command</Filter>
     </ClCompile>
     <ClCompile Include="SidechainInputSelector.cpp" />
+    <ClCompile Include="Fader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -181,6 +182,7 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="SidechainInputSelector.h" />
+    <ClInclude Include="Fader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
