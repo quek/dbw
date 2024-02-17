@@ -101,6 +101,7 @@ tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {
 
     auto channel = trackElement->InsertNewChildElement("Channel");
     channel->SetAttribute("role", role());
+    channel->SetAttribute("solo", _fader->_solo);
 
     auto mute = channel->InsertNewChildElement("Mute");
     mute->SetAttribute("value", _fader->_mute);
@@ -121,17 +122,13 @@ std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element, Composer* c
     std::unique_ptr<Track> track(new Track(name, composer));
 
     auto channelElement = element->FirstChildElement("Channel");
+    channelElement->QueryBoolAttribute("solo", &track->_fader->_solo);
     auto mute = channelElement->FirstChildElement("Mute");
-    bool boolValue;
-    mute->QueryBoolAttribute("value", &boolValue);
-    track->_fader->_mute = boolValue;
+    mute->QueryBoolAttribute("value", &track->_fader->_mute);
     auto pan = channelElement->FirstChildElement("Pan");
-    float floatValue;
-    pan->QueryFloatAttribute("value", &floatValue);
-    track->_fader->_pan = floatValue;
+    pan->QueryFloatAttribute("value", &track->_fader->_pan);
     auto volume = channelElement->FirstChildElement("Volume");
-    volume->QueryFloatAttribute("value", &floatValue);
-    track->_fader->_level = floatValue;
+    volume->QueryFloatAttribute("value", &track->_fader->_level);
 
     for (auto deviceElement = channelElement->FirstChildElement("Devices")->FirstChildElement();
          deviceElement != nullptr;
