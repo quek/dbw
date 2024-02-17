@@ -2,8 +2,7 @@
 #include <ranges>
 #include <imgui.h>
 
-Fader::Fader(std::string name, Track* track) :
-        BuiltinModule(name, track), _level(1.0) {
+Fader::Fader(std::string name, Track* track) : BuiltinModule(name, track) {
 }
 
 tinyxml2::XMLElement* Fader::dawProject(tinyxml2::XMLDocument* doc) {
@@ -35,7 +34,11 @@ void Fader::loadParameters(tinyxml2::XMLElement* element) {
 bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
     for (auto [in, out] : std::views::zip(buffer->_in.buffer32(), buffer->_out.buffer32())) {
         for (auto [a, b] : std::views::zip(in, out)) {
-            b = a * _level;
+            if (_mute) {
+                b = 0.0f;
+            } else {
+                b = a * _level;
+            }
         }
     }
     return true;
@@ -44,4 +47,9 @@ bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
 void Fader::renderContent() {
     ImGui::PushItemWidth(-FLT_MIN);
     ImGui::SliderFloat("##Level", &_level, 0.0f, 2.0f, "Level %.3f");
+    ImGui::SliderFloat("##Pan", &_pan, 0.0f, 1.0f, "Pan %.3f");
+    ImGui::Checkbox("Mute", &_mute);
+    ImGui::SameLine();
+    ImGui::Checkbox("Solo", &_solo);
+    ImGui::PopItemWidth();
 }

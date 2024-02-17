@@ -12,12 +12,10 @@
 #include "PluginHost.h"
 #include "Lane.h"
 
-Track::Track(std::string name, Composer* composer) : _name(name), _composer(composer) {
+Track::Track(std::string name, Composer* composer) :
+    _fader(new Fader("Fader", this)), _name(name), _composer(composer){
     _trackLanes.emplace_back(new Lane());
-    _lastKeys.push_back(0);
-    auto fader = new Fader("Fader", this);
-    _modules.emplace_back(fader);
-    fader->start();
+    _fader->start();
 }
 
 Track::~Track() {
@@ -62,14 +60,13 @@ void Track::process(int64_t steadyTime) {
             _processBuffer.swapInOut();
         }
     }
-    _processBuffer.swapInOut();
+    _fader->process(&_processBuffer, steadyTime);
 }
 
 void Track::render() {
-    for (auto module = _modules.begin(); module != _modules.end(); ++module) {
-        ImGui::PushID((*module).get());
-        (*module)->render();
-        ImGui::PopID();
+    ImGui::PushID(this);
+    for (auto& module : _modules) {
+        module->render();
     }
     if (ImGui::Button("+")) {
         _openModuleSelector = true;
@@ -77,6 +74,8 @@ void Track::render() {
     if (_openModuleSelector) {
         _composer->_pluginManager.openModuleSelector(this);
     }
+    _fader->render();
+    ImGui::PopID();
 }
 
 void Track::addModule(std::string path, uint32_t index) {
@@ -93,4 +92,28 @@ bool Track::isAvailableSidechainSrc(Track* dst) {
     }
     // TODO
     return true;
+}
+
+tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {
+    auto* trackElement = doc->NewElement("Track");
+    trackElement->SetAttribute("id", xmlId());
+    trackElement->SetAttribute("name", _name.c_str());
+
+    // TODO _fader->toXml(doc)
+    // <Mute value = "false" id = "id16" name = "Mute" / >
+    // <Pan max = "1.000000" min = "0.000000" unit = "normalized" value = "0.500000" id = "id15" name = "Pan" / >
+    // <Volume max = "2.000000" min = "0.000000" unit = "linear" value = "0.942701" id = "id14" name = "Volume" / >
+
+    auto* channel = trackElement->InsertNewChildElement("Channel");
+    channel->SetAttribute("role", role());
+    auto* devices = channel->InsertNewChildElement("Devices");
+    for (auto& module : _modules) {
+        devices->InsertEndChild(module->dawProject(doc));
+    }
+    return trackElement;
+}
+
+std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element) {
+    // TODO
+    return std::unique_ptr<Track>();
 }

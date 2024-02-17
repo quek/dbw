@@ -20,9 +20,9 @@ std::unique_ptr<Note> Note::fromXml(tinyxml2::XMLElement* element) {
     element->QueryDoubleAttribute("duration", &note->_duration);
     int intValue;
     element->QueryIntAttribute("channel", &intValue);
-    note->_channel = intValue;
+    note->_channel = static_cast<int16_t>(intValue);
     element->QueryIntAttribute("key", &intValue);
-    note->_key = intValue;
+    note->_key = static_cast<int16_t>(intValue);
     element->QueryDoubleAttribute("vel", &note->_velocity);
     element->QueryDoubleAttribute("rel", &note->_rel);
     return note;

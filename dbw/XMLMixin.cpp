@@ -10,7 +10,7 @@ XMLMixin::XMLMixin() :_id(++idSeq) {
     //idMap[_id] = this;
 }
 
-XMLMixin::XMLMixin(const XMLMixin& other) {
+XMLMixin::XMLMixin(const XMLMixin&) {
     _id = ++idSeq;
     //idMap[_id] = this;
 }
@@ -25,6 +25,7 @@ const uint64_t XMLMixin::xmlId() const {
 
 void XMLMixin::setXMLId(uint64_t id) {
     _id = id;
+    idSeq.store(std::max(id, idSeq.load()));
 }
 
 //template<typename T>

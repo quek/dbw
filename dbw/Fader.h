@@ -10,6 +10,9 @@ public:
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     void renderContent() override;
 private:
-    float _level;
+    float _level = 1.0f;
+    float _pan = 0.5f;
+    bool _mute = false;
+    bool _solo = false;
 };
 
