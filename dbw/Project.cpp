@@ -19,18 +19,8 @@ std::vector<std::unique_ptr<Note>> notesFromElement(tinyxml2::XMLElement* notesE
     for (auto noteElement = notesElement->FirstChildElement("Note");
          noteElement != nullptr;
          noteElement = noteElement->NextSiblingElement("Note")) {
-        Note* note = new Note();
-        noteElement->QueryDoubleAttribute("time", &note->_time);
-        noteElement->QueryDoubleAttribute("duration", &note->_duration);
-        int intValue;
-        noteElement->QueryIntAttribute("channel", &intValue);
-        note->_channel = intValue;
-        noteElement->QueryIntAttribute("key", &intValue);
-        note->_key = intValue;
-        noteElement->QueryDoubleAttribute("vel", &note->_velocity);
-        noteElement->QueryDoubleAttribute("rel", &note->_rel);
-
-        notes.emplace_back(note);
+        auto note = Note::fromXml(noteElement);
+        notes.emplace_back(std::move(note));
     }
     return notes;
 }
@@ -102,14 +92,8 @@ void Project::open(std::filesystem::path dir) {
         track->_trackLanes.emplace_back(lane);
         for (auto clipElement = lanesElement->FirstChildElement("Clips")->FirstChildElement("Clip");
              clipElement != nullptr;
-             clipElement = clipElement->NextSiblingElement("Clips")) {
-            double time, duration;
-            clipElement->QueryDoubleAttribute("time", &time);
-            clipElement->QueryDoubleAttribute("duration", &duration);
-            Clip* clip = new Clip(time, duration);
-            lane->_clips.emplace_back(clip);
-            clip->_sequence->_duration = duration;
-            clip->_sequence->_notes = notesFromElement(clipElement->FirstChildElement("Notes"));
+             clipElement = clipElement->NextSiblingElement("Clip")) {
+            lane->_clips.emplace_back(Clip::fromXml(clipElement));
         }
     }
 
@@ -124,14 +108,11 @@ void Project::open(std::filesystem::path dir) {
         auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
         for (auto& track : _composer->_tracks) {
             for (auto& lane : track->_trackLanes) {
-                Clip* clip = nullptr;
+                auto& clipSlot = scene->getClipSlot(lane.get());
                 auto clipElement = clipSlotElement->FirstChildElement("Clip");
                 if (clipElement != nullptr) {
-                    clip = new Clip();
-                    clip->_sequence->_notes = notesFromElement(clipElement->FirstChildElement("Notes"));
+                    clipSlot->_clip = Clip::fromXml(clipElement);
                 }
-                auto& clipSlot = scene->getClipSlot(lane.get());
-                clipSlot->_clip.reset(clip);
                 clipSlotElement = clipSlotElement->NextSiblingElement("ClipSlot");
             }
         }
@@ -187,18 +168,7 @@ void Project::save() {
                     lanes->SetAttribute("track", getId(track).c_str());
                     auto* clipsElement = lanes->InsertNewChildElement("Clips");
                     for (auto& clip : lane->_clips) {
-                        auto* clipElement = clipsElement->InsertNewChildElement("Clip");
-                        clipElement->SetAttribute("time", clip->_time);
-                        clipElement->SetAttribute("duration", clip->_duration);
-                        auto* notesElement = clipElement->InsertNewChildElement("Notes");
-                        for (auto& note : clip->_sequence->_notes) {
-                            auto* noteElement = notesElement->InsertNewChildElement("Note");
-                            noteElement->SetAttribute("key", note->_key);
-                            noteElement->SetAttribute("time", note->_time);
-                            noteElement->SetAttribute("duration", note->_duration);
-                            noteElement->SetAttribute("vel", note->_velocity);
-                            noteElement->SetAttribute("rel", note->_rel);
-                        }
+                        clipsElement->InsertEndChild(clip->toXml(&doc));
                     }
                 }
             }
@@ -215,17 +185,7 @@ void Project::save() {
                     auto& clipSlot = scene->getClipSlot(lane.get());
                     auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
                     if (clipSlot->_clip != nullptr) {
-                        auto clipElement = clipSlotElement->InsertNewChildElement("Clip");
-                        auto notesElement = clipElement->InsertNewChildElement("Notes");
-                        for (auto& note : clipSlot->_clip->_sequence->_notes) {
-                            auto noteElement = notesElement->InsertNewChildElement("Note");
-                            noteElement->SetAttribute("time", note->_time);
-                            noteElement->SetAttribute("duration", note->_duration);
-                            noteElement->SetAttribute("channel", note->_channel);
-                            noteElement->SetAttribute("key", note->_key);
-                            noteElement->SetAttribute("vel", note->_velocity);
-                            noteElement->SetAttribute("rel", note->_rel);
-                        }
+                        clipSlotElement->InsertEndChild(clipSlot->_clip->toXml(&doc));
                     }
                 }
             }

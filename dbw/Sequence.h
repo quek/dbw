@@ -4,17 +4,24 @@
 #include "Command.h"
 #include "Nameable.h"
 #include "Note.h"
+#include "XMLMixin.h"
 
 class Composer;
 
-class Sequence : public Nameable {
+class Sequence : public Nameable, public XMLMixin {
 public:
-    Sequence(double duration = 16.0);
+    static std::shared_ptr<Sequence>create(double duration = 16.0, uint64_t id = 0);
+    virtual ~Sequence();
+    tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
+    static std::shared_ptr<Sequence> fromXml(tinyxml2::XMLElement* element);
 
     std::vector<std::unique_ptr<Note>> _notes;
     double _duration;
 
     static int _no;
+
+private:
+    Sequence(double duration);
 };
 
 class DeleteNoteCommand : public Command {
