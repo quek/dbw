@@ -41,7 +41,6 @@
     <ClCompile Include="PluginModule.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
@@ -134,7 +133,6 @@
     <ClInclude Include="PluginModule.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
-    <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="BuiltinModule.h" />

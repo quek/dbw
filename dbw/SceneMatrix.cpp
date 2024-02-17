@@ -62,7 +62,7 @@ void SceneMatrix::render() {
 
                 columnIndex = 0;
                 for (const auto& track : _composer->_tracks) {
-                    for (const auto& lane : track->_trackLanes) {
+                    for (const auto& lane : track->_lanes) {
                         ImGui::TableSetColumnIndex(++columnIndex);
                         auto& clipSlot = scene->getClipSlot(lane.get());
                         clipSlot->render(_composer->_pianoRollWindow.get());
@@ -76,7 +76,7 @@ void SceneMatrix::render() {
                     }
                 }
                 ImGui::TableSetColumnIndex(++columnIndex);
-                for (const auto& lane : _composer->_masterTrack->_trackLanes) {
+                for (const auto& lane : _composer->_masterTrack->_lanes) {
                     auto& clipSlot = scene->getClipSlot(lane.get());
                     clipSlot->render(_composer->_pianoRollWindow.get());
                     if (ImGui::BeginDragDropTarget()) {
@@ -102,7 +102,7 @@ void SceneMatrix::process(Track* track) {
     double oneBeatSec = 60.0 / track->_composer->_bpm;
     double sampleRate = track->_composer->_audioEngine->_sampleRate;
     for (auto& scene : _scenes) {
-        for (auto& lane : track->_trackLanes) {
+        for (auto& lane : track->_lanes) {
             auto& clipSlot = scene->getClipSlot(lane.get());
             if (!clipSlot->_playing) {
                 continue;

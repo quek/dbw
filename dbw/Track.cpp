@@ -13,8 +13,8 @@
 #include "Lane.h"
 
 Track::Track(std::string name, Composer* composer) :
-    _fader(new Fader("Fader", this)), _name(name), _composer(composer){
-    _trackLanes.emplace_back(new Lane());
+    _fader(new Fader("Fader", this)), _name(name), _composer(composer) {
+    _lanes.emplace_back(new Lane());
     _fader->start();
 }
 
@@ -24,7 +24,7 @@ Track::~Track() {
 void Track::process(int64_t steadyTime) {
     double oneBeatSec = 60.0 / _composer->_bpm;
     double sampleRate = _composer->_audioEngine->_sampleRate;
-    for (auto& lane : _trackLanes) {
+    for (auto& lane : _lanes) {
         for (auto& clip : lane->_clips) {
             double clipTime = clip->_time;
             double clipDuration = clip->_duration;
@@ -116,7 +116,34 @@ tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {
     return trackElement;
 }
 
-std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element) {
-    // TODO
-    return std::unique_ptr<Track>();
+std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element, Composer* composer) {
+    auto name = element->Attribute("name");
+    std::unique_ptr<Track> track(new Track(name, composer));
+
+    auto channelElement = element->FirstChildElement("Channel");
+    auto mute = channelElement->FirstChildElement("Mute");
+    bool boolValue;
+    mute->QueryBoolAttribute("value", &boolValue);
+    track->_fader->_mute = boolValue;
+    auto pan = channelElement->FirstChildElement("Pan");
+    float floatValue;
+    pan->QueryFloatAttribute("value", &floatValue);
+    track->_fader->_pan = floatValue;
+    auto volume = channelElement->FirstChildElement("Volume");
+    volume->QueryFloatAttribute("value", &floatValue);
+    track->_fader->_level = floatValue;
+
+    for (auto deviceElement = channelElement->FirstChildElement("Devices")->FirstChildElement();
+         deviceElement != nullptr;
+         deviceElement = deviceElement->NextSiblingElement()) {
+        if (deviceElement) {
+            // TODO fromXML 
+            Module* module = composer->_pluginManager.create(deviceElement, track.get());
+            if (module != nullptr) {
+                track->_modules.push_back(std::unique_ptr<Module>(module));
+                module->start();
+            }
+        }
+    }
+    return track;
 }

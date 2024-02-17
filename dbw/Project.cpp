@@ -44,6 +44,7 @@ void Project::open(std::filesystem::path dir) {
     _composer->stop();
     _composer->_audioEngine->stop();
     _composer->clear();
+    _composer->_masterTrack = nullptr;
 
     tinyxml2::XMLElement* tempo = doc.FirstChildElement("Project")->FirstChildElement("Transport")->FirstChildElement("Tempo");
     if (tempo != nullptr) {
@@ -55,41 +56,28 @@ void Project::open(std::filesystem::path dir) {
     for (auto* trackElement = doc.FirstChildElement("Project")->FirstChildElement("Structure")->FirstChildElement("Track");
          trackElement != nullptr;
          trackElement = trackElement->NextSiblingElement("Track")) {
-        std::string name = trackElement->Attribute("name");
-        auto channelElement = trackElement->FirstChildElement("Channel");
-        std::string role = channelElement->Attribute("role");
-        Track* track;
-        if (role == "master") {
-            MasterTrack* masterTrack = new MasterTrack(_composer);
-            _composer->_masterTrack.reset(masterTrack);
-            track = masterTrack;
-        } else {
-            track = new Track(name, _composer);
-            _composer->_tracks.push_back(std::unique_ptr<Track>(track));
+        auto track = Track::fromXml(trackElement, _composer);
+        track->_lanes.clear();
+        uint64_t id = 0;
+        trackElement->QueryUnsigned64Attribute("id", &id);
+        if (id != 0) {
+            track->setXMLId(id);
         }
-        track->_trackLanes.clear();
-        track->_modules.clear();
-        setId(track, trackElement->Attribute("id"));
-
-        for (auto deviceElement = channelElement->FirstChildElement("Devices")->FirstChildElement();
-             deviceElement != nullptr;
-             deviceElement = deviceElement->NextSiblingElement()) {
-            if (deviceElement) {
-                Module* module = _composer->_pluginManager.create(deviceElement, track);
-                if (module != nullptr) {
-                    track->_modules.push_back(std::unique_ptr<Module>(module));
-                    module->start();
-                }
-            }
+        if (_composer->_masterTrack) {
+            _composer->_tracks.emplace_back(std::move(track));
+        } else {
+            _composer->_masterTrack = std::move(track);
         }
     }
     auto* lanesWrap = doc.FirstChildElement("Project")->FirstChildElement("Arrangement")->FirstChildElement("Lanes");
     for (auto lanesElement = lanesWrap->FirstChildElement("Lanes");
          lanesElement != nullptr;
          lanesElement = lanesElement->NextSiblingElement("Lanes")) {
-        Track* track = (Track*)getObject(lanesElement->Attribute("track"));
+        uint64_t id = 0;
+        lanesElement->QueryUnsigned64Attribute("track", &id);
+        Track* track = XMLMixin::findByXMLId<Track>(id);
         Lane* lane = new Lane();
-        track->_trackLanes.emplace_back(lane);
+        track->_lanes.emplace_back(lane);
         for (auto clipElement = lanesElement->FirstChildElement("Clips")->FirstChildElement("Clip");
              clipElement != nullptr;
              clipElement = clipElement->NextSiblingElement("Clip")) {
@@ -107,7 +95,7 @@ void Project::open(std::filesystem::path dir) {
         auto lanesElement = sceneElement->FirstChildElement("Lanes");
         auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
         for (auto& track : _composer->_tracks) {
-            for (auto& lane : track->_trackLanes) {
+            for (auto& lane : track->_lanes) {
                 auto& clipSlot = scene->getClipSlot(lane.get());
                 auto clipElement = clipSlotElement->FirstChildElement("Clip");
                 if (clipElement != nullptr) {
@@ -150,22 +138,30 @@ void Project::save() {
     }
     {
         auto* structure = project->InsertNewChildElement("Structure");
-        for (int i = 0; i < _composer->_tracks.size(); ++i) {
-            Track* track = _composer->_tracks[i].get();
-            writeTrack(doc, structure, track);
+        structure->InsertEndChild(_composer->_masterTrack->toXml(&doc));
+        for (auto& track : _composer->_tracks) {
+            structure->InsertEndChild(track->toXml(&doc));
         }
-        writeTrack(doc, structure, (Track*)(_composer->_masterTrack.get()), "master");
     }
     {
         auto* arrangement = project->InsertNewChildElement("Arrangement");
         {
             auto* lanesWrap = arrangement->InsertNewChildElement("Lanes");
             lanesWrap->SetAttribute("timeUnit", "beats");
-            for (int trackIndex = 0; trackIndex < _composer->_tracks.size(); ++trackIndex) {
-                Track* track = _composer->_tracks[trackIndex].get();
-                for (auto& lane : track->_trackLanes) {
+            {
+                for (auto& lane : _composer->_masterTrack->_lanes) {
                     auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
-                    lanes->SetAttribute("track", getId(track).c_str());
+                    lanes->SetAttribute("track", _composer->_masterTrack->xmlId());
+                    auto* clipsElement = lanes->InsertNewChildElement("Clips");
+                    for (auto& clip : lane->_clips) {
+                        clipsElement->InsertEndChild(clip->toXml(&doc));
+                    }
+                }
+            }
+            for (auto& track : _composer->_tracks) {
+                for (auto& lane : track->_lanes) {
+                    auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
+                    lanes->SetAttribute("track", track->xmlId());
                     auto* clipsElement = lanes->InsertNewChildElement("Clips");
                     for (auto& clip : lane->_clips) {
                         clipsElement->InsertEndChild(clip->toXml(&doc));
@@ -180,8 +176,17 @@ void Project::save() {
             auto* sceneElement = scenesElement->InsertNewChildElement("Scene");
             sceneElement->SetAttribute("name", scene->_name.c_str());
             auto lanesElement = sceneElement->InsertNewChildElement("Lanes");
+            {
+                for (auto& lane : _composer->_masterTrack->_lanes) {
+                    auto& clipSlot = scene->getClipSlot(lane.get());
+                    auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
+                    if (clipSlot->_clip != nullptr) {
+                        clipSlotElement->InsertEndChild(clipSlot->_clip->toXml(&doc));
+                    }
+                }
+            }
             for (auto& track : _composer->_tracks) {
-                for (auto& lane : track->_trackLanes) {
+                for (auto& lane : track->_lanes) {
                     auto& clipSlot = scene->getClipSlot(lane.get());
                     auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
                     if (clipSlot->_clip != nullptr) {

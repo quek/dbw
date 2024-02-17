@@ -19,7 +19,7 @@ Composer::Composer(AudioEngine* audioEngine) :
     _commandManager(this),
     _pluginManager(this),
     _project(std::make_unique<Project>(yyyyMmDd(), this)),
-    _masterTrack(std::make_unique<MasterTrack>(this)),
+    _masterTrack(std::make_unique<Track>("MASTER", this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
@@ -99,7 +99,7 @@ void Composer::deleteClips(std::set<Clip*> clips) {
     // TODO undo
     for (auto clip : clips) {
         for (auto& track : _tracks) {
-            for (auto& lane : track->_trackLanes) {
+            for (auto& lane : track->_lanes) {
                 auto it = std::ranges::find_if(lane->_clips, [clip](const auto& x) { return x.get() == clip; });
                 if (it != lane->_clips.end()) {
                     lane->_clips.erase(it);

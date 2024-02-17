@@ -21,13 +21,13 @@ public:
     void addModule(std::string path, uint32_t index);
     bool isAvailableSidechainSrc(Track* dst);
     tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
-    static std::unique_ptr<Track> fromXml(tinyxml2::XMLElement* element);
+    static std::unique_ptr<Track> fromXml(tinyxml2::XMLElement* element, Composer* composer);
 
     std::unique_ptr<Fader> _fader;
     ProcessBuffer _processBuffer;
 
     std::string _name;
-    std::vector<std::unique_ptr<Lane>> _trackLanes;
+    std::vector<std::unique_ptr<Lane>> _lanes;
     std::vector<std::unique_ptr<Module>> _modules;
 
     Composer* _composer;

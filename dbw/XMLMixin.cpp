@@ -1,38 +1,33 @@
 #include "XmlMixin.h"
 #include <atomic>
 #include <cstdint>
-#include <map>
+
+std::map<uint64_t, XMLMixin*> XMLMixin::idMap;
 
 static std::atomic<uint64_t> idSeq(0);
-//static std::map<uint64_t, XMLMixin*> idMap;
 
-XMLMixin::XMLMixin() :_id(++idSeq) {
+XMLMixin::XMLMixin() :_xmlId(++idSeq) {
     //idMap[_id] = this;
 }
 
 XMLMixin::XMLMixin(const XMLMixin&) {
-    _id = ++idSeq;
-    //idMap[_id] = this;
+    _xmlId = ++idSeq;
+    idMap[_xmlId] = this;
 }
 
 XMLMixin::~XMLMixin() {
-    //idMap.erase(_id);
+    idMap.erase(_xmlId);
 }
 
 const uint64_t XMLMixin::xmlId() const {
-    return _id;
+    return _xmlId;
 }
 
 void XMLMixin::setXMLId(uint64_t id) {
-    _id = id;
-    idSeq.store(std::max(id, idSeq.load()));
+    idMap.erase(_xmlId);
+    _xmlId = id;
+    idMap[_xmlId] = this;
+    if (idSeq.load() < id) {
+        idSeq.store(id);
+    }
 }
-
-//template<typename T>
-//T* XMLMixin::get(uint64_t id) {
-//    auto it = idMap.find(id);
-//    if (it != idMap.end()) {
-//        return dynamic_cast<T*>(it->second.get());
-//    }
-//    return nullptr;
-//}

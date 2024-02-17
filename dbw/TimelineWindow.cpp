@@ -110,7 +110,7 @@ void TimelineWindow::prepareAllThings() {
     _allLanes.clear();
     _clipLaneMap.clear();
     for (auto& track : _composer->_tracks) {
-        for (auto& lane : track->_trackLanes) {
+        for (auto& lane : track->_lanes) {
             _allLanes.push_back(lane.get());
             for (auto& clip : lane->_clips) {
                 _allThings.push_back(clip.get());
@@ -245,7 +245,7 @@ float TimelineWindow::getLaneWidth(Lane* lane) {
 
 float TimelineWindow::getTrackWidth(Track* track) {
     float width = 0.0f;
-    for (auto& lane : track->_trackLanes) {
+    for (auto& lane : track->_lanes) {
         width += getLaneWidth(lane.get());
     }
     return width;
@@ -264,7 +264,7 @@ Lane* TimelineWindow::laneFromPos(ImVec2& pos) {
     float scrollX = ImGui::GetScrollX();
     float x = (pos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
     for (auto& track : _composer->_tracks) {
-        for (auto& lane : track->_trackLanes) {
+        for (auto& lane : track->_lanes) {
             float laneWidth = getLaneWidth(lane.get());
             if (laneWidth > x) {
                 return lane.get();
