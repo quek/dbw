@@ -6,7 +6,7 @@
 ClipSlot::ClipSlot() {
 }
 
-void ClipSlot::render(PianoRollWindow* pianoRollWindow) {
+void ClipSlot::render(Composer* composer) {
     ImGui::PushID(this);
     if (_clip) {
         if (_playing) {
@@ -16,10 +16,11 @@ void ClipSlot::render(PianoRollWindow* pianoRollWindow) {
         } else {
             if (ImGui::Button("▶")) {
                 play();
+                composer->play();
             }
         }
         ImGui::SameLine();
-        _clip->renderInScene(pianoRollWindow);
+        _clip->renderInScene(composer->_pianoRollWindow.get());
     } else {
         ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
         if (ImGui::Button("+", ImVec2(-FLT_MIN, 0.0f))) {

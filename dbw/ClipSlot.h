@@ -2,15 +2,12 @@
 #include "Clip.h"
 
 class Clip;
-class Lane;
-class PianoRollWindow;
-class Track;
-class Lane;
+class Composer;
 
 class ClipSlot {
 public:
     ClipSlot();
-    void render(PianoRollWindow*);
+    void render(Composer* composer);
     void play();
     void stop();
 

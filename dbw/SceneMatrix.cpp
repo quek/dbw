@@ -65,7 +65,7 @@ void SceneMatrix::render() {
                     for (const auto& lane : track->_lanes) {
                         ImGui::TableSetColumnIndex(++columnIndex);
                         auto& clipSlot = scene->getClipSlot(lane.get());
-                        clipSlot->render(_composer->_pianoRollWindow.get());
+                        clipSlot->render(_composer);
                         if (ImGui::BeginDragDropTarget()) {
                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
                                 const Clip* clip = (Clip*)payload->Data;
@@ -78,7 +78,7 @@ void SceneMatrix::render() {
                 ImGui::TableSetColumnIndex(++columnIndex);
                 for (const auto& lane : _composer->_masterTrack->_lanes) {
                     auto& clipSlot = scene->getClipSlot(lane.get());
-                    clipSlot->render(_composer->_pianoRollWindow.get());
+                    clipSlot->render(_composer);
                     if (ImGui::BeginDragDropTarget()) {
                         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
                             const Clip* clip = (Clip*)payload->Data;
@@ -105,6 +105,9 @@ void SceneMatrix::process(Track* track) {
         for (auto& lane : track->_lanes) {
             auto& clipSlot = scene->getClipSlot(lane.get());
             if (!clipSlot->_playing) {
+                continue;
+            }
+            if (!clipSlot->_clip) {
                 continue;
             }
             double sequenceDuration = clipSlot->_clip->_sequence->_duration;
