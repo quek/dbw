@@ -21,13 +21,6 @@ public:
     std::filesystem::path _name;
 
 private:
-    void writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* structure, Track* track, const char* role = "regular");
-    bool contaisId(void* x);
-    std::string generateId(void* x, std::string prefix);
-    std::string getId(void* x);
-    void setId(void* x, std::string id);
-    void* getObject(std::string id);
-
     std::map<void*, std::string> _idMap;
     std::map<std::string, void*> _idMapRev;
 };
