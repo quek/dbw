@@ -99,16 +99,19 @@ tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {
     trackElement->SetAttribute("id", xmlId());
     trackElement->SetAttribute("name", _name.c_str());
 
-    // TODO _fader->toXml(doc)
-    // <Mute value = "false" id = "id16" name = "Mute" / >
-    // <Pan max = "1.000000" min = "0.000000" unit = "normalized" value = "0.500000" id = "id15" name = "Pan" / >
-    // <Volume max = "2.000000" min = "0.000000" unit = "linear" value = "0.942701" id = "id14" name = "Volume" / >
-
-    auto* channel = trackElement->InsertNewChildElement("Channel");
+    auto channel = trackElement->InsertNewChildElement("Channel");
     channel->SetAttribute("role", role());
+
+    auto mute = channel->InsertNewChildElement("Mute");
+    mute->SetAttribute("value", _fader->_mute);
+    auto pan = channel->InsertNewChildElement("Pan");
+    pan->SetAttribute("value", _fader->_pan);
+    auto volume = channel->InsertNewChildElement("Volume");
+    volume->SetAttribute("value", _fader->_level);
+
     auto* devices = channel->InsertNewChildElement("Devices");
     for (auto& module : _modules) {
-        devices->InsertEndChild(module->dawProject(doc));
+        devices->InsertEndChild(module->toXml(doc));
     }
     return trackElement;
 }

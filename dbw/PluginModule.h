@@ -16,7 +16,7 @@ public:
     void start() override;
     void stop() override;
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
-    tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
+    tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
 
     std::unique_ptr<PluginHost> _pluginHost;
 };

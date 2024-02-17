@@ -223,7 +223,7 @@ void Project::writeTrack(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* struc
             channel->SetAttribute("role", role);
             auto* devices = channel->InsertNewChildElement("Devices");
             for (auto module = track->_modules.begin(); module != track->_modules.end(); ++module) {
-                devices->InsertEndChild((*module)->dawProject(&doc));
+                devices->InsertEndChild((*module)->toXml(&doc));
             }
         }
     }

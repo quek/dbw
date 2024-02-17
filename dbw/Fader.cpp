@@ -5,7 +5,7 @@
 Fader::Fader(std::string name, Track* track) : BuiltinModule(name, track) {
 }
 
-tinyxml2::XMLElement* Fader::dawProject(tinyxml2::XMLDocument* doc) {
+tinyxml2::XMLElement* Fader::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("BuiltinDevice");
     element->SetAttribute("deviceRole", "audioFX");
     element->SetAttribute("deviceName", _name.c_str());

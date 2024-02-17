@@ -8,7 +8,7 @@ GainModule::GainModule(std::string name, Track* track) :
     BuiltinModule(name, track), _gain(1.0) {
 }
 
-tinyxml2::XMLElement* GainModule::dawProject(tinyxml2::XMLDocument* doc) {
+tinyxml2::XMLElement* GainModule::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("BuiltinDevice");
     element->SetAttribute("deviceRole", "audioFX");
     element->SetAttribute("deviceName", _name.c_str());

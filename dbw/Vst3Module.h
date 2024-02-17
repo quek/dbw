@@ -24,7 +24,7 @@ public:
     void renderContent() override;
     virtual void onResize(int width, int height) override;
     virtual void loadState(std::filesystem::path path) override;
-    virtual tinyxml2::XMLElement* dawProject(tinyxml2::XMLDocument* doc) override;
+    virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
 
     static nlohmann::json scan(const std::string path);
 

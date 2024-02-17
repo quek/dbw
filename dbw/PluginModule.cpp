@@ -18,7 +18,7 @@ bool PluginModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
     return _pluginHost->process(buffer, steadyTime);
 }
 
-tinyxml2::XMLElement* PluginModule::dawProject(tinyxml2::XMLDocument* doc) {
+tinyxml2::XMLElement* PluginModule::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("ClapPlugin");
     // TODO Possible values: instrument, noteFX, audioFX, analyzer
     element->SetAttribute("deviceRole", "instrument");

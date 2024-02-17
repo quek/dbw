@@ -506,7 +506,7 @@ void Vst3Module::loadState(std::filesystem::path path) {
     }
 }
 
-tinyxml2::XMLElement* Vst3Module::dawProject(tinyxml2::XMLDocument* doc) {
+tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
     Steinberg::MemoryStream processorStream;
     if (_component->getState(&processorStream) != Steinberg::kResultOk) {
         Error(_name + "のプロセスステータスの取得に失敗しました。");
