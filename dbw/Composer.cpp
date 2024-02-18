@@ -7,6 +7,7 @@
 #include "AudioEngineWindow.h"
 #include "Clip.h"
 #include "Command.h"
+#include "Config.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "Project.h"
@@ -80,7 +81,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
 }
 
 void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
-    double deltaSec = framesPerBuffer / _audioEngine->_sampleRate;
+    double deltaSec = framesPerBuffer / gPreference.sampleRate;
     double oneBeatSec = 60.0 / _bpm;
     _nextPlayTime = deltaSec / oneBeatSec + _playTime;
 }

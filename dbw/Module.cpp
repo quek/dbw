@@ -4,6 +4,7 @@
 #include "AudioEngine.h"
 #include "Composer.h"
 #include "Command.h"
+#include "Config.h"
 #include "Track.h"
 
 Module::~Module() {
@@ -12,7 +13,7 @@ Module::~Module() {
 }
 
 void Module::start() {
-    _track->_processBuffer.ensure(_track->_composer->_audioEngine->_bufferSize, std::max(_ninputs, _noutputs), 2);
+    _track->_processBuffer.ensure(gPreference.bufferSize, std::max(_ninputs, _noutputs), 2);
     _isStarting = true;
 }
 

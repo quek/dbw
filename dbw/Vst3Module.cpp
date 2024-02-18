@@ -11,6 +11,7 @@
 #include "imgui.h"
 #include "AudioEngine.h"
 #include "Composer.h"
+#include "Config.h"
 #include "Error.h"
 #include "logger.h"
 #include "Project.h"
@@ -357,7 +358,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kBarPositionValid;
     Steinberg::Vst::ProcessContext processContext = {};
     processContext.state = statesAndFlangs;
-    double sampleRate = _track->_composer->_audioEngine->_sampleRate;
+    double sampleRate = gPreference.sampleRate;
     processContext.sampleRate = sampleRate;
     double playTime = _track->_composer->_playTime;
     processContext.projectTimeMusic = playTime;

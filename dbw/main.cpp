@@ -33,6 +33,7 @@
 
 #include "AudioEngine.h"
 #include "Composer.h"
+#include "Config.h"
 #include "ErrorWindow.h"
 #include "Grid.h"
 #include "GuiUtil.h"
@@ -81,6 +82,8 @@ int main(int, char**) {
     logger = std::make_shared<spdlog::logger>("deafult", daily_sink);
     logger->set_level(spdlog::level::debug);
     logger->info("start");
+
+    gPreference.load();
 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();

@@ -176,6 +176,7 @@
     <ClInclude Include="command\DeleteNotes.h" />
     <ClInclude Include="Command\OpenProject.h" />
     <ClInclude Include="ComposerWindow.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="ErrorWindow.h" />
@@ -242,6 +243,7 @@
     <ClCompile Include="command\DeleteNotes.cpp" />
     <ClCompile Include="Command\OpenProject.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />

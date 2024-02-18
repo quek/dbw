@@ -6,6 +6,7 @@
 #include "Clip.h"
 #include "ClipSlot.h"
 #include "Composer.h"
+#include "Config.h"
 
 SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
     addScene(false);
@@ -100,7 +101,7 @@ void SceneMatrix::render() {
 
 void SceneMatrix::process(Track* track) {
     double oneBeatSec = 60.0 / track->_composer->_bpm;
-    double sampleRate = track->_composer->_audioEngine->_sampleRate;
+    double sampleRate = gPreference.sampleRate;
     for (auto& scene : _scenes) {
         for (auto& lane : track->_lanes) {
             auto& clipSlot = scene->getClipSlot(lane.get());

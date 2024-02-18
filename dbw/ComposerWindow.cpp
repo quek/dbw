@@ -3,11 +3,16 @@
 #include "../ImGuiFileDialog/ImGuiFileDialog.h"
 #include "Composer.h"
 #include "Command/OpenProject.h"
+#include "Config.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "util.h"
 
 ComposerWindow::ComposerWindow(Composer* composer) : _composer(composer) {
+    if (gPreference.audioDeviceIndex == -1) {
+        _audioEngineWindow.reset(new AudioEngineWindow(_composer));
+        _showAudioEngineWindow = true;
+    }
 }
 
 void ComposerWindow::render() {

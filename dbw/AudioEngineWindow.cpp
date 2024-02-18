@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include "AudioEngine.h"
 #include "Composer.h"
+#include "Config.h"
 
 static std::vector<double> PrintSupportedStandardSampleRates(
     const PaStreamParameters* inputParameters,
@@ -27,7 +28,7 @@ static std::vector<double> PrintSupportedStandardSampleRates(
 }
 
 AudioEngineWindow::AudioEngineWindow(Composer* composer) : _composer(composer) {
-    _deviceIndex = _composer->_audioEngine->_deviceIndex;
+    _deviceIndex = gPreference.audioDeviceIndex;
     auto apiCount = Pa_GetHostApiCount();
     for (auto i = 0; i < apiCount; ++i) {
         auto apiInfo = Pa_GetHostApiInfo(i);
@@ -99,7 +100,11 @@ void AudioEngineWindow::render() {
             }
         }
         ImGui::Separator();
-        ImGui::Text(std::format("【{}】{}", _apiInfos[_deviceInfos[_deviceIndex]->hostApi]->name, _deviceInfos[_deviceIndex]->name).c_str());
+        if (_deviceIndex != -1) {
+            ImGui::Text(std::format("【{}】{}", _apiInfos[_deviceInfos[_deviceIndex]->hostApi]->name, _deviceInfos[_deviceIndex]->name).c_str());
+        } else {
+            ImGui::Text("--");
+        }
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 7);
         ImGui::InputDouble("Sample Rate", &_sampleRate);
         ImGui::SameLine();
@@ -107,7 +112,11 @@ void AudioEngineWindow::render() {
         ImGui::InputScalar("Buffer Size", ImGuiDataType_U32, &_bufferSize);
         ImGui::BeginDisabled(_composer->_audioEngine->_isStarted);
         if (ImGui::Button("Apply")) {
-            _composer->_audioEngine->restart(_deviceIndex, _sampleRate, _bufferSize);
+            gPreference.audioDeviceIndex = _deviceIndex;
+            gPreference.sampleRate = _sampleRate;
+            gPreference.bufferSize = _bufferSize;
+            gPreference.save();
+            _composer->_audioEngine->start();
             _composer->_composerWindow->_showAudioEngineWindow = false;
         }
         ImGui::EndDisabled();

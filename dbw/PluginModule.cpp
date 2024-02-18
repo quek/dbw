@@ -3,6 +3,7 @@
 #include "PluginHost.h"
 #include "Track.h"
 #include "Composer.h"
+#include "Config.h"
 #include "AudioEngine.h"
 
 PluginModule::PluginModule(std::string name, Track* track, PluginHost* pluginHost) : Module(name, track), _pluginHost(pluginHost) {
@@ -66,8 +67,8 @@ void PluginModule::renderContent() {
 
 void PluginModule::start() {
     _pluginHost->start(
-        _track->_composer->_audioEngine->_sampleRate,
-        _track->_composer->_audioEngine->_bufferSize
+        gPreference.sampleRate,
+        gPreference.bufferSize
     );
     Module::start();
 }

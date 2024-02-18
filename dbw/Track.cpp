@@ -7,6 +7,7 @@
 #include "Clip.h"
 #include "Command.h"
 #include "Composer.h"
+#include "Config.h"
 #include "Fader.h"
 #include "Midi.h"
 #include "Module.h"
@@ -49,7 +50,7 @@ bool Track::process(int64_t steadyTime) {
     }
     if (!_waitingModule) {
         double oneBeatSec = 60.0 / _composer->_bpm;
-        double sampleRate = _composer->_audioEngine->_sampleRate;
+        double sampleRate = gPreference.sampleRate;
         for (auto& lane : _lanes) {
             for (auto& clip : lane->_clips) {
                 double clipTime = clip->_time;
