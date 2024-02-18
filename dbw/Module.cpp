@@ -4,10 +4,16 @@
 #include "AudioEngine.h"
 #include "Composer.h"
 #include "Command.h"
+#include "Track.h"
 
 Module::~Module() {
     closeGui();
     stop();
+}
+
+void Module::start() {
+    _track->_processBuffer.ensure(_track->_composer->_audioEngine->_bufferSize, std::max(_ninputs, _noutputs));
+    _isStarting = true;
 }
 
 void Module::render() {
@@ -33,7 +39,7 @@ void Module::render() {
 
         // TODO とりあえずいまは表示だけ
         for (auto& c : _connections) {
-            auto x = c->_from->_name + " " + std::to_string(c->_fromIndex) + " => " + c->_to->_name + " " + std::to_string(c->_toIndex);
+            auto x = c->_from->_name + " " + std::to_string(c->_fromIndex) + " ⇒ " + c->_to->_name + " " + std::to_string(c->_toIndex);
             ImGui::Text(x.c_str());
         }
 
@@ -43,8 +49,41 @@ void Module::render() {
     ImGui::PopID();
 }
 
+bool Module::isWaitingFrom() {
+    for (auto& connection : _connections) {
+        if (connection->_to == this && !connection->_from->_processed && connection->_from->isStarting()) {
+            return true;
+        }
+
+    }
+    return false;
+}
+
+bool Module::isWaitingTo() {
+    for (auto& connection : _connections) {
+        if (connection->_from == this && !connection->_to->_processed && connection->_to->isStarting()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Module::process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) {
+    _processed = true;
+    return true;
+}
+
+void Module::prepare() {
+    _processed = false;
+}
+
 void Module::connect(Module* from, int outputIndex, int inputIndex) {
     _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+    from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+}
+
+ProcessBuffer& Module::getProcessBuffer() {
+    return _track->_processBuffer;
 }
 
 tinyxml2::XMLElement* Module::toXml(tinyxml2::XMLDocument* doc) {

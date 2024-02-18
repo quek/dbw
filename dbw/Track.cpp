@@ -21,46 +21,86 @@ Track::Track(std::string name, Composer* composer) :
 Track::~Track() {
 }
 
-void Track::process(int64_t steadyTime) {
-    double oneBeatSec = 60.0 / _composer->_bpm;
-    double sampleRate = _composer->_audioEngine->_sampleRate;
-    for (auto& lane : _lanes) {
-        for (auto& clip : lane->_clips) {
-            double clipTime = clip->_time;
-            double clipDuration = clip->_duration;
-            double begin = _composer->_playTime;
-            double end = _composer->_nextPlayTime;
-            // TODO Loop
-            if (begin < clipTime + clipDuration && clipTime < end) {
-                for (auto& note : clip->_sequence->_notes) {
-                    double noteTime = clipTime + note->_time;
-                    if (begin <= noteTime && noteTime < end) {
-                        int16_t channel = 0;
-                        uint32_t sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
-                        uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                        _processBuffer._eventIn.noteOn(note->_key, channel, note->_velocity, sampleOffset);
-                    }
-                    double noteDuration = noteTime + note->_duration;
-                    if (begin <= noteDuration && noteDuration < end) {
-                        int16_t channel = 0;
-                        uint32_t sampleOffsetDouble = (noteDuration - begin) * oneBeatSec * sampleRate;
-                        uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                        _processBuffer._eventIn.noteOff(note->_key, channel, 1.0f, sampleOffset);
+void Track::prepare(unsigned long framesPerBuffer) {
+    _processed = false;
+    _processBuffer.clear();
+    _processBuffer.ensure(framesPerBuffer, 2);
+    _waitingModule = nullptr;
+    for (auto& module : _modules) {
+        module->prepare();
+    }
+    _fader->prepare();
+}
+
+bool Track::process(int64_t steadyTime) {
+    if (_processed) {
+        return true;
+    }
+    if (!_waitingModule) {
+        double oneBeatSec = 60.0 / _composer->_bpm;
+        double sampleRate = _composer->_audioEngine->_sampleRate;
+        for (auto& lane : _lanes) {
+            for (auto& clip : lane->_clips) {
+                double clipTime = clip->_time;
+                double clipDuration = clip->_duration;
+                double begin = _composer->_playTime;
+                double end = _composer->_nextPlayTime;
+                // TODO Loop
+                if (begin < clipTime + clipDuration && clipTime < end) {
+                    for (auto& note : clip->_sequence->_notes) {
+                        double noteTime = clipTime + note->_time;
+                        if (begin <= noteTime && noteTime < end) {
+                            int16_t channel = 0;
+                            uint32_t sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
+                            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+                            _processBuffer._eventIn.noteOn(note->_key, channel, note->_velocity, sampleOffset);
+                        }
+                        double noteDuration = noteTime + note->_duration;
+                        if (begin <= noteDuration && noteDuration < end) {
+                            int16_t channel = 0;
+                            uint32_t sampleOffsetDouble = (noteDuration - begin) * oneBeatSec * sampleRate;
+                            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+                            _processBuffer._eventIn.noteOff(note->_key, channel, 1.0f, sampleOffset);
+                        }
                     }
                 }
             }
         }
+
+        _composer->_sceneMatrix->process(this);
     }
 
-    _composer->_sceneMatrix->process(this);
 
+    bool skip = !!_waitingModule;
     for (auto& module : _modules) {
+        if (skip) {
+            if (module.get() == _waitingModule) {
+                skip = false;
+            } else {
+                continue;
+            }
+        }
         if (module->isStarting()) {
-            module->process(&_processBuffer, steadyTime);
+            if (!module->_processed) {
+                if (module->isWaitingFrom()) {
+                    _waitingModule = module.get();
+                    return false;
+                }
+                module->process(&_processBuffer, steadyTime);
+            }
+            if (module->isWaitingTo()) {
+                _waitingModule = module.get();
+                return false;
+            }
             _processBuffer.swapInOut();
         }
     }
+
+    // TODO PRE POST
     _fader->process(&_processBuffer, steadyTime);
+
+    _processed = true;
+    return true;
 }
 
 void Track::render() {

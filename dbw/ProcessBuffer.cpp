@@ -4,7 +4,7 @@ ProcessBuffer::ProcessBuffer() : _framesPerBuffer(0), _nchannels(0) {
 }
 
 void ProcessBuffer::ensure(unsigned long framesPerBuffer, int nchannels) {
-    if (_framesPerBuffer == framesPerBuffer && _nchannels == nchannels) {
+    if (_framesPerBuffer >= framesPerBuffer && _nchannels >= nchannels) {
         return;
     }
     _framesPerBuffer = framesPerBuffer;

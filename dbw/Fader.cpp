@@ -32,14 +32,11 @@ void Fader::loadParameters(tinyxml2::XMLElement* element) {
 
 }
 
-bool Fader::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
+bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
     if (_mute) {
         std::ranges::fill(buffer->_out._constantp, true);
         for (auto& out : buffer->_out.buffer32()) {
-            for (auto& x : out) {
-                x = 0.0f;
-                break;
-            }
+            out[0] = 0.0f;
         }
         return true;
     }
@@ -51,7 +48,7 @@ bool Fader::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
         }
         pan = _pan * 2.0f;
     }
-    return true;
+    return Module::process(buffer, steadyTime);
 }
 
 void Fader::renderContent() {

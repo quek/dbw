@@ -267,7 +267,7 @@ bool Vst3Module::load(std::string path) {
     return true;
 }
 
-bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
+bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     Steinberg::Vst::ProcessData processData;
     ///< processing mode - value of \ref ProcessModes
     processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;
@@ -368,7 +368,8 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t /*steadyTime*/) {
     processData.processContext = &processContext;
 
     _processor->process(processData);
-    return true;
+
+    return Module::process(buffer, steadyTime);
 }
 
 void Vst3Module::start() {

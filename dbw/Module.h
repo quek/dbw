@@ -15,21 +15,26 @@ public:
     virtual ~Module();
     virtual void openGui() { _didOpenGui = true; }
     virtual void closeGui() { _didOpenGui = false; }
-    virtual void start() { _isStarting = true;};
+    virtual void start();
     virtual bool isStarting() { return _isStarting; }
     virtual void stop() { _isStarting = false; }
     virtual void render();
     virtual void renderContent() {}
-    virtual bool process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) { return true; }
+    virtual bool isWaitingFrom();
+    virtual bool isWaitingTo();
+    virtual bool process(ProcessBuffer* buffer, int64_t steadyTime);
     virtual void onResize(int /*width*/, int /*height*/) {}
     virtual void loadState(std::filesystem::path /*path*/) {}
+    virtual void prepare();
     virtual void connect(Module* from, int outputIndex, int inputIndex);
+    ProcessBuffer& getProcessBuffer();
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
     Track* _track;
     std::string _name;
     bool _didOpenGui = false;
     std::vector<std::unique_ptr<Connection>> _connections;
+    bool _processed = false;
 
 protected:
     bool _isStarting = false;

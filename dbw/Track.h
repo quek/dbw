@@ -16,8 +16,9 @@ class Track : public XMLMixin {
 public:
     Track(std::string name, Composer* composer);
     virtual ~Track();
-    virtual void process(int64_t steadyTime);
-    virtual void render();
+    void prepare(unsigned long framesPerBuffer);
+    bool process(int64_t steadyTime);
+    void render();
     void addModule(std::string path, uint32_t index);
     bool isAvailableSidechainSrc(Track* dst);
     tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
@@ -25,10 +26,12 @@ public:
 
     std::unique_ptr<Fader> _fader;
     ProcessBuffer _processBuffer;
+    bool _processed = false;
 
     std::string _name;
     std::vector<std::unique_ptr<Lane>> _lanes;
     std::vector<std::unique_ptr<Module>> _modules;
+    Module* _waitingModule = nullptr;
 
     Composer* _composer;
     bool _openModuleSelector = false;

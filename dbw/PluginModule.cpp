@@ -15,7 +15,8 @@ PluginModule::~PluginModule() {
 }
 
 bool PluginModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
-    return _pluginHost->process(buffer, steadyTime);
+    _pluginHost->process(buffer, steadyTime);
+    return Module::process(buffer, steadyTime);
 }
 
 tinyxml2::XMLElement* PluginModule::toXml(tinyxml2::XMLDocument* doc) {
