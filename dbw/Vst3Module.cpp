@@ -280,54 +280,58 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     ///< number of audio output busses
     processData.numOutputs = _noutputs;
     ///< buffers of input busses
-    // TODO 複数バス対応
-    std::vector<float*> inputChannelBuffers32;
-    std::vector<double*> inputChannelBuffers64;
-    std::vector<float*> outputChannelBuffers32;
-    std::vector<double*> outputChannelBuffers64;
-    if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
-        buffer->ensure32();
-        for (auto& x : buffer->_in.buffer32()) {
-            inputChannelBuffers32.push_back(x.data());
-        }
-        for (auto& x : buffer->_out.buffer32()) {
-            outputChannelBuffers32.push_back(x.data());
-        }
-    } else {
-        buffer->ensure64();
-        for (auto& x : buffer->_in.buffer64()) {
-            inputChannelBuffers64.push_back(x.data());
-        }
-        for (auto& x : buffer->_out.buffer64()) {
-            outputChannelBuffers64.push_back(x.data());
-        }
-    }
+    // TODO track->addModule(module) のときにやる
     std::vector<Steinberg::Vst::AudioBusBuffers> inputAudioBusBuffers;
-    for (int i = 0; i < _ninputs; ++i) {
-        Steinberg::Vst::AudioBusBuffers x;
-        x.numChannels = buffer->_nchannels;
+    std::vector<Steinberg::Vst::AudioBusBuffers> outputAudioBusBuffers;
+    std::vector<std::vector<float*>> inputChannelBuffers32;
+    std::vector<std::vector<double*>> inputChannelBuffers64;
+    std::vector<std::vector<float*>> outputChannelBuffers32;
+    std::vector<std::vector<double*>> outputChannelBuffers64;
+    for (int i = 0; i < nbuses(); ++i) {
         if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
-            x.channelBuffers32 = inputChannelBuffers32.data();
+            buffer->ensure32();
+            std::vector<float*> inChannels;
+            for (auto& x : buffer->_in.at(i).buffer32()) {
+                inChannels.push_back(x.data());
+            }
+            inputChannelBuffers32.push_back(inChannels);
+            std::vector<float*> outChannels;
+            for (auto& x : buffer->_out.at(i).buffer32()) {
+                outChannels.push_back(x.data());
+            }
+            outputChannelBuffers32.push_back(outChannels);
         } else {
-            x.channelBuffers64 = inputChannelBuffers64.data();
+            buffer->ensure64();
+            std::vector<double*> inChannels;
+            for (auto& x : buffer->_in.at(i).buffer64()) {
+                inChannels.push_back(x.data());
+            }
+            inputChannelBuffers64.push_back(inChannels);
+            std::vector<double*> outChannels;
+            for (auto& x : buffer->_out.at(i).buffer64()) {
+                outChannels.push_back(x.data());
+            }
+            outputChannelBuffers64.push_back(outChannels);
         }
-        inputAudioBusBuffers.emplace_back(x);
+        Steinberg::Vst::AudioBusBuffers inBus;
+        inBus.numChannels = buffer->_nchannels;
+        if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
+            inBus.channelBuffers32 = inputChannelBuffers32.back().data();
+        } else {
+            inBus.channelBuffers64 = inputChannelBuffers64.back().data();
+        }
+        inputAudioBusBuffers.emplace_back(inBus);
+
+        Steinberg::Vst::AudioBusBuffers outBus;
+        outBus.numChannels = buffer->_nchannels;
+        if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
+            outBus.channelBuffers32 = outputChannelBuffers32.back().data();
+        } else {
+            outBus.channelBuffers64 = outputChannelBuffers64.back().data();
+        }
+        outputAudioBusBuffers.emplace_back(outBus);
     }
     processData.inputs = inputAudioBusBuffers.data();
-
-    ///< buffers of output busses
-    // TODO 複数バス対応
-    std::vector<Steinberg::Vst::AudioBusBuffers> outputAudioBusBuffers;
-    for (int i = 0; i < _noutputs; ++i) {
-        Steinberg::Vst::AudioBusBuffers x;
-        x.numChannels = buffer->_nchannels;
-        if (_symbolicSampleSizes == Steinberg::Vst::SymbolicSampleSizes::kSample32) {
-            x.channelBuffers32 = outputChannelBuffers32.data();
-        } else {
-            x.channelBuffers64 = outputChannelBuffers64.data();
-        }
-        outputAudioBusBuffers.emplace_back(x);
-    }
     processData.outputs = outputAudioBusBuffers.data();
 
     ///< incoming parameter changes for this block

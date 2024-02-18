@@ -12,7 +12,7 @@ Module::~Module() {
 }
 
 void Module::start() {
-    _track->_processBuffer.ensure(_track->_composer->_audioEngine->_bufferSize, std::max(_ninputs, _noutputs));
+    _track->_processBuffer.ensure(_track->_composer->_audioEngine->_bufferSize, std::max(_ninputs, _noutputs), 2);
     _isStarting = true;
 }
 
@@ -79,10 +79,9 @@ void Module::processConnections() {
             continue;
         }
         if (!connection->_from->isStarting()) {
-
+            continue;
         }
-        connection->_from->_track->_processBuffer._out;
-
+        connection->_from->_track->_processBuffer._out.at(connection->_fromIndex).copyTo(_track->_processBuffer._in.at(connection->_toIndex));
     }
 }
 
@@ -93,6 +92,10 @@ void Module::prepare() {
 void Module::connect(Module* from, int outputIndex, int inputIndex) {
     _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
     from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+}
+
+int Module::nbuses() {
+    return std::max(_ninputs, _noutputs);
 }
 
 ProcessBuffer& Module::getProcessBuffer() {

@@ -34,15 +34,15 @@ void Fader::loadParameters(tinyxml2::XMLElement* element) {
 
 bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
     if (_mute) {
-        std::ranges::fill(buffer->_out._constantp, true);
-        for (auto& out : buffer->_out.buffer32()) {
+        std::ranges::fill(buffer->_out[0]._constantp, true);
+        for (auto& out : buffer->_out[0].buffer32()) {
             out[0] = 0.0f;
         }
         return true;
     }
     // pan の処理ってどうやるのが正しい？
     float pan = (1.0f - _pan) * 2.0f;
-    for (auto [in, out] : std::views::zip(buffer->_in.buffer32(), buffer->_out.buffer32())) {
+    for (auto [in, out] : std::views::zip(buffer->_in[0].buffer32(), buffer->_out[0].buffer32())) {
         for (auto [a, b] : std::views::zip(in, out)) {
             b = a * _level * pan;
         }

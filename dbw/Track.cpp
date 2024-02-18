@@ -1,5 +1,7 @@
 #include "Track.h"
+#include <algorithm>
 #include <mutex>
+#include <ranges>
 #include "imgui.h"
 #include "AudioEngine.h"
 #include "Clip.h"
@@ -24,7 +26,16 @@ Track::~Track() {
 void Track::prepare(unsigned long framesPerBuffer) {
     _processed = false;
     _processBuffer.clear();
-    _processBuffer.ensure(framesPerBuffer, 2);
+    int nbuses = 1;
+    for (auto& module : _modules) {
+        if (nbuses < module->_ninputs) {
+            nbuses = module->_ninputs;
+        }
+        if (nbuses < module->_noutputs) {
+            nbuses = module->_noutputs;
+        }
+    }
+    _processBuffer.ensure(framesPerBuffer, nbuses,2);
     _waitingModule = nullptr;
     for (auto& module : _modules) {
         module->prepare();
@@ -98,7 +109,7 @@ bool Track::process(int64_t steadyTime) {
     }
 
     // TODO PRE POST
-    module->processConnections();
+    _fader->processConnections();
     _fader->process(&_processBuffer, steadyTime);
 
     _processed = true;

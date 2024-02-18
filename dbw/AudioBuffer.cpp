@@ -12,6 +12,15 @@ void addBuffers(std::vector<std::vector<T>>& dest, const std::vector<std::vector
     }
 }
 
+template<typename T, typename U>
+void copyBuffers(std::vector<std::vector<T>>& src, std::vector<std::vector<U>>& dest) {
+    for (auto [a, b] : std::views::zip(src, dest)) {
+        for (auto i = 0; i < a.size(); ++i) {
+            b[i] = static_cast<U>(a[i]);
+        }
+    }
+}
+
 void AudioBuffer::add(const AudioBuffer& other) {
     if (_dataType == Float) {
         if (other._dataType == Float) {
@@ -24,6 +33,22 @@ void AudioBuffer::add(const AudioBuffer& other) {
             addBuffers(_buffer64, other._buffer32);
         } else {
             addBuffers(_buffer64, other._buffer64);
+        }
+    }
+}
+
+void AudioBuffer::copyTo(AudioBuffer& other) {
+    if (_dataType == Float) {
+        if (other._dataType == Float) {
+            copyBuffers(_buffer32, other._buffer32);
+        } else {
+            copyBuffers(_buffer32, other._buffer64);
+        }
+    } else {
+        if (other._dataType == Float) {
+            copyBuffers(_buffer64, other._buffer32);
+        } else {
+            copyBuffers(_buffer64, other._buffer64);
         }
     }
 }

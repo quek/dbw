@@ -5,6 +5,7 @@ class AudioBuffer {
 public:
     AudioBuffer();
     void add(const AudioBuffer& other);
+    void copyTo(AudioBuffer& other);
     void copyFrom(const float** buffer, unsigned long framesPerBuffer, int nchannels);
     void copyFrom(const double** buffer, unsigned long framesPerBuffer, int nchannels);
     void copyTo(float** buffer, unsigned long framesPerBuffer, int nchannels);

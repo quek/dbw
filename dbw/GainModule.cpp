@@ -29,7 +29,7 @@ void GainModule::loadParameters(tinyxml2::XMLElement* element) {
 }
 
 bool GainModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
-    for (auto [in, out] : std::views::zip(buffer->_in.buffer32(), buffer->_out.buffer32())) {
+    for (auto [in, out] : std::views::zip(buffer->_in[0].buffer32(), buffer->_out[0].buffer32())) {
         for (auto [a, b] : std::views::zip(in, out)) {
             b = a * _gain;
         }

@@ -329,13 +329,13 @@ void PluginHost::changeLatency() {
 bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     // とりあえず 0, 1 の 2ch で
     buffer->ensure32();
-    _inputs[0] = buffer->_in.buffer32()[0].data();
-    _inputs[1] = buffer->_in.buffer32()[1].data();
-    _outputs[0] = buffer->_out.buffer32()[0].data();
-    _outputs[1] = buffer->_out.buffer32()[1].data();
+    _inputs[0] = buffer->_in[0].buffer32()[0].data();
+    _inputs[1] = buffer->_in[0].buffer32()[1].data();
+    _outputs[0] = buffer->_out[0].buffer32()[0].data();
+    _outputs[1] = buffer->_out[0].buffer32()[1].data();
 
-    _audioIn.channel_count = buffer->_in.getNchannels();
-    _audioOut.channel_count = buffer->_in.getNchannels();
+    _audioIn.channel_count = buffer->_in[0].getNchannels();
+    _audioOut.channel_count = buffer->_in[0].getNchannels();
 
     _process.frames_count = buffer->_framesPerBuffer;
     _process.in_events = buffer->_eventIn.clapInputEvents();
@@ -358,9 +358,9 @@ bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
         Error("Plack plugin render failed!\n\nUnknown error.");
         return false;
     }
-    buffer->_out._constantp.clear();
+    buffer->_out[0]._constantp.clear();
     for (uint32_t i = 0; i < _process.audio_outputs->channel_count; ++i) {
-        buffer->_out._constantp.push_back((_process.audio_outputs->constant_mask & (static_cast<unsigned long long>(1) << i)) != 0);
+        buffer->_out[0]._constantp.push_back((_process.audio_outputs->constant_mask & (static_cast<unsigned long long>(1) << i)) != 0);
     }
 
     return true;

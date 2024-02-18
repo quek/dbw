@@ -49,7 +49,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
 
     _processBuffer.clear();
     _processBuffer.ensure32();
-    _processBuffer.ensure(framesPerBuffer, 2);
+    _processBuffer.ensure(framesPerBuffer, 1, 2);
 
     bool processed = false;
     while (!processed) {
@@ -59,13 +59,13 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         }
     }
 
-    _masterTrack->_processBuffer._in.zero();
+    _masterTrack->_processBuffer.inZero();
     for (auto& track : _tracks) {
-        _masterTrack->_processBuffer._in.add(track->_processBuffer._out);
+        _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
     }
 
     _masterTrack->process(steadyTime);
-    _masterTrack->_processBuffer._out.copyTo(out, framesPerBuffer, 2);
+    _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
 
     if (_playing) {
         _playTime = _nextPlayTime;
