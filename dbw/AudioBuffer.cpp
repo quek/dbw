@@ -6,9 +6,22 @@ AudioBuffer::AudioBuffer() : _framesPerBuffer(0), _nchannels(0) {
 }
 
 template<typename T, typename U>
-void addBuffers(std::vector<std::vector<T>>& dest, const std::vector<std::vector<U>>& src) {
-    for (auto [a, b] : std::views::zip(dest, src)) {
-        std::transform(a.begin(), a.end(), b.begin(), a.begin(), [](T& aa, const U& bb) { return aa += static_cast<T>(bb); });
+void addBuffers(std::vector<std::vector<T>>& dest, const std::vector<std::vector<U>>& src, std::vector<bool>& destConstantp, const std::vector<bool>& srcConstantp) {
+    for (auto [a, b, acp, bcp] : std::views::zip(dest, src, destConstantp, srcConstantp)) {
+        for (auto [aa, bb] : std::views::zip(a, b)) {
+            if (acp && bcp) {
+                aa += bb;
+                return;
+            }
+            if (acp) {
+                acp = false;
+            }
+            if (bcp) {
+                aa += static_cast<T>(b[0]);
+            } else {
+                aa += static_cast<T>(bb);
+            }
+        }
     }
 }
 
@@ -24,15 +37,15 @@ void copyBuffers(std::vector<std::vector<T>>& src, std::vector<std::vector<U>>& 
 void AudioBuffer::add(const AudioBuffer& other) {
     if (_dataType == Float) {
         if (other._dataType == Float) {
-            addBuffers(_buffer32, other._buffer32);
+            addBuffers(_buffer32, other._buffer32, _constantp, other._constantp);
         } else {
-            addBuffers(_buffer32, other._buffer64);
+            addBuffers(_buffer32, other._buffer64, _constantp, other._constantp);
         }
     } else {
         if (other._dataType == Float) {
-            addBuffers(_buffer64, other._buffer32);
+            addBuffers(_buffer64, other._buffer32, _constantp, other._constantp);
         } else {
-            addBuffers(_buffer64, other._buffer64);
+            addBuffers(_buffer64, other._buffer64, _constantp, other._constantp);
         }
     }
 }

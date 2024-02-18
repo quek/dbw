@@ -105,6 +105,16 @@ void Project::open(std::filesystem::path dir) {
         sceneMatrix->_scenes.emplace_back(scene);
         auto lanesElement = sceneElement->FirstChildElement("Lanes");
         auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
+        {
+            for (auto& lane : _composer->_masterTrack->_lanes) {
+                auto& clipSlot = scene->getClipSlot(lane.get());
+                auto clipElement = clipSlotElement->FirstChildElement("Clip");
+                if (clipElement != nullptr) {
+                    clipSlot->_clip = Clip::fromXml(clipElement);
+                }
+                clipSlotElement = clipSlotElement->NextSiblingElement("ClipSlot");
+            }
+        }
         for (auto& track : _composer->_tracks) {
             for (auto& lane : track->_lanes) {
                 auto& clipSlot = scene->getClipSlot(lane.get());

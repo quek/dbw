@@ -98,6 +98,7 @@
     <ClCompile Include="Fader.cpp" />
     <ClCompile Include="XMLMixin.cpp" />
     <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="AudioEngineWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -185,6 +186,7 @@
     <ClInclude Include="Fader.h" />
     <ClInclude Include="XMLMixin.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="AudioEngineWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

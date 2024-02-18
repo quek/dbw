@@ -4,6 +4,7 @@
 #include <ranges>
 #include <sstream>
 #include "AudioEngine.h"
+#include "AudioEngineWindow.h"
 #include "Clip.h"
 #include "Command.h"
 #include "ErrorWindow.h"

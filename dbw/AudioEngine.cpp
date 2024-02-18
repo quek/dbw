@@ -3,6 +3,7 @@
 #include <string.h>
 #include "Composer.h"
 #include "logger.h"
+#include "Error.h"
 
 
 /* This routine will be called by the PortAudio engine when audio is needed.
@@ -41,8 +42,7 @@ static int paCallback(
     return result;
 }
 
-AudioEngine::AudioEngine()
-{
+AudioEngine::AudioEngine() {
     PaError err = Pa_Initialize();
     if (err != paNoError) {
         // TODO
@@ -50,8 +50,7 @@ AudioEngine::AudioEngine()
     }
 }
 
-AudioEngine::~AudioEngine()
-{
+AudioEngine::~AudioEngine() {
     stop();
 
     PaError err = Pa_Terminate();
@@ -61,14 +60,15 @@ AudioEngine::~AudioEngine()
     }
 }
 
-void AudioEngine::start()
-{
+void AudioEngine::start() {
+    if (_isStarted) {
+        return;
+    }
     try {
         PaError err;
 
         const PaDeviceInfo* deviceInfo;
         PaDeviceIndex nDevices = Pa_GetDeviceCount();
-        PaDeviceIndex deviceIndex = -1;
         for (PaDeviceIndex i = 0; i < nDevices; ++i) {
             deviceInfo = Pa_GetDeviceInfo(i);
             const char* name = deviceInfo->name;
@@ -76,37 +76,34 @@ void AudioEngine::start()
             const PaHostApiInfo* apiInfo = Pa_GetHostApiInfo(apiIndex);
             printf("%s, %s, %f\n", name, apiInfo->name, deviceInfo->defaultSampleRate);
             if (strcmp(name, "Prism Sound USB Audio Class 2.0") == 0 && strcmp(apiInfo->name, "ASIO") == 0) {
-                deviceIndex = i;
+                _deviceIndex = i;
                 break;
             }
         }
-        if (deviceIndex == -1) {
+        if (_deviceIndex == -1) {
             // TODO
             printf("Device not found!\n");
         }
 
         PaStreamParameters inputParameters{
-             deviceIndex,
+             _deviceIndex,
              2,
              paFloat32,
-             Pa_GetDeviceInfo(deviceIndex)->defaultLowInputLatency,
+             Pa_GetDeviceInfo(_deviceIndex)->defaultLowInputLatency,
              nullptr //See you specific host's API docs for info on using this field
         };
         PaStreamParameters outputParameters{};
         outputParameters.channelCount = 2;
-        outputParameters.device = deviceIndex;
+        outputParameters.device = _deviceIndex;
         outputParameters.hostApiSpecificStreamInfo = NULL;
         outputParameters.sampleFormat = paFloat32;
-        outputParameters.suggestedLatency = Pa_GetDeviceInfo(deviceIndex)->defaultLowOutputLatency;
+        outputParameters.suggestedLatency = Pa_GetDeviceInfo(_deviceIndex)->defaultLowOutputLatency;
         outputParameters.hostApiSpecificStreamInfo = NULL; //See you specific host's API docs for info on using this field
 
         err = Pa_IsFormatSupported(&inputParameters, &outputParameters, _sampleRate);
-        if (err == paFormatIsSupported)
-        {
+        if (err == paFormatIsSupported) {
             printf("Hooray!\n");
-        }
-        else
-        {
+        } else {
             printf("Too Bad.\n");
         }
 
@@ -135,32 +132,69 @@ void AudioEngine::start()
             // TODO
             printf("PortAudio error: %s\n", Pa_GetErrorText(err));
         }
-    }
-    catch (...) {
+        _isStarted = true;
+    } catch (...) {
         stop();
     }
 }
 
-void AudioEngine::stop()
-{
+void AudioEngine::stop() {
     PaError err;
     if (_stream != nullptr) {
         err = Pa_StopStream(_stream);
         if (err != paNoError) {
-            // TODO
-            printf("PortAudio error: %s\n", Pa_GetErrorText(err));
+            Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
         }
         err = Pa_CloseStream(_stream);
         if (err != paNoError) {
-            // TODO
-            printf("PortAudio error: %s\n", Pa_GetErrorText(err));
+            Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
         }
         _stream = nullptr;
     }
+    _isStarted = false;
 }
 
-void AudioEngine::process(float* in, float* out, unsigned long framesPerBuffer)
-{
+void AudioEngine::restart(int deviceIndex, double sampleRate, unsigned long bufferSize) {
+    _deviceIndex = deviceIndex;
+    _sampleRate = sampleRate;
+    _bufferSize = bufferSize;
+
+    PaError err;
+    PaStreamParameters inputParameters{
+         _deviceIndex,
+         2,
+         paFloat32,
+         Pa_GetDeviceInfo(_deviceIndex)->defaultLowInputLatency,
+         nullptr
+    };
+    PaStreamParameters outputParameters{};
+    outputParameters.channelCount = 2;
+    outputParameters.device = _deviceIndex;
+    outputParameters.hostApiSpecificStreamInfo = NULL;
+    outputParameters.sampleFormat = paFloat32;
+    outputParameters.suggestedLatency = Pa_GetDeviceInfo(_deviceIndex)->defaultLowOutputLatency;
+    outputParameters.hostApiSpecificStreamInfo = NULL;
+    err = Pa_OpenStream(
+        &_stream,
+        &inputParameters,
+        &outputParameters,
+        _sampleRate,
+        _bufferSize,
+        paNoFlag,
+        paCallback,
+        (void*)this);
+    if (err != paNoError) {
+        Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
+    }
+
+    err = Pa_StartStream(_stream);
+    if (err != paNoError) {
+        Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
+    }
+    _isStarted = true;
+}
+
+void AudioEngine::process(float* in, float* out, unsigned long framesPerBuffer) {
     _composer->process(in, out, framesPerBuffer, _steadyTime);
     _steadyTime += framesPerBuffer;
 }

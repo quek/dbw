@@ -53,8 +53,8 @@ void TimelineCanvasMixin<THING, LANE>::render() {
         ImVec2 windowPos = ImGui::GetWindowPos();
         ImGui::PopStyleVar();
 
-        // TODO マウスホイールとかでスクロールするようにする
-        renderDebugZoomSlider();
+        // DONE マウスホイールとかでスクロールするようにする
+        // renderDebugZoomSlider();
     }
     ImGui::End();
 }
@@ -234,6 +234,24 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
         } else if (bounds.q.y - mousePos.y <= 5) {
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+        }
+    }
+
+    // マウスホイールでのズーム
+    if (io.MouseWheel != 0.0f) {
+        if (io.KeyCtrl) {
+            // Alt だけで横ズームしたいけど縦スクロールしちゃうので仕方なく
+            if (io.KeyAlt) {
+                _zoomX += io.MouseWheel * 0.05f;
+                if (_zoomX <= 0.1f) {
+                    _zoomX = 0.1f;
+                }
+            } else {
+                _zoomY += io.MouseWheel * _zoomY * 0.1f;
+                if (_zoomY <= 0.1f) {
+                    _zoomY = 0.1f;
+                }
+            }
         }
     }
 }

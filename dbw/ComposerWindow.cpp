@@ -100,6 +100,12 @@ void ComposerWindow::render() {
         }
     }
 
+    ImGui::SameLine();
+    if (ImGui::Button("AE")) {
+        _audioEngineWindow.reset(new AudioEngineWindow(_composer));
+        _showAudioEngineWindow = true;
+    }
+
     ImVec2 mainWindowSize = ImGui::GetWindowSize();
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
@@ -142,9 +148,14 @@ void ComposerWindow::render() {
 
     ImGui::End();
 
+    if (_showAudioEngineWindow) {
+        _audioEngineWindow->render();
+    }
+
     if (_saveWindow != nullptr) {
         _saveWindow->render();
     }
+
 
     handleGlobalShortcut();
 }
