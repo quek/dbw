@@ -518,6 +518,7 @@ tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
     }
 
     auto* element = doc->NewElement("Vst3Plugin");
+    element->SetAttribute("id", xmlId());
     // TODO Possible values: instrument, noteFX, audioFX, analyzer
     element->SetAttribute("deviceRole", "instrument");
     element->SetAttribute("deviceName", _name.c_str());
@@ -560,6 +561,9 @@ tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
     if (out.fail()) {
         Error(_name + "のステータス保存に失敗しました。");
     }
+
+    auto connectionsElement = Module::toXml(doc);
+    element->InsertEndChild(connectionsElement);
 
     return element;
 }

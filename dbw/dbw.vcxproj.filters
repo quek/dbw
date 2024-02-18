@@ -97,6 +97,7 @@
     <ClCompile Include="SidechainInputSelector.cpp" />
     <ClCompile Include="Fader.cpp" />
     <ClCompile Include="XMLMixin.cpp" />
+    <ClCompile Include="Connection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -183,6 +184,7 @@
     <ClInclude Include="SidechainInputSelector.h" />
     <ClInclude Include="Fader.h" />
     <ClInclude Include="XMLMixin.h" />
+    <ClInclude Include="Connection.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

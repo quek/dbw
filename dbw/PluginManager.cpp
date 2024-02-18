@@ -31,6 +31,7 @@ PluginManager::PluginManager(Composer* composer) : _composer(composer) {
 }
 
 Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
+    Module* result;
     if (strcmp(element->Name(), "ClapPlugin") == 0) {
         auto deviceId = element->Attribute("deviceID");
         auto plugin = _composer->_pluginManager.findPlugin("clap", deviceId);
@@ -43,7 +44,7 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
         auto state = element->FirstChildElement("State");
         pluginHost->_statePath = state->Attribute("path");
         pluginHost->loadState();
-        return module;
+        result = module;
     } else if (strcmp(element->Name(), "Vst3Plugin") == 0) {
         auto deviceId = element->Attribute("deviceID");
         auto plugin = _composer->_pluginManager.findPlugin("vst3", deviceId);
@@ -56,7 +57,7 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
         auto state = element->FirstChildElement("State");
         auto statePath = _composer->_project->projectDir() / state->Attribute("path");
         module->loadState(statePath);
-        return module;
+        result = module;
     } else if (strcmp(element->Name(), "BuiltinDevice") == 0) {
         auto deviceId = element->Attribute("deviceID");
         auto factory = builtinModuleMap.find(deviceId);
@@ -65,9 +66,26 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
         }
         BuiltinModule* module = (*factory).second(track);
         module->loadParameters(element->FirstChildElement("Parameters"));
-        return module;
+        result = module;
+    } else {
+        return nullptr;
     }
-    return nullptr;
+
+    uint64_t id = 0;
+    element->QueryUnsigned64Attribute("id", &id);
+    if (id != 0) {
+        result->setXMLId(id);
+    }
+
+    auto connectionsElement = element->FirstChildElement("Connections");
+    if (connectionsElement) {
+        for (auto connectionElement = connectionsElement->FirstChildElement("Connection");
+             connectionElement != nullptr;
+             connectionElement = connectionElement->NextSiblingElement("Connection")) {
+            result->_connections.emplace_back(std::move(Connection::fromXml(connectionElement)));
+        }
+    }
+    return result;
 }
 
 void PluginManager::scan() {

@@ -10,6 +10,7 @@ GainModule::GainModule(std::string name, Track* track) :
 
 tinyxml2::XMLElement* GainModule::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("BuiltinDevice");
+    element->SetAttribute("id", xmlId());
     element->SetAttribute("deviceRole", "audioFX");
     element->SetAttribute("deviceName", _name.c_str());
     element->SetAttribute("deviceID", "Gain");

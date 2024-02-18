@@ -20,6 +20,7 @@ bool PluginModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
 
 tinyxml2::XMLElement* PluginModule::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("ClapPlugin");
+    element->SetAttribute("id", xmlId());
     // TODO Possible values: instrument, noteFX, audioFX, analyzer
     element->SetAttribute("deviceRole", "instrument");
     element->SetAttribute("deviceName", _name.c_str());

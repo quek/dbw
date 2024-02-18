@@ -7,13 +7,14 @@
 SidechainInputSelector::SidechainInputSelector(Composer* composer) : _composer(composer) {
 }
 
-void SidechainInputSelector::open(Module* module) {
+void SidechainInputSelector::open(Module* module, int inputIndex) {
     _module = module;
+    _inputIndex = inputIndex;
     _show = true;
 }
 
 void SidechainInputSelector::render() {
-    if (!_module || !_show) {
+    if (!_show) {
         return;
     }
     ImGui::OpenPopup(NAME);
@@ -35,7 +36,9 @@ void SidechainInputSelector::render() {
                         break;
                     }
                     if (ImGui::Button(module->_name.c_str())) {
-
+                        // TODO outputIndex
+                        _module->connect(module.get(), 0, _inputIndex);
+                        _show = false;
                     }
                 }
                 ImGui::TreePop();

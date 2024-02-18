@@ -3,11 +3,13 @@
 #include <string>
 #include <clap/clap.h>
 #include "tinyxml2/tinyxml2.h"
+#include "Connection.h"
 #include "ProcessBuffer.h"
+#include "XMLMixin.h"
 
 class Track;
 
-class Module {
+class Module :public XMLMixin {
 public:
     Module(std::string name, Track* track) : _name(name), _track(track) {}
     virtual ~Module();
@@ -21,12 +23,13 @@ public:
     virtual bool process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) { return true; }
     virtual void onResize(int /*width*/, int /*height*/) {}
     virtual void loadState(std::filesystem::path /*path*/) {}
-    virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) = 0;
+    virtual void connect(Module* from, int outputIndex, int inputIndex);
+    virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
     Track* _track;
     std::string _name;
     bool _didOpenGui = false;
-
+    std::vector<std::unique_ptr<Connection>> _connections;
 
 protected:
     bool _isStarting = false;
@@ -34,4 +37,5 @@ protected:
     int _noutputs = 0;
     int _neventInputs = 0;
     int _neventOutputs = 0;
+
 };

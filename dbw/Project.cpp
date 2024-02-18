@@ -5,6 +5,7 @@
 #include "Clip.h"
 #include "ClipSlot.h"
 #include "Composer.h"
+#include "Connection.h"
 #include "logger.h"
 #include "Module.h"
 #include "Note.h"
@@ -69,6 +70,16 @@ void Project::open(std::filesystem::path dir) {
             _composer->_masterTrack = std::move(track);
         }
     }
+
+    for (auto& track : _composer->_tracks) {
+        for (auto& module : track->_modules) {
+            for (auto& connection : module->_connections) {
+                connection->resolveModuleReference();
+            }
+        }
+    }
+
+    
     auto* lanesWrap = doc.FirstChildElement("Project")->FirstChildElement("Arrangement")->FirstChildElement("Lanes");
     for (auto lanesElement = lanesWrap->FirstChildElement("Lanes");
          lanesElement != nullptr;
