@@ -81,10 +81,10 @@ void AudioEngineWindow::render() {
                         std::stringstream s1;
                         s1 << "    in " << deviceInfo->maxInputChannels
                             << " out " << deviceInfo->maxOutputChannels
-                            << " defaultLowInputLatency " << deviceInfo->defaultLowInputLatency
+                            << "\n    defaultLowInputLatency " << deviceInfo->defaultLowInputLatency
                             << " defaultLowOutputLatency " << deviceInfo->defaultLowOutputLatency
                             << " defaultHighInputLatency " << deviceInfo->defaultHighInputLatency
-                            << " defaultHighOutputLatency " << deviceInfo->defaultHighOutputLatency
+                            << "\n    defaultHighOutputLatency " << deviceInfo->defaultHighOutputLatency
                             << " defaultSampleRate " << deviceInfo->defaultSampleRate;
                         ImGui::Text(s1.str().c_str());
                         std::stringstream s2;
