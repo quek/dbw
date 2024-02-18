@@ -122,7 +122,7 @@ void Track::render() {
     for (auto& module : _modules) {
         module->render();
     }
-    if (ImGui::Button("+")) {
+    if (ImGui::Button("Add Module")) {
         _openModuleSelector = true;
     }
     if (_openModuleSelector) {

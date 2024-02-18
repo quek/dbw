@@ -191,11 +191,12 @@ void PianoRollWindow::renderHeader() {
 }
 
 std::string PianoRollWindow::windowName() {
-    std::string name = _clip->_name;
-    if (name.empty()) {
-        name = "Piano Roll";
-    }
-    return name + "##Piano Roll";
+    return "Piano Roll";
+    //std::string name = _clip->_name;
+    //if (name.empty()) {
+    //    name = "Piano Roll";
+    //}
+    //return name + "##Piano Roll";
 }
 
 std::string PianoRollWindow::canvasName() {

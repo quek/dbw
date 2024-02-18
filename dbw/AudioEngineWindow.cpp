@@ -64,7 +64,8 @@ AudioEngineWindow::AudioEngineWindow(Composer* composer) : _composer(composer) {
 }
 
 void AudioEngineWindow::render() {
-    if (ImGui::Begin("Audio Engine", &_composer->_composerWindow->_showAudioEngineWindow)) {
+    ImGui::OpenPopup("Audio Engine");
+    if (ImGui::BeginPopupModal("Audio Engine", &_composer->_composerWindow->_showAudioEngineWindow)) {
         auto apiInfoIndex = -1;
         for (auto& apiInfo : _apiInfos) {
             ++apiInfoIndex;
@@ -129,7 +130,8 @@ void AudioEngineWindow::render() {
             _composer->stop();
             _composer->_audioEngine->stop();
         }
+
+        ImGui::EndPopup();
     }
 
-    ImGui::End();
 }

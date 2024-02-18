@@ -18,8 +18,9 @@ ComposerWindow::ComposerWindow(Composer* composer) : _composer(composer) {
 void ComposerWindow::render() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
 
-    auto composerWindowName = _composer->_project->_name.string() + "##Composer";
-    ImGui::Begin(composerWindowName.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar);
+    // TODO imgui.ini 問題
+    //auto composerWindowName = _composer->_project->_name.string() + "##Composer";
+    ImGui::Begin("Composer", nullptr, ImGuiWindowFlags_NoScrollbar);
 
     if (_composer->_playing) {
         ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BUTTON_ON);
@@ -117,29 +118,27 @@ void ComposerWindow::render() {
 
     if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
         ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
         for (size_t i = 0; i < _composer->_tracks.size(); ++i) {
             ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str());
         }
-        ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
         ImGui::TableHeadersRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TableHeader(_composer->_masterTrack->_name.c_str());
         for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetColumnIndex(i);
+            ImGui::TableSetColumnIndex(i + 1);
             auto name = _composer->_tracks[i]->_name.c_str();
             ImGui::TableHeader(name);
         }
 
         ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        _composer->_masterTrack->render();
         for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetColumnIndex(i);
-            ImGui::PushID(i);
+            ImGui::TableSetColumnIndex(i + 1);
             _composer->_tracks[i]->render();
-            ImGui::PopID();
         }
 
-        ImGui::TableSetColumnIndex(static_cast<int>(_composer->_tracks.size()));
-        ImGui::PushID("MASTER RACK");
-        _composer->_masterTrack->render();
-        ImGui::PopID();
 
         ImGui::EndTable();
     }

@@ -224,7 +224,8 @@ void TimelineWindow::renderHeader() {
 }
 
 std::string TimelineWindow::windowName() {
-    return _composer->_project->_name.string() + "##Timeline";
+    return "Timeline";
+    //return _composer->_project->_name.string() + "##Timeline";
 }
 
 std::string TimelineWindow::canvasName() {
