@@ -73,6 +73,19 @@ bool Module::process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) {
     return true;
 }
 
+void Module::processConnections() {
+    for (auto& connection : _connections) {
+        if (connection->_to != this) {
+            continue;
+        }
+        if (!connection->_from->isStarting()) {
+
+        }
+        connection->_from->_track->_processBuffer._out;
+
+    }
+}
+
 void Module::prepare() {
     _processed = false;
 }

@@ -23,6 +23,7 @@ public:
     virtual bool isWaitingFrom();
     virtual bool isWaitingTo();
     virtual bool process(ProcessBuffer* buffer, int64_t steadyTime);
+    void processConnections();
     virtual void onResize(int /*width*/, int /*height*/) {}
     virtual void loadState(std::filesystem::path /*path*/) {}
     virtual void prepare();

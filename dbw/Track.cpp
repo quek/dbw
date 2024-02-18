@@ -86,6 +86,7 @@ bool Track::process(int64_t steadyTime) {
                     _waitingModule = module.get();
                     return false;
                 }
+                module->processConnections();
                 module->process(&_processBuffer, steadyTime);
             }
             if (module->isWaitingTo()) {
@@ -97,6 +98,7 @@ bool Track::process(int64_t steadyTime) {
     }
 
     // TODO PRE POST
+    module->processConnections();
     _fader->process(&_processBuffer, steadyTime);
 
     _processed = true;
