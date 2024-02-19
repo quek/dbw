@@ -76,13 +76,7 @@ bool Module::process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) {
 
 void Module::processConnections() {
     for (auto& connection : _connections) {
-        if (connection->_to != this) {
-            continue;
-        }
-        if (!connection->_from->isStarting()) {
-            continue;
-        }
-        connection->_from->_track->_processBuffer._out.at(connection->_fromIndex).copyTo(_track->_processBuffer._in.at(connection->_toIndex));
+        connection->process(this);
     }
 }
 
@@ -101,6 +95,11 @@ int Module::nbuses() const {
 
 ProcessBuffer& Module::getProcessBuffer() {
     return _track->_processBuffer;
+}
+
+uint32_t Module::computeLatency() {
+    // TODO connections latency
+    return _latency;
 }
 
 tinyxml2::XMLElement* Module::toXml(tinyxml2::XMLDocument* doc) {

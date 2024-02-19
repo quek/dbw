@@ -102,8 +102,65 @@ void Composer::clear() {
     _pianoRollWindow->_show = false;
 }
 
+void Composer::computeProcessOrder() {
+    std::set<Module*> processedModules;
+    Module* _waitingModule = nullptr;
+
+    bool processed = false;
+    while (!processed) {
+        processed = true;
+        for (auto& track : _tracks) {
+            bool skip = !!_waitingModule;
+            for (auto& module : track->_modules) {
+                if (skip) {
+                    if (module.get() == _waitingModule) {
+                        skip = false;
+                    } else {
+                        continue;
+                    }
+                }
+                if (module->isStarting()) {
+                    if (!processedModules.contains(module.get())) {
+                        bool isWaitingFrom = false;
+                        for (auto& connection : module->_connections) {
+                            if (connection->_to == module.get() && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
+                                isWaitingFrom = true;
+                                break;
+                            }
+
+                        }
+                        if (isWaitingFrom) {
+                            _waitingModule = module.get();
+                            processed = false;
+                            break;
+                        }
+                        _orderedModules.push_back(module.get());
+                        processedModules.insert(module.get());
+                    }
+                    bool isWaitingTo = false;
+                    for (auto& connection : module->_connections) {
+                        if (connection->_from == module.get() && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
+                            isWaitingTo = true;
+                            break;
+                        }
+                    }
+                    if (isWaitingTo) {
+                        _waitingModule = module.get();
+                        processed = false;
+                        break;
+                    }
+                }
+            }
+            if (processed) {
+                Module* fader = (Module*)track->_fader.get();
+                _orderedModules.push_back(fader);
+                processedModules.insert(fader);
+            }
+        }
+    }
+}
+
 uint32_t Composer::computeMaxLatency() {
-    std::lock_guard<std::mutex> lock(_audioEngine->mtx);
     _maxLatency = 0;
     for (const auto& track : _tracks) {
         uint32_t latency = track->computeLatency();
@@ -111,8 +168,11 @@ uint32_t Composer::computeMaxLatency() {
             _maxLatency = latency;
         }
     }
-    for (const auto& track : _tracks) {
-        track->_processBuffer.setLatency(_maxLatency - track->_latency);
+    {
+        std::lock_guard<std::recursive_mutex> lock(_audioEngine->_mtx);
+        for (const auto& track : _tracks) {
+            track->_processBuffer.setLatency(_maxLatency - track->_latency);
+        }
     }
 
     // マスタはレイテンシー出すだけでいいかな
@@ -158,11 +218,11 @@ class AddTrackCommand : public Command {
 public:
     AddTrackCommand(Track* track) : _track(track) {}
     void execute(Composer* composer) override {
-        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
         composer->_tracks.push_back(std::move(_track));
     }
     void undo(Composer* composer) override {
-        std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+        std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
         _track = std::move(composer->_tracks.back());
         composer->_tracks.pop_back();
     }

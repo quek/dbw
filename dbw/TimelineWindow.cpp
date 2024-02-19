@@ -70,7 +70,7 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
 }
 
 void TimelineWindow::handleClickTimeline(double time) {
-    std::lock_guard<std::mutex> lock(_composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(_composer->_audioEngine->_mtx);
     _composer->_playTime = time;
 }
 

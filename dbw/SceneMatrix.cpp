@@ -161,12 +161,12 @@ void AddSceneCommand::execute(Composer* composer) {
     if (!_scene) {
         _scene = std::make_unique<Scene>(_sceneMatrix);
     }
-    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
     _sceneMatrix->_scenes.push_back(std::move(_scene));
 }
 
 void AddSceneCommand::undo(Composer* composer) {
-    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
     _scene = std::move(_sceneMatrix->_scenes.back());
     _sceneMatrix->_scenes.pop_back();
 }

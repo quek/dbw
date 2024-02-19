@@ -81,7 +81,7 @@ void CommandManager::clear() {
 }
 
 void AddModuleCommand::execute(Composer* composer) {
-    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
     auto module = _module.get();
     _track->_modules.emplace_back(std::move(_module));
     module->start();
@@ -89,7 +89,7 @@ void AddModuleCommand::execute(Composer* composer) {
 }
 
 void AddModuleCommand::undo(Composer* composer) {
-    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
     _module = std::move(_track->_modules.back());
     _track->_modules.pop_back();
     _module->closeGui();
@@ -103,7 +103,7 @@ void DeleteModuleCommand::execute(Composer* composer) {
     _module->closeGui();
     _module->stop();
     auto modules = &_module->_track->_modules;
-    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
     auto it = std::find_if(modules->begin(), modules->end(), [this](const std::unique_ptr<Module>& ptr) {
         return ptr.get() == _module;
     });
@@ -117,7 +117,7 @@ void DeleteModuleCommand::execute(Composer* composer) {
 }
 
 void DeleteModuleCommand::undo(Composer* composer) {
-    std::lock_guard<std::mutex> lock(composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
     _module->_track->_modules.insert(_module->_track->_modules.begin() + _index, std::move(_moduleUniquePtr));
 
     _module->start();

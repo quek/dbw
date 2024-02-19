@@ -16,7 +16,7 @@ public:
     void process(float* in, float* out, unsigned long framesPerBuffer);
 
     Composer* _composer = nullptr;
-    std::mutex mtx;
+    std::recursive_mutex _mtx;
     bool _isStarted = false;
 private:
     PaStream* _stream = nullptr;

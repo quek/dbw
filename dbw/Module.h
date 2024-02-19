@@ -30,6 +30,7 @@ public:
     virtual void connect(Module* from, int outputIndex, int inputIndex);
     int nbuses() const;
     ProcessBuffer& getProcessBuffer();
+    virtual uint32_t computeLatency();
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
     Track* _track;

@@ -23,7 +23,7 @@ static int paCallback(
     AudioEngine* audioEngine = (AudioEngine*)userData;
     int result = 0;
     try {
-        std::lock_guard<std::mutex> lock(audioEngine->mtx);
+        std::lock_guard<std::recursive_mutex> lock(audioEngine->_mtx);
 
         audioEngine->process((float*)inputBuffer, (float*)outputBuffer, framesPerBuffer);
         float* out = (float*)outputBuffer;

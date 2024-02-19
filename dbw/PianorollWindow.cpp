@@ -65,7 +65,7 @@ void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLan
 }
 
 void PianoRollWindow::handleClickTimeline(double time) {
-    std::lock_guard<std::mutex> lock(_composer->_audioEngine->mtx);
+    std::lock_guard<std::recursive_mutex> lock(_composer->_audioEngine->_mtx);
     _composer->_playTime = time + _clip->_time;
 }
 
