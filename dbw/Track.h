@@ -17,6 +17,7 @@ public:
     Track(std::string name, Composer* composer);
     virtual ~Track();
     void prepare(unsigned long framesPerBuffer);
+    void prepareEvent();
     bool process(int64_t steadyTime);
     void render();
     void addModule(std::string path, uint32_t index);
@@ -28,12 +29,12 @@ public:
 
     std::unique_ptr<Fader> _fader;
     ProcessBuffer _processBuffer;
-    bool _processed = false;
+    //bool _processed = false;
 
     std::string _name;
     std::vector<std::unique_ptr<Lane>> _lanes;
     std::vector<std::unique_ptr<Module>> _modules;
-    Module* _waitingModule = nullptr;
+    //Module* _waitingModule = nullptr;
     uint32_t _latency = 0;
 
     Composer* _composer;

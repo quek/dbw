@@ -122,7 +122,9 @@ void PluginManager::openModuleSelector(Track* track) {
             std::string id = plugin["id"].get<std::string>();
             if (ImGui::Button((name + " clap##" + id).c_str())) {
                 track->_openModuleSelector = false;
+                // TODO use AddModuleCommand
                 track->addModule(plugin["path"].get<std::string>(), plugin["index"].get<uint32_t>());
+                track->_composer->computeProcessOrder();
             }
         }
     }

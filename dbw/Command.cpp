@@ -85,6 +85,7 @@ void AddModuleCommand::execute(Composer* composer) {
     auto module = _module.get();
     _track->_modules.emplace_back(std::move(_module));
     module->start();
+    composer->computeProcessOrder();
     module->openGui();
 }
 
@@ -94,6 +95,7 @@ void AddModuleCommand::undo(Composer* composer) {
     _track->_modules.pop_back();
     _module->closeGui();
     _module->stop();
+    composer->computeProcessOrder();
 }
 
 DeleteModuleCommand::DeleteModuleCommand(Module* module) : _module(module) {
@@ -114,6 +116,8 @@ void DeleteModuleCommand::execute(Composer* composer) {
         _index = std::distance(modules->begin(), it);
         modules->erase(it);
     }
+
+    composer->computeProcessOrder();
 }
 
 void DeleteModuleCommand::undo(Composer* composer) {
@@ -121,6 +125,7 @@ void DeleteModuleCommand::undo(Composer* composer) {
     _module->_track->_modules.insert(_module->_track->_modules.begin() + _index, std::move(_moduleUniquePtr));
 
     _module->start();
+    composer->computeProcessOrder();
     _module->openGui();
 }
 

@@ -127,6 +127,7 @@ void Project::open(std::filesystem::path dir) {
         }
     }
 
+    _composer->computeProcessOrder();
     _composer->_audioEngine->start();
     _isNew = false;
 }

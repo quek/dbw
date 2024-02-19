@@ -9,6 +9,7 @@
 #include "Command.h"
 #include "Config.h"
 #include "ErrorWindow.h"
+#include "Fader.h"
 #include "GuiUtil.h"
 #include "Project.h"
 #include "logger.h"
@@ -53,20 +54,26 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     _processBuffer.ensure32();
     _processBuffer.ensure(framesPerBuffer, 1, 2);
 
-    bool processed = false;
-    while (!processed) {
-        processed = true;
-        for (auto& track : _tracks) {
-            processed &= track->process(steadyTime);
-        }
+    for (auto& track : _tracks) {
+        track->prepareEvent();
+    }
+    for (auto& module : _orderedModules) {
+        module->process(&module->_track->_processBuffer, steadyTime);
+        module->_track->_processBuffer.swapInOut();
     }
 
     for (auto& track : _tracks) {
+        track->_processBuffer.swapInOut();
         track->doDCP();
         _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
     }
 
-    _masterTrack->process(steadyTime);
+
+    for (auto& module : _masterTrack->_modules) {
+        module->process(&module->_track->_processBuffer, steadyTime);
+        module->_track->_processBuffer.swapInOut();
+    }
+    _masterTrack->_fader->process(&_masterTrack->_processBuffer, steadyTime);
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
 
     if (_playing) {
@@ -103,6 +110,7 @@ void Composer::clear() {
 }
 
 void Composer::computeProcessOrder() {
+    std::vector<Module*> orderedModules;
     std::set<Module*> processedModules;
     Module* _waitingModule = nullptr;
 
@@ -134,7 +142,7 @@ void Composer::computeProcessOrder() {
                             processed = false;
                             break;
                         }
-                        _orderedModules.push_back(module.get());
+                        orderedModules.push_back(module.get());
                         processedModules.insert(module.get());
                     }
                     bool isWaitingTo = false;
@@ -153,11 +161,13 @@ void Composer::computeProcessOrder() {
             }
             if (processed) {
                 Module* fader = (Module*)track->_fader.get();
-                _orderedModules.push_back(fader);
+                orderedModules.push_back(fader);
                 processedModules.insert(fader);
             }
         }
     }
+    std::lock_guard<std::recursive_mutex> lock(_audioEngine->_mtx);
+    _orderedModules = orderedModules;
 }
 
 uint32_t Composer::computeMaxLatency() {
@@ -220,11 +230,13 @@ public:
     void execute(Composer* composer) override {
         std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
         composer->_tracks.push_back(std::move(_track));
+        composer->computeProcessOrder();
     }
     void undo(Composer* composer) override {
         std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
         _track = std::move(composer->_tracks.back());
         composer->_tracks.pop_back();
+        composer->computeProcessOrder();
     }
 
     std::unique_ptr<Track> _track;
