@@ -125,7 +125,7 @@ void SceneMatrix::process(Track* track) {
                         sampleOffsetDouble = (time + sequenceDuration - begin) * oneBeatSec * sampleRate;
                     }
                     uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                    track->_processBuffer._eventIn.noteOn(note->_key, channel, note->_velocity, sampleOffset);
+                    track->_processBuffer._eventOut.noteOn(note->_key, channel, note->_velocity, sampleOffset);
                 }
                 time = note->_time + note->_duration;
                 if ((begin <= time && time < end) || (end < begin && (begin <= time || time < end))) {
@@ -137,7 +137,7 @@ void SceneMatrix::process(Track* track) {
                         sampleOffsetDouble = (time + sequenceDuration - begin) * oneBeatSec * sampleRate;
                     }
                     uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                    track->_processBuffer._eventIn.noteOff(note->_key, channel, 1.0f, sampleOffset);
+                    track->_processBuffer._eventOut.noteOff(note->_key, channel, 1.0f, sampleOffset);
                 }
             }
         }

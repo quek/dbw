@@ -36,10 +36,6 @@ void Track::prepare(unsigned long framesPerBuffer) {
         }
     }
     _processBuffer.ensure(framesPerBuffer, nbuses, 2);
-    for (auto& module : _modules) {
-        module->prepare();
-    }
-    _fader->prepare();
 }
 
 void Track::prepareEvent() {
@@ -59,14 +55,14 @@ void Track::prepareEvent() {
                         int16_t channel = 0;
                         uint32_t sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
                         uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                        _processBuffer._eventIn.noteOn(note->_key, channel, note->_velocity, sampleOffset);
+                        _processBuffer._eventOut.noteOn(note->_key, channel, note->_velocity, sampleOffset);
                     }
                     double noteDuration = noteTime + note->_duration;
                     if (begin <= noteDuration && noteDuration < end) {
                         int16_t channel = 0;
                         uint32_t sampleOffsetDouble = (noteDuration - begin) * oneBeatSec * sampleRate;
                         uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                        _processBuffer._eventIn.noteOff(note->_key, channel, 1.0f, sampleOffset);
+                        _processBuffer._eventOut.noteOff(note->_key, channel, 1.0f, sampleOffset);
                     }
                 }
             }

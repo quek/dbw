@@ -50,27 +50,7 @@ void Module::render() {
     ImGui::PopID();
 }
 
-bool Module::isWaitingFrom() {
-    for (auto& connection : _connections) {
-        if (connection->_to == this && !connection->_from->_processed && connection->_from->isStarting()) {
-            return true;
-        }
-
-    }
-    return false;
-}
-
-bool Module::isWaitingTo() {
-    for (auto& connection : _connections) {
-        if (connection->_from == this && !connection->_to->_processed && connection->_to->isStarting()) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool Module::process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/) {
-    _processed = true;
     return true;
 }
 
@@ -78,10 +58,6 @@ void Module::processConnections() {
     for (auto& connection : _connections) {
         connection->process(this);
     }
-}
-
-void Module::prepare() {
-    _processed = false;
 }
 
 void Module::connect(Module* from, int outputIndex, int inputIndex) {

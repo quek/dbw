@@ -20,13 +20,10 @@ public:
     virtual void stop() { _isStarting = false; }
     virtual void render();
     virtual void renderContent() {}
-    virtual bool isWaitingFrom();
-    virtual bool isWaitingTo();
     virtual bool process(ProcessBuffer* buffer, int64_t steadyTime);
     void processConnections();
     virtual void onResize(int /*width*/, int /*height*/) {}
     virtual void loadState(std::filesystem::path /*path*/) {}
-    virtual void prepare();
     virtual void connect(Module* from, int outputIndex, int inputIndex);
     int nbuses() const;
     ProcessBuffer& getProcessBuffer();
@@ -37,7 +34,6 @@ public:
     std::string _name;
     bool _didOpenGui = false;
     std::vector<std::unique_ptr<Connection>> _connections;
-    bool _processed = false;
     int _ninputs = 0;
     int _noutputs = 0;
     int _neventInputs = 0;

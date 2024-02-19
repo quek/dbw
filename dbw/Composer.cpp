@@ -41,10 +41,10 @@ void Composer::render() const {
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
-    _masterTrack->prepare(framesPerBuffer);
     for (auto& track : _tracks) {
         track->prepare(framesPerBuffer);
     }
+    _masterTrack->prepare(framesPerBuffer);
 
     if (_playing) {
         computeNextPlayTime(framesPerBuffer);
@@ -57,21 +57,22 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     for (auto& track : _tracks) {
         track->prepareEvent();
     }
+
     for (auto& module : _orderedModules) {
-        module->process(&module->_track->_processBuffer, steadyTime);
         module->_track->_processBuffer.swapInOut();
+        module->processConnections();
+        module->process(&module->_track->_processBuffer, steadyTime);
     }
 
     for (auto& track : _tracks) {
-        track->_processBuffer.swapInOut();
         track->doDCP();
         _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
     }
 
-
     for (auto& module : _masterTrack->_modules) {
-        module->process(&module->_track->_processBuffer, steadyTime);
         module->_track->_processBuffer.swapInOut();
+        module->processConnections();
+        module->process(&module->_track->_processBuffer, steadyTime);
     }
     _masterTrack->_fader->process(&_masterTrack->_processBuffer, steadyTime);
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
@@ -118,7 +119,7 @@ void Composer::computeProcessOrder() {
     while (!processed) {
         processed = true;
         for (auto& track : _tracks) {
-            bool skip = !!_waitingModule;
+            bool skip = _waitingModule && _waitingModule->_track == track.get();
             for (auto& module : track->_modules) {
                 if (skip) {
                     if (module.get() == _waitingModule) {
