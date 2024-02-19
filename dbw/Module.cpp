@@ -78,8 +78,16 @@ uint32_t Module::getComputedLatency() {
 }
 
 void Module::setComputedLatency(uint32_t computedLatency) {
-    // TODO connections に設定
     _computedLatency = computedLatency;
+    for (auto& connection : _connections) {
+        if (connection->_to == this) {
+            if (connection->_from->getComputedLatency() > computedLatency) {
+                connection->setLatency(connection->_from->getComputedLatency() - computedLatency);
+            } else {
+                connection->setLatency(0);
+            }
+        }
+    }
 }
 
 tinyxml2::XMLElement* Module::toXml(tinyxml2::XMLDocument* doc) {
