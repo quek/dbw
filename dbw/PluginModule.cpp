@@ -74,6 +74,6 @@ void PluginModule::start() {
 }
 
 void PluginModule::stop() {
-    _pluginHost->stop();
     Module::stop();
+    _pluginHost->stop();
 }

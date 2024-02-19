@@ -214,6 +214,7 @@
     <ClInclude Include="Track.h" />
     <ClInclude Include="Lane.h" />
     <ClInclude Include="util.h" />
+    <ClInclude Include="Vst3Context.h" />
     <ClInclude Include="Vst3Module.h" />
     <ClInclude Include="XMLMixin.h" />
     <ClInclude Include="ZoomMixin.h" />
@@ -281,6 +282,7 @@
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="Lane.cpp" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="Vst3Context.cpp" />
     <ClCompile Include="Vst3Module.cpp" />
     <ClCompile Include="XMLMixin.cpp" />
     <ClCompile Include="ZoomMixin.cpp" />

@@ -348,11 +348,11 @@ bool PluginHost::process(ProcessBuffer* buffer, int64_t steadyTime) {
     try {
         clap_process_status status = _plugin->process(_plugin, &_process);
         if (status == CLAP_PROCESS_ERROR) {
-            Error(std::string("Plack plugin render return error ") + std::to_string(status));
+            Error("Clap plugin process return error {}", status);
             return false;
         }
     } catch (const std::exception& e) {
-        Error(std::string("Plack plugin render failed!") +  e.what());
+        Error("Plack plugin render failed! {}", e.what());
         return false;
     } catch (...) {
         Error("Plack plugin render failed!\n\nUnknown error.");

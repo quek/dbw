@@ -28,7 +28,7 @@ public:
     virtual void loadState(std::filesystem::path /*path*/) {}
     virtual void prepare();
     virtual void connect(Module* from, int outputIndex, int inputIndex);
-    int nbuses();
+    int nbuses() const;
     ProcessBuffer& getProcessBuffer();
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
@@ -41,6 +41,7 @@ public:
     int _noutputs = 0;
     int _neventInputs = 0;
     int _neventOutputs = 0;
+    uint32_t _latency = 0;
 
 protected:
     bool _isStarting = false;

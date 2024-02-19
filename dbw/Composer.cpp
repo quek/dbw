@@ -61,8 +61,8 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         }
     }
 
-    _masterTrack->_processBuffer.inZero();
     for (auto& track : _tracks) {
+        track->doDCP();
         _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
     }
 
@@ -100,6 +100,25 @@ void Composer::clear() {
     _commandManager.clear();
     _sceneMatrix->_scenes.clear();
     _pianoRollWindow->_show = false;
+}
+
+uint32_t Composer::computeMaxLatency() {
+    std::lock_guard<std::mutex> lock(_audioEngine->mtx);
+    _maxLatency = 0;
+    for (const auto& track : _tracks) {
+        uint32_t latency = track->computeLatency();
+        if (_maxLatency < latency) {
+            _maxLatency = latency;
+        }
+    }
+    for (const auto& track : _tracks) {
+        track->_processBuffer.setLatency(_maxLatency - track->_latency);
+    }
+
+    // マスタはレイテンシー出すだけでいいかな
+    _masterTrack->computeLatency();
+
+    return _maxLatency;
 }
 
 void Composer::deleteClips(std::set<Clip*> clips) {

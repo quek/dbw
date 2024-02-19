@@ -28,6 +28,7 @@ public:
     void scanPlugin();
     int maxBar();
     void clear();
+    uint32_t computeMaxLatency();
 
     void deleteClips(std::set<Clip*> clips);
 
@@ -49,6 +50,7 @@ public:
     PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<Track> _masterTrack;
+    uint32_t _maxLatency;
 
     std::unique_ptr<ComposerWindow> _composerWindow;
     std::unique_ptr<SceneMatrix> _sceneMatrix;

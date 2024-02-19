@@ -10,8 +10,9 @@
 #include <json.hpp>
 #include "Module.h"
 #include "PluginEditorWindow.h"
+#include "Vst3Context.h"
 
-class Vst3Module : public Module, public Steinberg::IPlugFrame {
+class Vst3Module : public Module {
 public:
     Vst3Module(std::string name, Track* track);
     virtual ~Vst3Module();
@@ -28,12 +29,11 @@ public:
 
     static nlohmann::json scan(const std::string path);
 
-    DECLARE_FUNKNOWN_METHODS
-    Steinberg::tresult PLUGIN_API resizeView(Steinberg::IPlugView* view, Steinberg::ViewRect* newSize) SMTG_OVERRIDE;
 
+    std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
 private:
     std::string _id;
-    Steinberg::Vst::HostApplication _pluginContext;
+    Vst3Context _pluginContext;
     VST3::Hosting::Module::Ptr _module = nullptr;
     std::unique_ptr<Steinberg::Vst::PlugProvider> _plugProvider = nullptr;
     Steinberg::Vst::IAudioProcessor* _processor = nullptr;
@@ -43,5 +43,4 @@ private:
 
     Steinberg::Vst::SymbolicSampleSizes _symbolicSampleSizes = Steinberg::Vst::SymbolicSampleSizes::kSample32;
 
-    std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
 };

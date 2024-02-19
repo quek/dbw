@@ -129,6 +129,7 @@ void Track::render() {
         _composer->_pluginManager.openModuleSelector(this);
     }
     _fader->render();
+    ImGui::Text(std::to_string(_latency).c_str());
     ImGui::PopID();
 }
 
@@ -146,6 +147,18 @@ bool Track::isAvailableSidechainSrc(Track* dst) {
     }
     // TODO
     return true;
+}
+
+uint32_t Track::computeLatency() {
+    _latency = 0;
+    for (auto& module : _modules) {
+        _latency += module->_latency;
+    }
+    return _latency;
+}
+
+void Track::doDCP() {
+    _processBuffer.doDCP();
 }
 
 tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {

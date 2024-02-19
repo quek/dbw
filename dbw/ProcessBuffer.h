@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include <memory>
 #include <vector>
 #include "AudioBuffer.h"
@@ -14,9 +15,13 @@ public:
     void ensure64();
     void inZero();
     void outZero();
+    void setLatency(uint32_t latency);
+    void doDCP();
 
     std::vector<AudioBuffer> _in;
     std::vector<AudioBuffer> _out;
+
+    std::vector<std::deque<float>> _dcpBuffer;
 
     PluginEventList _eventIn;
     PluginEventList _eventOut;
@@ -24,4 +29,5 @@ public:
     unsigned long _framesPerBuffer;
     int _nbuses;
     int _nchannels;
+    uint32_t _latency;
 };

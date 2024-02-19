@@ -95,7 +95,7 @@ void Module::connect(Module* from, int outputIndex, int inputIndex) {
     from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
 }
 
-int Module::nbuses() {
+int Module::nbuses() const {
     return std::max(_ninputs, _noutputs);
 }
 

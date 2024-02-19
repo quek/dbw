@@ -21,6 +21,8 @@ public:
     void render();
     void addModule(std::string path, uint32_t index);
     bool isAvailableSidechainSrc(Track* dst);
+    uint32_t computeLatency();
+    void doDCP();
     tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
     static std::unique_ptr<Track> fromXml(tinyxml2::XMLElement* element, Composer* composer);
 
@@ -32,6 +34,7 @@ public:
     std::vector<std::unique_ptr<Lane>> _lanes;
     std::vector<std::unique_ptr<Module>> _modules;
     Module* _waitingModule = nullptr;
+    uint32_t _latency = 0;
 
     Composer* _composer;
     bool _openModuleSelector = false;

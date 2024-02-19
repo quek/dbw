@@ -94,12 +94,12 @@ void AudioEngine::start() {
         paCallback,
         (void*)this);
     if (err != paNoError) {
-        Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
+        Error("PortAudio error: {}", Pa_GetErrorText(err));
     }
 
     err = Pa_StartStream(_stream);
     if (err != paNoError) {
-        Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
+        Error("PortAudio error: {}", Pa_GetErrorText(err));
     }
     _isStarted = true;
 }
@@ -187,11 +187,11 @@ void AudioEngine::stop() {
     if (_stream != nullptr) {
         err = Pa_StopStream(_stream);
         if (err != paNoError) {
-            Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
+            Error("PortAudio error: {}", Pa_GetErrorText(err));
         }
         err = Pa_CloseStream(_stream);
         if (err != paNoError) {
-            Error(std::format("PortAudio error: {}", Pa_GetErrorText(err)));
+            Error("PortAudio error: {}", Pa_GetErrorText(err));
         }
         _stream = nullptr;
     }

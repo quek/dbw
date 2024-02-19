@@ -100,6 +100,7 @@
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Vst3Context.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -189,6 +190,7 @@
     <ClInclude Include="Connection.h" />
     <ClInclude Include="AudioEngineWindow.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="Vst3Context.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
