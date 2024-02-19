@@ -108,7 +108,7 @@ bool Track::isAvailableSidechainSrc(Track* dst) {
 uint32_t Track::computeLatency() {
     _latency = 0;
     for (auto& module : _modules) {
-        _latency += module->computeLatency();
+        _latency += module->getComputedLatency();
     }
     return _latency;
 }

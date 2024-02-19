@@ -73,9 +73,13 @@ ProcessBuffer& Module::getProcessBuffer() {
     return _track->_processBuffer;
 }
 
-uint32_t Module::computeLatency() {
-    // TODO connections latency
-    return _latency;
+uint32_t Module::getComputedLatency() {
+    return _computedLatency;
+}
+
+void Module::setComputedLatency(uint32_t computedLatency) {
+    // TODO connections に設定
+    _computedLatency = computedLatency;
 }
 
 tinyxml2::XMLElement* Module::toXml(tinyxml2::XMLDocument* doc) {

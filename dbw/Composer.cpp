@@ -105,6 +105,7 @@ int Composer::maxBar() {
 
 void Composer::clear() {
     _tracks.clear();
+    _orderedModules.clear();
     _commandManager.clear();
     _sceneMatrix->_scenes.clear();
     _pianoRollWindow->_show = false;
@@ -169,27 +170,44 @@ void Composer::computeProcessOrder() {
     }
     std::lock_guard<std::recursive_mutex> lock(_audioEngine->_mtx);
     _orderedModules = orderedModules;
+    computeLatency();
 }
 
-uint32_t Composer::computeMaxLatency() {
-    _maxLatency = 0;
+void Composer::computeLatency() {
+    for (auto& module : _orderedModules) {
+        uint32_t latency = module->_latency;
+        for (auto& x : _orderedModules) {
+            if (module == x) {
+                break;
+            }
+            if (module->_track == x->_track) {
+                latency += x->getComputedLatency();
+            }
+        }
+        for (auto& connection : module->_connections) {
+            if (connection->_to == module) {
+                latency += connection->_from->getComputedLatency();
+            }
+        }
+        module->setComputedLatency(latency);
+    }
+
+    uint32_t maxLatency = 0;
     for (const auto& track : _tracks) {
         uint32_t latency = track->computeLatency();
-        if (_maxLatency < latency) {
-            _maxLatency = latency;
+        if (maxLatency < latency) {
+            maxLatency = latency;
         }
     }
     {
         std::lock_guard<std::recursive_mutex> lock(_audioEngine->_mtx);
+        _maxLatency = maxLatency;
         for (const auto& track : _tracks) {
-            track->_processBuffer.setLatency(_maxLatency - track->_latency);
+            track->_processBuffer.setLatency(maxLatency - track->_latency);
         }
     }
-
     // マスタはレイテンシー出すだけでいいかな
     _masterTrack->computeLatency();
-
-    return _maxLatency;
 }
 
 void Composer::deleteClips(std::set<Clip*> clips) {

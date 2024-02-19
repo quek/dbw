@@ -27,7 +27,8 @@ public:
     virtual void connect(Module* from, int outputIndex, int inputIndex);
     int nbuses() const;
     ProcessBuffer& getProcessBuffer();
-    virtual uint32_t computeLatency();
+    virtual uint32_t getComputedLatency();
+    virtual void setComputedLatency(uint32_t computedLatency);
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
     Track* _track;
@@ -39,6 +40,7 @@ public:
     int _neventInputs = 0;
     int _neventOutputs = 0;
     uint32_t _latency = 0;
+    uint32_t _computedLatency = 0;
 
 protected:
     bool _isStarting = false;

@@ -29,7 +29,7 @@ public:
     int maxBar();
     void clear();
     void computeProcessOrder();
-    uint32_t computeMaxLatency();
+    void computeLatency();
 
     void deleteClips(std::set<Clip*> clips);
 

@@ -376,7 +376,7 @@ void Vst3Module::start() {
     }
     if (_processor) {
         _latency = _processor->getLatencySamples();
-        _track->_composer->computeMaxLatency();
+        _track->_composer->computeLatency();
 
         Steinberg::uint32 tailSample = _processor->getTailSamples();
         if (tailSample != Steinberg::Vst::kNoTail) {

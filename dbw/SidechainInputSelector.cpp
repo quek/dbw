@@ -39,6 +39,7 @@ void SidechainInputSelector::render() {
                         // TODO outputIndex
                         _module->connect(module.get(), 0, _inputIndex);
                         _show = false;
+                        _composer->computeProcessOrder();
                     }
                 }
                 ImGui::TreePop();
