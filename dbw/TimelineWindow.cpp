@@ -148,15 +148,18 @@ ImU32 TimelineWindow::colorThing() {
 }
 
 float TimelineWindow::xFromThing(Clip* clip) {
-    Lane* lane = _clipLaneMap[clip];
+    return laneToScreenX(_clipLaneMap[clip]);
+}
+
+float TimelineWindow::laneToScreenX(Lane* lane) {
     float x = 0.0f;
     for (auto it : _allLanes) {
         if (it == lane) {
-            return x;
+            break;
         }
         x += getLaneWidth(it);
     }
-    return x;
+    return x * _zoomX + offsetLeft() - ImGui::GetScrollX() + ImGui::GetWindowPos().x;
 }
 
 void TimelineWindow::handleShortcut() {

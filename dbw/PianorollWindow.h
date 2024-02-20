@@ -32,6 +32,7 @@ public:
 
     virtual int16_t* laneFromPos(ImVec2& pos) override;
     virtual float xFromThing(Note* thing) override;
+    virtual float laneToScreenX(int16_t* lane);
     virtual float getLaneWidth(Note* thing) override;
 
     bool _show = false;

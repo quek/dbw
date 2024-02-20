@@ -367,6 +367,12 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
 
     _processor->process(processData);
 
+    // TODO
+    for (auto& x : buffer->_out) {
+        std::ranges::fill(x._constantp, false);
+    }
+
+
     return Module::process(buffer, steadyTime);
 }
 

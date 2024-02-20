@@ -48,6 +48,12 @@ bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
         }
         pan = _pan * 2.0f;
     }
+
+    // TODO
+    for (auto& x : buffer->_out) {
+        std::ranges::fill(x._constantp, false);
+    }
+
     return Module::process(buffer, steadyTime);
 }
 

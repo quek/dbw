@@ -119,7 +119,11 @@ int16_t* PianoRollWindow::laneFromPos(ImVec2& pos) {
 }
 
 float PianoRollWindow::xFromThing(Note* thing) {
-    return thing->_key * KEY_WIDTH;
+    return laneToScreenX(_allLanes[thing->_key]);
+}
+
+float PianoRollWindow::laneToScreenX(int16_t* lane) {
+    return KEY_WIDTH * *lane * _zoomX + offsetLeft() - ImGui::GetScrollX() + ImGui::GetWindowPos().x;
 }
 
 float PianoRollWindow::getLaneWidth(Note* /*thing*/) {

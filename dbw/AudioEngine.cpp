@@ -1,4 +1,5 @@
 #include "AudioEngine.h"
+#include <chrono>
 #include <stdio.h>
 #include <string.h>
 #include "Composer.h"
@@ -19,7 +20,8 @@ static int paCallback(
     PaStreamCallbackFlags /* statusFlags */,
     void* userData
 ) {
-    /* Cast data passed through stream to our structure. */
+    auto startTime = std::chrono::high_resolution_clock::now();
+
     AudioEngine* audioEngine = (AudioEngine*)userData;
     int result = 0;
     try {
@@ -39,6 +41,12 @@ static int paCallback(
         logger->error("catch(...) in paCallback!");
         result = -1;
     }
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto processingTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    double theoreticalProcessingTimeMs = (framesPerBuffer / gPreference.sampleRate) * 1000.0;
+    double cpuLoad = (processingTimeMs / theoreticalProcessingTimeMs) * 100.0;
+    audioEngine->_cpuLoad = cpuLoad;
 
     return result;
 }

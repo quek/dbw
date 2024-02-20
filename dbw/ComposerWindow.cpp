@@ -1,6 +1,7 @@
 #include "ComposerWindow.h"
 #include <imgui.h>
 #include "../ImGuiFileDialog/ImGuiFileDialog.h"
+#include "AudioEngine.h"
 #include "Composer.h"
 #include "Command/OpenProject.h"
 #include "Config.h"
@@ -111,6 +112,9 @@ void ComposerWindow::render() {
         _audioEngineWindow.reset(new AudioEngineWindow(_composer));
         _showAudioEngineWindow = true;
     }
+
+    ImGui::SameLine();
+    ImGui::Text("cpu %.02f", _composer->_audioEngine->_cpuLoad);
 
     ImVec2 mainWindowSize = ImGui::GetWindowSize();
 

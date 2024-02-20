@@ -33,7 +33,7 @@ public:
     std::vector<LANE*> _allLanes;
     virtual void prepareAllThings() = 0;
 
-    void renderThings(ImVec2& windowPos);
+    void renderThings();
     virtual void renderThing(THING* thing, const ImVec2& pos1, const ImVec2& pos2);
     virtual void renderTimeline();
     virtual void renderGridBeat16th(ImDrawList* drawList, float beatY, float x1, float x2);
@@ -51,6 +51,7 @@ public:
     virtual LANE* laneFromPos(ImVec2& pos) = 0;
     THING* thingAtPos(ImVec2& pos);
     virtual float xFromThing(THING* thing) = 0;
+    virtual float laneToScreenX(LANE*) = 0;
     virtual float timeToScreenY(double time);
     virtual float getLaneWidth(THING* thing) = 0;
     double toSnapFloor(const double time);
@@ -74,7 +75,7 @@ public:
         ClickedPart _thingClickedPart = Middle;
         float _thingClickedOffset = 0.0f;
         bool _rangeSelecting = false;
-        float _editCursorY = 0.0f;
+        ImVec2 _editCursorPos{ 0.0f, 0.0f };
 
         std::map <THING*, Bounds> _thingBoundsMap;
         void reset() {

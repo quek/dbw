@@ -34,6 +34,7 @@ public:
 
     virtual Lane* laneFromPos(ImVec2& pos) override;
     virtual float xFromThing(Clip* clip) override;
+    virtual float laneToScreenX(Lane* lane);
     virtual float getLaneWidth(Clip* clip) override;
     float getLaneWidth(Lane* lane);
 

@@ -10,19 +10,19 @@ void addBuffers(std::vector<std::vector<T>>& dest, const std::vector<std::vector
     for (auto [a, b, acp, bcp] : std::views::zip(dest, src, destConstantp, srcConstantp)) {
         for (auto [aa, bb] : std::views::zip(a, b)) {
             if (acp && bcp) {
-                aa += bb;
+                aa += static_cast<T>(bb);
                 return;
             }
             if (acp) {
-                acp = false;
-            }
-            if (bcp) {
+                aa = a[0] + static_cast<T>(bb);
+            } else if (bcp) {
                 aa += static_cast<T>(b[0]);
             } else {
                 aa += static_cast<T>(bb);
             }
         }
     }
+    std::ranges::fill(destConstantp, false);
 }
 
 template<typename T, typename U>
@@ -168,17 +168,30 @@ void AudioBuffer::ensure64() {
     _dataType = Double;
 }
 
-void AudioBuffer::zero() {
-    if (_dataType == Float) {
-        for (auto& x : _buffer32) {
-            std::ranges::fill(x, 0.0f);
+void AudioBuffer::zero(bool useConstant) {
+    if (useConstant) {
+        if (_dataType == Float) {
+            for (auto& x : _buffer32) {
+                x[0] = 0.0f;
+            }
+        } else {
+            for (auto& x : _buffer64) {
+                x[0] = 0.0;
+            }
         }
+        std::ranges::fill(_constantp, true);
     } else {
-        for (auto& x : _buffer64) {
-            std::ranges::fill(x, 0.0);
+        if (_dataType == Float) {
+            for (auto& x : _buffer32) {
+                std::ranges::fill(x, 0.0f);
+            }
+        } else {
+            for (auto& x : _buffer64) {
+                std::ranges::fill(x, 0.0);
+            }
         }
+        std::ranges::fill(_constantp, false);
     }
-    std::ranges::fill(_constantp, false);
 }
 
 std::vector<std::vector<float>>& AudioBuffer::buffer32() {

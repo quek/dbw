@@ -23,9 +23,9 @@ void ProcessBuffer::ensure(unsigned long framesPerBuffer, int nbuses, int nchann
     }
 }
 
-void ProcessBuffer::clear() {
-    inZero();
-    outZero();
+void ProcessBuffer::clear(bool useConstant) {
+    inZero(useConstant);
+    outZero(useConstant);
     _eventIn.clear();
     _eventOut.clear();
 }
@@ -44,15 +44,15 @@ void ProcessBuffer::ensure32() {
     }
 }
 
-void ProcessBuffer::inZero() {
+void ProcessBuffer::inZero(bool useConstant) {
     for (auto& x : _in) {
-        x.zero();
+        x.zero(useConstant);
     }
 }
 
-void ProcessBuffer::outZero() {
+void ProcessBuffer::outZero(bool useConstant) {
     for (auto& x : _out) {
-        x.zero();
+        x.zero(useConstant);
     }
 }
 

@@ -14,7 +14,7 @@ public:
     void ensure32();
     void ensure64();
     int getNchannels() const { return _nchannels; }
-    void zero();
+    void zero(bool useConstant = true);
     std::vector<std::vector<float>>& buffer32();
     std::vector<std::vector<double>>& buffer64();
 

@@ -45,7 +45,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
 
             clipRectMin += ImVec2(offsetLeft(), offsetTop());
             ImGui::PushClipRect(clipRectMin, clipRectMax, true);
-            renderThings(windowPos);
+            renderThings();
             handleMouse(clipRectMin, clipRectMax);
             handleShortcut();
             ImGui::PopClipRect();
@@ -258,17 +258,17 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
         }
     }
 
-    _state._editCursorY = timeToScreenY(timeFromMousePos());
+    _state._editCursorPos = ImVec2(laneToScreenX(laneFromPos(mousePos)),
+                                   timeToScreenY(timeFromMousePos(0, true)));
 }
 
 template<class THING, typename LANE>
-void TimelineCanvasMixin<THING, LANE>::renderThings(ImVec2& windowPos) {
+void TimelineCanvasMixin<THING, LANE>::renderThings() {
     _state._thingBoundsMap.clear();
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
-    float scrollX = ImGui::GetScrollX();
     for (const auto& thing : _allThings) {
-        float x1 = xFromThing(thing) * _zoomX + offsetLeft() - scrollX + windowPos.x;
+        float x1 = xFromThing(thing);
         float x2 = x1 + getLaneWidth(thing) * _zoomX;
         float y1 = timeToScreenY(thing->_time);
         float y2 = y1 + thing->_duration * _zoomY;
@@ -368,9 +368,14 @@ void TimelineCanvasMixin<THING, LANE>::renderGridBeat16th(ImDrawList* drawList, 
 template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::renderEditCursor() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
-    float y = _state._editCursorY;
     ImVec2 windowPos = ImGui::GetWindowPos();
-    drawList->AddLine(ImVec2(windowPos.x, y), ImVec2(windowPos.x + ImGui::GetWindowWidth(), y), gTheme.editCursor);
+    ImVec2 pos1 = ImVec2(windowPos.x, _state._editCursorPos.y);
+    ImVec2 pos2 = pos1 + ImVec2(ImGui::GetWindowWidth(), 0.0f);
+    drawList->AddLine(pos1, pos2, gTheme.editCursor);
+
+    pos1 = ImVec2(_state._editCursorPos.x, windowPos.y);
+    pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+    drawList->AddLine(pos1, pos2, gTheme.editCursor);
 }
 
 template<class THING, typename LANE>

@@ -9,12 +9,12 @@ class ProcessBuffer {
 public:
     ProcessBuffer();
     void ensure(unsigned long framesPerBuffer, int nbuses, int nchannels);
-    void clear();
+    void clear(bool useConstant = true);
     void swapInOut();
     void ensure32();
     void ensure64();
-    void inZero();
-    void outZero();
+    void inZero(bool useConstant = true);
+    void outZero(bool useConstant = true);
     void setLatency(uint32_t latency);
     void doDCP();
 
