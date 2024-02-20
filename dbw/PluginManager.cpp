@@ -12,6 +12,7 @@
 #include "Track.h"
 #include "util.h"
 #include "Vst3Module.h"
+#include "command/AddModule.h"
 
 std::map<std::string, std::function<BuiltinModule* (Track*)>> builtinModuleMap = {
     {"Gain", [](Track* track) -> BuiltinModule* { return new GainModule("Gain", track); }},
@@ -144,7 +145,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);
                 module->load(path);
-                _composer->_commandManager.executeCommand(new AddModuleCommand(track, module));
+                _composer->_commandManager.executeCommand(new command::AddModule(track, module));
             }
         }
     }
@@ -160,7 +161,7 @@ void PluginManager::openModuleSelector(Track* track) {
             if (ImGui::Button(name.c_str())) {
                 track->_openModuleSelector = false;
                 auto module = fun(track);
-                _composer->_commandManager.executeCommand(new AddModuleCommand(track, module));
+                _composer->_commandManager.executeCommand(new command::AddModule(track, module));
             }
         }
     }

@@ -1,4 +1,5 @@
 #include "Vst3Module.h"
+#include <filesystem>
 #include <fstream>
 #include <public.sdk/source/vst/hosting/module.h>
 #include <public.sdk/source/vst/hosting/parameterchanges.h>
@@ -8,6 +9,7 @@
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/base/ftypes.h>
 #include <public.sdk/source/common/memorystream.h>
+#include <public.sdk/source/vst/vstpresetfile.h>
 #include "imgui.h"
 #include "AudioEngine.h"
 #include "Composer.h"
@@ -466,18 +468,12 @@ void Vst3Module::onResize(int width, int height) {
 }
 
 void Vst3Module::loadState(std::filesystem::path path) {
+    auto size = std::filesystem::file_size(path);
+    std::unique_ptr<char[]> buffer(new char[size]);
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         Error("{} のステートファイルをオープンできませんでした。{}", _name, path.string());
     }
-
-    int64_t size = 0;
-    in.read((char*)&size, sizeof(int64_t));
-    if (!in) {
-        Error("{} のステートサイズを取得できませんでした。{}", _name, path.string());
-    }
-
-    std::unique_ptr<char[]> buffer(new char[size]);
     in.read(buffer.get(), size);
     if (!in) {
         Error("{}のステートを読み込めませんでした。{}", _name, path.string());
@@ -486,51 +482,14 @@ void Vst3Module::loadState(std::filesystem::path path) {
     if (readSize != size) {
         Error("{}のステートの読み込みサイズ不正。{}/{} {}", _name, std::to_string(readSize), std::to_string(size), path.string());
     }
-
-    Steinberg::MemoryStream processorStream(buffer.get(), size);
-    Steinberg::tresult result = _component->setState(&processorStream);
-    if (result != Steinberg::kResultOk) {
-        Error("{}のステータス設定に失敗しました。{}", _name, std::to_string(result));
+    Steinberg::MemoryStream stream(buffer.get(), size);
+    if (!Steinberg::Vst::PresetFile::loadPreset(&stream, _component->iid, _component, _controller)) {
+        Error("Steinberg::Vst::PresetFile::loadPreset FAILED!");
     }
-    processorStream.seek(0, Steinberg::IBStream::IStreamSeekMode::kIBSeekSet, 0);
-    result = _controller->setComponentState(&processorStream);
-    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
-        Error("{}のステータス設定に失敗しました。{}", _name, std::to_string(result));
-    }
-
-    in.read((char*)&size, sizeof(int64_t));
-    if (!in) {
-        Error("{}のコントロールステートサイズを取得できませんでした。{}", _name, path.string());
-    }
-
-    buffer.reset(new char[size]);
-    in.read(buffer.get(), size);
-    if (!in) {
-        Error("{}のコントロールステートを読み込めませんでした。{}", _name, path.string());
-    }
-    readSize = in.gcount();
-    if (readSize != size) {
-        Error("{}のコントロールステートの読み込みサイズ不正。{}/{} {}", _name, std::to_string(readSize), std::to_string(size), path.string());
-    }
-
-    Steinberg::MemoryStream controllerStream(buffer.get(), size);
-    result = _controller->setState(&controllerStream);
-    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
-        Error("{}のステータス設定に失敗しました。{}", _name, result);
-    }
+    return;
 }
 
 tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
-    Steinberg::MemoryStream processorStream;
-    if (_component->getState(&processorStream) != Steinberg::kResultOk) {
-        Error("{} のプロセスステータスの取得に失敗しました。", _name);
-    }
-    Steinberg::MemoryStream controllerStream;
-    auto result = _controller->getState(&controllerStream);
-    if (result != Steinberg::kResultOk && result != Steinberg::kNotImplemented) {
-        Error("{}のコントロールステータスの取得に失敗しました。{}", _name, result);
-    }
-
     auto* element = doc->NewElement("Vst3Plugin");
     element->SetAttribute("id", xmlId());
     // TODO Possible values: instrument, noteFX, audioFX, analyzer
@@ -547,32 +506,18 @@ tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
     auto statePath = std::filesystem::path("plugins") / (generateUniqueId() + ".vstpreset");
     state->SetAttribute("path", statePath.string().c_str());
 
+    Steinberg::MemoryStream stream;
+    if (!Steinberg::Vst::PresetFile::savePreset(&stream, _component->iid, _component, _controller)) {
+        Error("Steinberg::Vst::PresetFile::savePreset FAILED!");
+    }
     auto path = _track->_composer->_project->projectDir() / statePath;
     std::filesystem::create_directories(path.parent_path());
     std::ofstream out(path, std::ios::binary);
     if (!out) {
         Error("{}のステータス保存に失敗しました。", _name);
     }
-    int64_t size = processorStream.getSize();
-    out.write((const char*)&size, sizeof(int64_t));
+    out.write(stream.getData(), stream.getSize());
     if (!out) {
-        Error("{}のステータス保存に失敗しました。", _name);
-    }
-    out.write(processorStream.getData(), size);
-    if (!out) {
-        Error("{}のステータス保存に失敗しました。", _name);
-    }
-    size = controllerStream.getSize();
-    out.write((const char*)&size, sizeof(int64_t));
-    if (!out) {
-        Error("{}のステータス保存に失敗しました。", _name);
-    }
-    out.write(controllerStream.getData(), size);
-    if (!out) {
-        Error("{}のステータス保存に失敗しました。", _name);
-    }
-    out.close();
-    if (out.fail()) {
         Error("{}のステータス保存に失敗しました。", _name);
     }
 

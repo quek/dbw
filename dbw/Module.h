@@ -31,6 +31,8 @@ public:
     virtual void setComputedLatency(uint32_t computedLatency);
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
+    static Module* create(std::string& type, std::string& id);
+
     Track* _track;
     std::string _name;
     bool _didOpenGui = false;

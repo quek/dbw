@@ -68,23 +68,3 @@ private:
     P _value;
     P _lastValue;
 };
-
-class AddModuleCommand : public Command {
-public:
-    AddModuleCommand(Track* track, Module* module) : _track(track), _module(module) {}
-    void execute(Composer* composer) override;
-    void undo(Composer* composer) override;
-    Track* _track;
-    std::unique_ptr<Module> _module;
-};
-
-class DeleteModuleCommand : public Command {
-public:
-    DeleteModuleCommand(Module* module);
-    void execute(Composer* composer) override;
-    void undo(Composer* composer) override;
-private:
-    Module* _module;
-    size_t _index = 0;
-    std::unique_ptr<Module> _moduleUniquePtr;
-};

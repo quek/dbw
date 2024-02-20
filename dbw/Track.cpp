@@ -14,6 +14,7 @@
 #include "PluginModule.h"
 #include "PluginHost.h"
 #include "Lane.h"
+#include "command/AddModule.h"
 
 Track::Track(std::string name, Composer* composer) :
     _fader(new Fader("Fader", this)), _name(name), _composer(composer) {
@@ -93,7 +94,7 @@ void Track::addModule(std::string path, uint32_t index) {
     PluginHost* pluginHost = new PluginHost(this);
     pluginHost->load(path.c_str(), index);
     Module* module = new PluginModule(pluginHost->_name, this, pluginHost);
-    _composer->_commandManager.executeCommand(new AddModuleCommand(this, module));
+    _composer->_commandManager.executeCommand(new command::AddModule(this, module));
 }
 
 bool Track::isAvailableSidechainSrc(Track* dst) {

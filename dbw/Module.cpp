@@ -2,10 +2,14 @@
 #include <mutex>
 #include "imgui.h"
 #include "AudioEngine.h"
+#include "BuiltinModule.h"
+#include "PluginModule.h"
 #include "Composer.h"
 #include "Command.h"
 #include "Config.h"
 #include "Track.h"
+#include "Vst3Module.h"
+#include "command/DeleteModule.h"
 
 Module::~Module() {
     closeGui();
@@ -13,7 +17,7 @@ Module::~Module() {
 }
 
 void Module::start() {
-    _track->_processBuffer.ensure(gPreference.bufferSize, std::max(_ninputs, _noutputs), 2);
+    _track->_processBuffer.ensure(gPreference.bufferSize, max(_ninputs, _noutputs), 2);
     _isStarting = true;
 }
 
@@ -25,7 +29,7 @@ void Module::render() {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {
-                    _track->_composer->_commandManager.executeCommand(new DeleteModuleCommand(this));
+                    _track->_composer->_commandManager.executeCommand(new command::DeleteModule(this));
                 }
                 ImGui::EndMenu();
             }
@@ -66,7 +70,7 @@ void Module::connect(Module* from, int outputIndex, int inputIndex) {
 }
 
 int Module::nbuses() const {
-    return std::max(_ninputs, _noutputs);
+    return max(_ninputs, _noutputs);
 }
 
 ProcessBuffer& Module::getProcessBuffer() {
@@ -96,4 +100,15 @@ tinyxml2::XMLElement* Module::toXml(tinyxml2::XMLDocument* doc) {
         element->InsertEndChild(connection->toXml(doc));
     }
     return element;
+}
+
+Module* Module::create(std::string& type, std::string& id) {
+    if (type == "builtin") {
+        return BuiltinModule::create(id);
+    } else if (type == "vst3") {
+        //return Vst3Module::create(id);
+    } else if (type == "clap") {
+        //return ClapModule::create(id);
+    }
+    return nullptr;
 }

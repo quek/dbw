@@ -3,7 +3,7 @@
 
 class GainModule : public BuiltinModule {
 public:
-    GainModule(std::string name, Track* track);
+    GainModule(std::string name = "Gain", Track* track = nullptr);
     virtual ~GainModule() = default;
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
     virtual void loadParameters(tinyxml2::XMLElement* element) override;
