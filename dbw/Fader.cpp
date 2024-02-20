@@ -42,16 +42,20 @@ bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
     }
     // pan の処理ってどうやるのが正しい？
     float pan = (1.0f - _pan) * 2.0f;
-    for (auto [in, out] : std::views::zip(buffer->_in[0].buffer32(), buffer->_out[0].buffer32())) {
+    for (auto [in, out, acp, bcp] : std::views::zip(buffer->_in[0].buffer32(), buffer->_out[0].buffer32(), buffer->_in[0]._constantp, buffer->_out[0]._constantp)) {
+        auto in0 = in[0];
         for (auto [a, b] : std::views::zip(in, out)) {
-            b = a * _level * pan;
+            if (acp && bcp) {
+                b = a * _level * pan;
+                break;
+            } else if (acp) {
+                b = in0 * _level * pan;
+            } else {
+                bcp = false;
+                b = a * _level * pan;
+            }
         }
         pan = _pan * 2.0f;
-    }
-
-    // TODO
-    for (auto& x : buffer->_out) {
-        std::ranges::fill(x._constantp, false);
     }
 
     return Module::process(buffer, steadyTime);

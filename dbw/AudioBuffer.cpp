@@ -8,15 +8,17 @@ AudioBuffer::AudioBuffer() : _framesPerBuffer(0), _nchannels(0) {
 template<typename T, typename U>
 void addBuffers(std::vector<std::vector<T>>& dest, const std::vector<std::vector<U>>& src, std::vector<bool>& destConstantp, const std::vector<bool>& srcConstantp) {
     for (auto [a, b, acp, bcp] : std::views::zip(dest, src, destConstantp, srcConstantp)) {
+        auto a0 = a[0];
+        auto b0 = b[0];
         for (auto [aa, bb] : std::views::zip(a, b)) {
             if (acp && bcp) {
                 aa += static_cast<T>(bb);
                 return;
             }
             if (acp) {
-                aa = a[0] + static_cast<T>(bb);
+                aa = a0 + static_cast<T>(bb);
             } else if (bcp) {
-                aa += static_cast<T>(b[0]);
+                aa += static_cast<T>(b0);
             } else {
                 aa += static_cast<T>(bb);
             }
