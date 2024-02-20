@@ -84,6 +84,7 @@ int main(int, char**) {
     logger->info("start");
 
     gPreference.load();
+    gTheme.load();
 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();

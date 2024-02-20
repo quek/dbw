@@ -43,7 +43,7 @@ void Connection::process(Module* to) {
     for (int channel = 0; channel < 2; ++channel) {
         auto& x = _from->_track->_processBuffer._out.at(_fromIndex).buffer32()[channel];
         auto& y = to->_track->_processBuffer._in.at(_toIndex).buffer32()[channel];
-        for (int i = 0; i < gPreference.bufferSize; ++i) {
+        for (size_t i = 0; i < gPreference.bufferSize; ++i) {
             if (_latency == 0) {
                 y[i] = x[i];
             } else {
