@@ -94,7 +94,11 @@ void Track::addModule(std::string path, uint32_t index) {
     PluginHost* pluginHost = new PluginHost(this);
     pluginHost->load(path.c_str(), index);
     Module* module = new PluginModule(pluginHost->_name, this, pluginHost);
-    _composer->_commandManager.executeCommand(new command::AddModule(this, module));
+    // TODO
+    _modules.emplace_back(module);
+    module->start();
+    module->openGui();
+    _composer->computeProcessOrder();
 }
 
 bool Track::isAvailableSidechainSrc(Track* dst) {

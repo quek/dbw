@@ -29,6 +29,7 @@ public:
     virtual nlohmann::json toJson() override;
 
     static nlohmann::json scan(const std::string path);
+    static Vst3Module* create(const std::string& id);
     static Vst3Module* fromJson(const nlohmann::json& json);
 
     std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;

@@ -588,14 +588,13 @@ nlohmann::json Vst3Module::scan(const std::string path) {
     return plugins;
 }
 
-Vst3Module* Vst3Module::fromJson(const nlohmann::json& json) {
+Vst3Module* Vst3Module::create(const std::string& id) {
     std::ifstream in(configDir() / "plugin.json");
     if (!in) {
         return nullptr;
     }
     nlohmann::json plugins;
     in >> plugins;
-    auto& id = json["_id"];
     auto plugin = std::find_if(plugins["vst3"].begin(), plugins["vst3"].end(), [&id](auto x) { return x["id"] == id; });
     if (plugin == plugins["vst3"].end()) {
         return nullptr;
@@ -603,6 +602,12 @@ Vst3Module* Vst3Module::fromJson(const nlohmann::json& json) {
     auto path = (*plugin)["path"].get<std::string>();
     auto module = new Vst3Module((*plugin)["name"], nullptr);
     module->load(path);
+    return module;
+}
+
+Vst3Module* Vst3Module::fromJson(const nlohmann::json& json) {
+    auto& id = json["_id"];
+    auto module = Vst3Module::create(id);
 
     std::string state = json["state"].get<std::string>();
     std::vector<uint8_t> buffer = cppcodec::base64_rfc4648::decode(state);

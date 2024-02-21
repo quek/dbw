@@ -106,7 +106,7 @@ Module* Module::create(std::string& type, std::string& id) {
     if (type == "builtin") {
         return BuiltinModule::create(id);
     } else if (type == "vst3") {
-        //return Vst3Module::create(id);
+        return Vst3Module::create(id);
     } else if (type == "clap") {
         //return ClapModule::create(id);
     }

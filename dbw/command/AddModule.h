@@ -7,23 +7,18 @@ class Track;
 
 namespace command {
 
-class AddModule2 : public Command {
-public:
-    AddModule2(uint64_t trackRef, std::string& type, std::string& id);
-    void execute(Composer* composer) override;
-    void undo(Composer* composer) override;
-    uint64_t _trackRef;
-    std::string _type;
-    std::string _id;
-};
-
 class AddModule : public Command {
 public:
-    AddModule(Track* track, Module* module) : _track(track), _module(module) {}
+    AddModule(uint64_t trackRef, const char* type, const std::string& id);
     void execute(Composer* composer) override;
+    void redo(Composer* composer) override;
     void undo(Composer* composer) override;
-    Track* _track;
-    std::unique_ptr<Module> _module;
+    uint64_t _trackRef;
+    uint64_t _moduleId = 0;
+    std::string _type;
+    std::string _id;
+private:
+    Module* exec(Composer* composer);
 };
 
 

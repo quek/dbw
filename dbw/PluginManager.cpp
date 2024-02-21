@@ -145,7 +145,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);
                 module->load(path);
-                _composer->_commandManager.executeCommand(new command::AddModule(track, module));
+                _composer->_commandManager.executeCommand(new command::AddModule(track->xmlId(), "vst3", id));
             }
         }
     }
@@ -160,8 +160,7 @@ void PluginManager::openModuleSelector(Track* track) {
         if (q == _query.end()) {
             if (ImGui::Button(name.c_str())) {
                 track->_openModuleSelector = false;
-                auto module = fun(track);
-                _composer->_commandManager.executeCommand(new command::AddModule(track, module));
+                _composer->_commandManager.executeCommand(new command::AddModule(track->xmlId(), "builtin", name));
             }
         }
     }

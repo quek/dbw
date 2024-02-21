@@ -8,6 +8,10 @@
 Command::Command(bool undoable) : _undoable(undoable) {
 }
 
+void Command::redo(Composer* composer) {
+    execute(composer);
+}
+
 GroupCommand::GroupCommand(std::vector<Command*> commands, bool undoable) : Command(undoable) {
     for (auto command : commands) {
         _commands.emplace_back(command);
@@ -65,7 +69,7 @@ void CommandManager::undo() {
 void CommandManager::redo() {
     if (!_redoStack.empty()) {
         auto& command = _redoStack.top();
-        command->execute(_composer);
+        command->redo(_composer);
         _undoStack.push(command);
         _redoStack.pop();
     }
