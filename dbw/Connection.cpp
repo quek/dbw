@@ -29,8 +29,8 @@ std::unique_ptr<Connection> Connection::fromXml(tinyxml2::XMLElement* element) {
 }
 
 void Connection::resolveModuleReference() {
-    _from = XMLMixin::findByXMLId<Module>(_fromId);
-    _to = XMLMixin::findByXMLId<Module>(_toId);
+    _from = Neko::findByNekoId<Module>(_fromId);
+    _to = Neko::findByNekoId<Module>(_toId);
 }
 
 void Connection::process(Module* to) {

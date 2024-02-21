@@ -10,7 +10,7 @@ Sequence::Sequence(double duration) : Nameable("Seq" + std::to_string(++_no)), _
 std::shared_ptr<Sequence> Sequence::create(double duration, uint64_t id) {
     std::shared_ptr<Sequence> sequence(new Sequence(duration));
     if (id != 0) {
-        sequence->setXMLId(id);
+        sequence->setNekoId(id);
     }
     xmlIdSequenceMap[sequence->xmlId()] = sequence;
     return sequence;

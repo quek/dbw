@@ -2,11 +2,11 @@
 #include <memory>
 #include "Sequence.h"
 #include "Thing.h"
-#include "XMLMixin.h"
+#include "Neko.h"
 
 class PianoRollWindow;
 
-class Clip : public Nameable, public Thing, public XMLMixin {
+class Clip : public Nameable, public Thing {
 public:
     Clip(const Clip& other) = default;
     Clip(double time = 0.0, double duration = 16.0);

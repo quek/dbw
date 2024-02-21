@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
 #include <imgui.h>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 class Config;
 struct Preference;

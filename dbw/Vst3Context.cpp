@@ -57,8 +57,10 @@ tresult PLUGIN_API Vst3Context::endEdit(Vst::ParamID id) {
 tresult PLUGIN_API Vst3Context::restartComponent(int32 flags) {
     // TODO
     Error("restartComponent {}", flags);
-    _module->stop();
-    _module->start();
+    if (_module->_track) {
+        _module->stop();
+        _module->start();
+    }
     return kResultOk;
 }
 

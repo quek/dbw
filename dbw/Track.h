@@ -4,7 +4,7 @@
 #include <vector>
 #include <clap/clap.h>
 #include "ProcessBuffer.h"
-#include "XMLMixin.h"
+#include "Neko.h"
 
 class ProcessBuffer;
 class Composer;
@@ -12,7 +12,7 @@ class Fader;
 class Lane;
 class Module;
 
-class Track : public XMLMixin {
+class Track : public Neko {
 public:
     Track(std::string name, Composer* composer);
     virtual ~Track();

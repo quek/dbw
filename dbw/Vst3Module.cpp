@@ -11,6 +11,7 @@
 #include <public.sdk/source/common/memorystream.h>
 #include <public.sdk/source/vst/vstpresetfile.h>
 #include "imgui.h"
+#include <cppcodec/base64_rfc4648.hpp>
 #include "AudioEngine.h"
 #include "Composer.h"
 #include "Config.h"
@@ -478,7 +479,7 @@ void Vst3Module::loadState(std::filesystem::path path) {
     if (!in) {
         Error("{}のステートを読み込めませんでした。{}", _name, path.string());
     }
-    auto readSize = in.gcount();
+    uintmax_t readSize = in.gcount();
     if (readSize != size) {
         Error("{}のステートの読み込みサイズ不正。{}/{} {}", _name, std::to_string(readSize), std::to_string(size), path.string());
     }
@@ -527,6 +528,20 @@ tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
     return element;
 }
 
+nlohmann::json Vst3Module::toJson() {
+    nlohmann::json json = Module::toJson();
+    json["type"] = "vst3";
+    json["_id"] = _id;
+
+    Steinberg::MemoryStream stream;
+    if (!Steinberg::Vst::PresetFile::savePreset(&stream, _component->iid, _component, _controller)) {
+        Error("Steinberg::Vst::PresetFile::savePreset FAILED!");
+    }
+    json["state"] = cppcodec::base64_rfc4648::encode(stream.getData(), stream.getSize());
+
+    return json;
+}
+
 nlohmann::json Vst3Module::scan(const std::string path) {
     nlohmann::json plugins;
     plugins["path"] = path;
@@ -571,5 +586,32 @@ nlohmann::json Vst3Module::scan(const std::string path) {
     }
 
     return plugins;
+}
+
+Vst3Module* Vst3Module::fromJson(const nlohmann::json& json) {
+    std::ifstream in(configDir() / "plugin.json");
+    if (!in) {
+        return nullptr;
+    }
+    nlohmann::json plugins;
+    in >> plugins;
+    auto& id = json["_id"];
+    auto plugin = std::find_if(plugins["vst3"].begin(), plugins["vst3"].end(), [&id](auto x) { return x["id"] == id; });
+    if (plugin == plugins["vst3"].end()) {
+        return nullptr;
+    }
+    auto path = (*plugin)["path"].get<std::string>();
+    auto module = new Vst3Module((*plugin)["name"], nullptr);
+    module->load(path);
+
+    std::string state = json["state"].get<std::string>();
+    std::vector<uint8_t> buffer = cppcodec::base64_rfc4648::decode(state);
+    Steinberg::MemoryStream stream(buffer.data(), buffer.size());
+    FUID fuid;
+    fuid.fromString(json["_id"].get<std::string>().c_str());
+    if (!Steinberg::Vst::PresetFile::loadPreset(&stream, module->_component->iid, module->_component, module->_controller)) {
+        Error("Steinberg::Vst::PresetFile::loadPreset FAILED!");
+    }
+    return module;
 }
 

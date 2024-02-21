@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
 #include "Thing.h"
-#include "XMLMixin.h"
+#include "Neko.h"
 
-class Note : public Thing, public XMLMixin {
+class Note : public Thing, public Neko {
 public:
     Note(double time = 0.0f, double duration = 1.0f, int16_t key = 64, double velocity = 0.8, int16_t channel = 0);
     virtual ~Note() = default;

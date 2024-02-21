@@ -7,7 +7,7 @@
 // plugprovider.cppをプロジェクトに追加すること
 #include <public.sdk/source/vst/hosting/plugprovider.h>
 #include <pluginterfaces/gui/iplugview.h>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "Module.h"
 #include "PluginEditorWindow.h"
 #include "Vst3Context.h"
@@ -26,11 +26,13 @@ public:
     virtual void onResize(int width, int height) override;
     virtual void loadState(std::filesystem::path path) override;
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
+    virtual nlohmann::json toJson() override;
 
     static nlohmann::json scan(const std::string path);
-
+    static Vst3Module* fromJson(const nlohmann::json& json);
 
     std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
+
 private:
     std::string _id;
     Vst3Context _pluginContext;

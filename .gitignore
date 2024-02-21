@@ -12,6 +12,7 @@ spdlog
 nlohmann
 VST_SDK
 ImGuiFileDialog
+lib
 
 dbw/imgui.ini
 

@@ -36,3 +36,4 @@ std::unique_ptr<ClipSlot>& Scene::getClipSlot(Lane* lane) {
     _clipSlotMap[lane] = std::make_unique<ClipSlot>();
     return _clipSlotMap[lane];
 }
+

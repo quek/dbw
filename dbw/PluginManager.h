@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "tinyxml2/tinyxml2.h"
 
 class Composer;

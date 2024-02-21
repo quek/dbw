@@ -4,7 +4,7 @@
 #include <string>
 #include <clap/clap.h>
 #include <windows.h>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "PluginEventList.h"
 
 class ProcessBuffer;

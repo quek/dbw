@@ -2,16 +2,18 @@
 #include <filesystem>
 #include <string>
 #include <clap/clap.h>
+#include <nlohmann/json.hpp>
 #include "tinyxml2/tinyxml2.h"
 #include "Connection.h"
+#include "Nameable.h"
 #include "ProcessBuffer.h"
-#include "XMLMixin.h"
+#include "Neko.h"
 
 class Track;
 
-class Module :public XMLMixin {
+class Module : public Nameable {
 public:
-    Module(std::string name, Track* track) : _name(name), _track(track) {}
+    Module(std::string name, Track* track) : Nameable(name), _track(track) {}
     virtual ~Module();
     virtual void openGui() { _didOpenGui = true; }
     virtual void closeGui() { _didOpenGui = false; }
@@ -32,9 +34,9 @@ public:
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
     static Module* create(std::string& type, std::string& id);
+    static Module* fromJson(const nlohmann::json&);
 
     Track* _track;
-    std::string _name;
     bool _didOpenGui = false;
     std::vector<std::unique_ptr<Connection>> _connections;
     int _ninputs = 0;

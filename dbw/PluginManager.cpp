@@ -75,7 +75,7 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
     uint64_t id = 0;
     element->QueryUnsigned64Attribute("id", &id);
     if (id != 0) {
-        result->setXMLId(id);
+        result->setNekoId(id);
     }
 
     auto connectionsElement = element->FirstChildElement("Connections");

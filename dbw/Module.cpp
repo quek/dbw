@@ -112,3 +112,15 @@ Module* Module::create(std::string& type, std::string& id) {
     }
     return nullptr;
 }
+
+Module* Module::fromJson(const nlohmann::json& json) {
+    auto& type = json["type"];
+    if (type == "builtin") {
+        //return BuiltinModule::fromJson(json);
+    } else if (type == "vst3") {
+        return Vst3Module::fromJson(json);
+    } else if (type == "clap") {
+        //return PluginModule::fromJson(json);
+    }
+    return nullptr;
+}

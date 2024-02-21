@@ -40,7 +40,6 @@
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="PluginModule.cpp" />
     <ClCompile Include="Project.cpp" />
-    <ClCompile Include="tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
@@ -96,13 +95,16 @@
     </ClCompile>
     <ClCompile Include="SidechainInputSelector.cpp" />
     <ClCompile Include="Fader.cpp" />
-    <ClCompile Include="XMLMixin.cpp" />
+    <ClCompile Include="Neko.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Vst3Context.cpp" />
     <ClCompile Include="command\AddModule.cpp" />
     <ClCompile Include="command\DeleteModule.cpp" />
+    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -138,7 +140,6 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="PluginModule.h" />
     <ClInclude Include="Project.h" />
-    <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="BuiltinModule.h" />
@@ -188,7 +189,7 @@
     </ClInclude>
     <ClInclude Include="SidechainInputSelector.h" />
     <ClInclude Include="Fader.h" />
-    <ClInclude Include="XMLMixin.h" />
+    <ClInclude Include="Neko.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="AudioEngineWindow.h" />
     <ClInclude Include="Config.h" />

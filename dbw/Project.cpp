@@ -62,7 +62,7 @@ void Project::open(std::filesystem::path dir) {
         uint64_t id = 0;
         trackElement->QueryUnsigned64Attribute("id", &id);
         if (id != 0) {
-            track->setXMLId(id);
+            track->setNekoId(id);
         }
         if (_composer->_masterTrack) {
             _composer->_tracks.emplace_back(std::move(track));
@@ -86,7 +86,7 @@ void Project::open(std::filesystem::path dir) {
          lanesElement = lanesElement->NextSiblingElement("Lanes")) {
         uint64_t id = 0;
         lanesElement->QueryUnsigned64Attribute("track", &id);
-        Track* track = XMLMixin::findByXMLId<Track>(id);
+        Track* track = Neko::findByNekoId<Track>(id);
         Lane* lane = new Lane();
         track->_lanes.emplace_back(lane);
         for (auto clipElement = lanesElement->FirstChildElement("Clips")->FirstChildElement("Clip");

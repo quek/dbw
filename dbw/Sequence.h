@@ -4,11 +4,11 @@
 #include "Command.h"
 #include "Nameable.h"
 #include "Note.h"
-#include "XMLMixin.h"
+#include "Neko.h"
 
 class Composer;
 
-class Sequence : public Nameable, public XMLMixin {
+class Sequence : public Nameable {
 public:
     static std::shared_ptr<Sequence>create(double duration = 16.0, uint64_t id = 0);
     virtual ~Sequence();

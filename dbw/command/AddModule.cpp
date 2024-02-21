@@ -27,7 +27,7 @@ command::AddModule2::AddModule2(uint64_t trackRef, std::string& type, std::strin
 }
 
 void command::AddModule2::execute(Composer* composer) {
-    auto track = XMLMixin::findByXMLId<Track>(_trackRef);
+    auto track = Neko::findByNekoId<Track>(_trackRef);
     auto module = Module::create(_type, _id);
     track->_modules.emplace_back(module);
 }
