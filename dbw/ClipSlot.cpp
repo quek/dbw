@@ -7,6 +7,10 @@
 ClipSlot::ClipSlot() {
 }
 
+ClipSlot::ClipSlot(const nlohmann::json& json) : Nameable(json) {
+    _clip.reset(new Clip(json["_clip"]));
+}
+
 void ClipSlot::render(Composer* composer) {
     ImGui::PushID(this);
     if (_clip) {
@@ -45,4 +49,10 @@ void ClipSlot::stop() {
         return;
     }
     _playing = false;
+}
+
+nlohmann::json ClipSlot::toJson() {
+    nlohmann::json json = Nameable::toJson();
+    json["_clip"] = _clip->toJson();
+    return json;
 }

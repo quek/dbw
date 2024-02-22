@@ -14,7 +14,9 @@ public:
     Lane(const nlohmann::json& json);
     virtual ~Lane() = default;
     virtual nlohmann::json toJson() override;
+    std::unique_ptr<ClipSlot>& getClipSlot(Scene* scene);
 
     std::vector<std::unique_ptr<Clip>> _clips;
     std::map<Scene*, std::unique_ptr<ClipSlot>> _sceneClipSlotMap;
+    Track* _track = nullptr;
 };

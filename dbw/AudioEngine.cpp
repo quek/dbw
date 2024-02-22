@@ -76,6 +76,10 @@ void AudioEngine::start() {
     if (gPreference.audioDeviceIndex == -1) {
         return;
     }
+    if (Pa_GetDeviceInfo(gPreference.audioDeviceIndex) == nullptr) {
+        gPreference.audioDeviceIndex = -1;
+        return;
+    }
 
     PaError err;
     PaStreamParameters inputParameters{

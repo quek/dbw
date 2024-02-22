@@ -1,6 +1,9 @@
 #include "Scene.h"
+#include "Clip.h"
 #include "ClipSlot.h"
 #include "Composer.h"
+#include "Lane.h"
+#include "Track.h"
 #include "SceneMatrix.h"
 
 Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
@@ -8,32 +11,41 @@ Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
 }
 
 void Scene::play() {
-    for (auto& [_, clipSlot] : _clipSlotMap) {
-        clipSlot->play();
+    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+        for (const auto& lane : track->_lanes) {
+            lane->getClipSlot(this)->play();
+        }
     }
     _sceneMatrix->_composer->play();
 }
 
 void Scene::stop() {
-    for (auto& [_, clipSlot] : _clipSlotMap) {
-        clipSlot->stop();
+    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+        for (const auto& lane : track->_lanes) {
+            lane->getClipSlot(this)->stop();
+        }
     }
 }
 
 bool Scene::isAllLanePlaying() {
-    return false;
+    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+        for (const auto& lane : track->_lanes) {
+            if (!lane->getClipSlot(this)->_playing) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 bool Scene::isAllLaneStoped() {
-    return false;
-}
-
-std::unique_ptr<ClipSlot>& Scene::getClipSlot(Lane* lane) {
-    auto x = _clipSlotMap.find(lane);
-    if (x != _clipSlotMap.end()) {
-        return x->second;
+    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+        for (const auto& lane : track->_lanes) {
+            if (lane->getClipSlot(this)->_playing) {
+                return false;
+            }
+        }
     }
-    _clipSlotMap[lane] = std::make_unique<ClipSlot>();
-    return _clipSlotMap[lane];
+    return true;
 }
 

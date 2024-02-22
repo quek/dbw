@@ -4,7 +4,7 @@
 #include "PianoRollWindow.h"
 
 Clip::Clip(const nlohmann::json& json) : Nameable(json), Thing(json["_time"], json["_duration"]) {
-    _sequence.reset(new Sequence(json["_sequence"]));
+    _sequence = Sequence::create(json["_sequence"]);
 }
 
 Clip::Clip(double time, double duration) :

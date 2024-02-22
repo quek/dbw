@@ -1,7 +1,7 @@
 #include "Sequence.h"
 #include <map>
 
-static std::map<uint64_t, std::weak_ptr<Sequence>> xmlIdSequenceMap;
+static std::map<uint64_t, std::weak_ptr<Sequence>> nekoIdSequenceMap;
 int Sequence::_no = 0;
 
 Sequence::Sequence(double duration) : Nameable("Seq" + std::to_string(++_no)), _duration(duration) {
@@ -12,7 +12,20 @@ std::shared_ptr<Sequence> Sequence::create(double duration, uint64_t id) {
     if (id != 0) {
         sequence->setNekoId(id);
     }
-    xmlIdSequenceMap[sequence->nekoId()] = sequence;
+    nekoIdSequenceMap[sequence->nekoId()] = sequence;
+    return sequence;
+}
+
+std::shared_ptr<Sequence> Sequence::create(const nlohmann::json& json) {
+    if (json.contains("sequenceId")) {
+        auto& p = nekoIdSequenceMap[json["sequenceId"].template get<uint64_t>()];
+        auto sequence = p.lock();
+        if (sequence) {
+            return sequence;
+        }
+    }
+    std::shared_ptr<Sequence> sequence(new Sequence(json));
+    nekoIdSequenceMap[sequence->nekoId()] = sequence;
     return sequence;
 }
 
@@ -24,7 +37,7 @@ Sequence::Sequence(const nlohmann::json& json) : Nameable(json) {
 }
 
 Sequence::~Sequence() {
-    xmlIdSequenceMap.erase(nekoId());
+    nekoIdSequenceMap.erase(nekoId());
 }
 
 tinyxml2::XMLElement* Sequence::toXml(tinyxml2::XMLDocument* doc) {
@@ -42,8 +55,8 @@ std::shared_ptr<Sequence> Sequence::fromXml(tinyxml2::XMLElement* element) {
     uint64_t id = 0;
     element->QueryUnsigned64Attribute("id", &id);
 
-    auto it = xmlIdSequenceMap.find(id);
-    if (it != xmlIdSequenceMap.end()) {
+    auto it = nekoIdSequenceMap.find(id);
+    if (it != nekoIdSequenceMap.end()) {
         auto sequence = it->second.lock();
         if (sequence) {
             return sequence;
@@ -64,6 +77,7 @@ std::shared_ptr<Sequence> Sequence::fromXml(tinyxml2::XMLElement* element) {
 
 nlohmann::json Sequence::toJson() {
     nlohmann::json json = Nameable::toJson();
+    json["sequenceId"] = nekoId();
     json["type"] = TYPE;
     json["_duration"] = _duration;
 

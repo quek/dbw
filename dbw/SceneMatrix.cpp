@@ -8,6 +8,7 @@
 #include "ClipSlot.h"
 #include "Composer.h"
 #include "Config.h"
+#include "Lane.h"
 
 SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
     addScene(false);
@@ -66,7 +67,7 @@ void SceneMatrix::render() {
                 for (const auto& track : _composer->_tracks) {
                     for (const auto& lane : track->_lanes) {
                         ImGui::TableSetColumnIndex(++columnIndex);
-                        auto& clipSlot = scene->getClipSlot(lane.get());
+                        auto& clipSlot = lane->getClipSlot(scene.get());
                         clipSlot->render(_composer);
                         if (ImGui::BeginDragDropTarget()) {
                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
@@ -79,7 +80,7 @@ void SceneMatrix::render() {
                 }
                 ImGui::TableSetColumnIndex(++columnIndex);
                 for (const auto& lane : _composer->_masterTrack->_lanes) {
-                    auto& clipSlot = scene->getClipSlot(lane.get());
+                    auto& clipSlot = lane->getClipSlot(scene.get());
                     clipSlot->render(_composer);
                     if (ImGui::BeginDragDropTarget()) {
                         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
@@ -105,7 +106,7 @@ void SceneMatrix::process(Track* track) {
     double sampleRate = gPreference.sampleRate;
     for (auto& scene : _scenes) {
         for (auto& lane : track->_lanes) {
-            auto& clipSlot = scene->getClipSlot(lane.get());
+            auto& clipSlot = lane->getClipSlot(scene.get());
             if (!clipSlot->_playing) {
                 continue;
             }

@@ -18,7 +18,7 @@
 
 Track::Track(const nlohmann::json& json) : Nameable(json) {
     for (const auto& x : json["_lanes"]) {
-        _lanes.emplace_back(new Lane(x));
+        addLane(new Lane(x));
     }
 
     _fader.reset(new Fader(json["_fader"]));
@@ -32,7 +32,7 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
 
 Track::Track(std::string name, Composer* composer) :
     _fader(new Fader("Fader", this)), Nameable(name), _composer(composer) {
-    _lanes.emplace_back(new Lane());
+    addLane(new Lane());
     _fader->start();
 }
 
@@ -124,6 +124,11 @@ void Track::addModule(Module* module) {
     }
 }
 
+void Track::addLane(Lane* lane) {
+    lane->_track = this;
+    _lanes.emplace_back(lane);
+}
+
 bool Track::isAvailableSidechainSrc(Track* dst) {
     if (this == dst) {
         // 当該モジュールより前のは使える
@@ -212,13 +217,6 @@ nlohmann::json Track::toJson() {
         lanes.emplace_back(lane->toJson());
     }
     json["_lanes"] = lanes;
-
-    for (const auto& scene : _composer->_sceneMatrix->_scenes) {
-        for (const auto& lane : _lanes) {
-            auto& clipSlot = scene->getClipSlot(lane.get());
-        }
-
-    }
 
     return json;
 }

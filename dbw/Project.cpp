@@ -88,7 +88,7 @@ void Project::open(std::filesystem::path dir) {
         lanesElement->QueryUnsigned64Attribute("track", &id);
         Track* track = Neko::findByNekoId<Track>(id);
         Lane* lane = new Lane();
-        track->_lanes.emplace_back(lane);
+        track->addLane(lane);
         for (auto clipElement = lanesElement->FirstChildElement("Clips")->FirstChildElement("Clip");
              clipElement != nullptr;
              clipElement = clipElement->NextSiblingElement("Clip")) {
@@ -107,7 +107,7 @@ void Project::open(std::filesystem::path dir) {
         auto clipSlotElement = lanesElement->FirstChildElement("ClipSlot");
         {
             for (auto& lane : _composer->_masterTrack->_lanes) {
-                auto& clipSlot = scene->getClipSlot(lane.get());
+                auto& clipSlot = lane->getClipSlot(scene);
                 auto clipElement = clipSlotElement->FirstChildElement("Clip");
                 if (clipElement != nullptr) {
                     clipSlot->_clip = Clip::fromXml(clipElement);
@@ -117,7 +117,7 @@ void Project::open(std::filesystem::path dir) {
         }
         for (auto& track : _composer->_tracks) {
             for (auto& lane : track->_lanes) {
-                auto& clipSlot = scene->getClipSlot(lane.get());
+                auto& clipSlot = lane->getClipSlot(scene);
                 auto clipElement = clipSlotElement->FirstChildElement("Clip");
                 if (clipElement != nullptr) {
                     clipSlot->_clip = Clip::fromXml(clipElement);
@@ -200,7 +200,7 @@ void Project::save() {
             auto lanesElement = sceneElement->InsertNewChildElement("Lanes");
             {
                 for (auto& lane : _composer->_masterTrack->_lanes) {
-                    auto& clipSlot = scene->getClipSlot(lane.get());
+                    auto& clipSlot = lane->getClipSlot(scene.get());
                     auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
                     if (clipSlot->_clip != nullptr) {
                         clipSlotElement->InsertEndChild(clipSlot->_clip->toXml(&doc));
@@ -209,7 +209,7 @@ void Project::save() {
             }
             for (auto& track : _composer->_tracks) {
                 for (auto& lane : track->_lanes) {
-                    auto& clipSlot = scene->getClipSlot(lane.get());
+                    auto& clipSlot = lane->getClipSlot(scene.get());
                     auto clipSlotElement = lanesElement->InsertNewChildElement("ClipSlot");
                     if (clipSlot->_clip != nullptr) {
                         clipSlotElement->InsertEndChild(clipSlot->_clip->toXml(&doc));

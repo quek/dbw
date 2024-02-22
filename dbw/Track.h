@@ -23,6 +23,7 @@ public:
     void render();
     void addModule(std::string path, uint32_t index);
     void addModule(Module* module);
+    void addLane(Lane* lane);
     bool isAvailableSidechainSrc(Track* dst);
     uint32_t computeLatency();
     void doDCP();

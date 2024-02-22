@@ -1,15 +1,16 @@
 #pragma once
 #include "Clip.h"
 
-class Clip;
 class Composer;
 
-class ClipSlot {
+class ClipSlot : Nameable{
 public:
     ClipSlot();
+    ClipSlot(const nlohmann::json& josn);
     void render(Composer* composer);
     void play();
     void stop();
+    virtual nlohmann::json toJson() override;
 
     std::unique_ptr<Clip> _clip;
     bool _playing = false;

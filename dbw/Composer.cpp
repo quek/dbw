@@ -257,9 +257,8 @@ public:
 };
 
 void Composer::addTrack() {
-    std::stringstream name;
-    name << "track " << this->_tracks.size() + 1;
-    Track* track = new Track(name.str(), this);
+    auto name = std::to_string(this->_tracks.size() + 1);
+    Track* track = new Track(name, this);
     addTrack(track);
 }
 

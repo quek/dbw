@@ -15,9 +15,6 @@ public:
     bool isAllLanePlaying();
     bool isAllLaneStoped();
 
-    std::unique_ptr<ClipSlot>& getClipSlot(Lane* lane);
-    std::map<Lane*, std::unique_ptr<ClipSlot>> _clipSlotMap;
-
 private:
     SceneMatrix* _sceneMatrix;
 };

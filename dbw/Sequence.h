@@ -12,8 +12,7 @@ class Sequence : public Nameable {
 public:
     inline static const char* TYPE = "sequence";
     static std::shared_ptr<Sequence>create(double duration = 16.0, uint64_t id = 0);
-    Sequence() = default;
-    Sequence(const nlohmann::json& json);
+    static std::shared_ptr<Sequence>create(const nlohmann::json& json);
     virtual ~Sequence();
     tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
     static std::shared_ptr<Sequence> fromXml(tinyxml2::XMLElement* element);
@@ -26,6 +25,8 @@ public:
     static int _no;
 
 private:
+    Sequence() = default;
+    Sequence(const nlohmann::json& josn);
     Sequence(double duration);
 };
 
