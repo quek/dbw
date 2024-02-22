@@ -1,5 +1,10 @@
 #include "Nameable.h"
 
+Nameable::Nameable(const nlohmann::json& json) : Neko(json) {
+    _name = json["_name"];
+    _color = json["_color"];
+}
+
 Nameable::Nameable(std::string name) : _name(name) {
 }
 

@@ -2,6 +2,7 @@
 #include <algorithm>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include <nlohmann/json.hpp>
 
 extern float TEXT_BASE_WIDTH;
 extern float TEXT_BASE_HEIGHT;
@@ -37,3 +38,7 @@ struct Bounds {
     bool contains(const ImVec2& pos) const;
     bool overlaped(const Bounds& other) const;
 };
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ImVec4, x, y, z, w);
+
+ImVec4 selectedColor(const ImVec4& color);

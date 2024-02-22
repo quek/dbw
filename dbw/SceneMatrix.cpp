@@ -1,6 +1,7 @@
 #include "SceneMatrix.h"
 #include <mutex>
 #include <ranges>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "AudioEngine.h"
 #include "Clip.h"

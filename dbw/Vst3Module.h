@@ -14,6 +14,8 @@
 
 class Vst3Module : public Module {
 public:
+    inline static const char* TYPE = "vst3";
+    Vst3Module(const nlohmann::json& json);
     Vst3Module(std::string name, Track* track);
     virtual ~Vst3Module();
     bool load(std::string path);
@@ -27,10 +29,10 @@ public:
     virtual void loadState(std::filesystem::path path) override;
     virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
     virtual nlohmann::json toJson() override;
+    static Vst3Module* fromJson(const nlohmann::json& json);
 
     static nlohmann::json scan(const std::string path);
     static Vst3Module* create(const std::string& id);
-    static Vst3Module* fromJson(const nlohmann::json& json);
 
     std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
 

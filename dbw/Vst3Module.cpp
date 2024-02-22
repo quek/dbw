@@ -21,7 +21,28 @@
 #include "Track.h"
 #include "util.h"
 
-// ここからVSTプラグイン関係(音声処理クラスやパラメーター操作クラス)のヘッダ
+Vst3Module::Vst3Module(const nlohmann::json& json) : Module(json) , _pluginContext(this) {
+    std::ifstream in(configDir() / "plugin.json");
+    if (!in) {
+        return;
+    }
+    nlohmann::json plugins;
+    in >> plugins;
+    _id = json["_id"];
+    auto plugin = std::find_if(plugins["vst3"].begin(), plugins["vst3"].end(), [this](auto x) { return x["id"] == _id; });
+    if (plugin == plugins["vst3"].end()) {
+        return;
+    }
+
+    auto path = (*plugin)["path"].get<std::string>();
+    load(path);
+    std::string state = json["state"].get<std::string>();
+    std::vector<uint8_t> buffer = cppcodec::base64_rfc4648::decode(state);
+    Steinberg::MemoryStream stream(buffer.data(), buffer.size());
+    if (!Steinberg::Vst::PresetFile::loadPreset(&stream, _component->iid, _component, _controller)) {
+        Error("Steinberg::Vst::PresetFile::loadPreset FAILED!");
+    }
+}
 
 Vst3Module::Vst3Module(std::string name, Track* track) : Module(name, track), _pluginContext(this) {
 }
@@ -386,7 +407,9 @@ void Vst3Module::start() {
     }
     if (_processor) {
         _latency = _processor->getLatencySamples();
-        _track->_composer->computeLatency();
+        if (_track && _track->_composer) {
+            _track->_composer->computeLatency();
+        }
 
         Steinberg::uint32 tailSample = _processor->getTailSamples();
         if (tailSample != Steinberg::Vst::kNoTail) {
@@ -492,7 +515,7 @@ void Vst3Module::loadState(std::filesystem::path path) {
 
 tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("Vst3Plugin");
-    element->SetAttribute("id", xmlId());
+    element->SetAttribute("id", nekoId());
     // TODO Possible values: instrument, noteFX, audioFX, analyzer
     element->SetAttribute("deviceRole", "instrument");
     element->SetAttribute("deviceName", _name.c_str());

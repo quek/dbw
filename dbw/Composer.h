@@ -25,6 +25,7 @@ public:
     void play();
     void stop();
     void addTrack();
+    void addTrack(Track* track);
     void scanPlugin();
     int maxBar();
     void clear();
@@ -48,7 +49,6 @@ public:
     double _loopEndTime = 16.0;
     bool _isScrollFolloPlayhead = true;
     CommandManager _commandManager;
-    PluginManager _pluginManager;
     std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<Track> _masterTrack;
     std::vector<Module*> _orderedModules;

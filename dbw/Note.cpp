@@ -27,3 +27,10 @@ std::unique_ptr<Note> Note::fromXml(tinyxml2::XMLElement* element) {
     element->QueryDoubleAttribute("rel", &note->_rel);
     return note;
 }
+
+nlohmann::json Note::toJson() {
+    nlohmann::json json = Neko::toJson();
+    json["type"] = TYPE;
+    json.update(*this);
+    return json;
+}

@@ -25,6 +25,16 @@ float widthWithPadding(int nchars) {
     return TEXT_BASE_WIDTH * nchars + style.FramePadding.x * 2;
 }
 
+ImVec4 selectedColor(const ImVec4& color) {
+    float weight = 1.3f;
+    return ImVec4(
+        std::min(color.x * weight, 1.0f),
+        std::min(color.y * weight, 1.0f),
+        std::min(color.z * weight, 1.0f),
+        std::min(color.w * weight, 1.0f)
+    );
+}
+
 bool operator<(const ImVec2& lhs, const ImVec2& rhs) {
     return lhs.x < rhs.x && lhs.y < rhs.y;
 }

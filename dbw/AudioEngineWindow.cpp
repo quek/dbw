@@ -2,6 +2,7 @@
 #include <format>
 #include <sstream>
 #include <string>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "AudioEngine.h"
 #include "Composer.h"

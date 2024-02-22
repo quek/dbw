@@ -103,11 +103,13 @@ void AudioEngine::start() {
         (void*)this);
     if (err != paNoError) {
         Error("PortAudio error: {}", Pa_GetErrorText(err));
+        return;
     }
 
     err = Pa_StartStream(_stream);
     if (err != paNoError) {
         Error("PortAudio error: {}", Pa_GetErrorText(err));
+        return;
     }
     _isStarted = true;
 }

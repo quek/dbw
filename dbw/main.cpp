@@ -37,7 +37,8 @@
 #include "ErrorWindow.h"
 #include "Grid.h"
 #include "GuiUtil.h"
-#include "PluginHost.h"
+#include "ClapHost.h"
+#include "PluginManager.h"
 #include "util.h"
 
 struct FrameContext {
@@ -85,6 +86,7 @@ int main(int, char**) {
 
     gPreference.load();
     gTheme.load();
+    gPluginManager.load();
 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
@@ -162,7 +164,7 @@ int main(int, char**) {
             while (!gClapRequestCallbackQueue.empty()) {
                 const clap_host* host = gClapRequestCallbackQueue.front();
                 gClapRequestCallbackQueue.pop();
-                PluginHost* pluginHost = (PluginHost*)host->host_data;
+                ClapHost* pluginHost = (ClapHost*)host->host_data;
                 pluginHost->_plugin->on_main_thread(pluginHost->_plugin);
             }
         }
@@ -189,8 +191,8 @@ int main(int, char**) {
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
         composer._commandManager.run();
-        gErrorWindow->render();
         composer.render();
+        gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)

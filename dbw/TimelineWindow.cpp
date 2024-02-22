@@ -1,5 +1,6 @@
 #include "TimelineWindow.h"
 #include <mutex>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "AudioEngine.h"
 #include "Clip.h"

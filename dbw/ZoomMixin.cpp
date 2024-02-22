@@ -1,4 +1,5 @@
 #include "ZoomMixin.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 
 ZoomMixin::ZoomMixin(float zoomX, float zoomY) : _zoomX(zoomX), _zoomY(zoomY) {

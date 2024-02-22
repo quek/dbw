@@ -4,13 +4,17 @@
 #include "Composer.h"
 #include "Track.h"
 
+GainModule::GainModule(const nlohmann::json& json) : BuiltinModule(json) {
+    _gain = json["_gain"];
+}
+
 GainModule::GainModule(std::string name, Track* track) :
     BuiltinModule(name, track), _gain(1.0) {
 }
 
 tinyxml2::XMLElement* GainModule::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("BuiltinDevice");
-    element->SetAttribute("id", xmlId());
+    element->SetAttribute("id", nekoId());
     element->SetAttribute("deviceRole", "audioFX");
     element->SetAttribute("deviceName", _name.c_str());
     element->SetAttribute("deviceID", "Gain");
@@ -21,6 +25,12 @@ tinyxml2::XMLElement* GainModule::toXml(tinyxml2::XMLDocument* doc) {
     realParameter->SetAttribute("value", _gain);
 
     return element;
+}
+
+nlohmann::json GainModule::toJson() {
+    nlohmann::json json = BuiltinModule::toJson();
+    json["_id"] = "Gain";
+    return json;
 }
 
 void GainModule::loadParameters(tinyxml2::XMLElement* element) {

@@ -1,5 +1,6 @@
 #include "PianoRollWindow.h"
 #include <mutex>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "Clip.h"
 #include "AudioEngine.h"

@@ -3,13 +3,16 @@
 #include "imgui.h"
 #include "AudioEngine.h"
 #include "BuiltinModule.h"
-#include "PluginModule.h"
+#include "ClapModule.h"
 #include "Composer.h"
 #include "Command.h"
 #include "Config.h"
 #include "Track.h"
 #include "Vst3Module.h"
 #include "command/DeleteModule.h"
+
+Module::Module(const nlohmann::json& json) : Nameable(json) {
+}
 
 Module::~Module() {
     closeGui();
@@ -118,7 +121,7 @@ Module* Module::fromJson(const nlohmann::json& json) {
     if (type == "builtin") {
         //return BuiltinModule::fromJson(json);
     } else if (type == "vst3") {
-        return Vst3Module::fromJson(json);
+        return new Vst3Module(json);
     } else if (type == "clap") {
         //return PluginModule::fromJson(json);
     }

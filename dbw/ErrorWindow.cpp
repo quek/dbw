@@ -7,6 +7,7 @@ void ErrorWindow::render() {
     if (!_show) {
         return;
     }
+    ImGui::SetNextWindowFocus();
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, -1), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));

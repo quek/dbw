@@ -3,6 +3,10 @@
 #include <imgui.h>
 #include "PianoRollWindow.h"
 
+Clip::Clip(const nlohmann::json& json) : Nameable(json), Thing(json["_time"], json["_duration"]) {
+    _sequence.reset(new Sequence(json["_sequence"]));
+}
+
 Clip::Clip(double time, double duration) :
     Thing(time, duration), _sequence(Sequence::create(duration)) {
 }
@@ -41,7 +45,7 @@ void Clip::renderInScene(PianoRollWindow* pianoRoll) {
 
 tinyxml2::XMLElement* Clip::toXml(tinyxml2::XMLDocument* doc) {
     auto element = doc->NewElement("Clip");
-    element->SetAttribute("id", xmlId());
+    element->SetAttribute("id", nekoId());
     element->SetAttribute("time", _time);
     element->SetAttribute("duration", _duration);
     element->InsertEndChild(_sequence->toXml(doc));
@@ -55,4 +59,13 @@ std::unique_ptr<Clip> Clip::fromXml(tinyxml2::XMLElement* element) {
     std::shared_ptr<Sequence> sequence = Sequence::fromXml(element->FirstChildElement("Notes"));
     std::unique_ptr<Clip> clip(new Clip(time, duration, sequence));
     return clip;
+}
+
+nlohmann::json Clip::toJson() {
+    nlohmann::json json = Nameable::toJson();
+    json["type"] = TYPE;
+    json["_sequence"] = _sequence->toJson();
+    json["_time"] = _time;
+    json["_duration"] = _duration;
+    return json;
 }

@@ -1,13 +1,22 @@
 #include "Fader.h"
 #include <ranges>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+
+Fader::Fader(const nlohmann::json& json) : BuiltinModule(json)
+{
+    _level = json["_level"];
+    _pan = json["_pan"];
+    _mute = json["_mute"];
+    _solo = json["_solo"];
+}
 
 Fader::Fader(std::string name, Track* track) : BuiltinModule(name, track) {
 }
 
 tinyxml2::XMLElement* Fader::toXml(tinyxml2::XMLDocument* doc) {
     auto* element = doc->NewElement("BuiltinDevice");
-    element->SetAttribute("id", xmlId());
+    element->SetAttribute("id", nekoId());
     element->SetAttribute("deviceRole", "audioFX");
     element->SetAttribute("deviceName", _name.c_str());
     element->SetAttribute("deviceID", "Fader");
@@ -69,4 +78,10 @@ void Fader::renderContent() {
     ImGui::SameLine();
     ImGui::Checkbox("Solo", &_solo);
     ImGui::PopItemWidth();
+}
+
+nlohmann::json Fader::toJson() {
+    nlohmann::json json = BuiltinModule::toJson();
+    json.update(*this);
+    return json;
 }

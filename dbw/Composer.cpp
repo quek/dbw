@@ -20,7 +20,6 @@
 Composer::Composer(AudioEngine* audioEngine) :
     _audioEngine(audioEngine),
     _commandManager(this),
-    _pluginManager(this),
     _project(std::make_unique<Project>(yyyyMmDd(), this)),
     _masterTrack(std::make_unique<Track>("MASTER", this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
@@ -29,7 +28,6 @@ Composer::Composer(AudioEngine* audioEngine) :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
     addTrack();
-    _pluginManager.load();
 }
 
 void Composer::render() const {
@@ -92,10 +90,6 @@ void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
     double deltaSec = framesPerBuffer / gPreference.sampleRate;
     double oneBeatSec = 60.0 / _bpm;
     _nextPlayTime = deltaSec / oneBeatSec + _playTime;
-}
-
-void Composer::scanPlugin() {
-    _pluginManager.scan();
 }
 
 int Composer::maxBar() {
@@ -248,6 +242,7 @@ public:
     AddTrackCommand(Track* track) : _track(track) {}
     void execute(Composer* composer) override {
         std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+        _track->_composer = composer;
         composer->_tracks.push_back(std::move(_track));
         composer->computeProcessOrder();
     }
@@ -265,5 +260,9 @@ void Composer::addTrack() {
     std::stringstream name;
     name << "track " << this->_tracks.size() + 1;
     Track* track = new Track(name.str(), this);
+    addTrack(track);
+}
+
+void Composer::addTrack(Track* track) {
     _commandManager.executeCommand(new AddTrackCommand(track));
 }

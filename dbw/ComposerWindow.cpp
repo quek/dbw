@@ -1,4 +1,5 @@
 #include "ComposerWindow.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "../ImGuiFileDialog/ImGuiFileDialog.h"
 #include "AudioEngine.h"
@@ -77,7 +78,7 @@ void ComposerWindow::render() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Scan Plugin")) {
-        _composer->scanPlugin();
+        gPluginManager.scan();
     }
 
     ImGui::SameLine();
@@ -121,28 +122,48 @@ void ComposerWindow::render() {
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
     if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
+        Track* masterTrack = _composer->_masterTrack.get();
         ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
+        ImGui::TableSetupColumn(masterTrack->_name.c_str());
         for (size_t i = 0; i < _composer->_tracks.size(); ++i) {
             ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str());
         }
         ImGui::TableHeadersRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::TableHeader(_composer->_masterTrack->_name.c_str());
+        ImGui::TableHeader(masterTrack->_name.c_str());
+        if (ImGui::IsItemActivated()) {
+            _selectedTracks.clear();
+            _selectedTracks.insert(masterTrack);
+        }
+        ImVec4 colorMasterTrack = _selectedTracks.contains(masterTrack) ? selectedColor(masterTrack->_color) : masterTrack->_color;
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
+
         for (auto i = 0; i < _composer->_tracks.size(); ++i) {
+            Track* track = _composer->_tracks[i].get();
             ImGui::TableSetColumnIndex(i + 1);
-            auto name = _composer->_tracks[i]->_name.c_str();
-            ImGui::TableHeader(name);
+            ImGui::TableHeader(track->_name.c_str());
+            if (ImGui::IsItemActivated()) {
+                _selectedTracks.clear();
+                _selectedTracks.insert(track);
+            }
+            ImVec4 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(color));
         }
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        _composer->_masterTrack->render();
-        for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetColumnIndex(i + 1);
-            _composer->_tracks[i]->render();
-        }
+        masterTrack->render();
+        colorMasterTrack.w = 0.2f;
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
 
+        for (auto i = 0; i < _composer->_tracks.size(); ++i) {
+            Track* track = _composer->_tracks[i].get();
+            ImGui::TableSetColumnIndex(i + 1);
+            track->render();
+            ImVec4 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
+            color.w = 0.2f;
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(color));
+        }
 
         ImGui::EndTable();
     }
@@ -165,6 +186,7 @@ void ComposerWindow::render() {
     }
 
 
+    handleLocalShortcut();
     handleGlobalShortcut();
 }
 
@@ -184,10 +206,42 @@ void ComposerWindow::handleGlobalShortcut() {
 
     auto& io = ImGui::GetIO();
     if (io.KeyCtrl) {
-        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z))) {
-            _composer->_commandManager.undo();
-        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y))) {
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y))) {
             _composer->_commandManager.redo();
+        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z))) {
+            _composer->_commandManager.undo();
+        }
+    }
+}
+
+void ComposerWindow::handleLocalShortcut() {
+    // TODO 動かない。なぜ？
+    //if (!canHandleInput()) {
+    //    return;
+    //}
+
+    auto& io = ImGui::GetIO();
+    if (io.KeyCtrl) {
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C))) {
+            // COPY
+            if (!_selectedTracks.empty()) {
+                nlohmann::json json;
+                for (const auto& track : _selectedTracks) {
+                    json["tracks"].push_back(track->toJson());
+                }
+                ImGui::SetClipboardText(eraseNekoId(json).dump(2).c_str());
+            }
+        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_X))) {
+            // CUT
+        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V))) {
+            // PAST
+            nlohmann::json json = nlohmann::json::parse(ImGui::GetClipboardText());
+            if (json.contains("tracks") && json["tracks"].is_array()) {
+                for (const auto& x : json["tracks"]) {
+                    Track* track = new Track(x);
+                    _composer->addTrack(track);
+                }
+            }
         }
     }
 }

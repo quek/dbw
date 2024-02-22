@@ -10,10 +10,10 @@
 class ProcessBuffer;
 class Track;
 
-class PluginHost {
+class ClapHost {
 public:
-    PluginHost(Track* track);
-    ~PluginHost();
+    ClapHost(Track* track);
+    ~ClapHost();
     bool load(const std::string path, uint32_t pluginIndex);
     static nlohmann::json scan(const std::string path);
     void unload();

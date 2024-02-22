@@ -12,17 +12,24 @@ std::shared_ptr<Sequence> Sequence::create(double duration, uint64_t id) {
     if (id != 0) {
         sequence->setNekoId(id);
     }
-    xmlIdSequenceMap[sequence->xmlId()] = sequence;
+    xmlIdSequenceMap[sequence->nekoId()] = sequence;
     return sequence;
 }
 
+Sequence::Sequence(const nlohmann::json& json) : Nameable(json) {
+    _duration = json["_duration"];
+    for (const auto& x : json["_notes"]) {
+        _notes.emplace_back(new Note(x));
+    }
+}
+
 Sequence::~Sequence() {
-    xmlIdSequenceMap.erase(xmlId());
+    xmlIdSequenceMap.erase(nekoId());
 }
 
 tinyxml2::XMLElement* Sequence::toXml(tinyxml2::XMLDocument* doc) {
     auto element = doc->NewElement("Notes");
-    element->SetAttribute("id", xmlId());
+    element->SetAttribute("id", nekoId());
     element->SetAttribute("name", _name.c_str());
     for (auto& note : _notes) {
         auto noteElement = note->toXml(doc);
@@ -53,6 +60,20 @@ std::shared_ptr<Sequence> Sequence::fromXml(tinyxml2::XMLElement* element) {
         sequence->_notes.emplace_back(Note::fromXml(noteElement));
     }
     return sequence;
+}
+
+nlohmann::json Sequence::toJson() {
+    nlohmann::json json = Nameable::toJson();
+    json["type"] = TYPE;
+    json["_duration"] = _duration;
+
+    nlohmann::json notes = nlohmann::json::array();
+    for (const auto& note : _notes) {
+        notes.emplace_back(note->toJson());
+    }
+    json["_notes"] = notes;
+
+    return json;
 }
 
 DeleteNoteCommand::DeleteNoteCommand(Sequence* sequence, Note* note, bool undoable) : Command(undoable), _sequence(sequence), _note(note) {

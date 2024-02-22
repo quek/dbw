@@ -200,9 +200,9 @@
     <ClInclude Include="Midi.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="PluginEventList.h" />
-    <ClInclude Include="PluginHost.h" />
+    <ClInclude Include="ClapHost.h" />
     <ClInclude Include="PluginManager.h" />
-    <ClInclude Include="PluginModule.h" />
+    <ClInclude Include="ClapModule.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="Scene.h" />
@@ -270,9 +270,9 @@
     <ClCompile Include="Midi.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="PluginEventList.cpp" />
-    <ClCompile Include="PluginHost.cpp" />
+    <ClCompile Include="ClapHost.cpp" />
     <ClCompile Include="PluginManager.cpp" />
-    <ClCompile Include="PluginModule.cpp" />
+    <ClCompile Include="ClapModule.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="Scene.cpp" />

@@ -6,7 +6,7 @@
 #include "../Module.h"
 #include "../Track.h"
 
-command::DeleteModule::DeleteModule(Module* module) : _moduleId(module->xmlId()), _trackId(module->_track->xmlId()) {
+command::DeleteModule::DeleteModule(Module* module) : _moduleId(module->nekoId()), _trackId(module->_track->nekoId()) {
 }
 
 void command::DeleteModule::execute(Composer* composer) {

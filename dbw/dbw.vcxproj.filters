@@ -24,7 +24,7 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="AudioEngine.cpp" />
-    <ClCompile Include="PluginHost.cpp" />
+    <ClCompile Include="ClapHost.cpp" />
     <ClCompile Include="Composer.cpp" />
     <ClCompile Include="PluginEventList.cpp" />
     <ClCompile Include="..\imgui\misc\cpp\imgui_stdlib.cpp">
@@ -38,7 +38,7 @@
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />
     <ClCompile Include="Module.cpp" />
-    <ClCompile Include="PluginModule.cpp" />
+    <ClCompile Include="ClapModule.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
@@ -123,7 +123,7 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="AudioEngine.h" />
-    <ClInclude Include="PluginHost.h" />
+    <ClInclude Include="ClapHost.h" />
     <ClInclude Include="Composer.h" />
     <ClInclude Include="PluginEventList.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h">
@@ -138,7 +138,7 @@
     <ClInclude Include="Track.h" />
     <ClInclude Include="ProcessBuffer.h" />
     <ClInclude Include="Module.h" />
-    <ClInclude Include="PluginModule.h" />
+    <ClInclude Include="ClapModule.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="ErrorWindow.h" />

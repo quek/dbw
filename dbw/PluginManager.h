@@ -3,13 +3,16 @@
 #include <nlohmann/json.hpp>
 #include "tinyxml2/tinyxml2.h"
 
-class Composer;
 class Module;
 class Track;
 
+class PluginManager;
+extern PluginManager gPluginManager;
+
 class PluginManager {
 public:
-    PluginManager(Composer* composer);
+    PluginManager();
+    Module* create(const nlohmann::json& json);
     Module* create(tinyxml2::XMLElement* element, Track* track);
     void scan();
     void load();
@@ -18,7 +21,6 @@ public:
     nlohmann::json _plugins;
 
     std::string _query;
-    Composer* _composer;
 
 private:
     void scanClap();

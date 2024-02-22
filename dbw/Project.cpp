@@ -9,8 +9,8 @@
 #include "logger.h"
 #include "Module.h"
 #include "Note.h"
-#include "PluginHost.h"
-#include "PluginModule.h"
+#include "ClapHost.h"
+#include "ClapModule.h"
 #include "Lane.h"
 #include "util.h"
 
@@ -173,7 +173,7 @@ void Project::save() {
             {
                 for (auto& lane : _composer->_masterTrack->_lanes) {
                     auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
-                    lanes->SetAttribute("track", _composer->_masterTrack->xmlId());
+                    lanes->SetAttribute("track", _composer->_masterTrack->nekoId());
                     auto* clipsElement = lanes->InsertNewChildElement("Clips");
                     for (auto& clip : lane->_clips) {
                         clipsElement->InsertEndChild(clip->toXml(&doc));
@@ -183,7 +183,7 @@ void Project::save() {
             for (auto& track : _composer->_tracks) {
                 for (auto& lane : track->_lanes) {
                     auto* lanes = lanesWrap->InsertNewChildElement("Lanes");
-                    lanes->SetAttribute("track", track->xmlId());
+                    lanes->SetAttribute("track", track->nekoId());
                     auto* clipsElement = lanes->InsertNewChildElement("Clips");
                     for (auto& clip : lane->_clips) {
                         clipsElement->InsertEndChild(clip->toXml(&doc));

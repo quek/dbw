@@ -10,6 +10,15 @@ Neko::Neko() {
     setNewNekoId();
 }
 
+Neko::Neko(const nlohmann::json& json) {
+    if (json.contains("_nekoId") && json["_nekoId"].is_number()) {
+        _nekoId = json["_nekoId"];
+        nekoIdMap[_nekoId] = this;
+    } else {
+        setNewNekoId();
+    }
+}
+
 Neko::Neko(const Neko&) {
     setNewNekoId();
 }
@@ -18,7 +27,7 @@ Neko::~Neko() {
     nekoIdMap.erase(_nekoId);
 }
 
-const uint64_t Neko::xmlId() const {
+const uint64_t Neko::nekoId() const {
     return _nekoId;
 }
 
@@ -41,4 +50,25 @@ void Neko::setNewNekoId() {
         nekoIdMap[_nekoId] = this;
         break;
     }
+}
+
+nlohmann::json eraseNekoId(const nlohmann::json& json) {
+    if (json.is_array()) {
+        nlohmann::json array = nlohmann::json::array();
+        for (const auto& x : json) {
+            array.push_back(eraseNekoId(x));
+        }
+        return array;
+    }
+    if (json.is_object()) {
+        nlohmann::json object;
+        for (auto& x : json.items()) {
+            if (x.key() == "_nekoId") {
+                continue;
+            }
+            object[x.key()] = eraseNekoId(x.value());
+        }
+        return object;
+    }
+    return json;
 }

@@ -11,13 +11,27 @@
 #include "Fader.h"
 #include "Midi.h"
 #include "Module.h"
-#include "PluginModule.h"
-#include "PluginHost.h"
+#include "ClapModule.h"
+#include "ClapHost.h"
 #include "Lane.h"
 #include "command/AddModule.h"
 
+Track::Track(const nlohmann::json& json) : Nameable(json) {
+    for (const auto& x : json["_lanes"]) {
+        _lanes.emplace_back(new Lane(x));
+    }
+
+    _fader.reset(new Fader(json["_fader"]));
+    _fader->_track = this;
+    if (json.contains("_modules")) {
+        for (const auto& x : json["_modules"]) {
+            addModule(gPluginManager.create(x));
+        }
+    }
+}
+
 Track::Track(std::string name, Composer* composer) :
-    _fader(new Fader("Fader", this)), _name(name), _composer(composer) {
+    _fader(new Fader("Fader", this)), Nameable(name), _composer(composer) {
     _lanes.emplace_back(new Lane());
     _fader->start();
 }
@@ -83,7 +97,7 @@ void Track::render() {
         _openModuleSelector = true;
     }
     if (_openModuleSelector) {
-        _composer->_pluginManager.openModuleSelector(this);
+        gPluginManager.openModuleSelector(this);
     }
     _fader->render();
     ImGui::Text(std::to_string(_latency).c_str());
@@ -91,14 +105,23 @@ void Track::render() {
 }
 
 void Track::addModule(std::string path, uint32_t index) {
-    PluginHost* pluginHost = new PluginHost(this);
+    ClapHost* pluginHost = new ClapHost(this);
     pluginHost->load(path.c_str(), index);
-    Module* module = new PluginModule(pluginHost->_name, this, pluginHost);
+    Module* module = new ClapModule(pluginHost->_name, this, pluginHost);
     // TODO
     _modules.emplace_back(module);
     module->start();
     module->openGui();
     _composer->computeProcessOrder();
+}
+
+void Track::addModule(Module* module) {
+    module->_track = this;
+    _modules.emplace_back(module);
+    module->start();
+    if (_composer) {
+        _composer->computeProcessOrder();
+    }
 }
 
 bool Track::isAvailableSidechainSrc(Track* dst) {
@@ -124,7 +147,7 @@ void Track::doDCP() {
 
 tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {
     auto* trackElement = doc->NewElement("Track");
-    trackElement->SetAttribute("id", xmlId());
+    trackElement->SetAttribute("id", nekoId());
     trackElement->SetAttribute("name", _name.c_str());
 
     auto channel = trackElement->InsertNewChildElement("Channel");
@@ -163,7 +186,7 @@ std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element, Composer* c
          deviceElement = deviceElement->NextSiblingElement()) {
         if (deviceElement) {
             // TODO fromXML 
-            Module* module = composer->_pluginManager.create(deviceElement, track.get());
+            Module* module = gPluginManager.create(deviceElement, track.get());
             if (module != nullptr) {
                 track->_modules.push_back(std::unique_ptr<Module>(module));
                 module->start();
@@ -172,3 +195,31 @@ std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element, Composer* c
     }
     return track;
 }
+
+nlohmann::json Track::toJson() {
+    nlohmann::json json = Nameable::toJson();
+    json["type"] = TYPE;
+    json["_fader"].update(_fader->toJson());
+
+    nlohmann::json modules = nlohmann::json::array();
+    for (auto& module : _modules) {
+        modules.emplace_back(module->toJson());
+    }
+    json["_modules"] = modules;
+
+    nlohmann::json lanes = nlohmann::json::array();
+    for (auto& lane : _lanes) {
+        lanes.emplace_back(lane->toJson());
+    }
+    json["_lanes"] = lanes;
+
+    for (const auto& scene : _composer->_sceneMatrix->_scenes) {
+        for (const auto& lane : _lanes) {
+            auto& clipSlot = scene->getClipSlot(lane.get());
+        }
+
+    }
+
+    return json;
+}
+

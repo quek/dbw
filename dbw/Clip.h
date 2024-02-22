@@ -8,6 +8,8 @@ class PianoRollWindow;
 
 class Clip : public Nameable, public Thing {
 public:
+    inline static const char* TYPE = "clip";
+    Clip(const nlohmann::json& json);
     Clip(const Clip& other) = default;
     Clip(double time = 0.0, double duration = 16.0);
     Clip(double time, double duration, std::shared_ptr<Sequence> sequence);
@@ -19,6 +21,7 @@ public:
     tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
     static std::unique_ptr<Clip> fromXml(tinyxml2::XMLElement* element);
 
+    virtual nlohmann::json toJson() override;
 
     std::shared_ptr<Sequence> _sequence;
 

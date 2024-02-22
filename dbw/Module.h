@@ -13,6 +13,7 @@ class Track;
 
 class Module : public Nameable {
 public:
+    Module(const nlohmann::json& json);
     Module(std::string name, Track* track) : Nameable(name), _track(track) {}
     virtual ~Module();
     virtual void openGui() { _didOpenGui = true; }
@@ -36,7 +37,7 @@ public:
     static Module* create(std::string& type, std::string& id);
     static Module* fromJson(const nlohmann::json&);
 
-    Track* _track;
+    Track* _track = nullptr;
     bool _didOpenGui = false;
     std::vector<std::unique_ptr<Connection>> _connections;
     int _ninputs = 0;

@@ -10,9 +10,9 @@ Connection::Connection(Module* from, int fromIndex, Module* to, int toIndex) :
 
 tinyxml2::XMLElement* Connection::toXml(tinyxml2::XMLDocument* doc) {
     auto element = doc->NewElement("Connection");
-    element->SetAttribute("from", _from->xmlId());
+    element->SetAttribute("from", _from->nekoId());
     element->SetAttribute("fromIndex", _fromIndex);
-    element->SetAttribute("to", _to->xmlId());
+    element->SetAttribute("to", _to->nekoId());
     element->SetAttribute("toIndex", _toIndex);
     return element;
 }

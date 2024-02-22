@@ -7,15 +7,17 @@
 #include "Composer.h"
 #include "GainModule.h"
 #include "logger.h"
-#include "PluginHost.h"
-#include "PluginModule.h"
+#include "ClapHost.h"
+#include "ClapModule.h"
 #include "Track.h"
 #include "util.h"
 #include "Vst3Module.h"
 #include "command/AddModule.h"
 
-std::map<std::string, std::function<BuiltinModule* (Track*)>> builtinModuleMap = {
-    {"Gain", [](Track* track) -> BuiltinModule* { return new GainModule("Gain", track); }},
+PluginManager gPluginManager;
+
+std::map<std::string, std::function<BuiltinModule* (const nlohmann::json& json)>> builtinModuleMap = {
+    {"Gain", [](const nlohmann::json& json) -> BuiltinModule* { return new GainModule(json); }},
 };
 
 void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::string& filename, std::string content) {
@@ -28,27 +30,39 @@ void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::s
     configFile.close();
 }
 
-PluginManager::PluginManager(Composer* composer) : _composer(composer) {
+PluginManager::PluginManager() {
+}
+
+Module* PluginManager::create(const nlohmann::json& json) {
+    auto& type = json["type"];
+    if (type == "builtin") {
+        return builtinModuleMap[json["_id"]](json);
+    } else if (type == "vst3") {
+        return new Vst3Module(json);
+    } else if (type == "clap") {
+        return new ClapModule(json);
+    }
+    return nullptr;
 }
 
 Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
     Module* result;
     if (strcmp(element->Name(), "ClapPlugin") == 0) {
         auto deviceId = element->Attribute("deviceID");
-        auto plugin = _composer->_pluginManager.findPlugin("clap", deviceId);
+        auto plugin = findPlugin("clap", deviceId);
         if (plugin == nullptr) {
             return nullptr;
         }
-        PluginHost* pluginHost = new PluginHost(track);
+        ClapHost* pluginHost = new ClapHost(track);
         pluginHost->load((*plugin)["path"].get<std::string>(), (*plugin)["index"].get<uint32_t>());
-        Module* module = new PluginModule(pluginHost->_name, track, pluginHost);
+        Module* module = new ClapModule(pluginHost->_name, track, pluginHost);
         auto state = element->FirstChildElement("State");
         pluginHost->_statePath = state->Attribute("path");
         pluginHost->loadState();
         result = module;
     } else if (strcmp(element->Name(), "Vst3Plugin") == 0) {
         auto deviceId = element->Attribute("deviceID");
-        auto plugin = _composer->_pluginManager.findPlugin("vst3", deviceId);
+        auto plugin = findPlugin("vst3", deviceId);
         if (plugin == nullptr) {
             return nullptr;
         }
@@ -56,18 +70,20 @@ Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
         auto module = new Vst3Module((*plugin)["name"], track);
         module->load(path);
         auto state = element->FirstChildElement("State");
-        auto statePath = _composer->_project->projectDir() / state->Attribute("path");
+        auto statePath = track->_composer->_project->projectDir() / state->Attribute("path");
         module->loadState(statePath);
         result = module;
     } else if (strcmp(element->Name(), "BuiltinDevice") == 0) {
-        auto deviceId = element->Attribute("deviceID");
-        auto factory = builtinModuleMap.find(deviceId);
-        if (factory == builtinModuleMap.end()) {
-            return nullptr;
-        }
-        BuiltinModule* module = (*factory).second(track);
-        module->loadParameters(element->FirstChildElement("Parameters"));
-        result = module;
+        //auto deviceId = element->Attribute("deviceID");
+        //auto factory = builtinModuleMap.find(deviceId);
+        //if (factory == builtinModuleMap.end()) {
+        //    return nullptr;
+        //}
+        //BuiltinModule* module = (*factory).second(track);
+        //module->loadParameters(element->FirstChildElement("Parameters"));
+        //result = module;
+        // TODO
+        return nullptr;
     } else {
         return nullptr;
     }
@@ -145,7 +161,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);
                 module->load(path);
-                _composer->_commandManager.executeCommand(new command::AddModule(track->xmlId(), "vst3", id));
+                track->_composer->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "vst3", id));
             }
         }
     }
@@ -160,7 +176,7 @@ void PluginManager::openModuleSelector(Track* track) {
         if (q == _query.end()) {
             if (ImGui::Button(name.c_str())) {
                 track->_openModuleSelector = false;
-                _composer->_commandManager.executeCommand(new command::AddModule(track->xmlId(), "builtin", name));
+                track->_composer->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "builtin", name));
             }
         }
     }
@@ -205,7 +221,7 @@ void PluginManager::scanClap() {
 
     _plugins["clap"] = nlohmann::json::array();
     for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
-        auto x = PluginHost::scan(*i);
+        auto x = ClapHost::scan(*i);
         for (auto p = x.begin(); p != x.end(); ++p) {
             _plugins["clap"].push_back(*p);
         }

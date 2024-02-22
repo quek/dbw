@@ -4,12 +4,14 @@
 #include "Module.h"
 
 class Track;
-class PluginHost;
+class ClapHost;
 
-class PluginModule : public Module {
+class ClapModule : public Module {
 public:
-    PluginModule(std::string name, Track* track, PluginHost* pluginHost);
-    ~PluginModule();
+    inline static const char* TYPE = "clap";
+    ClapModule(const nlohmann::json& json);
+    ClapModule(std::string name, Track* track, ClapHost* pluginHost);
+    ~ClapModule();
     void openGui() override;
     void closeGui() override;
     void renderContent() override;
@@ -18,5 +20,5 @@ public:
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
 
-    std::unique_ptr<PluginHost> _pluginHost;
+    std::unique_ptr<ClapHost> _pluginHost;
 };
