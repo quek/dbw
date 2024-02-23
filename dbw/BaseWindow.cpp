@@ -1,7 +1,7 @@
 #include "BaseWindow.h"
 
 bool BaseWindow::canHandleInput() {
-    return ImGui::IsWindowHovered();
+    return ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 }
 
 ImVec2 BaseWindow::screenToWindow(const ImVec2& pos) {

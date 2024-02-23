@@ -111,30 +111,43 @@ void ComposerWindow::render() {
     if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
         Track* masterTrack = _composer->_masterTrack.get();
         ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableSetupColumn(masterTrack->_name.c_str());
-        for (size_t i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str());
+        ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_None;
+        ImGui::TableSetupColumn(masterTrack->_name.c_str(), columnFlags, 0.0f, 0);
+        for (int i = 0; i < _composer->_tracks.size(); ++i) {
+            ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str(), columnFlags, 0.0f, i + 1);
         }
-        ImGui::TableHeadersRow();
+
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         ImGui::TableSetColumnIndex(0);
-        ImGui::TableHeader(masterTrack->_name.c_str());
+        ImGui::PushID(masterTrack);
+        ImGui::TableHeader(ImGui::TableGetColumnName(0));
         if (ImGui::IsItemActivated()) {
             _selectedTracks.clear();
             _selectedTracks.insert(masterTrack);
         }
         ImVec4 colorMasterTrack = _selectedTracks.contains(masterTrack) ? selectedColor(masterTrack->_color) : masterTrack->_color;
         ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
+        ImGui::PopID();
 
         for (auto i = 0; i < _composer->_tracks.size(); ++i) {
             Track* track = _composer->_tracks[i].get();
             ImGui::TableSetColumnIndex(i + 1);
-            ImGui::TableHeader(track->_name.c_str());
+            ImGui::PushID(track);
+            ImGui::TableHeader(ImGui::TableGetColumnName(i + 1));
             if (ImGui::IsItemActivated()) {
                 _selectedTracks.clear();
                 _selectedTracks.insert(track);
             }
             ImVec4 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(color));
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::MenuItem("Close", "CTRL+W"))
+                    ImGui::CloseCurrentPopup();
+                if (ImGui::MenuItem("Delete", "Delete"))
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
+            }
+            ImGui::PopID();
         }
 
         ImGui::TableNextRow();
@@ -162,6 +175,8 @@ void ComposerWindow::render() {
     ImGui::SameLine();
     ImGui::Text(_statusMessage.c_str());
 
+    handleLocalShortcut();
+
     ImGui::End();
 
     if (_saveWindow != nullptr) {
@@ -169,7 +184,6 @@ void ComposerWindow::render() {
     }
 
 
-    handleLocalShortcut();
     handleGlobalShortcut();
 }
 
@@ -198,10 +212,9 @@ void ComposerWindow::handleGlobalShortcut() {
 }
 
 void ComposerWindow::handleLocalShortcut() {
-    // TODO 動かない。なぜ？
-    //if (!canHandleInput()) {
-    //    return;
-    //}
+    if (!canHandleInput()) {
+        return;
+    }
 
     auto& io = ImGui::GetIO();
     if (io.KeyCtrl) {

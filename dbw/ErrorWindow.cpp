@@ -14,7 +14,8 @@ void ErrorWindow::render() {
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, -1), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::Begin("Error!", &_show)) {
+
+    if (ImGui::Begin("Error!", &_show, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::TextWrapped(_message.c_str());
         ImGui::Separator();
         if (ImGui::Button("Close")) {
