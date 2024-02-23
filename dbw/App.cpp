@@ -1,10 +1,24 @@
 #include "App.h"
+#include "AudioEngineWindow.h"
 #include "Composer.h"
 #include "Command.h"
+#include "Config.h"
 
 App::App() :
     _audioEngine(std::make_unique<AudioEngine>(this)) {
     addComposer(new Composer());
+}
+
+void App::render() {
+    if (gPreference.audioDeviceIndex == -1) {
+        showAudioSetupWindow();
+    }
+    for (auto& x : _composers) {
+        x->render();
+    }
+    if (_audioEngineWindow) {
+        _audioEngineWindow->render();
+    }
 }
 
 void App::addComposer(Composer* composer) {
@@ -48,4 +62,24 @@ void App::requestAddComposer(Composer* composer) {
 
 void App::requestDeleteComposer(Composer* composer) {
     _requestDeleteComposers.push_back(composer);
+}
+
+void App::showAudioSetupWindow() {
+    if (!_audioEngineWindow) {
+        _audioEngineWindow = std::make_unique<AudioEngineWindow>(this);
+    }
+    _audioEngineWindow->show();
+}
+
+void App::start() {
+    _audioEngine->start();
+    _isStarted = true;
+}
+
+void App::stop() {
+    for (auto& x : _composers) {
+        x->stop();
+    }
+    _audioEngine->stop();
+    _isStarted = false;
 }

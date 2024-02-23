@@ -4,6 +4,7 @@
 #include <string>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include "App.h"
 #include "AudioEngine.h"
 #include "Composer.h"
 #include "Config.h"
@@ -28,7 +29,7 @@ static std::vector<double> PrintSupportedStandardSampleRates(
     return  supportedStandardSampleRates;
 }
 
-AudioEngineWindow::AudioEngineWindow(Composer* composer) : _composer(composer) {
+AudioEngineWindow::AudioEngineWindow(App* app) : _app(app) {
     _deviceIndex = gPreference.audioDeviceIndex;
     auto apiCount = Pa_GetHostApiCount();
     for (auto i = 0; i < apiCount; ++i) {
@@ -65,8 +66,11 @@ AudioEngineWindow::AudioEngineWindow(Composer* composer) : _composer(composer) {
 }
 
 void AudioEngineWindow::render() {
+    if (!_show) {
+        return;
+    }
     ImGui::OpenPopup("Audio Engine");
-    if (ImGui::BeginPopupModal("Audio Engine", &_composer->_composerWindow->_showAudioEngineWindow)) {
+    if (ImGui::BeginPopupModal("Audio Engine", &_show)) {
         auto apiInfoIndex = -1;
         for (auto& apiInfo : _apiInfos) {
             ++apiInfoIndex;
@@ -112,27 +116,30 @@ void AudioEngineWindow::render() {
         ImGui::SameLine();
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 7);
         ImGui::InputScalar("Buffer Size", ImGuiDataType_U32, &_bufferSize);
-        ImGui::BeginDisabled(_composer->audioEngine()->_isStarted);
+        ImGui::BeginDisabled(_app->isStarted());
         if (ImGui::Button("Apply")) {
             gPreference.audioDeviceIndex = _deviceIndex;
             gPreference.sampleRate = _sampleRate;
             gPreference.bufferSize = _bufferSize;
             gPreference.save();
-            _composer->audioEngine()->start();
-            _composer->_composerWindow->_showAudioEngineWindow = false;
+            _app->start();
+            _show = false;
         }
         ImGui::EndDisabled();
         ImGui::SameLine();
         if (ImGui::Button("Start Audio Engign")) {
-            _composer->audioEngine()->start();
+            _app->audioEngine()->start();
         }
         ImGui::SameLine();
         if (ImGui::Button("Stop Audio Engign")) {
-            _composer->stop();
-            _composer->audioEngine()->stop();
+            _app->stop();
         }
 
         ImGui::EndPopup();
     }
 
+}
+
+void AudioEngineWindow::show() {
+    _show = true;
 }

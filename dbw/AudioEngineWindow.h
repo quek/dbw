@@ -2,15 +2,17 @@
 #include <vector>
 #include <portaudio.h>
 
-class Composer;
+class App;
 
 class AudioEngineWindow {
 public:
-    AudioEngineWindow(Composer* composer);
+    AudioEngineWindow(App* app);
     void render();
+    void show();
 
 private:
-    Composer* _composer;
+    App* _app;
+    bool _show = false;
     std::vector<const PaHostApiInfo*> _apiInfos;
     std::vector<const PaDeviceInfo*> _deviceInfos;
     std::vector<std::vector<double>> _supportedStandardSampleRates;

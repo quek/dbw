@@ -190,9 +190,7 @@ int main(int, char**) {
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
         app->runCommand();
-        for (auto& composer : app->composers()) {
-            composer->render();
-        }
+        app->render();
         gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).

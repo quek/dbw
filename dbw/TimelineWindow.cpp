@@ -221,7 +221,7 @@ void TimelineWindow::renderHeader() {
     x += getTrackWidth(_composer->_masterTrack.get()) * _zoomX;
 
     for (auto& track : _composer->_tracks) {
-        ImVec2 pos = ImVec2(x, y);
+        pos = ImVec2(x, y);
         ImGui::SetCursorPos(pos + ImVec2(padding, 0));
         ImGui::Text(track->_name.c_str());
 

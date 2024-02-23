@@ -3,12 +3,14 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include "App.h"
 #include "Composer.h"
 #include "Project.h"
 
 static std::map<std::string, std::function<void(Composer*)>> table = {
-    {"Nya", [](Composer*) { printf("nya~"); }},
-    {"Save", [](Composer* composer) { composer->_project->save(); }}
+    {"Audio Setup", [](Composer* composer) { composer->app()->showAudioSetupWindow(); }},
+    {"Save", [](Composer* composer) { composer->_project->save(); }},
+    {"Scan Plugin", [](Composer* composer) { gPluginManager.scan(); }},
 };
 
 CommandWindow::CommandWindow(Composer* composer) : _composer(composer) {
@@ -18,6 +20,8 @@ void CommandWindow::render() {
     if (_show) {
         ImGui::OpenPopup("Command");
     }
+
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
     if (ImGui::BeginPopupModal("Command", &_show)) {
 
         if (ImGui::IsWindowAppearing()) {
@@ -43,6 +47,7 @@ void CommandWindow::render() {
                         fun(_composer);
                         _show = false;
                     }
+                    ImGui::SameLine();
                 }
             }
             if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {

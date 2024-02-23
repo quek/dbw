@@ -12,10 +12,6 @@
 #include "util.h"
 
 ComposerWindow::ComposerWindow(Composer* composer) : _composer(composer) {
-    if (gPreference.audioDeviceIndex == -1) {
-        _audioEngineWindow.reset(new AudioEngineWindow(_composer));
-        _showAudioEngineWindow = true;
-    }
 }
 
 void ComposerWindow::render() {
@@ -77,10 +73,6 @@ void ComposerWindow::render() {
     if (ImGui::Button("Redo")) {
         _composer->_commandManager.redo();
     }
-    ImGui::SameLine();
-    if (ImGui::Button("Scan Plugin")) {
-        gPluginManager.scan();
-    }
 
     ImGui::SameLine();
     if (ImGui::Button("Open")) {
@@ -107,12 +99,6 @@ void ComposerWindow::render() {
         } else {
             _composer->_project->save();
         }
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("AE")) {
-        _audioEngineWindow.reset(new AudioEngineWindow(_composer));
-        _showAudioEngineWindow = true;
     }
 
     ImGui::SameLine();
@@ -177,10 +163,6 @@ void ComposerWindow::render() {
     ImGui::Text(_statusMessage.c_str());
 
     ImGui::End();
-
-    if (_showAudioEngineWindow) {
-        _audioEngineWindow->render();
-    }
 
     if (_saveWindow != nullptr) {
         _saveWindow->render();

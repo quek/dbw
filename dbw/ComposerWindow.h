@@ -2,7 +2,6 @@
 #include <memory>
 #include <set>
 #include <string>
-#include "AudioEngineWindow.h"
 #include "BaseWindow.h"
 #include "SaveWindow.h"
 #include "Track.h"
@@ -22,7 +21,6 @@ private:
     void handleGlobalShortcut();
     void handleLocalShortcut();
 
-    std::unique_ptr<AudioEngineWindow> _audioEngineWindow = nullptr;
     std::unique_ptr<SaveWindow> _saveWindow = nullptr;
     std::string _statusMessage = "";
 
