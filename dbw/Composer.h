@@ -5,6 +5,7 @@
 #include "Command.h"
 #include "ComposerWindow.h"
 #include "Midi.h"
+#include "Nameable.h"
 #include "PianoRollWindow.h"
 #include "PluginManager.h"
 #include "Project.h"
@@ -13,29 +14,32 @@
 #include "TimelineWindow.h"
 #include "Track.h"
 
+class App;
 class AudioEngine;
 
-class Composer {
+class Composer : public Nameable {
 public:
-    Composer(AudioEngine* audioEngine);
+    Composer();
+    Composer(const nlohmann::json& json);
     void render() const;
     void process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime);
+    App* app();
+    AudioEngine* audioEngine();
     void computeNextPlayTime(unsigned long framesPerBuffer);
 
     void play();
     void stop();
     void addTrack();
     void addTrack(Track* track);
-    void scanPlugin();
     int maxBar();
     void clear();
     void computeProcessOrder();
     void computeLatency();
-
     void deleteClips(std::set<Clip*> clips);
+    virtual nlohmann::json toJson() override;
 
+    App* _app = nullptr;
     std::unique_ptr<Project> _project;
-    AudioEngine* _audioEngine;
     ProcessBuffer _processBuffer;
     float _bpm = 128.0;
     int _samplePerDelay;

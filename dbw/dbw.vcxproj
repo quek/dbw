@@ -164,6 +164,7 @@
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h" />
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="App.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="AudioEngineWindow.h" />
     <ClInclude Include="BaseWindow.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
     <ClCompile Include="BaseWindow.cpp" />
@@ -255,7 +257,6 @@
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridMixin.cpp" />
-    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="Note.cpp" />
     <ClCompile Include="PianoRollH.cpp" />

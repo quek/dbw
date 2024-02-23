@@ -14,33 +14,6 @@ Fader::Fader(const nlohmann::json& json) : BuiltinModule(json)
 Fader::Fader(std::string name, Track* track) : BuiltinModule(name, track) {
 }
 
-tinyxml2::XMLElement* Fader::toXml(tinyxml2::XMLDocument* doc) {
-    auto* element = doc->NewElement("BuiltinDevice");
-    element->SetAttribute("id", nekoId());
-    element->SetAttribute("deviceRole", "audioFX");
-    element->SetAttribute("deviceName", _name.c_str());
-    element->SetAttribute("deviceID", "Fader");
-    auto* parameters = element->InsertNewChildElement("Parameters");
-    auto* realParameter = parameters->InsertNewChildElement("RealParameter");
-    realParameter->SetAttribute("name", "Level");
-    realParameter->SetAttribute("unit", "linear");
-    realParameter->SetAttribute("value", _level);
-
-    return element;
-}
-
-void Fader::loadParameters(tinyxml2::XMLElement* element) {
-    for (auto param = element->FirstChildElement();
-         param != nullptr;
-         param = param->NextSiblingElement()) {
-        auto name = param->Attribute("name");
-        if (strcmp(name, "level") == 0) {
-            param->QueryFloatAttribute("value", &_level);
-        }
-    }
-
-}
-
 bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime) {
     if (_mute) {
         std::ranges::fill(buffer->_out[0]._constantp, true);

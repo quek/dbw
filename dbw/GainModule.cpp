@@ -12,30 +12,10 @@ GainModule::GainModule(std::string name, Track* track) :
     BuiltinModule(name, track), _gain(1.0) {
 }
 
-tinyxml2::XMLElement* GainModule::toXml(tinyxml2::XMLDocument* doc) {
-    auto* element = doc->NewElement("BuiltinDevice");
-    element->SetAttribute("id", nekoId());
-    element->SetAttribute("deviceRole", "audioFX");
-    element->SetAttribute("deviceName", _name.c_str());
-    element->SetAttribute("deviceID", "Gain");
-    auto* parameters = element->InsertNewChildElement("Parameters");
-    auto* realParameter = parameters->InsertNewChildElement("RealParameter");
-    realParameter->SetAttribute("name", "Gain");
-    realParameter->SetAttribute("unit", "linear");
-    realParameter->SetAttribute("value", _gain);
-
-    return element;
-}
-
 nlohmann::json GainModule::toJson() {
     nlohmann::json json = BuiltinModule::toJson();
     json["_id"] = "Gain";
     return json;
-}
-
-void GainModule::loadParameters(tinyxml2::XMLElement* element) {
-    auto param = element->FirstChildElement("RealParameter");
-    param->QueryFloatAttribute("value", &_gain);
 }
 
 bool GainModule::process(ProcessBuffer* buffer, int64_t steadyTime) {

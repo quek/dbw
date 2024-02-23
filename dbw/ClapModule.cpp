@@ -24,28 +24,28 @@ bool ClapModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
     return Module::process(buffer, steadyTime);
 }
 
-tinyxml2::XMLElement* ClapModule::toXml(tinyxml2::XMLDocument* doc) {
-    auto* element = doc->NewElement("ClapPlugin");
-    element->SetAttribute("id", nekoId());
-    // TODO Possible values: instrument, noteFX, audioFX, analyzer
-    element->SetAttribute("deviceRole", "instrument");
-    element->SetAttribute("deviceName", _name.c_str());
-    element->SetAttribute("deviceID", _pluginHost->_plugin->desc->id);
-    {
-        element->InsertNewChildElement("Parameters");
-    }
-    {
-        auto* enabled = element->InsertNewChildElement("Enabled");
-        enabled->SetAttribute("value", true);
-    }
-    {
-        auto* state = element->InsertNewChildElement("State");
-        state->SetAttribute("path", _pluginHost->_statePath.string().c_str());
-        _pluginHost->saveState();
-    }
-
-    return element;
-}
+//tinyxml2::XMLElement* ClapModule::toXml(tinyxml2::XMLDocument* doc) {
+//    auto* element = doc->NewElement("ClapPlugin");
+//    element->SetAttribute("id", nekoId());
+//    // TODO Possible values: instrument, noteFX, audioFX, analyzer
+//    element->SetAttribute("deviceRole", "instrument");
+//    element->SetAttribute("deviceName", _name.c_str());
+//    element->SetAttribute("deviceID", _pluginHost->_plugin->desc->id);
+//    {
+//        element->InsertNewChildElement("Parameters");
+//    }
+//    {
+//        auto* enabled = element->InsertNewChildElement("Enabled");
+//        enabled->SetAttribute("value", true);
+//    }
+//    {
+//        auto* state = element->InsertNewChildElement("State");
+//        state->SetAttribute("path", _pluginHost->_statePath.string().c_str());
+//        _pluginHost->saveState();
+//    }
+//
+//    return element;
+//}
 
 void ClapModule::openGui() {
     _pluginHost->openGui();

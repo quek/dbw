@@ -18,8 +18,6 @@ public:
 
     std::string name() const;
     void renderInScene(PianoRollWindow* pianoRollWindow);
-    tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
-    static std::unique_ptr<Clip> fromXml(tinyxml2::XMLElement* element);
 
     virtual nlohmann::json toJson() override;
 

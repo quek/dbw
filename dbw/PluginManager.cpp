@@ -45,66 +45,6 @@ Module* PluginManager::create(const nlohmann::json& json) {
     return nullptr;
 }
 
-Module* PluginManager::create(tinyxml2::XMLElement* element, Track* track) {
-    Module* result;
-    if (strcmp(element->Name(), "ClapPlugin") == 0) {
-        auto deviceId = element->Attribute("deviceID");
-        auto plugin = findPlugin("clap", deviceId);
-        if (plugin == nullptr) {
-            return nullptr;
-        }
-        ClapHost* pluginHost = new ClapHost(track);
-        pluginHost->load((*plugin)["path"].get<std::string>(), (*plugin)["index"].get<uint32_t>());
-        Module* module = new ClapModule(pluginHost->_name, track, pluginHost);
-        auto state = element->FirstChildElement("State");
-        pluginHost->_statePath = state->Attribute("path");
-        pluginHost->loadState();
-        result = module;
-    } else if (strcmp(element->Name(), "Vst3Plugin") == 0) {
-        auto deviceId = element->Attribute("deviceID");
-        auto plugin = findPlugin("vst3", deviceId);
-        if (plugin == nullptr) {
-            return nullptr;
-        }
-        auto path = (*plugin)["path"].get<std::string>();
-        auto module = new Vst3Module((*plugin)["name"], track);
-        module->load(path);
-        auto state = element->FirstChildElement("State");
-        auto statePath = track->_composer->_project->projectDir() / state->Attribute("path");
-        module->loadState(statePath);
-        result = module;
-    } else if (strcmp(element->Name(), "BuiltinDevice") == 0) {
-        //auto deviceId = element->Attribute("deviceID");
-        //auto factory = builtinModuleMap.find(deviceId);
-        //if (factory == builtinModuleMap.end()) {
-        //    return nullptr;
-        //}
-        //BuiltinModule* module = (*factory).second(track);
-        //module->loadParameters(element->FirstChildElement("Parameters"));
-        //result = module;
-        // TODO
-        return nullptr;
-    } else {
-        return nullptr;
-    }
-
-    uint64_t id = 0;
-    element->QueryUnsigned64Attribute("id", &id);
-    if (id != 0) {
-        result->setNekoId(id);
-    }
-
-    auto connectionsElement = element->FirstChildElement("Connections");
-    if (connectionsElement) {
-        for (auto connectionElement = connectionsElement->FirstChildElement("Connection");
-             connectionElement != nullptr;
-             connectionElement = connectionElement->NextSiblingElement("Connection")) {
-            result->_connections.emplace_back(std::move(Connection::fromXml(connectionElement)));
-        }
-    }
-    return result;
-}
-
 void PluginManager::scan() {
     scanClap();
     scanVst3();

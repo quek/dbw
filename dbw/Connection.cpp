@@ -3,29 +3,16 @@
 #include "Module.h"
 #include "Track.h"
 
+Connection::Connection(const nlohmann::json& json) : Nameable(json) {
+    _fromId = json["_fromId"];
+    _fromIndex = json["_fromIndex"];
+    _toId = json["_toId"];
+    _toIndex = json["_toIndex"];
+}
+
 Connection::Connection(Module* from, int fromIndex, Module* to, int toIndex) :
     _from(from), _fromIndex(fromIndex), _to(to), _toIndex(toIndex) {
     setLatency(0);
-}
-
-tinyxml2::XMLElement* Connection::toXml(tinyxml2::XMLDocument* doc) {
-    auto element = doc->NewElement("Connection");
-    element->SetAttribute("from", _from->nekoId());
-    element->SetAttribute("fromIndex", _fromIndex);
-    element->SetAttribute("to", _to->nekoId());
-    element->SetAttribute("toIndex", _toIndex);
-    return element;
-}
-
-std::unique_ptr<Connection> Connection::fromXml(tinyxml2::XMLElement* element) {
-    int fromIndex;
-    element->QueryIntAttribute("fromIndex", &fromIndex);
-    int toIndex;
-    element->QueryIntAttribute("toIndex", &toIndex);
-    std::unique_ptr<Connection> connection(new Connection(nullptr, fromIndex, nullptr, toIndex));
-    element->QueryUnsigned64Attribute("from", &connection->_fromId);
-    element->QueryUnsigned64Attribute("to", &connection->_toId);
-    return connection;
 }
 
 void Connection::resolveModuleReference() {
@@ -65,4 +52,10 @@ void Connection::setLatency(uint32_t latency) {
     for (int i = 0; i < 2; ++i) {
         _dcpBuffer.emplace_back(latency, 0.0f);
     }
+}
+
+nlohmann::json Connection::toJson() {
+    nlohmann::json json = Nameable::toJson();
+    json.update(*this);
+    return json;
 }

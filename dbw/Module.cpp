@@ -12,6 +12,9 @@
 #include "command/DeleteModule.h"
 
 Module::Module(const nlohmann::json& json) : Nameable(json) {
+    for (const auto& connection : json["_connections"]) {
+        _connections.emplace_back(new Connection(connection));
+    }
 }
 
 Module::~Module() {
@@ -97,14 +100,6 @@ void Module::setComputedLatency(uint32_t computedLatency) {
     }
 }
 
-tinyxml2::XMLElement* Module::toXml(tinyxml2::XMLDocument* doc) {
-    auto element = doc->NewElement("Connections");
-    for (auto& connection : _connections) {
-        element->InsertEndChild(connection->toXml(doc));
-    }
-    return element;
-}
-
 Module* Module::create(std::string& type, std::string& id) {
     if (type == "builtin") {
         return BuiltinModule::create(id);
@@ -126,4 +121,16 @@ Module* Module::fromJson(const nlohmann::json& json) {
         //return PluginModule::fromJson(json);
     }
     return nullptr;
+}
+
+nlohmann::json Module::toJson() {
+    nlohmann::json json = Nameable::toJson();
+
+    nlohmann::json connections = nlohmann::json::array();
+    for (const auto& connection : _connections) {
+        connections.emplace_back(connection->toJson());
+    }
+    json["_connections"] = connections;
+
+    return json;
 }

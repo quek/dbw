@@ -31,6 +31,7 @@
 #include <spdlog/async.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
+#include "App.h"
 #include "AudioEngine.h"
 #include "Composer.h"
 #include "Config.h"
@@ -151,10 +152,8 @@ int main(int, char**) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     Grid::init();
-    std::unique_ptr<AudioEngine> audioEngine = std::make_unique<AudioEngine>();
-    Composer composer(audioEngine.get());
-    audioEngine->_composer = &composer;
-    audioEngine->start();
+    std::unique_ptr<App> app(new App());
+    app->audioEngine()->start();
 
     // Main loop
     bool done = false;
@@ -190,8 +189,10 @@ int main(int, char**) {
         TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
         TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
-        composer._commandManager.run();
-        composer.render();
+        app->runCommand();
+        for (auto& composer : app->composers()) {
+            composer->render();
+        }
         gErrorWindow->render();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -269,9 +270,11 @@ int main(int, char**) {
         frameCtx->FenceValue = fenceValue;
     }
 
-    composer.stop();
-    audioEngine->stop();
-    audioEngine.reset();
+    for (auto& composer : app->composers()) {
+        composer->stop();
+    }
+    app->audioEngine()->stop();
+    app.reset();
 
     WaitForLastSubmittedFrame();
 

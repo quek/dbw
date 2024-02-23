@@ -3,12 +3,20 @@
 #include <ranges>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
-#include "AudioEngine.h"
+#include "App.h"
 #include "Clip.h"
 #include "ClipSlot.h"
 #include "Composer.h"
 #include "Config.h"
 #include "Lane.h"
+
+SceneMatrix::SceneMatrix(const nlohmann::json& json) : Nameable(json) {
+    for (const auto& x : json["_scenes"]) {
+        Scene* scene = new Scene(x);
+        scene->_sceneMatrix = this;
+        _scenes.emplace_back(scene);
+    }
+}
 
 SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
     addScene(false);
@@ -156,6 +164,18 @@ void SceneMatrix::addScene(bool undoable) {
     _composer->_commandManager.executeCommand(new AddSceneCommand(this, undoable));
 }
 
+nlohmann::json SceneMatrix::toJson() {
+    nlohmann::json json = Nameable::toJson();
+
+    nlohmann::json scenes = nlohmann::json::array();
+    for (const auto& scene : _scenes) {
+        scenes.emplace_back(scene->toJson());
+    }
+    json["_scenes"] = scenes;
+
+    return json;
+}
+
 AddSceneCommand::AddSceneCommand(SceneMatrix* sceneMatrix, bool undoable) : _sceneMatrix(sceneMatrix), Command(undoable) {
 }
 
@@ -163,12 +183,12 @@ void AddSceneCommand::execute(Composer* composer) {
     if (!_scene) {
         _scene = std::make_unique<Scene>(_sceneMatrix);
     }
-    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     _sceneMatrix->_scenes.push_back(std::move(_scene));
 }
 
 void AddSceneCommand::undo(Composer* composer) {
-    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     _scene = std::move(_sceneMatrix->_scenes.back());
     _sceneMatrix->_scenes.pop_back();
 }

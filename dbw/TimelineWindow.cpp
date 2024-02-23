@@ -2,7 +2,7 @@
 #include <mutex>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
-#include "AudioEngine.h"
+#include "App.h"
 #include "Clip.h"
 #include "Composer.h"
 #include "Grid.h"
@@ -71,7 +71,7 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
 }
 
 void TimelineWindow::handleClickTimeline(double time) {
-    std::lock_guard<std::recursive_mutex> lock(_composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(_composer->app()->_mtx);
     _composer->_playTime = time;
 }
 

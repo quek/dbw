@@ -1,22 +1,20 @@
 #pragma once
 
-#include <mutex>
 #include <clap/clap.h>
 #include <portaudio.h>
 
-class Composer;
+class App;
 
 class AudioEngine
 {
 public:
-    AudioEngine();
+    AudioEngine(App* app);
     ~AudioEngine();
     void start();
     void stop();
     void process(float* in, float* out, unsigned long framesPerBuffer);
 
-    Composer* _composer = nullptr;
-    std::recursive_mutex _mtx;
+    App* _app = nullptr;
     bool _isStarted = false;
     double _cpuLoad = 0.0;
 

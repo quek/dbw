@@ -43,24 +43,6 @@ void Clip::renderInScene(PianoRollWindow* pianoRoll) {
     ImGui::PopID();
 }
 
-tinyxml2::XMLElement* Clip::toXml(tinyxml2::XMLDocument* doc) {
-    auto element = doc->NewElement("Clip");
-    element->SetAttribute("id", nekoId());
-    element->SetAttribute("time", _time);
-    element->SetAttribute("duration", _duration);
-    element->InsertEndChild(_sequence->toXml(doc));
-    return element;
-}
-
-std::unique_ptr<Clip> Clip::fromXml(tinyxml2::XMLElement* element) {
-    double time = 0.0, duration = 16.0;
-    element->QueryDoubleAttribute("time", &time);
-    element->QueryDoubleAttribute("duration", &duration);
-    std::shared_ptr<Sequence> sequence = Sequence::fromXml(element->FirstChildElement("Notes"));
-    std::unique_ptr<Clip> clip(new Clip(time, duration, sequence));
-    return clip;
-}
-
 nlohmann::json Clip::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["type"] = TYPE;

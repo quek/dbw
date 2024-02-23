@@ -15,6 +15,7 @@ extern Theme gTheme;
 class Config {
 public:
     Config();
+    std::filesystem::path projectDir();
 
     std::filesystem::path _dir;
 };

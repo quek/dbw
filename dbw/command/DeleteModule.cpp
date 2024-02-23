@@ -1,7 +1,6 @@
 #include "DeleteModule.h"
 #include <mutex>
-#include <tinyxml2/tinyxml2.h>
-#include "../AudioEngine.h"
+#include "../App.h"
 #include "../Composer.h"
 #include "../Module.h"
 #include "../Track.h"
@@ -17,7 +16,7 @@ void command::DeleteModule::execute(Composer* composer) {
 
     auto modules = &module->_track->_modules;
 
-    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
 
     auto it = std::find_if(modules->begin(), modules->end(), [module](const std::unique_ptr<Module>& ptr) {
         return ptr.get() == module;
@@ -36,7 +35,7 @@ void command::DeleteModule::undo(Composer* composer) {
     Track* track = Neko::findByNekoId<Track>(_trackId);
     module->_track = track;
 
-    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     track->_modules.emplace(track->_modules.begin() + _index, module);
     module->start();
     composer->computeProcessOrder();

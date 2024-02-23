@@ -84,13 +84,13 @@ void ComposerWindow::render() {
     ImGui::SameLine();
     if (ImGui::Button("Open")) {
         IGFD::FileDialogConfig config;
-        config.path = _composer->_project->_dir.string();
+        config.path = gConfig.projectDir().string();
         config.flags = ImGuiFileDialogFlags_Modal;
-        ImGuiFileDialog::Instance()->OpenDialog("Open Project", "Choose File", nullptr, config);
+        ImGuiFileDialog::Instance()->OpenDialog("Open Project", "Choose File", ".json", config);
     }
     if (ImGuiFileDialog::Instance()->Display("Open Project")) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
-            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+            std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _composer->_commandManager.executeCommand(new command::OpenProject(std::filesystem::path(filePath)));
         }
         ImGuiFileDialog::Instance()->Close();
@@ -115,7 +115,7 @@ void ComposerWindow::render() {
     }
 
     ImGui::SameLine();
-    ImGui::Text("cpu %.02f", _composer->_audioEngine->_cpuLoad);
+    ImGui::Text("cpu %.02f", _composer->audioEngine()->_cpuLoad);
 
     ImVec2 mainWindowSize = ImGui::GetWindowSize();
 

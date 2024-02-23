@@ -2,19 +2,22 @@
 #include <memory>
 #include <vector>
 #include "Command.h"
+#include "Nameable.h"
 #include "Scene.h"
 
 class Composer;
 class Track;
 
-class SceneMatrix {
+class SceneMatrix : public Nameable {
 public:
+    SceneMatrix(const nlohmann::json& json);
     SceneMatrix(Composer* composer);
     Composer* composer() { return _composer; }
     void render();
     void process(Track* track);
     void stop();
     void addScene(bool undoable = true);
+    virtual nlohmann::json toJson() override;
 
     std::vector<std::unique_ptr<Scene>> _scenes;
     Composer* _composer;

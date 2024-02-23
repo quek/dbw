@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <nlohmann/json.hpp>
-#include "tinyxml2/tinyxml2.h"
 
 class Module;
 class Track;
@@ -13,7 +12,6 @@ class PluginManager {
 public:
     PluginManager();
     Module* create(const nlohmann::json& json);
-    Module* create(tinyxml2::XMLElement* element, Track* track);
     void scan();
     void load();
     void openModuleSelector(Track* track);

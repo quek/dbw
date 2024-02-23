@@ -27,7 +27,6 @@ public:
     void renderContent() override;
     virtual void onResize(int width, int height) override;
     virtual void loadState(std::filesystem::path path) override;
-    virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
 

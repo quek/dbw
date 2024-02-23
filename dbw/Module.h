@@ -3,7 +3,6 @@
 #include <string>
 #include <clap/clap.h>
 #include <nlohmann/json.hpp>
-#include "tinyxml2/tinyxml2.h"
 #include "Connection.h"
 #include "Nameable.h"
 #include "ProcessBuffer.h"
@@ -32,10 +31,10 @@ public:
     ProcessBuffer& getProcessBuffer();
     virtual uint32_t getComputedLatency();
     virtual void setComputedLatency(uint32_t computedLatency);
-    virtual tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc);
 
     static Module* create(std::string& type, std::string& id);
     static Module* fromJson(const nlohmann::json&);
+    virtual nlohmann::json toJson() override;
 
     Track* _track = nullptr;
     bool _didOpenGui = false;

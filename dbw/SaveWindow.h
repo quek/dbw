@@ -10,6 +10,5 @@ public:
     void save();
 private:
     Composer* _composer;
-    std::string _projectDir;
-    std::string _projectName;
+    std::string _path;
 };

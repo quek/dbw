@@ -1,4 +1,5 @@
 #include "OpenProject.h"
+#include "../App.h"
 #include "../Composer.h"
 #include "../Project.h"
 
@@ -6,5 +7,7 @@ command::OpenProject::OpenProject(const std::filesystem::path& path) : Command(f
 }
 
 void command::OpenProject::execute(Composer* composer) {
-    composer->_project->open(_path);
+    Composer* newComposer = composer->_project->open(_path);
+    composer->app()->requestAddComposer(newComposer);
+    composer->app()->requestDeleteComposer(composer);
 }

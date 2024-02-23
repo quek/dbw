@@ -112,24 +112,24 @@ void AudioEngineWindow::render() {
         ImGui::SameLine();
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 7);
         ImGui::InputScalar("Buffer Size", ImGuiDataType_U32, &_bufferSize);
-        ImGui::BeginDisabled(_composer->_audioEngine->_isStarted);
+        ImGui::BeginDisabled(_composer->audioEngine()->_isStarted);
         if (ImGui::Button("Apply")) {
             gPreference.audioDeviceIndex = _deviceIndex;
             gPreference.sampleRate = _sampleRate;
             gPreference.bufferSize = _bufferSize;
             gPreference.save();
-            _composer->_audioEngine->start();
+            _composer->audioEngine()->start();
             _composer->_composerWindow->_showAudioEngineWindow = false;
         }
         ImGui::EndDisabled();
         ImGui::SameLine();
         if (ImGui::Button("Start Audio Engign")) {
-            _composer->_audioEngine->start();
+            _composer->audioEngine()->start();
         }
         ImGui::SameLine();
         if (ImGui::Button("Stop Audio Engign")) {
             _composer->stop();
-            _composer->_audioEngine->stop();
+            _composer->audioEngine()->stop();
         }
 
         ImGui::EndPopup();

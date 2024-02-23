@@ -513,43 +513,6 @@ void Vst3Module::loadState(std::filesystem::path path) {
     return;
 }
 
-tinyxml2::XMLElement* Vst3Module::toXml(tinyxml2::XMLDocument* doc) {
-    auto* element = doc->NewElement("Vst3Plugin");
-    element->SetAttribute("id", nekoId());
-    // TODO Possible values: instrument, noteFX, audioFX, analyzer
-    element->SetAttribute("deviceRole", "instrument");
-    element->SetAttribute("deviceName", _name.c_str());
-    element->SetAttribute("deviceID", _id.c_str());
-
-    element->InsertNewChildElement("Parameters");
-
-    auto* enabled = element->InsertNewChildElement("Enabled");
-    enabled->SetAttribute("value", true);
-
-    auto* state = element->InsertNewChildElement("State");
-    auto statePath = std::filesystem::path("plugins") / (generateUniqueId() + ".vstpreset");
-    state->SetAttribute("path", statePath.string().c_str());
-
-    Steinberg::MemoryStream stream;
-    if (!Steinberg::Vst::PresetFile::savePreset(&stream, _component->iid, _component, _controller)) {
-        Error("Steinberg::Vst::PresetFile::savePreset FAILED!");
-    }
-    auto path = _track->_composer->_project->projectDir() / statePath;
-    std::filesystem::create_directories(path.parent_path());
-    std::ofstream out(path, std::ios::binary);
-    if (!out) {
-        Error("{}のステータス保存に失敗しました。", _name);
-    }
-    out.write(stream.getData(), stream.getSize());
-    if (!out) {
-        Error("{}のステータス保存に失敗しました。", _name);
-    }
-
-    auto connectionsElement = Module::toXml(doc);
-    element->InsertEndChild(connectionsElement);
-
-    return element;
-}
 
 nlohmann::json Vst3Module::toJson() {
     nlohmann::json json = Module::toJson();

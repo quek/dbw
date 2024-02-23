@@ -14,8 +14,6 @@ public:
     static std::shared_ptr<Sequence>create(double duration = 16.0, uint64_t id = 0);
     static std::shared_ptr<Sequence>create(const nlohmann::json& json);
     virtual ~Sequence();
-    tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
-    static std::shared_ptr<Sequence> fromXml(tinyxml2::XMLElement* element);
 
     virtual nlohmann::json toJson() override;
 

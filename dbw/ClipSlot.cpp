@@ -8,7 +8,9 @@ ClipSlot::ClipSlot() {
 }
 
 ClipSlot::ClipSlot(const nlohmann::json& json) : Nameable(json) {
-    _clip.reset(new Clip(json["_clip"]));
+    if (json.contains("_clip")) {
+        _clip.reset(new Clip(json["_clip"]));
+    }
 }
 
 void ClipSlot::render(Composer* composer) {
@@ -53,6 +55,8 @@ void ClipSlot::stop() {
 
 nlohmann::json ClipSlot::toJson() {
     nlohmann::json json = Nameable::toJson();
-    json["_clip"] = _clip->toJson();
+    if (_clip) {
+        json["_clip"] = _clip->toJson();
+    }
     return json;
 }

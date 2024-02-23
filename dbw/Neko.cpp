@@ -1,10 +1,19 @@
 #include "Neko.h"
-#include <atomic>
-#include <cstdint>
 
 std::map<uint64_t, Neko*> Neko::nekoIdMap;
 
-static std::atomic<uint64_t> idSeq(0);
+uint64_t generateNeko() {
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+    uint64_t neko = static_cast<uint64_t>(nanoseconds);
+    while (true) {
+        if (!Neko::nekoIdMap.contains(neko)) {
+            return neko;
+        }
+        ++neko;
+    }
+}
 
 Neko::Neko() {
     setNewNekoId();
@@ -42,14 +51,8 @@ nlohmann::json Neko::toJson() {
 }
 
 void Neko::setNewNekoId() {
-    while (true) {
-        _nekoId = ++idSeq;
-        if (nekoIdMap.contains(_nekoId)) {
-            continue;
-        }
-        nekoIdMap[_nekoId] = this;
-        break;
-    }
+    _nekoId = generateNeko();
+    nekoIdMap[_nekoId] = this;
 }
 
 nlohmann::json eraseNekoId(const nlohmann::json& json) {

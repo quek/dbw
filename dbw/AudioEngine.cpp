@@ -2,6 +2,7 @@
 #include <chrono>
 #include <stdio.h>
 #include <string.h>
+#include "App.h"
 #include "Composer.h"
 #include "Config.h"
 #include "logger.h"
@@ -25,7 +26,7 @@ static int paCallback(
     AudioEngine* audioEngine = (AudioEngine*)userData;
     int result = 0;
     try {
-        std::lock_guard<std::recursive_mutex> lock(audioEngine->_mtx);
+        std::lock_guard<std::recursive_mutex> lock(audioEngine->_app->_mtx);
 
         audioEngine->process((float*)inputBuffer, (float*)outputBuffer, framesPerBuffer);
         float* out = (float*)outputBuffer;
@@ -51,7 +52,7 @@ static int paCallback(
     return result;
 }
 
-AudioEngine::AudioEngine() {
+AudioEngine::AudioEngine(App* app) : _app(app) {
     PaError err = Pa_Initialize();
     if (err != paNoError) {
         // TODO
@@ -118,84 +119,6 @@ void AudioEngine::start() {
     _isStarted = true;
 }
 
-//void AudioEngine::start() {
-//    if (_isStarted) {
-//        return;
-//    }
-//    try {
-//        PaError err;
-//
-//        const PaDeviceInfo* deviceInfo;
-//        PaDeviceIndex nDevices = Pa_GetDeviceCount();
-//        for (PaDeviceIndex i = 0; i < nDevices; ++i) {
-//            deviceInfo = Pa_GetDeviceInfo(i);
-//            const char* name = deviceInfo->name;
-//            PaHostApiIndex apiIndex = deviceInfo->hostApi;
-//            const PaHostApiInfo* apiInfo = Pa_GetHostApiInfo(apiIndex);
-//            printf("%s, %s, %f\n", name, apiInfo->name, deviceInfo->defaultSampleRate);
-//            if (strcmp(name, "Prism Sound USB Audio Class 2.0") == 0 && strcmp(apiInfo->name, "ASIO") == 0) {
-//                _deviceIndex = i;
-//                break;
-//            }
-//        }
-//        if (_deviceIndex == -1) {
-//            // TODO
-//            printf("Device not found!\n");
-//        }
-//
-//        PaStreamParameters inputParameters{
-//             _deviceIndex,
-//             2,
-//             paFloat32,
-//             Pa_GetDeviceInfo(_deviceIndex)->defaultLowInputLatency,
-//             nullptr //See you specific host's API docs for info on using this field
-//        };
-//        PaStreamParameters outputParameters{};
-//        outputParameters.channelCount = 2;
-//        outputParameters.device = _deviceIndex;
-//        outputParameters.hostApiSpecificStreamInfo = NULL;
-//        outputParameters.sampleFormat = paFloat32;
-//        outputParameters.suggestedLatency = Pa_GetDeviceInfo(_deviceIndex)->defaultLowOutputLatency;
-//        outputParameters.hostApiSpecificStreamInfo = NULL; //See you specific host's API docs for info on using this field
-//
-//        err = Pa_IsFormatSupported(&inputParameters, &outputParameters, _sampleRate);
-//        if (err == paFormatIsSupported) {
-//            printf("Hooray!\n");
-//        } else {
-//            printf("Too Bad.\n");
-//        }
-//
-//        err = Pa_OpenStream(
-//            &_stream,
-//            &inputParameters,
-//            &outputParameters,
-//            _sampleRate,
-//            _bufferSize,        /* frames per buffer, i.e. the number
-//            of sample frames that PortAudio will
-//            request from the callback. Many apps
-//            may want to use
-//            paFramesPerBufferUnspecified, which
-//            tells PortAudio to pick the best,
-//            possibly changing, buffer size.*/
-//            paNoFlag,
-//            paCallback, /* this is your callback function */
-//            (void*)this); /*This is a pointer that will be passed to your callback*/
-//        if (err != paNoError) {
-//            // TODO
-//            printf("PortAudio error: %s\n", Pa_GetErrorText(err));
-//        }
-//
-//        err = Pa_StartStream(_stream);
-//        if (err != paNoError) {
-//            // TODO
-//            printf("PortAudio error: %s\n", Pa_GetErrorText(err));
-//        }
-//        _isStarted = true;
-//    } catch (...) {
-//        stop();
-//    }
-//}
-
 void AudioEngine::stop() {
     PaError err;
     if (_stream != nullptr) {
@@ -213,7 +136,9 @@ void AudioEngine::stop() {
 }
 
 void AudioEngine::process(float* in, float* out, unsigned long framesPerBuffer) {
-    _composer->process(in, out, framesPerBuffer, _steadyTime);
+    for (auto& composer : _app->composers()) {
+        composer->process(in, out, framesPerBuffer, _steadyTime);
+    }
     _steadyTime += framesPerBuffer;
 }
 

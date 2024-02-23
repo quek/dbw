@@ -6,6 +6,9 @@
 #include "Track.h"
 #include "SceneMatrix.h"
 
+Scene::Scene(const nlohmann::json& json) : Nameable(json) {
+}
+
 Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
     _name = "Scene" + std::to_string(_sceneMatrix->_scenes.size() + 1);
 }
@@ -47,5 +50,10 @@ bool Scene::isAllLaneStoped() {
         }
     }
     return true;
+}
+
+nlohmann::json Scene::toJson() {
+    nlohmann::json json = Nameable::toJson();
+    return json;
 }
 

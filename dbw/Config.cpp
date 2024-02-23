@@ -10,3 +10,9 @@ Config::Config() {
     std::filesystem::create_directories(_dir);
 }
 
+std::filesystem::path Config::projectDir() {
+    auto dir = std::filesystem::path(GetExecutablePath()) / "user" / "project";
+    std::filesystem::create_directories(dir);
+    return dir;
+}
+

@@ -257,33 +257,33 @@ void ClapHost::stop() {
 }
 
 void ClapHost::loadState() {
-    auto path = _track->_composer->_project->projectDir() / _statePath;
-    std::ifstream ofs(path, std::ios::binary);
-    clap_istream stream{
-        .ctx = &ofs,
-        .read = [](const struct clap_istream* stream, void* buffer, uint64_t size) -> int64_t {
-            ((std::ifstream*)stream->ctx)->read(static_cast<char*>(buffer), size);
-            return ((std::ifstream*)stream->ctx)->gcount();
-        }
-    };
-    _pluginState->load(_plugin, &stream);
+    //auto path = _track->_composer->_project->projectDir() / _statePath;
+    //std::ifstream ifs(path, std::ios::binary);
+    //clap_istream stream{
+    //    .ctx = &ifs,
+    //    .read = [](const struct clap_istream* stream, void* buffer, uint64_t size) -> int64_t {
+    //        ((std::ifstream*)stream->ctx)->read(static_cast<char*>(buffer), size);
+    //        return ((std::ifstream*)stream->ctx)->gcount();
+    //    }
+    //};
+    //_pluginState->load(_plugin, &stream);
 }
 
 void ClapHost::saveState() {
-    auto path = _track->_composer->_project->projectDir() / _statePath;
-    std::filesystem::create_directories(path.parent_path());
-    std::ofstream ofs(path, std::ios::binary);
-    clap_ostream stream{
-        .ctx = &ofs,
-        .write = [](const struct clap_ostream* stream, const void* buffer, uint64_t size) -> int64_t {
-            ((std::ofstream*)stream->ctx)->write(static_cast<const char*>(buffer), size);
-            if (((std::ofstream*)stream->ctx)->fail()) {
-                Error("ステート保存に失敗しました。");
-            }
-            return size;
-        }
-    };
-    _pluginState->save(_plugin, &stream);
+    //auto path = _track->_composer->_project->projectDir() / _statePath;
+    //std::filesystem::create_directories(path.parent_path());
+    //std::ofstream ofs(path, std::ios::binary);
+    //clap_ostream stream{
+    //    .ctx = &ofs,
+    //    .write = [](const struct clap_ostream* stream, const void* buffer, uint64_t size) -> int64_t {
+    //        ((std::ofstream*)stream->ctx)->write(static_cast<const char*>(buffer), size);
+    //        if (((std::ofstream*)stream->ctx)->fail()) {
+    //            Error("ステート保存に失敗しました。");
+    //        }
+    //        return size;
+    //    }
+    //};
+    //_pluginState->save(_plugin, &stream);
 }
 
 // TODO see host.hxx 130

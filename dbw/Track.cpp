@@ -150,57 +150,6 @@ void Track::doDCP() {
     _processBuffer.doDCP();
 }
 
-tinyxml2::XMLElement* Track::toXml(tinyxml2::XMLDocument* doc) {
-    auto* trackElement = doc->NewElement("Track");
-    trackElement->SetAttribute("id", nekoId());
-    trackElement->SetAttribute("name", _name.c_str());
-
-    auto channel = trackElement->InsertNewChildElement("Channel");
-    channel->SetAttribute("role", role());
-    channel->SetAttribute("solo", _fader->_solo);
-
-    auto mute = channel->InsertNewChildElement("Mute");
-    mute->SetAttribute("value", _fader->_mute);
-    auto pan = channel->InsertNewChildElement("Pan");
-    pan->SetAttribute("value", _fader->_pan);
-    auto volume = channel->InsertNewChildElement("Volume");
-    volume->SetAttribute("value", _fader->_level);
-
-    auto* devices = channel->InsertNewChildElement("Devices");
-    for (auto& module : _modules) {
-        devices->InsertEndChild(module->toXml(doc));
-    }
-    return trackElement;
-}
-
-std::unique_ptr<Track> Track::fromXml(tinyxml2::XMLElement* element, Composer* composer) {
-    auto name = element->Attribute("name");
-    std::unique_ptr<Track> track(new Track(name, composer));
-
-    auto channelElement = element->FirstChildElement("Channel");
-    channelElement->QueryBoolAttribute("solo", &track->_fader->_solo);
-    auto mute = channelElement->FirstChildElement("Mute");
-    mute->QueryBoolAttribute("value", &track->_fader->_mute);
-    auto pan = channelElement->FirstChildElement("Pan");
-    pan->QueryFloatAttribute("value", &track->_fader->_pan);
-    auto volume = channelElement->FirstChildElement("Volume");
-    volume->QueryFloatAttribute("value", &track->_fader->_level);
-
-    for (auto deviceElement = channelElement->FirstChildElement("Devices")->FirstChildElement();
-         deviceElement != nullptr;
-         deviceElement = deviceElement->NextSiblingElement()) {
-        if (deviceElement) {
-            // TODO fromXML 
-            Module* module = gPluginManager.create(deviceElement, track.get());
-            if (module != nullptr) {
-                track->_modules.push_back(std::unique_ptr<Module>(module));
-                module->start();
-            }
-        }
-    }
-    return track;
-}
-
 nlohmann::json Track::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["type"] = TYPE;

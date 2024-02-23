@@ -102,9 +102,7 @@
     <ClCompile Include="Vst3Context.cpp" />
     <ClCompile Include="command\AddModule.cpp" />
     <ClCompile Include="command\DeleteModule.cpp" />
-    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
+    <ClCompile Include="App.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -196,6 +194,7 @@
     <ClInclude Include="Vst3Context.h" />
     <ClInclude Include="command\AddModule.h" />
     <ClInclude Include="command\DeleteModule.h" />
+    <ClInclude Include="App.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

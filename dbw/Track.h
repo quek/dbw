@@ -27,8 +27,6 @@ public:
     bool isAvailableSidechainSrc(Track* dst);
     uint32_t computeLatency();
     void doDCP();
-    tinyxml2::XMLElement* toXml(tinyxml2::XMLDocument* doc) override;
-    static std::unique_ptr<Track> fromXml(tinyxml2::XMLElement* element, Composer* composer);
     virtual nlohmann::json toJson() override;
 
     std::unique_ptr<Fader> _fader;

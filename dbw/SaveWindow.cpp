@@ -5,13 +5,17 @@
 #include "../ImGuiFileDialog/ImGuiFileDialog.h"
 #include "Composer.h"
 #include "ComposerWindow.h"
+#include "Config.h"
 #include "Project.h"
 #include "util.h"
 
 SaveWindow::SaveWindow(Composer* composer) :
-    _composer(composer),
-    _projectName(composer->_project->_name.string()),
-    _projectDir(composer->_project->_dir.string()) {
+    _composer(composer) {
+    if (composer->_project->_isNew) {
+        _path = (gConfig.projectDir() / (yyyyMmDd() + ".json")).string();
+    } else {
+        _path = composer->_project->_path.string();
+    }
 }
 
 void SaveWindow::render() {
@@ -19,28 +23,25 @@ void SaveWindow::render() {
         return;
     }
     if (ImGui::Begin("Save", &_composer->_composerWindow->_showSaveWindow)) {
-        ImGui::Text(_projectDir.c_str());
+        ImGui::Text(_path.c_str());
         ImGui::SameLine();
-        if (ImGui::Button("Change##dir")) {
+        if (ImGui::Button("Change##path")) {
             IGFD::FileDialogConfig config;
-            config.path = _projectDir;
+            config.path = _path;
             config.flags = ImGuiFileDialogFlags_Modal;
-            ImGuiFileDialog::Instance()->OpenDialog("Project dir", "Choose File", nullptr, config);
+            ImGuiFileDialog::Instance()->OpenDialog("Project dir", "Choose File", ".json", config);
         }
 
-        ImGui::InputText("##Project name", &_projectName);
-
-        auto path = std::filesystem::path(_projectDir) / std::filesystem::path(_projectName);
-        bool exists = std::filesystem::exists(path);
+        bool exists = std::filesystem::exists(_path);
         if (exists) {
-            ImGui::Text("Already exists.");
+            ImGui::Text("Already exists!!!");
+            ImGui::Text("Already exists!!!");
+            ImGui::Text("Already exists!!!");
         }
-        //ImGui::BeginDisabled(exists);
         if (ImGui::Button("Save")) {
             _composer->_composerWindow->_showSaveWindow = false;
             save();
         }
-        //ImGui::EndDisabled();
 
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {
@@ -49,7 +50,7 @@ void SaveWindow::render() {
 
         if (ImGuiFileDialog::Instance()->Display("Project dir")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
-                _projectDir = ImGuiFileDialog::Instance()->GetCurrentPath();
+                _path = ImGuiFileDialog::Instance()->GetFilePathName();
             }
             ImGuiFileDialog::Instance()->Close();
         }
@@ -59,8 +60,7 @@ void SaveWindow::render() {
 
 void SaveWindow::save() {
     Project* project = _composer->_project.get();
-    project->_name = std::filesystem::path(_projectName);
-    project->_dir = std::filesystem::path(_projectDir);
+    project->_path = _path;
     project->save();
     _composer->_composerWindow->setStatusMessage(std::string("Project is saved ") + yyyyMmDdHhMmSs());
 }

@@ -2,8 +2,8 @@
 #include <mutex>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include "App.h"
 #include "Clip.h"
-#include "AudioEngine.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
@@ -66,7 +66,7 @@ void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLan
 }
 
 void PianoRollWindow::handleClickTimeline(double time) {
-    std::lock_guard<std::recursive_mutex> lock(_composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(_composer->app()->_mtx);
     _composer->_playTime = time + _clip->_time;
 }
 

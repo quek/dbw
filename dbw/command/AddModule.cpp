@@ -1,7 +1,7 @@
 #include "AddModule.h"
 #include <mutex>
 #include <ranges>
-#include "../AudioEngine.h"
+#include "../App.h"
 #include "../Composer.h"
 #include "../Track.h"
 
@@ -21,7 +21,7 @@ void command::AddModule::undo(Composer* composer) {
     auto track = Neko::findByNekoId<Track>(_trackRef);
     auto it = std::ranges::find_if(track->_modules, [this](const auto& x) { return x->nekoId() == _moduleId; });
     if (it != track->_modules.end()) {
-        std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+        std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
         (*it)->stop();
         track->_modules.erase(it);
         track->_composer->computeProcessOrder();
@@ -34,7 +34,7 @@ Module* command::AddModule::exec(Composer* composer) {
     auto track = Neko::findByNekoId<Track>(_trackRef);
     module->_track = track;
 
-    std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     track->_modules.emplace_back(module);
     module->start();
     track->_composer->computeProcessOrder();

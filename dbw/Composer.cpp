@@ -3,6 +3,7 @@
 #include <map>
 #include <ranges>
 #include <sstream>
+#include "App.h"
 #include "AudioEngine.h"
 #include "AudioEngineWindow.h"
 #include "Clip.h"
@@ -17,10 +18,9 @@
 #include "Lane.h"
 #include "util.h"
 
-Composer::Composer(AudioEngine* audioEngine) :
-    _audioEngine(audioEngine),
+Composer::Composer() :
     _commandManager(this),
-    _project(std::make_unique<Project>(yyyyMmDd(), this)),
+    _project(std::make_unique<Project>(this)),
     _masterTrack(std::make_unique<Track>("MASTER", this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
@@ -28,6 +28,29 @@ Composer::Composer(AudioEngine* audioEngine) :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
     addTrack();
+}
+
+Composer::Composer(const nlohmann::json& json) : Nameable(json),
+    _commandManager(this),
+    _project(std::make_unique<Project>(this)),
+    _composerWindow(std::make_unique<ComposerWindow>(this)),
+    _timelineWindow(std::make_unique<TimelineWindow>(this)),
+    _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
+    _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
+
+    _bpm = json["_bpm"];
+
+    _sceneMatrix =std::make_unique<SceneMatrix>(json["_sceneMatrix"]);
+    _sceneMatrix->_composer = this;
+
+    _masterTrack = std::make_unique<Track>(json["_masterTrack"]);
+    _masterTrack->_composer = this;
+
+    for (const auto& x : json["_tracks"]) {
+        Track* track = new Track(x);
+        track->_composer = this;
+        _tracks.emplace_back(track);
+    }
 }
 
 void Composer::render() const {
@@ -84,6 +107,14 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
             _playTime = _loopStartTime;
         }
     }
+}
+
+App* Composer::app() {
+    return _app;
+}
+
+AudioEngine* Composer::audioEngine() {
+    return app()->audioEngine();
 }
 
 void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
@@ -162,7 +193,7 @@ void Composer::computeProcessOrder() {
             }
         }
     }
-    std::lock_guard<std::recursive_mutex> lock(_audioEngine->_mtx);
+    std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
     _orderedModules = orderedModules;
     computeLatency();
 }
@@ -194,7 +225,7 @@ void Composer::computeLatency() {
         }
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(_audioEngine->_mtx);
+        std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
         _maxLatency = maxLatency;
         for (const auto& track : _tracks) {
             track->_processBuffer.setLatency(maxLatency - track->_latency);
@@ -219,6 +250,24 @@ void Composer::deleteClips(std::set<Clip*> clips) {
     }
 }
 
+nlohmann::json Composer::toJson() {
+    nlohmann::json json = Nameable::toJson();
+
+    json["_bpm"] = _bpm;
+
+    json["_masterTrack"] = _masterTrack->toJson();
+
+    nlohmann::json tracks = nlohmann::json::array();
+    for (const auto& track : _tracks) {
+        tracks.emplace_back(track->toJson());
+    }
+    json["_tracks"] = tracks;
+
+    json["_sceneMatrix"] = _sceneMatrix->toJson();
+
+    return json;
+}
+
 void Composer::play() {
     if (_playing) {
         return;
@@ -241,13 +290,13 @@ class AddTrackCommand : public Command {
 public:
     AddTrackCommand(Track* track) : _track(track) {}
     void execute(Composer* composer) override {
-        std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+        std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
         _track->_composer = composer;
         composer->_tracks.push_back(std::move(_track));
         composer->computeProcessOrder();
     }
     void undo(Composer* composer) override {
-        std::lock_guard<std::recursive_mutex> lock(composer->_audioEngine->_mtx);
+        std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
         _track = std::move(composer->_tracks.back());
         composer->_tracks.pop_back();
         composer->computeProcessOrder();
