@@ -26,17 +26,21 @@ Composer::Composer() :
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
-    _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
+    _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
+    _commandWindow(std::make_unique<CommandWindow>(this)) {
+   
     addTrack();
 }
 
-Composer::Composer(const nlohmann::json& json) : Nameable(json),
-_commandManager(this),
-_project(std::make_unique<Project>(this)),
-_composerWindow(std::make_unique<ComposerWindow>(this)),
-_timelineWindow(std::make_unique<TimelineWindow>(this)),
-_pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
-_sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
+Composer::Composer(const nlohmann::json& json) :
+    Nameable(json),
+    _commandManager(this),
+    _project(std::make_unique<Project>(this)),
+    _composerWindow(std::make_unique<ComposerWindow>(this)),
+    _timelineWindow(std::make_unique<TimelineWindow>(this)),
+    _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
+    _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
+    _commandWindow(std::make_unique<CommandWindow>(this)) {
 
     _bpm = json["_bpm"];
 
@@ -72,6 +76,7 @@ void Composer::render() const {
     _timelineWindow->render();
     _pianoRollWindow->render();
     _sideChainInputSelector->render();
+    _commandWindow->render();
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {

@@ -103,6 +103,7 @@
     <ClCompile Include="command\AddModule.cpp" />
     <ClCompile Include="command\DeleteModule.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="CommandWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -195,6 +196,7 @@
     <ClInclude Include="command\AddModule.h" />
     <ClInclude Include="command\DeleteModule.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="CommandWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

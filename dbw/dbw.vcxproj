@@ -171,6 +171,7 @@
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
     <ClInclude Include="ClipSlot.h" />
+    <ClInclude Include="CommandWindow.h" />
     <ClInclude Include="command\AddClips.h" />
     <ClInclude Include="command\AddModule.h" />
     <ClInclude Include="command\AddNotes.h" />
@@ -241,6 +242,7 @@
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />
     <ClCompile Include="ClipSlot.cpp" />
+    <ClCompile Include="CommandWindow.cpp" />
     <ClCompile Include="command\AddClips.cpp" />
     <ClCompile Include="command\AddModule.cpp" />
     <ClCompile Include="command\AddNotes.cpp" />

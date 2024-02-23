@@ -3,6 +3,7 @@
 #include <set>
 #include "ProcessBuffer.h"
 #include "Command.h"
+#include "CommandWindow.h"
 #include "ComposerWindow.h"
 #include "Midi.h"
 #include "Nameable.h"
@@ -61,5 +62,6 @@ public:
     std::unique_ptr<TimelineWindow> _timelineWindow;
     std::unique_ptr<PianoRollWindow> _pianoRollWindow;
     std::unique_ptr<SidechainInputSelector> _sideChainInputSelector;
+    std::unique_ptr<CommandWindow> _commandWindow;
 private:
 };

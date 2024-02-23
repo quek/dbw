@@ -6,6 +6,7 @@
 #include "Composer.h"
 #include "Command/OpenProject.h"
 #include "Config.h"
+#include "Error.h"
 #include "ErrorWindow.h"
 #include "GuiUtil.h"
 #include "util.h"

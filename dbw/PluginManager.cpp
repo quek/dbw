@@ -1,8 +1,8 @@
 #include "PluginManager.h"
 #include <fstream>
 #include <filesystem>
-#include "imgui.h"
-#include "misc/cpp/imgui_stdlib.h"
+#include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 #include "windows.h"
 #include "Composer.h"
 #include "GainModule.h"
