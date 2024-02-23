@@ -12,7 +12,7 @@ class SceneMatrix : public Nameable {
 public:
     SceneMatrix(const nlohmann::json& json);
     SceneMatrix(Composer* composer);
-    Composer* composer() { return _composer; }
+    Composer* composer() const { return _composer; }
     void render();
     void process(Track* track);
     void stop();
@@ -20,7 +20,7 @@ public:
     virtual nlohmann::json toJson() override;
 
     std::vector<std::unique_ptr<Scene>> _scenes;
-    Composer* _composer;
+    Composer* _composer = nullptr;
 };
 
 class AddSceneCommand : public Command {

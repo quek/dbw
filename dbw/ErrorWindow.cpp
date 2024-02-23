@@ -7,7 +7,10 @@ void ErrorWindow::render() {
     if (!_show) {
         return;
     }
-    ImGui::SetNextWindowFocus();
+    if (_focus) {
+        ImGui::SetNextWindowFocus();
+        _focus = false;
+    }
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, -1), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -27,6 +30,7 @@ void ErrorWindow::show(const std::string message) {
     }
     _message = message;
     _show = true;
+    _focus = true;
 }
 
 void ErrorWindow::show(const std::string message, const std::exception& e) {

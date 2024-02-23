@@ -110,6 +110,13 @@ void TimelineWindow::prepareAllThings() {
     _allThings.clear();
     _allLanes.clear();
     _clipLaneMap.clear();
+    for (auto& lane : _composer->_masterTrack->_lanes) {
+        _allLanes.push_back(lane.get());
+        for (auto& clip : lane->_clips) {
+            _allThings.push_back(clip.get());
+            _clipLaneMap[clip.get()] = lane.get();
+        }
+    }
     for (auto& track : _composer->_tracks) {
         for (auto& lane : track->_lanes) {
             _allLanes.push_back(lane.get());
@@ -207,6 +214,12 @@ void TimelineWindow::renderHeader() {
     ImVec2 clipRectMin = windowPos + ImVec2(TIMELINE_WIDTH, 0.0f);
     ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight());
     ImGui::PushClipRect(clipRectMin, clipRectMax, true);
+
+    ImVec2 pos = ImVec2(x, y);
+    ImGui::SetCursorPos(pos + ImVec2(padding, 0));
+    ImGui::Text(_composer->_masterTrack->_name.c_str());
+    x += getTrackWidth(_composer->_masterTrack.get()) * _zoomX;
+
     for (auto& track : _composer->_tracks) {
         ImVec2 pos = ImVec2(x, y);
         ImGui::SetCursorPos(pos + ImVec2(padding, 0));
@@ -218,9 +231,7 @@ void TimelineWindow::renderHeader() {
 
         x += getTrackWidth(track.get()) * _zoomX;
     }
-    ImVec2 pos = ImVec2(x, y);
-    ImGui::SetCursorPos(pos + ImVec2(padding, 0));
-    ImGui::Text(_composer->_masterTrack->_name.c_str());
+
     ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
     ImVec2 pos2 = pos1 + ImVec2(0, _composer->maxBar() * 4 * _zoomY);
     drawList->AddLine(pos1, pos2, BAR_LINE_COLOR);
@@ -257,17 +268,24 @@ float TimelineWindow::getTrackWidth(Track* track) {
 }
 
 float TimelineWindow::allTracksWidth() {
-    float width = 0.0f;
+    float width = getTrackWidth(_composer->_masterTrack.get());
     for (auto& track : _composer->_tracks) {
         width += getTrackWidth(track.get());
     }
-    return width + getTrackWidth(_composer->_masterTrack.get());
+    return width;
 }
 
 Lane* TimelineWindow::laneFromPos(ImVec2& pos) {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();
     float x = (pos.x - windowPos.x + scrollX - TIMELINE_WIDTH) / _zoomX;
+    for (auto& lane : _composer->_masterTrack->_lanes) {
+        float laneWidth = getLaneWidth(lane.get());
+        if (laneWidth > x) {
+            return lane.get();
+        }
+        x -= laneWidth;
+    }
     for (auto& track : _composer->_tracks) {
         for (auto& lane : track->_lanes) {
             float laneWidth = getLaneWidth(lane.get());

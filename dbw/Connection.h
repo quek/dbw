@@ -15,11 +15,11 @@ public:
     void setLatency(uint32_t latency);
     virtual nlohmann::json toJson() override;
 
-    Module* _from;
+    Module* _from = nullptr;
     uint64_t _fromId = 0;
     int _fromIndex;
 
-    Module* _to;
+    Module* _to = nullptr;
     uint64_t _toId = 0;
     int _toIndex;
 

@@ -17,5 +17,5 @@ public:
     bool isAllLaneStoped();
     virtual nlohmann::json toJson() override;
 
-    SceneMatrix* _sceneMatrix;
+    SceneMatrix* _sceneMatrix = nullptr;
 };

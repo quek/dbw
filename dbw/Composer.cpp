@@ -31,16 +31,16 @@ Composer::Composer() :
 }
 
 Composer::Composer(const nlohmann::json& json) : Nameable(json),
-    _commandManager(this),
-    _project(std::make_unique<Project>(this)),
-    _composerWindow(std::make_unique<ComposerWindow>(this)),
-    _timelineWindow(std::make_unique<TimelineWindow>(this)),
-    _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
-    _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
+_commandManager(this),
+_project(std::make_unique<Project>(this)),
+_composerWindow(std::make_unique<ComposerWindow>(this)),
+_timelineWindow(std::make_unique<TimelineWindow>(this)),
+_pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
+_sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)) {
 
     _bpm = json["_bpm"];
 
-    _sceneMatrix =std::make_unique<SceneMatrix>(json["_sceneMatrix"]);
+    _sceneMatrix = std::make_unique<SceneMatrix>(json["_sceneMatrix"]);
     _sceneMatrix->_composer = this;
 
     _masterTrack = std::make_unique<Track>(json["_masterTrack"]);
@@ -50,6 +50,19 @@ Composer::Composer(const nlohmann::json& json) : Nameable(json),
         Track* track = new Track(x);
         track->_composer = this;
         _tracks.emplace_back(track);
+    }
+
+    for (const auto& module : _masterTrack->_modules) {
+        for (const auto& connection : module->_connections) {
+            connection->resolveModuleReference();
+        }
+    }
+    for (const auto& track : _tracks) {
+        for (const auto& module : track->_modules) {
+            for (const auto& connection : module->_connections) {
+                connection->resolveModuleReference();
+            }
+        }
     }
 }
 
@@ -226,7 +239,6 @@ void Composer::computeLatency() {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
-        _maxLatency = maxLatency;
         for (const auto& track : _tracks) {
             track->_processBuffer.setLatency(maxLatency - track->_latency);
         }

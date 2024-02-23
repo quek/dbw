@@ -42,7 +42,6 @@ public:
     std::unique_ptr<Project> _project;
     ProcessBuffer _processBuffer;
     float _bpm = 128.0;
-    int _samplePerDelay;
     bool _playing = false;
     bool _looping = false;
     bool _scrollLock = false;
@@ -56,7 +55,6 @@ public:
     std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<Track> _masterTrack;
     std::vector<Module*> _orderedModules;
-    uint32_t _maxLatency;
 
     std::unique_ptr<ComposerWindow> _composerWindow;
     std::unique_ptr<SceneMatrix> _sceneMatrix;

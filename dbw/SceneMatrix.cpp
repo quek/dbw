@@ -30,16 +30,21 @@ void SceneMatrix::render() {
                               ImVec2(-1.0f, -20.0f))) {
             ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide);
+            ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
             for (auto& track : _composer->_tracks) {
                 ImGui::TableSetupColumn(track->_name.c_str());
             }
-            ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
 
             ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
             ImGui::TableSetColumnIndex(0);
             ImGui::TableHeader("");
 
-            int columnIndex = 0;
+            ImGui::TableSetColumnIndex(1);
+            ImGui::PushID(_composer->_masterTrack.get());
+            ImGui::TableHeader(_composer->_masterTrack->_name.c_str());
+            ImGui::PopID();
+
+            int columnIndex = 1;
             for (auto& track : _composer->_tracks) {
                 ImGui::TableSetColumnIndex(++columnIndex);
                 ImGui::PushID(track.get());
@@ -47,10 +52,6 @@ void SceneMatrix::render() {
                 ImGui::TableHeader(name);
                 ImGui::PopID();
             }
-            ImGui::TableSetColumnIndex(static_cast<int>(_composer->_tracks.size() + 1));
-            ImGui::PushID(_composer->_masterTrack.get());
-            ImGui::TableHeader(_composer->_masterTrack->_name.c_str());
-            ImGui::PopID();
 
             for (const auto& scene : _scenes) {
                 ImGui::TableNextRow();
@@ -72,6 +73,18 @@ void SceneMatrix::render() {
                 ImGui::Text(scene->_name.c_str());
 
                 columnIndex = 0;
+                ImGui::TableSetColumnIndex(++columnIndex);
+                for (const auto& lane : _composer->_masterTrack->_lanes) {
+                    auto& clipSlot = lane->getClipSlot(scene.get());
+                    clipSlot->render(_composer);
+                    if (ImGui::BeginDragDropTarget()) {
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
+                            const Clip* clip = (Clip*)payload->Data;
+                            clipSlot->_clip.reset(new Clip(*clip));
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+                }
                 for (const auto& track : _composer->_tracks) {
                     for (const auto& lane : track->_lanes) {
                         ImGui::TableSetColumnIndex(++columnIndex);
@@ -84,18 +97,6 @@ void SceneMatrix::render() {
                             }
                             ImGui::EndDragDropTarget();
                         }
-                    }
-                }
-                ImGui::TableSetColumnIndex(++columnIndex);
-                for (const auto& lane : _composer->_masterTrack->_lanes) {
-                    auto& clipSlot = lane->getClipSlot(scene.get());
-                    clipSlot->render(_composer);
-                    if (ImGui::BeginDragDropTarget()) {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
-                            const Clip* clip = (Clip*)payload->Data;
-                            clipSlot->_clip.reset(new Clip(*clip));
-                        }
-                        ImGui::EndDragDropTarget();
                     }
                 }
             }

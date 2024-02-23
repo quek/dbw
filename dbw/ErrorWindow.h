@@ -9,6 +9,7 @@ public:
 private:
     std::string _message = "";
     bool _show = false;
+    bool _focus = false;
 };
 
 extern ErrorWindow* gErrorWindow;
