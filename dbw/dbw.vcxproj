@@ -178,6 +178,7 @@
     <ClInclude Include="command\DeleteClips.h" />
     <ClInclude Include="command\DeleteModule.h" />
     <ClInclude Include="command\DeleteNotes.h" />
+    <ClInclude Include="command\GroupTrack.h" />
     <ClInclude Include="Command\OpenProject.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="Config.h" />
@@ -250,6 +251,7 @@
     <ClCompile Include="command\DeleteClips.cpp" />
     <ClCompile Include="command\DeleteModule.cpp" />
     <ClCompile Include="command\DeleteNotes.cpp" />
+    <ClCompile Include="command\GroupTrack.cpp" />
     <ClCompile Include="Command\OpenProject.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="Config.cpp" />

@@ -105,6 +105,9 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandWindow.cpp" />
     <ClCompile Include="RackWindow.cpp" />
+    <ClCompile Include="command\GroupTrack.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -199,6 +202,9 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="CommandWindow.h" />
     <ClInclude Include="RackWindow.h" />
+    <ClInclude Include="command\GroupTrack.h">
+      <Filter>command</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

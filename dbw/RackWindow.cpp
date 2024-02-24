@@ -5,6 +5,7 @@
 #include "Composer.h"
 #include "Fader.h"
 #include "Track.h"
+#include "command/GroupTrack.h"
 
 RackWindow::RackWindow(Composer* composer) : _composer(composer) {
 }
@@ -71,6 +72,19 @@ void RackWindow::renderHeader() {
                     }
                 }
             }
+        }
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Group", "CTRL+G")) {
+                std::vector<uint64_t> ids;
+                for (const auto& track : _selectedTracks) {
+                    ids.emplace_back(track->nekoId());
+                }
+                _composer->_commandManager.executeCommand(new command::GroupTrack(ids, true));
+                ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::MenuItem("Delete", "Delete"))
+                ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
         }
         ImGui::SameLine();
     }
