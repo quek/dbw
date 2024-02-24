@@ -105,7 +105,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandWindow.cpp" />
     <ClCompile Include="RackWindow.cpp" />
-    <ClCompile Include="command\GroupTrack.cpp">
+    <ClCompile Include="command\GroupTracks.cpp">
       <Filter>command</Filter>
     </ClCompile>
     <ClCompile Include="TracksHolder.cpp" />
@@ -203,7 +203,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="CommandWindow.h" />
     <ClInclude Include="RackWindow.h" />
-    <ClInclude Include="command\GroupTrack.h">
+    <ClInclude Include="command\GroupTracks.h">
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="TracksHolder.h" />
