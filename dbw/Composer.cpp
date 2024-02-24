@@ -23,12 +23,13 @@ Composer::Composer() :
     _project(std::make_unique<Project>(this)),
     _masterTrack(std::make_unique<Track>("MASTER", this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
+    _rackWindow(std::make_unique<RackWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
     _commandWindow(std::make_unique<CommandWindow>(this)) {
-   
+
     addTrack();
 }
 
@@ -37,6 +38,7 @@ Composer::Composer(const nlohmann::json& json) :
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
+    _rackWindow(std::make_unique<RackWindow>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
@@ -72,6 +74,7 @@ Composer::Composer(const nlohmann::json& json) :
 
 void Composer::render() const {
     _composerWindow->render();
+    _rackWindow->render();
     _sceneMatrix->render();
     _timelineWindow->render();
     _pianoRollWindow->render();
@@ -330,4 +333,12 @@ void Composer::addTrack() {
 
 void Composer::addTrack(Track* track) {
     _commandManager.executeCommand(new AddTrackCommand(track));
+}
+
+std::vector<Track*> Composer::allTracks() {
+    std::vector<Track*> tracks{ _masterTrack.get() };
+    for (auto& track : _tracks) {
+        tracks.push_back(track.get());
+    }
+    return tracks;
 }

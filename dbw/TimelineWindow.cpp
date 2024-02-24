@@ -165,6 +165,9 @@ float TimelineWindow::laneToScreenX(Lane* lane) {
         if (it == lane) {
             break;
         }
+        if (it == _allLanes.back()) {
+            break;
+        }
         x += getLaneWidth(it);
     }
     return x * _zoomX + offsetLeft() - ImGui::GetScrollX() + ImGui::GetWindowPos().x;

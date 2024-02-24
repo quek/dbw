@@ -106,7 +106,7 @@ void ComposerWindow::render() {
 
     ImVec2 mainWindowSize = ImGui::GetWindowSize();
 
-    ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+    ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable;
 
     if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
         Track* masterTrack = _composer->_masterTrack.get();
@@ -146,6 +146,11 @@ void ComposerWindow::render() {
                 if (ImGui::MenuItem("Delete", "Delete"))
                     ImGui::CloseCurrentPopup();
                 ImGui::EndPopup();
+            }
+            // TODO
+            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                ImGui::SetDragDropPayload("TRACK", track, sizeof(*track));
+                ImGui::EndDragDropSource();
             }
             ImGui::PopID();
         }

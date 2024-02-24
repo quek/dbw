@@ -206,6 +206,7 @@
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="ClapModule.h" />
     <ClInclude Include="Project.h" />
+    <ClInclude Include="RackWindow.h" />
     <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMatrix.h" />
@@ -277,6 +278,7 @@
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="ClapModule.cpp" />
     <ClCompile Include="Project.cpp" />
+    <ClCompile Include="RackWindow.cpp" />
     <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneMatrix.cpp" />

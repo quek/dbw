@@ -116,6 +116,11 @@ int16_t* PianoRollWindow::laneFromPos(ImVec2& pos) {
     float x = (pos.x - windowPos.x - offsetLeft() + scrollX);
     x = x / KEY_WIDTH / _zoomX;
     int16_t key = static_cast<int16_t>(x);
+    if (key < 0) {
+        key = 0;
+    } else if (key > 127) {
+        key = 127;
+    }
     return _allLanes[key];
 }
 

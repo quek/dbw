@@ -10,6 +10,7 @@
 #include "PianoRollWindow.h"
 #include "PluginManager.h"
 #include "Project.h"
+#include "RackWindow.h"
 #include "SceneMatrix.h"
 #include "SidechainInputSelector.h"
 #include "TimelineWindow.h"
@@ -32,6 +33,7 @@ public:
     void stop();
     void addTrack();
     void addTrack(Track* track);
+    std::vector<Track*> allTracks();
     int maxBar();
     void clear();
     void computeProcessOrder();
@@ -58,6 +60,7 @@ public:
     std::vector<Module*> _orderedModules;
 
     std::unique_ptr<ComposerWindow> _composerWindow;
+    std::unique_ptr<RackWindow> _rackWindow;
     std::unique_ptr<SceneMatrix> _sceneMatrix;
     std::unique_ptr<TimelineWindow> _timelineWindow;
     std::unique_ptr<PianoRollWindow> _pianoRollWindow;
