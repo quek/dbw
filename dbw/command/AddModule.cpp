@@ -24,7 +24,7 @@ void command::AddModule::undo(Composer* composer) {
         std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
         (*it)->stop();
         track->_modules.erase(it);
-        track->_composer->computeProcessOrder();
+        track->getComposer()->computeProcessOrder();
     }
 }
 
@@ -37,7 +37,7 @@ Module* command::AddModule::exec(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     track->_modules.emplace_back(module);
     module->start();
-    track->_composer->computeProcessOrder();
+    track->getComposer()->computeProcessOrder();
     return module;
 }
 

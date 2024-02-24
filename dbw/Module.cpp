@@ -35,7 +35,7 @@ void Module::render(float width, float height) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {
-                    _track->_composer->_commandManager.executeCommand(new command::DeleteModule(this));
+                    _track->getComposer()->_commandManager.executeCommand(new command::DeleteModule(this));
                 }
                 ImGui::EndMenu();
             }
@@ -44,7 +44,7 @@ void Module::render(float width, float height) {
         if (_ninputs > 1) {
             if (ImGui::Button("Sidechain")) {
                 // TODO inputIndex
-                _track->_composer->_sideChainInputSelector->open(this, 1);
+                _track->getComposer()->_sideChainInputSelector->open(this, 1);
             }
         }
 

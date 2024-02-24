@@ -18,6 +18,7 @@ public:
     Track(const nlohmann::json& json);
     Track(const std::string& name);
     virtual ~Track();
+    Composer* getComposer() override;
     void prepare(unsigned long framesPerBuffer);
     void prepareEvent();
     void render();
@@ -39,7 +40,6 @@ public:
 
     uint32_t _latency = 0;
 
-    Composer* _composer = nullptr;
     bool _openModuleSelector = false;
     float _width = 150.0f;
 

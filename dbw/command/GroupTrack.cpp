@@ -1,4 +1,6 @@
+#include <mutex>
 #include "GroupTrack.h"
+#include "../App.h"
 #include "../Composer.h"
 #include "../Track.h"
 
@@ -35,6 +37,7 @@ std::unique_ptr<Track> findTrack(Track* track, std::vector<std::unique_ptr<Track
 }
 
 void command::GroupTrack::execute(Composer* composer) {
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     Track* group = new Track(std::string("Group"));
     bool first = true;
     for (const auto& trackId : _ids) {
@@ -42,20 +45,23 @@ void command::GroupTrack::execute(Composer* composer) {
         if (!track) {
             continue;
         }
-        auto it = track->getTracksHolder()->findTrack(track);
-        if (it == track->getTracksHolder()->getTracks().end()) {
+        TracksHolder* tracksHolder = track->getTracksHolder();
+        auto it = tracksHolder->findTrack(track);
+        if (it == tracksHolder->getTracks().end()) {
             continue;
         }
-        _undoPlaces.push_back({ track->getTracksHolder()->nekoId(), std::distance(track->getTracksHolder()->getTracks().begin(), it) });
+        _undoPlaces.push_back({ tracksHolder->nekoId(), std::distance(tracksHolder->getTracks().begin(), it) });
         group->addTrack(std::move(*it));
         if (first) {
             first = false;
             (*it).reset(group);
+            group->setTracksHolder(tracksHolder);
         } else {
-            track->getTracksHolder()->getTracks().erase(it);
+            tracksHolder->getTracks().erase(it);
         }
     }
 }
 
-void command::GroupTrack::undo(Composer*) {
+void command::GroupTrack::undo(Composer* composer) {
+    std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
 }

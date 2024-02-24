@@ -29,7 +29,7 @@ Composer::Composer() :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
     _commandWindow(std::make_unique<CommandWindow>(this)) {
-    _masterTrack->_composer = this;
+    _masterTrack->setTracksHolder(this);
     addTrack();
 }
 
@@ -50,11 +50,10 @@ Composer::Composer(const nlohmann::json& json) :
     _sceneMatrix->_composer = this;
 
     _masterTrack = std::make_unique<Track>(json["_masterTrack"]);
-    _masterTrack->_composer = this;
+    _masterTrack->setTracksHolder(this);
 
     for (const auto& x : json["_tracks"]) {
         Track* track = new Track(x);
-        track->_composer = this;
         addTrack(track);
     }
 
@@ -255,6 +254,10 @@ void Composer::computeLatency() {
     _masterTrack->computeLatency();
 }
 
+Composer* Composer::getComposer() {
+    return this;
+}
+
 void Composer::deleteClips(std::set<Clip*> clips) {
     // TODO undo
     for (auto clip : clips) {
@@ -311,7 +314,6 @@ public:
     AddTrackCommand(Track* track) : _track(track) {}
     void execute(Composer* composer) override {
         std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
-        _track->_composer = composer;
         composer->addTrack(std::move(_track));
         composer->computeProcessOrder();
     }

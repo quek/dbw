@@ -3,6 +3,7 @@
 #include <vector>
 #include "Nameable.h"
 
+class Composer;
 class Track;
 
 class TracksHolder : public Nameable {
@@ -13,6 +14,7 @@ public:
     virtual void addTrack();
     virtual void addTrack(Track* track);
     virtual void addTrack(std::unique_ptr<Track> track);
+    virtual Composer* getComposer() = 0;
     virtual std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
     virtual std::vector<std::unique_ptr<Track>>& getTracks();
 

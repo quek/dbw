@@ -40,6 +40,10 @@ Track::Track(const std::string& name) :
 Track::~Track() {
 }
 
+Composer* Track::getComposer() {
+    return _tracksHolder->getComposer();
+}
+
 void Track::prepare(unsigned long framesPerBuffer) {
     _processBuffer.clear();
     int nbuses = 1;
@@ -55,14 +59,14 @@ void Track::prepare(unsigned long framesPerBuffer) {
 }
 
 void Track::prepareEvent() {
-    double oneBeatSec = 60.0 / _composer->_bpm;
+    double oneBeatSec = 60.0 / getComposer()->_bpm;
     double sampleRate = gPreference.sampleRate;
     for (auto& lane : _lanes) {
         for (auto& clip : lane->_clips) {
             double clipTime = clip->_time;
             double clipDuration = clip->_duration;
-            double begin = _composer->_playTime;
-            double end = _composer->_nextPlayTime;
+            double begin = getComposer()->_playTime;
+            double end = getComposer()->_nextPlayTime;
             // TODO Loop
             if (begin < clipTime + clipDuration && clipTime < end) {
                 for (auto& note : clip->_sequence->_notes) {
@@ -85,7 +89,7 @@ void Track::prepareEvent() {
         }
     }
 
-    _composer->_sceneMatrix->process(this);
+    getComposer()->_sceneMatrix->process(this);
 }
 
 
@@ -113,15 +117,15 @@ void Track::addModule(std::string path, uint32_t index) {
     _modules.emplace_back(module);
     module->start();
     module->openGui();
-    _composer->computeProcessOrder();
+    getComposer()->computeProcessOrder();
 }
 
 void Track::addModule(Module* module) {
     module->_track = this;
     _modules.emplace_back(module);
     module->start();
-    if (_composer) {
-        _composer->computeProcessOrder();
+    if (getComposer()) {
+        getComposer()->computeProcessOrder();
     }
 }
 

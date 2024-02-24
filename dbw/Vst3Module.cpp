@@ -367,7 +367,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
 
     ///< processing context (optional, but most welcome)
     Steinberg::uint32 statesAndFlangs = 0;
-    if (_track->_composer->_playing) {
+    if (_track->getComposer()->_playing) {
         statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kPlaying;
     }
     statesAndFlangs |= Steinberg::Vst::ProcessContext::StatesAndFlags::kTempoValid;
@@ -377,10 +377,10 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     processContext.state = statesAndFlangs;
     double sampleRate = gPreference.sampleRate;
     processContext.sampleRate = sampleRate;
-    double playTime = _track->_composer->_playTime;
+    double playTime = _track->getComposer()->_playTime;
     processContext.projectTimeMusic = playTime;
     processContext.barPositionMusic = static_cast<int>(playTime / 4);
-    double bpm = _track->_composer->_bpm;
+    double bpm = _track->getComposer()->_bpm;
     // TODO これあってる？
     processContext.projectTimeSamples = playTime / (bpm / 60.0) * sampleRate;
     processContext.tempo = bpm;
@@ -407,8 +407,8 @@ void Vst3Module::start() {
     }
     if (_processor) {
         _latency = _processor->getLatencySamples();
-        if (_track && _track->_composer) {
-            _track->_composer->computeLatency();
+        if (_track && _track->getComposer()) {
+            _track->getComposer()->computeLatency();
         }
 
         Steinberg::uint32 tailSample = _processor->getTailSamples();

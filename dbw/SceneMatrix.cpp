@@ -111,7 +111,7 @@ void SceneMatrix::render() {
 }
 
 void SceneMatrix::process(Track* track) {
-    double oneBeatSec = 60.0 / track->_composer->_bpm;
+    double oneBeatSec = 60.0 / track->getComposer()->_bpm;
     double sampleRate = gPreference.sampleRate;
     for (auto& scene : _scenes) {
         for (auto& lane : track->_lanes) {

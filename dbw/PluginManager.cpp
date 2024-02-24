@@ -81,7 +81,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 track->_openModuleSelector = false;
                 // TODO use AddModuleCommand
                 track->addModule(plugin["path"].get<std::string>(), plugin["index"].get<uint32_t>());
-                track->_composer->computeProcessOrder();
+                track->getComposer()->computeProcessOrder();
             }
         }
     }
@@ -101,7 +101,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);
                 module->load(path);
-                track->_composer->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "vst3", id));
+                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "vst3", id));
             }
         }
     }
@@ -116,7 +116,7 @@ void PluginManager::openModuleSelector(Track* track) {
         if (q == _query.end()) {
             if (ImGui::Button(name.c_str())) {
                 track->_openModuleSelector = false;
-                track->_composer->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "builtin", name));
+                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "builtin", name));
             }
         }
     }

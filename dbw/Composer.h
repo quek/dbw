@@ -36,6 +36,7 @@ public:
     void clear();
     void computeProcessOrder();
     void computeLatency();
+    Composer* getComposer() override;
     void deleteClips(std::set<Clip*> clips);
     virtual nlohmann::json toJson() override;
 
