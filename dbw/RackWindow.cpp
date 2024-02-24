@@ -36,63 +36,67 @@ void RackWindow::render() {
 
 void RackWindow::renderHeader() {
     float scrollY = ImGui::GetScrollY();
+    ImGui::SetCursorPosY(scrollY);
     for (auto& track : _allTracks) {
-        ImGui::SetCursorPosY(scrollY);
-        auto it = std::ranges::find(_selectedTracks, track);
-        bool selected = it != _selectedTracks.end();
-        if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, ImVec2(track->_width, 0.0f))) {
-            auto& io = ImGui::GetIO();
-            if (!io.KeyCtrl && !io.KeyShift) {
-                _selectedTracks = { track };
-            } else if (io.KeyCtrl) {
-                if (selected) {
-                    _selectedTracks.erase(it);
-                } else {
-                    _selectedTracks.push_back(track);
-                }
-            } else if (io.KeyShift) {
-                if (_selectedTracks.empty()) {
-                    for (auto& x : _allTracks) {
-                        _selectedTracks.push_back(x);
-                        if (x == track) break;
-                    }
-                } else {
-                    auto from = std::ranges::find(_allTracks, _selectedTracks.back());
-                    auto to = std::ranges::find(_allTracks, track);
-                    if (from > to) {
-                        std::swap(from, to);
-                    }
-                    while (true) {
-                        if (std::ranges::find(_selectedTracks, *from) == _selectedTracks.end()) {
-                            _selectedTracks.push_back(*from);
-                        }
-                        if (from++ == to) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        if (ImGui::BeginPopupContextItem()) {
-            if (ImGui::MenuItem("Group", "Ctrl+G")) {
-                std::vector<uint64_t> ids;
-                _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
-                ImGui::CloseCurrentPopup();
-            }
-            if (ImGui::MenuItem("Ungroup", "Ctrl+Shift+G")) {
-                // TODO
-                ImGui::CloseCurrentPopup();
-            }
-            if (ImGui::MenuItem("Delete", "Delete"))
-                ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
-        }
-        ImGui::SameLine();
+        renderHeader(track);
     }
     if (ImGui::Button("Add track")) {
         _composer->addTrack();
     }
     _headerHeight = TEXT_BASE_HEIGHT;
+}
+
+void RackWindow::renderHeader(Track* track) {
+    auto it = std::ranges::find(_selectedTracks, track);
+    bool selected = it != _selectedTracks.end();
+    if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, ImVec2(track->_width, 0.0f))) {
+        auto& io = ImGui::GetIO();
+        if (!io.KeyCtrl && !io.KeyShift) {
+            _selectedTracks = { track };
+        } else if (io.KeyCtrl) {
+            if (selected) {
+                _selectedTracks.erase(it);
+            } else {
+                _selectedTracks.push_back(track);
+            }
+        } else if (io.KeyShift) {
+            if (_selectedTracks.empty()) {
+                for (auto& x : _allTracks) {
+                    _selectedTracks.push_back(x);
+                    if (x == track) break;
+                }
+            } else {
+                auto from = std::ranges::find(_allTracks, _selectedTracks.back());
+                auto to = std::ranges::find(_allTracks, track);
+                if (from > to) {
+                    std::swap(from, to);
+                }
+                while (true) {
+                    if (std::ranges::find(_selectedTracks, *from) == _selectedTracks.end()) {
+                        _selectedTracks.push_back(*from);
+                    }
+                    if (from++ == to) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (ImGui::BeginPopupContextItem()) {
+        if (ImGui::MenuItem("Group", "Ctrl+G")) {
+            std::vector<uint64_t> ids;
+            _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
+            ImGui::CloseCurrentPopup();
+        }
+        if (ImGui::MenuItem("Ungroup", "Ctrl+Shift+G")) {
+            // TODO
+            ImGui::CloseCurrentPopup();
+        }
+        if (ImGui::MenuItem("Delete", "Delete"))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+    ImGui::SameLine();
 }
 
 void RackWindow::renderModules() {

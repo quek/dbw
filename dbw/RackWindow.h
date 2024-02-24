@@ -13,6 +13,7 @@ public:
 
 private:
     void renderHeader();
+    void renderHeader(Track* track);
     void renderModules();
     void renderFaders();
 
