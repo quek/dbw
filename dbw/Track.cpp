@@ -17,6 +17,8 @@
 #include "command/AddModule.h"
 
 Track::Track(const nlohmann::json& json) : Nameable(json) {
+    _width = json["_width"];
+    _selected = json["_selected"];
     for (const auto& x : json["_lanes"]) {
         addLane(new Lane(x));
     }
@@ -129,6 +131,11 @@ void Track::addLane(Lane* lane) {
     _lanes.emplace_back(lane);
 }
 
+void Track::addChild(Track* child) {
+    child->_parent = this;
+    _children.emplace_back(child);
+}
+
 bool Track::isAvailableSidechainSrc(Track* dst) {
     if (this == dst) {
         // 当該モジュールより前のは使える
@@ -153,6 +160,8 @@ void Track::doDCP() {
 nlohmann::json Track::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["type"] = TYPE;
+    json["_width"] = _width;
+    json["_selected"] = _selected;
     json["_fader"].update(_fader->toJson());
 
     nlohmann::json modules = nlohmann::json::array();

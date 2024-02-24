@@ -27,11 +27,11 @@ void Module::start() {
     _isStarting = true;
 }
 
-void Module::render() {
+void Module::render(float width) {
     ImGui::PushID(this);
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
-    if (ImGui::BeginChild("##module", ImVec2(0, 0), childFlags, windowFlags)) {
+    if (ImGui::BeginChild("##module", ImVec2(width, 0), childFlags, windowFlags)) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {

@@ -24,6 +24,7 @@ public:
     void addModule(std::string path, uint32_t index);
     void addModule(Module* module);
     void addLane(Lane* lane);
+    void addChild(Track* child);
     bool isAvailableSidechainSrc(Track* dst);
     uint32_t computeLatency();
     void doDCP();
@@ -39,7 +40,10 @@ public:
 
     Composer* _composer = nullptr;
     bool _openModuleSelector = false;
+    float _width = 150.0f;
+    bool _selected = false;
 
 private:
-    virtual const char* role() { return "regular"; }
+    Track* _parent = nullptr;
+    std::vector<std::unique_ptr<Track>> _children;
 };

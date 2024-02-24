@@ -1,7 +1,9 @@
 #pragma once
+#include <map>
 #include "BaseWindow.h"
 
 class Composer;
+class Track;
 
 class RackWindow : public BaseWindow {
 public:
@@ -9,7 +11,8 @@ public:
     void render();
 
 private:
-    Composer* _composer;
+    void renderHeader();
      
+    Composer* _composer;
 };
 
