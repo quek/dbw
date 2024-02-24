@@ -18,7 +18,6 @@
 
 Track::Track(const nlohmann::json& json) : Nameable(json) {
     _width = json["_width"];
-    _selected = json["_selected"];
     for (const auto& x : json["_lanes"]) {
         addLane(new Lane(x));
     }
@@ -161,7 +160,6 @@ nlohmann::json Track::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["type"] = TYPE;
     json["_width"] = _width;
-    json["_selected"] = _selected;
     json["_fader"].update(_fader->toJson());
 
     nlohmann::json modules = nlohmann::json::array();

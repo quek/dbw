@@ -31,7 +31,7 @@ void Module::render(float width, float height) {
     ImGui::PushID(this);
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
-    if (ImGui::BeginChild("##module", ImVec2(width, 0), childFlags, windowFlags)) {
+    if (ImGui::BeginChild("##module", ImVec2(width, height), childFlags, windowFlags)) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {

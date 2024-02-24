@@ -41,7 +41,6 @@ public:
     Composer* _composer = nullptr;
     bool _openModuleSelector = false;
     float _width = 150.0f;
-    bool _selected = false;
 
 private:
     Track* _parent = nullptr;

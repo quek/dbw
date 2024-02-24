@@ -10,6 +10,7 @@ RackWindow::RackWindow(Composer* composer) : _composer(composer) {
 }
 
 void RackWindow::render() {
+    _allTracks = _composer->allTracks();
     if (ImGui::Begin("Rack")) {
 
         if (ImGui::BeginChild("Rack Canvas",
@@ -34,9 +35,43 @@ void RackWindow::render() {
 
 void RackWindow::renderHeader() {
     float scrollY = ImGui::GetScrollY();
-    for (auto& track : _composer->allTracks()) {
+    for (auto& track : _allTracks) {
         ImGui::SetCursorPosY(scrollY);
-        ImGui::Selectable(track->_name.c_str(), &track->_selected, ImGuiSelectableFlags_None, ImVec2(track->_width, TEXT_BASE_HEIGHT));
+        auto it = std::ranges::find(_selectedTracks, track);
+        bool selected = it != _selectedTracks.end();
+        if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, ImVec2(track->_width, 0.0f))) {
+            auto io = ImGui::GetIO();
+            if (!io.KeyCtrl && !io.KeyShift) {
+                _selectedTracks = { track };
+            } else if (io.KeyCtrl) {
+                if (selected) {
+                    _selectedTracks.erase(it);
+                } else {
+                    _selectedTracks.push_back(track);
+                }
+            } else if (io.KeyShift) {
+                if (_selectedTracks.empty()) {
+                    for (auto& x : _allTracks) {
+                        _selectedTracks.push_back(x);
+                        if (x == track) break;
+                    }
+                } else {
+                    auto from = std::ranges::find(_allTracks, _selectedTracks.back());
+                    auto to = std::ranges::find(_allTracks, track);
+                    if (from > to) {
+                        std::swap(from, to);
+                    }
+                    while (true) {
+                        if (std::ranges::find(_selectedTracks, *from) == _selectedTracks.end()) {
+                            _selectedTracks.push_back(*from);
+                        }
+                        if (from++ == to) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         ImGui::SameLine();
     }
     if (ImGui::Button("Add track")) {
@@ -48,7 +83,7 @@ void RackWindow::renderHeader() {
 void RackWindow::renderModules() {
     float scrollY = ImGui::GetScrollY();
     bool first = true;
-    for (auto& track : _composer->allTracks()) {
+    for (auto& track : _allTracks) {
         ImGui::SetCursorPosY(_headerHeight);
         if (first) {
             first = false;
@@ -78,7 +113,7 @@ void RackWindow::renderFaders() {
         cursorPosY = _headerHeight;
     }
     bool first = true;
-    for (auto& track : _composer->allTracks()) {
+    for (auto& track : _allTracks) {
         ImGui::SetCursorPosY(cursorPosY);
         if (first) {
             first = false;
