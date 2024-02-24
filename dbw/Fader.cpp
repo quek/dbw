@@ -2,9 +2,9 @@
 #include <ranges>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include "Track.h"
 
-Fader::Fader(const nlohmann::json& json) : BuiltinModule(json)
-{
+Fader::Fader(const nlohmann::json& json) : BuiltinModule(json) {
     _level = json["_level"];
     _pan = json["_pan"];
     _mute = json["_mute"];
@@ -50,6 +50,7 @@ void Fader::renderContent() {
     ImGui::Checkbox("Mute", &_mute);
     ImGui::SameLine();
     ImGui::Checkbox("Solo", &_solo);
+    ImGui::Text(std::to_string(_track->_latency).c_str());
     ImGui::PopItemWidth();
 }
 

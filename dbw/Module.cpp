@@ -27,7 +27,7 @@ void Module::start() {
     _isStarting = true;
 }
 
-void Module::render(float width) {
+void Module::render(float width, float height) {
     ImGui::PushID(this);
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;

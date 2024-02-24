@@ -12,7 +12,11 @@ public:
 
 private:
     void renderHeader();
-     
+    void renderModules();
+    void renderFaders();
+
     Composer* _composer;
+    float _headerHeight = 0.0f;
+    float _faderHeight = 150.0f;
 };
 
