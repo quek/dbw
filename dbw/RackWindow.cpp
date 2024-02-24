@@ -41,7 +41,7 @@ void RackWindow::renderHeader() {
         auto it = std::ranges::find(_selectedTracks, track);
         bool selected = it != _selectedTracks.end();
         if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, ImVec2(track->_width, 0.0f))) {
-            auto io = ImGui::GetIO();
+            auto& io = ImGui::GetIO();
             if (!io.KeyCtrl && !io.KeyShift) {
                 _selectedTracks = { track };
             } else if (io.KeyCtrl) {
@@ -74,12 +74,13 @@ void RackWindow::renderHeader() {
             }
         }
         if (ImGui::BeginPopupContextItem()) {
-            if (ImGui::MenuItem("Group", "CTRL+G")) {
+            if (ImGui::MenuItem("Group", "Ctrl+G")) {
                 std::vector<uint64_t> ids;
-                for (const auto& track : _selectedTracks) {
-                    ids.emplace_back(track->nekoId());
-                }
-                _composer->_commandManager.executeCommand(new command::GroupTrack(ids, true));
+                _composer->_commandManager.executeCommand(new command::GroupTrack(_selectedTracks, true));
+                ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::MenuItem("Ungroup", "Ctrl+Shift+G")) {
+                // TODO
                 ImGui::CloseCurrentPopup();
             }
             if (ImGui::MenuItem("Delete", "Delete"))
@@ -95,7 +96,6 @@ void RackWindow::renderHeader() {
 }
 
 void RackWindow::renderModules() {
-    float scrollY = ImGui::GetScrollY();
     bool first = true;
     for (auto& track : _allTracks) {
         ImGui::SetCursorPosY(_headerHeight);

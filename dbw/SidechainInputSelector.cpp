@@ -20,7 +20,7 @@ void SidechainInputSelector::render() {
     }
     ImGui::OpenPopup(NAME);
     if (ImGui::BeginPopupModal(NAME, &_show)) {
-        for (auto& track : _composer->_tracks) {
+        for (auto& track : _composer->getTracks()) {
             if (!track->isAvailableSidechainSrc(_module->_track)) {
                 continue;
             }

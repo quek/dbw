@@ -5,7 +5,7 @@ Nameable::Nameable(const nlohmann::json& json) : Neko(json) {
     _color = json["_color"];
 }
 
-Nameable::Nameable(std::string name) : _name(name) {
+Nameable::Nameable(const std::string& name) : _name(name) {
 }
 
 nlohmann::json Nameable::toJson() {

@@ -16,7 +16,7 @@
 #include "Lane.h"
 #include "command/AddModule.h"
 
-Track::Track(const nlohmann::json& json) : Nameable(json) {
+Track::Track(const nlohmann::json& json) : TracksHolder(json) {
     _width = json["_width"];
     for (const auto& x : json["_lanes"]) {
         addLane(new Lane(x));
@@ -31,8 +31,8 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
     }
 }
 
-Track::Track(std::string name, Composer* composer) :
-    _fader(new Fader("Fader", this)), Nameable(name), _composer(composer) {
+Track::Track(const std::string& name) :
+    _fader(new Fader("Fader", this)), TracksHolder(name) {
     addLane(new Lane());
     _fader->start();
 }
@@ -130,11 +130,6 @@ void Track::addLane(Lane* lane) {
     _lanes.emplace_back(lane);
 }
 
-void Track::addChild(Track* child) {
-    child->_parent = this;
-    _children.emplace_back(child);
-}
-
 bool Track::isAvailableSidechainSrc(Track* dst) {
     if (this == dst) {
         // 当該モジュールより前のは使える
@@ -154,6 +149,14 @@ uint32_t Track::computeLatency() {
 
 void Track::doDCP() {
     _processBuffer.doDCP();
+}
+
+TracksHolder* Track::getTracksHolder() {
+    return _tracksHolder;
+}
+
+void Track::setTracksHolder(TracksHolder* tracksHolder) {
+    _tracksHolder = tracksHolder;
 }
 
 nlohmann::json Track::toJson() {

@@ -108,13 +108,13 @@ void ComposerWindow::render() {
 
     ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable;
 
-    if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->_tracks.size()), flags, ImVec2(-1.0f, -20.0f))) {
+    if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->getTracks().size()), flags, ImVec2(-1.0f, -20.0f))) {
         Track* masterTrack = _composer->_masterTrack.get();
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_None;
         ImGui::TableSetupColumn(masterTrack->_name.c_str(), columnFlags, 0.0f, 0);
-        for (int i = 0; i < _composer->_tracks.size(); ++i) {
-            ImGui::TableSetupColumn(_composer->_tracks[i]->_name.c_str(), columnFlags, 0.0f, i + 1);
+        for (int i = 0; i < _composer->getTracks().size(); ++i) {
+            ImGui::TableSetupColumn(_composer->getTracks()[i]->_name.c_str(), columnFlags, 0.0f, i + 1);
         }
 
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
@@ -129,8 +129,8 @@ void ComposerWindow::render() {
         ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
         ImGui::PopID();
 
-        for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            Track* track = _composer->_tracks[i].get();
+        for (auto i = 0; i < _composer->getTracks().size(); ++i) {
+            Track* track = _composer->getTracks()[i].get();
             ImGui::TableSetColumnIndex(i + 1);
             ImGui::PushID(track);
             ImGui::TableHeader(ImGui::TableGetColumnName(i + 1));
@@ -161,8 +161,8 @@ void ComposerWindow::render() {
         colorMasterTrack.w = 0.2f;
         ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
 
-        for (auto i = 0; i < _composer->_tracks.size(); ++i) {
-            Track* track = _composer->_tracks[i].get();
+        for (auto i = 0; i < _composer->getTracks().size(); ++i) {
+            Track* track = _composer->getTracks()[i].get();
             ImGui::TableSetColumnIndex(i + 1);
             track->render();
             ImVec4 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;

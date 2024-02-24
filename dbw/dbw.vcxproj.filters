@@ -108,6 +108,7 @@
     <ClCompile Include="command\GroupTrack.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="TracksHolder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -205,6 +206,7 @@
     <ClInclude Include="command\GroupTrack.h">
       <Filter>command</Filter>
     </ClInclude>
+    <ClInclude Include="TracksHolder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

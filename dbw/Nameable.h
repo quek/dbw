@@ -10,7 +10,7 @@ class Nameable : public Neko {
 public:
     Nameable(const nlohmann::json& json);
     Nameable(const Nameable& other) = default;
-    Nameable(std::string name = "");
+    Nameable(const std::string& name = "");
     virtual ~Nameable() = default;
     virtual nlohmann::json toJson() override;
 

@@ -24,14 +24,14 @@ SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
 
 void SceneMatrix::render() {
     if (ImGui::Begin("Scene Matrix")) {
-        int ncolumns = static_cast<int>(_composer->_tracks.size() + 2);
+        int ncolumns = static_cast<int>(_composer->getTracks().size() + 2);
         if (ImGui::BeginTable("Scene Matrix Table", ncolumns,
                               ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY,
                               ImVec2(-1.0f, -20.0f))) {
             ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
-            for (auto& track : _composer->_tracks) {
+            for (auto& track : _composer->getTracks()) {
                 ImGui::TableSetupColumn(track->_name.c_str());
             }
 
@@ -45,7 +45,7 @@ void SceneMatrix::render() {
             ImGui::PopID();
 
             int columnIndex = 1;
-            for (auto& track : _composer->_tracks) {
+            for (auto& track : _composer->getTracks()) {
                 ImGui::TableSetColumnIndex(++columnIndex);
                 ImGui::PushID(track.get());
                 auto name = track->_name.c_str();
@@ -85,7 +85,7 @@ void SceneMatrix::render() {
                         ImGui::EndDragDropTarget();
                     }
                 }
-                for (const auto& track : _composer->_tracks) {
+                for (const auto& track : _composer->getTracks()) {
                     for (const auto& lane : track->_lanes) {
                         ImGui::TableSetColumnIndex(++columnIndex);
                         auto& clipSlot = lane->getClipSlot(scene.get());

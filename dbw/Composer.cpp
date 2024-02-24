@@ -21,7 +21,7 @@
 Composer::Composer() :
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
-    _masterTrack(std::make_unique<Track>("MASTER", this)),
+    _masterTrack(std::make_unique<Track>(std::string("MASTER"))),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _rackWindow(std::make_unique<RackWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
@@ -29,12 +29,12 @@ Composer::Composer() :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
     _commandWindow(std::make_unique<CommandWindow>(this)) {
-
+    _masterTrack->_composer = this;
     addTrack();
 }
 
 Composer::Composer(const nlohmann::json& json) :
-    Nameable(json),
+    TracksHolder(json),
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
@@ -55,7 +55,7 @@ Composer::Composer(const nlohmann::json& json) :
     for (const auto& x : json["_tracks"]) {
         Track* track = new Track(x);
         track->_composer = this;
-        _tracks.emplace_back(track);
+        addTrack(track);
     }
 
     for (const auto& module : _masterTrack->_modules) {
@@ -63,7 +63,7 @@ Composer::Composer(const nlohmann::json& json) :
             connection->resolveModuleReference();
         }
     }
-    for (const auto& track : _tracks) {
+    for (const auto& track : getTracks()) {
         for (const auto& module : track->_modules) {
             for (const auto& connection : module->_connections) {
                 connection->resolveModuleReference();
@@ -83,7 +83,7 @@ void Composer::render() const {
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
-    for (auto& track : _tracks) {
+    for (auto& track : getTracks()) {
         track->prepare(framesPerBuffer);
     }
     _masterTrack->prepare(framesPerBuffer);
@@ -96,7 +96,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     _processBuffer.ensure32();
     _processBuffer.ensure(framesPerBuffer, 1, 2);
 
-    for (auto& track : _tracks) {
+    for (auto& track : getTracks()) {
         track->prepareEvent();
     }
 
@@ -106,7 +106,7 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         module->process(&module->_track->_processBuffer, steadyTime);
     }
 
-    for (auto& track : _tracks) {
+    for (auto& track : getTracks()) {
         track->doDCP();
         _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
     }
@@ -130,11 +130,11 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     }
 }
 
-App* Composer::app() {
+App* Composer::app() const {
     return _app;
 }
 
-AudioEngine* Composer::audioEngine() {
+AudioEngine* Composer::audioEngine() const {
     return app()->audioEngine();
 }
 
@@ -150,7 +150,7 @@ int Composer::maxBar() {
 }
 
 void Composer::clear() {
-    _tracks.clear();
+    getTracks().clear();
     _orderedModules.clear();
     _commandManager.clear();
     _sceneMatrix->_scenes.clear();
@@ -165,7 +165,7 @@ void Composer::computeProcessOrder() {
     bool processed = false;
     while (!processed) {
         processed = true;
-        for (auto& track : _tracks) {
+        for (auto& track : getTracks()) {
             bool skip = _waitingModule && _waitingModule->_track == track.get();
             for (auto& module : track->_modules) {
                 if (skip) {
@@ -239,7 +239,7 @@ void Composer::computeLatency() {
     }
 
     uint32_t maxLatency = 0;
-    for (const auto& track : _tracks) {
+    for (const auto& track : getTracks()) {
         uint32_t latency = track->computeLatency();
         if (maxLatency < latency) {
             maxLatency = latency;
@@ -247,7 +247,7 @@ void Composer::computeLatency() {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
-        for (const auto& track : _tracks) {
+        for (const auto& track : getTracks()) {
             track->_processBuffer.setLatency(maxLatency - track->_latency);
         }
     }
@@ -258,7 +258,7 @@ void Composer::computeLatency() {
 void Composer::deleteClips(std::set<Clip*> clips) {
     // TODO undo
     for (auto clip : clips) {
-        for (auto& track : _tracks) {
+        for (auto& track : getTracks()) {
             for (auto& lane : track->_lanes) {
                 auto it = std::ranges::find_if(lane->_clips, [clip](const auto& x) { return x.get() == clip; });
                 if (it != lane->_clips.end()) {
@@ -278,7 +278,7 @@ nlohmann::json Composer::toJson() {
     json["_masterTrack"] = _masterTrack->toJson();
 
     nlohmann::json tracks = nlohmann::json::array();
-    for (const auto& track : _tracks) {
+    for (const auto& track : getTracks()) {
         tracks.emplace_back(track->toJson());
     }
     json["_tracks"] = tracks;
@@ -312,32 +312,22 @@ public:
     void execute(Composer* composer) override {
         std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
         _track->_composer = composer;
-        composer->_tracks.push_back(std::move(_track));
+        composer->addTrack(std::move(_track));
         composer->computeProcessOrder();
     }
     void undo(Composer* composer) override {
         std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
-        _track = std::move(composer->_tracks.back());
-        composer->_tracks.pop_back();
+        _track = std::move(composer->getTracks().back());
+        composer->getTracks().pop_back();
         composer->computeProcessOrder();
     }
 
     std::unique_ptr<Track> _track;
 };
 
-void Composer::addTrack() {
-    auto name = std::to_string(this->_tracks.size() + 1);
-    Track* track = new Track(name, this);
-    addTrack(track);
-}
-
-void Composer::addTrack(Track* track) {
-    _commandManager.executeCommand(new AddTrackCommand(track));
-}
-
 std::vector<Track*> Composer::allTracks() {
     std::vector<Track*> tracks{ _masterTrack.get() };
-    for (auto& track : _tracks) {
+    for (auto& track : getTracks()) {
         tracks.push_back(track.get());
     }
     return tracks;

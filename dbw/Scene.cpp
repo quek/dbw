@@ -14,7 +14,7 @@ Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
 }
 
 void Scene::play() {
-    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
         for (const auto& lane : track->_lanes) {
             lane->getClipSlot(this)->play();
         }
@@ -23,7 +23,7 @@ void Scene::play() {
 }
 
 void Scene::stop() {
-    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
         for (const auto& lane : track->_lanes) {
             lane->getClipSlot(this)->stop();
         }
@@ -31,7 +31,7 @@ void Scene::stop() {
 }
 
 bool Scene::isAllLanePlaying() {
-    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
         for (const auto& lane : track->_lanes) {
             if (!lane->getClipSlot(this)->_playing) {
                 return false;
@@ -42,7 +42,7 @@ bool Scene::isAllLanePlaying() {
 }
 
 bool Scene::isAllLaneStoped() {
-    for (const auto& track : _sceneMatrix->_composer->_tracks) {
+    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
         for (const auto& lane : track->_lanes) {
             if (lane->getClipSlot(this)->_playing) {
                 return false;

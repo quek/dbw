@@ -18,7 +18,7 @@ public:
     void requestAddComposer(Composer* composer);
     void requestDeleteComposer(Composer* composer);
     void showAudioSetupWindow();
-    bool isStarted() { return _isStarted; }
+    bool isStarted() const { return _isStarted; }
     void start();
     void stop();
 

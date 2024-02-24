@@ -6,7 +6,6 @@
 #include "CommandWindow.h"
 #include "ComposerWindow.h"
 #include "Midi.h"
-#include "Nameable.h"
 #include "PianoRollWindow.h"
 #include "PluginManager.h"
 #include "Project.h"
@@ -15,24 +14,23 @@
 #include "SidechainInputSelector.h"
 #include "TimelineWindow.h"
 #include "Track.h"
+#include "TracksHolder.h"
 
 class App;
 class AudioEngine;
 
-class Composer : public Nameable {
+class Composer : public TracksHolder {
 public:
     Composer();
     Composer(const nlohmann::json& json);
     void render() const;
     void process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime);
-    App* app();
-    AudioEngine* audioEngine();
+    App* app() const;
+    AudioEngine* audioEngine() const;
     void computeNextPlayTime(unsigned long framesPerBuffer);
 
     void play();
     void stop();
-    void addTrack();
-    void addTrack(Track* track);
     std::vector<Track*> allTracks();
     int maxBar();
     void clear();
@@ -55,7 +53,6 @@ public:
     double _loopEndTime = 16.0;
     bool _isScrollFolloPlayhead = true;
     CommandManager _commandManager;
-    std::vector<std::unique_ptr<Track>> _tracks;
     std::unique_ptr<Track> _masterTrack;
     std::vector<Module*> _orderedModules;
 
