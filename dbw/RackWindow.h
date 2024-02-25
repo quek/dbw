@@ -13,9 +13,12 @@ public:
 
 private:
     void renderHeader();
-    void renderHeader(Track* track);
+    void renderHeader(Track* track, int groupLevel, bool isMaster);
     void renderModules();
     void renderFaders();
+    void handleShortcut();
+    void computeHeaderHeight();
+    void computeHeaderHeight(Track* track,int groupLevel);
 
     Composer* _composer;
     std::vector<Track*> _allTracks;

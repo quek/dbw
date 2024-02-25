@@ -3,6 +3,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <nlohmann/json.hpp>
+#include "GuiUtil.h"
 
 class Config;
 struct Preference;
@@ -63,9 +64,17 @@ struct Theme : ConfigMixin<Theme>{
 
     ImU32 editCursor = IM_COL32(0x00, 0xff, 0x00, 0x80);
 
+    ImU32 rackBorder = IM_COL32(0x80, 0x80, 0x80, 0x80);
+
+    ImU32 background = IM_COL32(0x00, 0x00, 0x00, 0x80);
+
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         Theme,
-        editCursor
+        editCursor,
+
+        rackBorder,
+
+        background
     );
 };
 

@@ -15,7 +15,7 @@ public:
     virtual nlohmann::json toJson() override;
 
     std::string _name;
-    ImVec4 _color = ImVec4(0.5, 0.5, 0.5, 0.5);
+    ImU32 _color = IM_COL32(0x80, 0x80, 0x80, 0x80);
 
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Nameable, _name, _color);

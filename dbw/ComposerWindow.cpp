@@ -125,8 +125,8 @@ void ComposerWindow::render() {
             _selectedTracks.clear();
             _selectedTracks.insert(masterTrack);
         }
-        ImVec4 colorMasterTrack = _selectedTracks.contains(masterTrack) ? selectedColor(masterTrack->_color) : masterTrack->_color;
-        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
+        ImColor colorMasterTrack = _selectedTracks.contains(masterTrack) ? selectedColor(masterTrack->_color) : masterTrack->_color;
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, colorMasterTrack);
         ImGui::PopID();
 
         for (auto i = 0; i < _composer->getTracks().size(); ++i) {
@@ -138,8 +138,8 @@ void ComposerWindow::render() {
                 _selectedTracks.clear();
                 _selectedTracks.insert(track);
             }
-            ImVec4 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
-            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(color));
+            ImU32 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
             if (ImGui::BeginPopupContextItem()) {
                 if (ImGui::MenuItem("Close", "CTRL+W"))
                     ImGui::CloseCurrentPopup();
@@ -158,16 +158,16 @@ void ComposerWindow::render() {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         masterTrack->render();
-        colorMasterTrack.w = 0.2f;
-        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(colorMasterTrack));
+        colorMasterTrack.Value.w = 0.2f;
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, colorMasterTrack);
 
         for (auto i = 0; i < _composer->getTracks().size(); ++i) {
             Track* track = _composer->getTracks()[i].get();
             ImGui::TableSetColumnIndex(i + 1);
             track->render();
-            ImVec4 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
-            color.w = 0.2f;
-            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(color));
+            ImColor color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
+            color.Value.w = 0.2f;
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
         }
 
         ImGui::EndTable();

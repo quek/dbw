@@ -7,7 +7,6 @@
 #include "AudioEngine.h"
 #include "AudioEngineWindow.h"
 #include "Clip.h"
-#include "Command.h"
 #include "Config.h"
 #include "ErrorWindow.h"
 #include "Fader.h"
@@ -308,24 +307,6 @@ void Composer::stop() {
     _nextPlayTime = _playStartTime;
     _sceneMatrix->stop();
 }
-
-class AddTrackCommand : public Command {
-public:
-    AddTrackCommand(Track* track) : _track(track) {}
-    void execute(Composer* composer) override {
-        std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
-        composer->addTrack(std::move(_track));
-        composer->computeProcessOrder();
-    }
-    void undo(Composer* composer) override {
-        std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
-        _track = std::move(composer->getTracks().back());
-        composer->getTracks().pop_back();
-        composer->computeProcessOrder();
-    }
-
-    std::unique_ptr<Track> _track;
-};
 
 std::vector<Track*> Composer::allTracks() {
     std::vector<Track*> tracks{ _masterTrack.get() };

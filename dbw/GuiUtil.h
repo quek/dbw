@@ -41,4 +41,4 @@ struct Bounds {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ImVec4, x, y, z, w);
 
-ImVec4 selectedColor(const ImVec4& color);
+ImU32 selectedColor(const ImU32 color);
