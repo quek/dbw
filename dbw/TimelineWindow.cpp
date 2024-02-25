@@ -110,21 +110,19 @@ void TimelineWindow::prepareAllThings() {
     _allThings.clear();
     _allLanes.clear();
     _clipLaneMap.clear();
-    for (auto& lane : _composer->_masterTrack->_lanes) {
+    prepareAllThings(_composer->_masterTrack.get());
+}
+
+void TimelineWindow::prepareAllThings(Track* track) {
+    for (auto& lane : track->_lanes) {
         _allLanes.push_back(lane.get());
         for (auto& clip : lane->_clips) {
             _allThings.push_back(clip.get());
             _clipLaneMap[clip.get()] = lane.get();
         }
     }
-    for (auto& track : _composer->getTracks()) {
-        for (auto& lane : track->_lanes) {
-            _allLanes.push_back(lane.get());
-            for (auto& clip : lane->_clips) {
-                _allThings.push_back(clip.get());
-                _clipLaneMap[clip.get()] = lane.get();
-            }
-        }
+    for (const auto& x : track->getTracks()) {
+        prepareAllThings(x.get());
     }
 }
 
@@ -223,7 +221,7 @@ void TimelineWindow::renderHeader() {
     ImGui::Text(_composer->_masterTrack->_name.c_str());
     x += getTrackWidth(_composer->_masterTrack.get()) * _zoomX;
 
-    for (auto& track : _composer->getTracks()) {
+    for (auto& track : _composer->_masterTrack->getTracks()) {
         pos = ImVec2(x, y);
         ImGui::SetCursorPos(pos + ImVec2(padding, 0));
         ImGui::Text(track->_name.c_str());
@@ -272,7 +270,7 @@ float TimelineWindow::getTrackWidth(Track* track) {
 
 float TimelineWindow::allTracksWidth() {
     float width = getTrackWidth(_composer->_masterTrack.get());
-    for (auto& track : _composer->getTracks()) {
+    for (auto& track : _composer->_masterTrack->getTracks()) {
         width += getTrackWidth(track.get());
     }
     return width;
@@ -289,7 +287,7 @@ Lane* TimelineWindow::laneFromPos(ImVec2& pos) {
         }
         x -= laneWidth;
     }
-    for (auto& track : _composer->getTracks()) {
+    for (auto& track : _composer->_masterTrack->getTracks()) {
         for (auto& lane : track->_lanes) {
             float laneWidth = getLaneWidth(lane.get());
             if (laneWidth > x) {

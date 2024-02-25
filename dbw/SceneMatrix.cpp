@@ -24,14 +24,14 @@ SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
 
 void SceneMatrix::render() {
     if (ImGui::Begin("Scene Matrix")) {
-        int ncolumns = static_cast<int>(_composer->getTracks().size() + 2);
+        int ncolumns = static_cast<int>(_composer->_masterTrack->getTracks().size() + 2);
         if (ImGui::BeginTable("Scene Matrix Table", ncolumns,
                               ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY,
                               ImVec2(-1.0f, -20.0f))) {
             ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupColumn(_composer->_masterTrack->_name.c_str());
-            for (auto& track : _composer->getTracks()) {
+            for (auto& track : _composer->_masterTrack->getTracks()) {
                 ImGui::TableSetupColumn(track->_name.c_str());
             }
 
@@ -45,7 +45,7 @@ void SceneMatrix::render() {
             ImGui::PopID();
 
             int columnIndex = 1;
-            for (auto& track : _composer->getTracks()) {
+            for (auto& track : _composer->_masterTrack->getTracks()) {
                 ImGui::TableSetColumnIndex(++columnIndex);
                 ImGui::PushID(track.get());
                 auto name = track->_name.c_str();
@@ -74,6 +74,7 @@ void SceneMatrix::render() {
 
                 columnIndex = 0;
                 ImGui::TableSetColumnIndex(++columnIndex);
+                // TODO group tracks
                 for (const auto& lane : _composer->_masterTrack->_lanes) {
                     auto& clipSlot = lane->getClipSlot(scene.get());
                     clipSlot->render(_composer);
@@ -85,7 +86,7 @@ void SceneMatrix::render() {
                         ImGui::EndDragDropTarget();
                     }
                 }
-                for (const auto& track : _composer->getTracks()) {
+                for (const auto& track : _composer->_masterTrack->getTracks()) {
                     for (const auto& lane : track->_lanes) {
                         ImGui::TableSetColumnIndex(++columnIndex);
                         auto& clipSlot = lane->getClipSlot(scene.get());

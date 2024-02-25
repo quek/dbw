@@ -14,42 +14,20 @@ Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
 }
 
 void Scene::play() {
-    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
-        for (const auto& lane : track->_lanes) {
-            lane->getClipSlot(this)->play();
-        }
-    }
+    _sceneMatrix->_composer->_masterTrack->play(this);
     _sceneMatrix->_composer->play();
 }
 
 void Scene::stop() {
-    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
-        for (const auto& lane : track->_lanes) {
-            lane->getClipSlot(this)->stop();
-        }
-    }
+    _sceneMatrix->_composer->_masterTrack->stop(this);
 }
 
 bool Scene::isAllLanePlaying() {
-    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
-        for (const auto& lane : track->_lanes) {
-            if (!lane->getClipSlot(this)->_playing) {
-                return false;
-            }
-        }
-    }
-    return true;
+    return _sceneMatrix->_composer->_masterTrack->isAllLanesPlaying(this);
 }
 
 bool Scene::isAllLaneStoped() {
-    for (const auto& track : _sceneMatrix->_composer->getTracks()) {
-        for (const auto& lane : track->_lanes) {
-            if (lane->getClipSlot(this)->_playing) {
-                return false;
-            }
-        }
-    }
-    return true;
+    return _sceneMatrix->_composer->_masterTrack->isAllLanesStoped(this);
 }
 
 nlohmann::json Scene::toJson() {

@@ -104,80 +104,6 @@ void ComposerWindow::render() {
     ImGui::SameLine();
     ImGui::Text("cpu %.02f", _composer->audioEngine()->_cpuLoad);
 
-    ImVec2 mainWindowSize = ImGui::GetWindowSize();
-
-    ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable;
-
-    if (ImGui::BeginTable("racks", 1 + static_cast<int>(_composer->getTracks().size()), flags, ImVec2(-1.0f, -20.0f))) {
-        Track* masterTrack = _composer->_masterTrack.get();
-        ImGui::TableSetupScrollFreeze(0, 1);
-        ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_None;
-        ImGui::TableSetupColumn(masterTrack->_name.c_str(), columnFlags, 0.0f, 0);
-        for (int i = 0; i < _composer->getTracks().size(); ++i) {
-            ImGui::TableSetupColumn(_composer->getTracks()[i]->_name.c_str(), columnFlags, 0.0f, i + 1);
-        }
-
-        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-        ImGui::TableSetColumnIndex(0);
-        ImGui::PushID(masterTrack);
-        ImGui::TableHeader(ImGui::TableGetColumnName(0));
-        if (ImGui::IsItemActivated()) {
-            _selectedTracks.clear();
-            _selectedTracks.insert(masterTrack);
-        }
-        ImColor colorMasterTrack = _selectedTracks.contains(masterTrack) ? selectedColor(masterTrack->_color) : masterTrack->_color;
-        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, colorMasterTrack);
-        ImGui::PopID();
-
-        for (auto i = 0; i < _composer->getTracks().size(); ++i) {
-            Track* track = _composer->getTracks()[i].get();
-            ImGui::TableSetColumnIndex(i + 1);
-            ImGui::PushID(track);
-            ImGui::TableHeader(ImGui::TableGetColumnName(i + 1));
-            if (ImGui::IsItemActivated()) {
-                _selectedTracks.clear();
-                _selectedTracks.insert(track);
-            }
-            ImU32 color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
-            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
-            if (ImGui::BeginPopupContextItem()) {
-                if (ImGui::MenuItem("Close", "CTRL+W"))
-                    ImGui::CloseCurrentPopup();
-                if (ImGui::MenuItem("Delete", "Delete"))
-                    ImGui::CloseCurrentPopup();
-                ImGui::EndPopup();
-            }
-            // TODO
-            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                ImGui::SetDragDropPayload("TRACK", track, sizeof(*track));
-                ImGui::EndDragDropSource();
-            }
-            ImGui::PopID();
-        }
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        masterTrack->render();
-        colorMasterTrack.Value.w = 0.2f;
-        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, colorMasterTrack);
-
-        for (auto i = 0; i < _composer->getTracks().size(); ++i) {
-            Track* track = _composer->getTracks()[i].get();
-            ImGui::TableSetColumnIndex(i + 1);
-            track->render();
-            ImColor color = _selectedTracks.contains(track) ? selectedColor(track->_color) : track->_color;
-            color.Value.w = 0.2f;
-            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
-        }
-
-        ImGui::EndTable();
-    }
-
-    if (ImGui::Button("Add track")) {
-        _composer->addTrack();
-    }
-
-    ImGui::SameLine();
     ImGui::Text(_statusMessage.c_str());
 
     handleLocalShortcut();
@@ -221,6 +147,7 @@ void ComposerWindow::handleLocalShortcut() {
         return;
     }
 
+    // TODO RackWindow に移動
     auto& io = ImGui::GetIO();
     if (io.KeyCtrl) {
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C))) {
@@ -240,7 +167,7 @@ void ComposerWindow::handleLocalShortcut() {
             if (json.contains("tracks") && json["tracks"].is_array()) {
                 for (const auto& x : json["tracks"]) {
                     Track* track = new Track(x);
-                    _composer->addTrack(track);
+                    _composer->_masterTrack->addTrack(track);
                 }
             }
         }

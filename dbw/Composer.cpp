@@ -20,7 +20,7 @@
 Composer::Composer() :
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
-    _masterTrack(std::make_unique<Track>(std::string("MASTER"))),
+    _masterTrack(std::make_unique<Track>(std::string("MASTER"), this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _rackWindow(std::make_unique<RackWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
@@ -28,12 +28,10 @@ Composer::Composer() :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
     _commandWindow(std::make_unique<CommandWindow>(this)) {
-    _masterTrack->setTracksHolder(this);
-    addTrack();
 }
 
 Composer::Composer(const nlohmann::json& json) :
-    TracksHolder(json),
+    Nameable(json),
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
@@ -49,25 +47,9 @@ Composer::Composer(const nlohmann::json& json) :
     _sceneMatrix->_composer = this;
 
     _masterTrack = std::make_unique<Track>(json["_masterTrack"]);
-    _masterTrack->setTracksHolder(this);
+    _masterTrack->setComposer(this);
 
-    for (const auto& x : json["_tracks"]) {
-        Track* track = new Track(x);
-        addTrack(track);
-    }
-
-    for (const auto& module : _masterTrack->_modules) {
-        for (const auto& connection : module->_connections) {
-            connection->resolveModuleReference();
-        }
-    }
-    for (const auto& track : getTracks()) {
-        for (const auto& module : track->_modules) {
-            for (const auto& connection : module->_connections) {
-                connection->resolveModuleReference();
-            }
-        }
-    }
+    _masterTrack->resolveModuleReference();
 }
 
 void Composer::render() const {
@@ -81,22 +63,17 @@ void Composer::render() const {
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
-    for (auto& track : getTracks()) {
-        track->prepare(framesPerBuffer);
-    }
+    // TODO オーディオ入力
+    _processBuffer.clear();
+    _processBuffer.ensure32();
+    _processBuffer.ensure(framesPerBuffer, 1, 2);
+
     _masterTrack->prepare(framesPerBuffer);
 
     if (_playing) {
         computeNextPlayTime(framesPerBuffer);
     }
-
-    _processBuffer.clear();
-    _processBuffer.ensure32();
-    _processBuffer.ensure(framesPerBuffer, 1, 2);
-
-    for (auto& track : getTracks()) {
-        track->prepareEvent();
-    }
+    _masterTrack->prepareEvent();
 
     for (auto& module : _orderedModules) {
         module->_track->_processBuffer.swapInOut();
@@ -104,17 +81,18 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         module->process(&module->_track->_processBuffer, steadyTime);
     }
 
-    for (auto& track : getTracks()) {
-        track->doDCP();
-        _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
-    }
+    //for (auto& track : getTracks()) {
+    //    track->doDCP();
+    //    _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
+    //}
 
-    for (auto& module : _masterTrack->_modules) {
-        module->_track->_processBuffer.swapInOut();
-        module->processConnections();
-        module->process(&module->_track->_processBuffer, steadyTime);
-    }
-    _masterTrack->_fader->process(&_masterTrack->_processBuffer, steadyTime);
+    //for (auto& module : _masterTrack->_modules) {
+    //    module->_track->_processBuffer.swapInOut();
+    //    module->processConnections();
+    //    module->process(&module->_track->_processBuffer, steadyTime);
+    //}
+    //_masterTrack->_fader->process(&_masterTrack->_processBuffer, steadyTime);
+
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
 
     if (_playing) {
@@ -148,7 +126,7 @@ int Composer::maxBar() {
 }
 
 void Composer::clear() {
-    getTracks().clear();
+    _masterTrack.reset(new Track(std::string("MASTER"), this));
     _orderedModules.clear();
     _commandManager.clear();
     _sceneMatrix->_scenes.clear();
@@ -160,11 +138,9 @@ void Composer::computeProcessOrder() {
     std::set<Module*> processedModules;
     std::map<Track*, Module*> waitingModule;
 
-    bool processed = false;
-    while (!processed) {
-        processed = true;
-        for (auto& track : getTracks()) {
-            processed &= computeProcessOrder(track, orderedModules, processedModules, waitingModule);
+    while (true) {
+        if (computeProcessOrder(_masterTrack, orderedModules, processedModules, waitingModule)) {
+            break;
         }
     }
 
@@ -241,6 +217,7 @@ void Composer::computeLatency() {
         module->setComputedLatency(latency);
     }
 
+    /* TODO latency
     uint32_t maxLatency = 0;
     for (const auto& track : getTracks()) {
         uint32_t latency = track->computeLatency();
@@ -256,25 +233,7 @@ void Composer::computeLatency() {
     }
     // マスタはレイテンシー出すだけでいいかな
     _masterTrack->computeLatency();
-}
-
-Composer* Composer::getComposer() {
-    return this;
-}
-
-void Composer::deleteClips(std::set<Clip*> clips) {
-    // TODO undo
-    for (auto clip : clips) {
-        for (auto& track : getTracks()) {
-            for (auto& lane : track->_lanes) {
-                auto it = std::ranges::find_if(lane->_clips, [clip](const auto& x) { return x.get() == clip; });
-                if (it != lane->_clips.end()) {
-                    lane->_clips.erase(it);
-                    break;
-                }
-            }
-        }
-    }
+    */
 }
 
 nlohmann::json Composer::toJson() {
@@ -283,12 +242,6 @@ nlohmann::json Composer::toJson() {
     json["_bpm"] = _bpm;
 
     json["_masterTrack"] = _masterTrack->toJson();
-
-    nlohmann::json tracks = nlohmann::json::array();
-    for (const auto& track : getTracks()) {
-        tracks.emplace_back(track->toJson());
-    }
-    json["_tracks"] = tracks;
 
     json["_sceneMatrix"] = _sceneMatrix->toJson();
 
@@ -313,10 +266,8 @@ void Composer::stop() {
     _sceneMatrix->stop();
 }
 
-std::vector<Track*> Composer::allTracks() {
-    std::vector<Track*> tracks{ _masterTrack.get() };
-    for (auto& track : getTracks()) {
-        tracks.push_back(track.get());
-    }
+std::vector<Track*> Composer::allTracks() const {
+    std::vector<Track*> tracks;
+    _masterTrack->allTracks(tracks);
     return tracks;
 }

@@ -108,7 +108,6 @@
     <ClCompile Include="command\GroupTracks.cpp">
       <Filter>command</Filter>
     </ClCompile>
-    <ClCompile Include="TracksHolder.cpp" />
     <ClCompile Include="command\AddTrack.cpp">
       <Filter>command</Filter>
     </ClCompile>
@@ -209,7 +208,6 @@
     <ClInclude Include="command\GroupTracks.h">
       <Filter>command</Filter>
     </ClInclude>
-    <ClInclude Include="TracksHolder.h" />
     <ClInclude Include="command\AddTrack.h">
       <Filter>command</Filter>
     </ClInclude>

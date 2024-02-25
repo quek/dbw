@@ -14,12 +14,11 @@
 #include "SidechainInputSelector.h"
 #include "TimelineWindow.h"
 #include "Track.h"
-#include "TracksHolder.h"
 
 class App;
 class AudioEngine;
 
-class Composer : public TracksHolder {
+class Composer : public Nameable {
 public:
     Composer();
     Composer(const nlohmann::json& json);
@@ -31,7 +30,7 @@ public:
 
     void play();
     void stop();
-    std::vector<Track*> allTracks();
+    std::vector<Track*> allTracks() const;
     int maxBar();
     void clear();
     void computeProcessOrder();
@@ -40,8 +39,6 @@ public:
                              std::set<Module*>& processedModules,
                              std::map<Track*, Module*> waitingModule);
     void computeLatency();
-    Composer* getComposer() override;
-    void deleteClips(std::set<Clip*> clips);
     virtual nlohmann::json toJson() override;
 
     App* _app = nullptr;

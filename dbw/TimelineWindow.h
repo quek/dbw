@@ -23,6 +23,7 @@ public:
     virtual Command* deleteThings(std::set<Clip*> clips, bool undoable) override;
 
     virtual void prepareAllThings() override;
+    void prepareAllThings(Track* track);
     virtual void renderThing(Clip* thing, const ImVec2& pos1, const ImVec2& pos2);
 
     virtual float offsetTop() const override;

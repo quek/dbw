@@ -45,19 +45,19 @@ void command::GroupTracks::execute(Composer* composer) {
         if (!track) {
             continue;
         }
-        TracksHolder* tracksHolder = track->getTracksHolder();
-        auto it = tracksHolder->findTrack(track);
-        if (it == tracksHolder->getTracks().end()) {
+        Track* parent = track->getParent();
+        auto it = parent->findTrack(track);
+        if (it == parent->getTracks().end()) {
             continue;
         }
-        _undoPlaces.push_back({ tracksHolder->nekoId(), std::distance(tracksHolder->getTracks().begin(), it) });
+        _undoPlaces.push_back({ parent->nekoId(), std::distance(parent->getTracks().begin(), it) });
         group->addTrack(std::move(*it));
         if (first) {
             first = false;
             (*it).reset(group);
-            group->setTracksHolder(tracksHolder);
+            group->setParent(parent);
         } else {
-            tracksHolder->getTracks().erase(it);
+            parent->getTracks().erase(it);
         }
     }
 }

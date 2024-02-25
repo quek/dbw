@@ -16,7 +16,7 @@
 #include "Lane.h"
 #include "command/AddModule.h"
 
-Track::Track(const nlohmann::json& json) : TracksHolder(json) {
+Track::Track(const nlohmann::json& json) : Nameable(json) {
     _width = json["_width"];
     for (const auto& x : json["_lanes"]) {
         addLane(new Lane(x));
@@ -31,8 +31,8 @@ Track::Track(const nlohmann::json& json) : TracksHolder(json) {
     }
 }
 
-Track::Track(const std::string& name) :
-    _fader(new Fader("Fader", this)), TracksHolder(name) {
+Track::Track(std::string name, Composer* composer) :
+    Nameable(name), _fader(new Fader("Fader", this)), _composer(composer) {
     addLane(new Lane());
     _fader->start();
 }
@@ -41,7 +41,14 @@ Track::~Track() {
 }
 
 Composer* Track::getComposer() {
-    return _tracksHolder->getComposer();
+    if (_composer) {
+        return _composer;
+    }
+    return _parent->getComposer();
+}
+
+void Track::setComposer(Composer* composer) {
+    _composer = composer;
 }
 
 void Track::prepare(unsigned long framesPerBuffer) {
@@ -56,6 +63,10 @@ void Track::prepare(unsigned long framesPerBuffer) {
         }
     }
     _processBuffer.ensure(framesPerBuffer, nbuses, 2);
+
+    for (const auto& track : _tracks) {
+        track->prepare(framesPerBuffer);
+    }
 }
 
 void Track::prepareEvent() {
@@ -90,6 +101,10 @@ void Track::prepareEvent() {
     }
 
     getComposer()->_sceneMatrix->process(this);
+
+    for (const auto& track : _tracks) {
+        track->prepareEvent();
+    }
 }
 
 
@@ -155,14 +170,6 @@ void Track::doDCP() {
     _processBuffer.doDCP();
 }
 
-TracksHolder* Track::getTracksHolder() {
-    return _tracksHolder;
-}
-
-void Track::setTracksHolder(TracksHolder* tracksHolder) {
-    _tracksHolder = tracksHolder;
-}
-
 nlohmann::json Track::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["type"] = TYPE;
@@ -182,5 +189,104 @@ nlohmann::json Track::toJson() {
     json["_lanes"] = lanes;
 
     return json;
+}
+
+void Track::addTrack() {
+    std::string name = std::to_string(_tracks.size() + 1);
+    Track* track = new Track(name);
+    addTrack(std::unique_ptr<Track>(track));
+}
+
+void Track::addTrack(Track* track) {
+    addTrack(std::unique_ptr<Track>(track));
+}
+
+void Track::addTrack(std::unique_ptr<Track> track) {
+    track->_parent = this;
+    _tracks.emplace_back(std::move(track));
+}
+
+Track* Track::getParent() {
+    return _parent;
+}
+
+void Track::setParent(Track* parent) {
+    _parent = parent;
+}
+
+void Track::resolveModuleReference() {
+    for (const auto& module : _modules) {
+        for (const auto& connection : module->_connections) {
+            connection->resolveModuleReference();
+        }
+    }
+    for (const auto& track : _tracks) {
+        track->resolveModuleReference();
+    }
+}
+
+void Track::play(Scene* scene) {
+    for (const auto& lane : _lanes) {
+        auto& clipSlot = lane->getClipSlot(scene);
+        clipSlot->play();
+    }
+    for (const auto& track : _tracks) {
+        track->play(scene);
+    }
+}
+
+void Track::stop(Scene* scene) {
+    for (const auto& lane : _lanes) {
+        auto& clipSlot = lane->getClipSlot(scene);
+        clipSlot->stop();
+    }
+    for (const auto& track : _tracks) {
+        track->stop(scene);
+    }
+}
+
+bool Track::isAllLanesPlaying(Scene* scene) {
+    for (const auto& lane : _lanes) {
+        auto& clipSlot = lane->getClipSlot(scene);
+        if (!clipSlot->_playing) {
+            return false;
+        }
+    }
+    for (const auto& track : _tracks) {
+        if (!track->isAllLanesPlaying(scene)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Track::isAllLanesStoped(Scene* scene) {
+    for (const auto& lane : _lanes) {
+        auto& clipSlot = lane->getClipSlot(scene);
+        if (clipSlot->_playing) {
+            return false;
+        }
+    }
+    for (const auto& track : _tracks) {
+        if (track->isAllLanesPlaying(scene)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void Track::allTracks(std::vector<Track*>& tracks) {
+    tracks.push_back(this);
+    for (const auto& x : _tracks) {
+        x->allTracks(tracks);
+    }
+}
+
+std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track) {
+    return std::ranges::find_if(_tracks, [track](const auto& x) { return x.get() == track; });
+}
+
+std::vector<std::unique_ptr<Track>>& Track::getTracks() {
+    return _tracks;
 }
 

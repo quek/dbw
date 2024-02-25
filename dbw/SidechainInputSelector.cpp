@@ -20,32 +20,38 @@ void SidechainInputSelector::render() {
     }
     ImGui::OpenPopup(NAME);
     if (ImGui::BeginPopupModal(NAME, &_show)) {
-        for (auto& track : _composer->getTracks()) {
-            if (!track->isAvailableSidechainSrc(_module->_track)) {
-                continue;
+        render(_composer->_masterTrack.get());
+        ImGui::EndPopup();
+    }
+}
+
+void SidechainInputSelector::render(Track* track) {
+    if (!track->isAvailableSidechainSrc(_module->_track)) {
+        return;
+    }
+    if (ImGui::TreeNode(track->_name.c_str())) {
+        if (track != _module->_track) {
+            if (ImGui::Button("PRE")) {
             }
-            if (ImGui::TreeNode(track->_name.c_str())) {
-                if (track.get() != _module->_track) {
-                    if (ImGui::Button("PRE")) {
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("POST")) {
-                    }
-                }
-                for (auto& module : track->_modules) {
-                    if (module.get() == _module) {
-                        break;
-                    }
-                    if (ImGui::Button(module->_name.c_str())) {
-                        // TODO outputIndex
-                        _module->connect(module.get(), 0, _inputIndex);
-                        _show = false;
-                        _composer->computeProcessOrder();
-                    }
-                }
-                ImGui::TreePop();
+            ImGui::SameLine();
+            if (ImGui::Button("POST")) {
             }
         }
-        ImGui::EndPopup();
+        for (auto& module : track->_modules) {
+            if (module.get() == _module) {
+                break;
+            }
+            if (ImGui::Button(module->_name.c_str())) {
+                // TODO outputIndex
+                _module->connect(module.get(), 0, _inputIndex);
+                _show = false;
+                _composer->computeProcessOrder();
+            }
+        }
+        ImGui::TreePop();
+    }
+
+    for (const auto& x : track->getTracks()) {
+        render(x.get());
     }
 }

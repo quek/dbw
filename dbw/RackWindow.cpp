@@ -43,10 +43,7 @@ void RackWindow::renderHeader() {
     computeHeaderHeight();
 
     bool isMaster = true;
-    for (auto& track : _allTracks) {
-        renderHeader(track, 0, isMaster);
-        isMaster = false;
-    }
+    renderHeader(_composer->_masterTrack.get(), 0, isMaster);
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto& style = ImGui::GetStyle();
@@ -86,7 +83,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.ItemSpacing.y / 2 - 1.0f);
     }
     ImVec2 size = ImVec2(track->_width, _headerHeight - GROUP_OFFSET_Y * groupLevel - style.ItemSpacing.y);
-    if (!track->getTracks().empty()) {
+    if (!isMaster && !track->getTracks().empty()) {
         //size.x -= _groupToggleButtonSize.x + style.ItemSpacing.x / 2.0f;
         size.x -= _groupToggleButtonSize.x;
     }
@@ -137,7 +134,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
         ImGui::EndPopup();
     }
     ImGui::SameLine();
-    if (!track->getTracks().empty()) {
+    if (!isMaster && !track->getTracks().empty()) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + GROUP_OFFSET_Y * groupLevel - 1.0f);
         if (track->_showTracks) {
@@ -152,13 +149,13 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
         ImGui::SameLine();
     }
     ImGui::SameLine();
-    if (!track->getTracks().empty()) {
+    if (!isMaster && !track->getTracks().empty()) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
     }
 
     if (track->_showTracks) {
         for (auto& x : track->getTracks()) {
-            renderHeader(x.get(), groupLevel + 1, false);
+            renderHeader(x.get(), groupLevel + isMaster ? 0 : 1, false);
         }
     }
     ImGui::PopID();
@@ -167,18 +164,14 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
 void RackWindow::renderModules() {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x / 2.0f);
     ImGui::SetCursorPosY(_headerHeight);
-    bool first = true;
-    for (auto& track : _allTracks) {
-        if (first) {
-            first = false;
-        } else {
-            ImGui::SameLine();
-        }
-        renderModules(track);
-    }
+    renderModules(_composer->_masterTrack.get());
 }
 
 void RackWindow::renderModules(Track* track) {
+    if (track != _composer->_masterTrack.get()) {
+        ImGui::SameLine();
+    }
+
     ImGui::PushID(track);
     ImGui::BeginGroup();
     for (auto& module : track->_modules) {
@@ -207,19 +200,14 @@ void RackWindow::renderFaders() {
     if (cursorPosY < _headerHeight) {
         cursorPosY = _headerHeight;
     }
-    bool first = true;
-    for (auto& track : _allTracks) {
-        ImGui::SetCursorPosY(cursorPosY);
-        if (first) {
-            first = false;
-        } else {
-            ImGui::SameLine();
-        }
-        renderFaders(track);
-    }
+    ImGui::SetCursorPosY(cursorPosY);
+    renderFaders(_composer->_masterTrack.get());
 }
 
 void RackWindow::renderFaders(Track* track) {
+    if (track!= _composer->_masterTrack.get()) {
+        ImGui::SameLine();
+    }
     ImGui::BeginGroup();
     track->_fader->render(track->_width, _faderHeight);
     ImGui::EndGroup();
