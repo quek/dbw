@@ -19,11 +19,21 @@ nlohmann::json GainModule::toJson() {
 }
 
 bool GainModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
-    for (auto [in, out] : std::views::zip(buffer->_in[0].buffer32(), buffer->_out[0].buffer32())) {
-        for (auto [a, b] : std::views::zip(in, out)) {
-            b = a * _gain;
+    for (auto [in, out, constantp] : std::views::zip(buffer->_in[0].buffer32(),
+                                                     buffer->_out[0].buffer32(),
+                                                     buffer->_in[0]._constantp)) {
+        if (constantp) {
+            auto value = in[0] * _gain;
+            for (auto b : out) {
+                b = value;
+            }
+        } else {
+            for (auto [a, b] : std::views::zip(in, out)) {
+                b = a * _gain;
+            }
         }
     }
+    std::ranges::fill(buffer->_out[0]._constantp, false);
     return Module::process(buffer, steadyTime);
 }
 

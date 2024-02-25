@@ -157,9 +157,6 @@ bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
     for (auto& x : track->getTracks()) {
         processed &= computeProcessOrder(x, orderedModules, processedModules, waitingModule);
     }
-    if (!processed) {
-        return false;
-    }
 
     std::vector<Module*> allModules;
     allModules.push_back(track->_gain.get());
@@ -198,7 +195,7 @@ bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
         }
     }
 
-    return true;
+    return processed;
 }
 
 void Composer::computeLatency() {

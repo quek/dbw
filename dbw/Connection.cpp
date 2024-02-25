@@ -28,18 +28,33 @@ void Connection::process(Module* to) {
         return;
     }
     for (int channel = 0; channel < 2; ++channel) {
+        bool constantp = _from->_track->_processBuffer._out.at(_fromIndex)._constantp[channel];
         auto& x = _from->_track->_processBuffer._out.at(_fromIndex).buffer32()[channel];
         auto& y = to->_track->_processBuffer._in.at(_toIndex).buffer32()[channel];
-        for (size_t i = 0; i < gPreference.bufferSize; ++i) {
-            if (_latency == 0) {
-                y[i] = x[i];
-            } else {
-                auto& dcp = _dcpBuffer[channel];
-                dcp.push_back(x[i]);
-                y[i] = dcp.front();
-                dcp.pop_front();
+        if (constantp) {
+            for (size_t i = 0; i < gPreference.bufferSize; ++i) {
+                if (_latency == 0) {
+                    y[i] = x[0];
+                } else {
+                    auto& dcp = _dcpBuffer[channel];
+                    dcp.push_back(x[0]);
+                    y[i] = dcp.front();
+                    dcp.pop_front();
+                }
+            }
+        } else {
+            for (size_t i = 0; i < gPreference.bufferSize; ++i) {
+                if (_latency == 0) {
+                    y[i] = x[i];
+                } else {
+                    auto& dcp = _dcpBuffer[channel];
+                    dcp.push_back(x[i]);
+                    y[i] = dcp.front();
+                    dcp.pop_front();
+                }
             }
         }
+        to->_track->_processBuffer._in.at(_toIndex)._constantp[channel] = false;
     }
 }
 
