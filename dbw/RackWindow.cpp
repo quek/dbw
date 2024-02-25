@@ -166,27 +166,37 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
 
 void RackWindow::renderModules() {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x / 2.0f);
+    ImGui::SetCursorPosY(_headerHeight);
     bool first = true;
     for (auto& track : _allTracks) {
-        ImGui::SetCursorPosY(_headerHeight);
         if (first) {
             first = false;
         } else {
             ImGui::SameLine();
         }
-        ImGui::PushID(track);
-        ImGui::BeginGroup();
-        for (auto& module : track->_modules) {
-            module->render(track->_width);
+        renderModules(track);
+    }
+}
+
+void RackWindow::renderModules(Track* track) {
+    ImGui::PushID(track);
+    ImGui::BeginGroup();
+    for (auto& module : track->_modules) {
+        module->render(track->_width);
+    }
+    if (ImGui::Button("Add Module", ImVec2(track->_width, 0.0f))) {
+        track->_openModuleSelector = true;
+    }
+    if (track->_openModuleSelector) {
+        gPluginManager.openModuleSelector(track);
+    }
+    ImGui::EndGroup();
+    ImGui::PopID();
+    if (track->_showTracks) {
+        for (auto& x : track->getTracks()) {
+            ImGui::SameLine();
+            renderModules(x.get());
         }
-        if (ImGui::Button("Add Module", ImVec2(track->_width, 0.0f))) {
-            track->_openModuleSelector = true;
-        }
-        if (track->_openModuleSelector) {
-            gPluginManager.openModuleSelector(track);
-        }
-        ImGui::EndGroup();
-        ImGui::PopID();
     }
 }
 
@@ -205,9 +215,19 @@ void RackWindow::renderFaders() {
         } else {
             ImGui::SameLine();
         }
-        ImGui::BeginGroup();
-        track->_fader->render(track->_width, _faderHeight);
-        ImGui::EndGroup();
+        renderFaders(track);
+    }
+}
+
+void RackWindow::renderFaders(Track* track) {
+    ImGui::BeginGroup();
+    track->_fader->render(track->_width, _faderHeight);
+    ImGui::EndGroup();
+    if (track->_showTracks) {
+        for (auto& x : track->getTracks()) {
+            ImGui::SameLine();
+            renderFaders(x.get());
+        }
     }
 }
 
@@ -232,8 +252,10 @@ void RackWindow::computeHeaderHeight() {
 
 void RackWindow::computeHeaderHeight(Track* track, int groupLevel) {
     _headerHeight = std::max(_headerHeight, BASE_HEADER_HEIGHT + GROUP_OFFSET_Y * groupLevel);
-    for (const auto& x : track->getTracks()) {
-        computeHeaderHeight(x.get(), groupLevel + 1);
+    if (track->_showTracks) {
+        for (const auto& x : track->getTracks()) {
+            computeHeaderHeight(x.get(), groupLevel + 1);
+        }
     }
 
 }

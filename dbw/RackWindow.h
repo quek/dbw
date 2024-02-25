@@ -15,7 +15,9 @@ private:
     void renderHeader();
     void renderHeader(Track* track, int groupLevel, bool isMaster);
     void renderModules();
+    void renderModules(Track* track);
     void renderFaders();
+    void renderFaders(Track* track);
     void handleShortcut();
     void computeHeaderHeight();
     void computeHeaderHeight(Track* track,int groupLevel);
