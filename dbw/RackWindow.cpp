@@ -47,12 +47,19 @@ void RackWindow::renderHeader() {
         renderHeader(track, 0, isMaster);
         isMaster = false;
     }
-    if (ImGui::Button("Add Track")) {
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto& style = ImGui::GetStyle();
+    ImVec2 pos1 = windowToScreen(ImGui::GetCursorPos()) + ImVec2(-style.ItemSpacing.x / 2.0f - ImGui::GetScrollX(), -style.ItemSpacing.y / 2.0f - ImGui::GetScrollY());
+    ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    if (ImGui::Button("+", ImVec2(0.0f, -FLT_MIN))) {
         _composer->_commandManager.executeCommand(new command::AddTrack());
     }
 }
 
 void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
+    ImGui::PushID(track);
     ImGuiStyle& style = ImGui::GetStyle();
     float scrollY = ImGui::GetScrollY();
     ImGui::SetCursorPosY(scrollY + 5 * groupLevel + style.ItemSpacing.y / 2.0f);
@@ -75,7 +82,15 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
 
     auto it = std::ranges::find(_selectedTracks, track);
     bool selected = it != _selectedTracks.end();
-    if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, ImVec2(track->_width, _headerHeight - GROUP_OFFSET_Y * groupLevel - style.ItemSpacing.y))) {
+    if (groupLevel > 0) {
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.ItemSpacing.y / 2 - 1.0f);
+    }
+    ImVec2 size = ImVec2(track->_width, _headerHeight - GROUP_OFFSET_Y * groupLevel - style.ItemSpacing.y);
+    if (!track->getTracks().empty()) {
+        //size.x -= _groupToggleButtonSize.x + style.ItemSpacing.x / 2.0f;
+        size.x -= _groupToggleButtonSize.x;
+    }
+    if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
         auto& io = ImGui::GetIO();
         if (!io.KeyCtrl && !io.KeyShift) {
             _selectedTracks = { track };
@@ -122,10 +137,31 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
         ImGui::EndPopup();
     }
     ImGui::SameLine();
-
-    for (auto& x : track->getTracks()) {
-        renderHeader(x.get(), groupLevel + 1, false);
+    if (!track->getTracks().empty()) {
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + GROUP_OFFSET_Y * groupLevel - 1.0f);
+        if (track->_showTracks) {
+            if (ImGui::Button("≪", ImVec2(_groupToggleButtonSize.x, size.y + style.ItemSpacing.y / 2.0f + 1.0f))) {
+                track->_showTracks = false;
+            }
+        } else {
+            if (ImGui::Button("≫", ImVec2(_groupToggleButtonSize.x, size.y + style.ItemSpacing.y / 2.0f + 1.0f))) {
+                track->_showTracks = true;
+            }
+        }
+        ImGui::SameLine();
     }
+    ImGui::SameLine();
+    if (!track->getTracks().empty()) {
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
+    }
+
+    if (track->_showTracks) {
+        for (auto& x : track->getTracks()) {
+            renderHeader(x.get(), groupLevel + 1, false);
+        }
+    }
+    ImGui::PopID();
 }
 
 void RackWindow::renderModules() {

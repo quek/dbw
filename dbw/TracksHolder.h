@@ -18,6 +18,8 @@ public:
     virtual std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
     virtual std::vector<std::unique_ptr<Track>>& getTracks();
 
+    bool _showTracks = true;
+
 private:
     std::vector<std::unique_ptr<Track>> _tracks;
 
