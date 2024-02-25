@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <clap/clap.h>
+#include "GainModule.h"
 #include "ProcessBuffer.h"
 #include "Nameable.h"
 
@@ -43,6 +44,7 @@ public:
     bool isAllLanesStoped(Scene* scene);
     void allTracks(std::vector<Track*>& tracks);
 
+    std::unique_ptr<GainModule> _gain;
     std::unique_ptr<Fader> _fader;
     ProcessBuffer _processBuffer;
 
@@ -62,6 +64,6 @@ public:
 
 private:
     Track* _parent = nullptr;
-    Composer* _composer;
+    Composer* _composer = nullptr;
     std::vector<std::unique_ptr<Track>> _tracks;
 };

@@ -161,39 +161,42 @@ bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
         return false;
     }
 
+    std::vector<Module*> allModules;
+    allModules.push_back(track->_gain.get());
+    for (const auto& module : track->_modules) {
+        allModules.push_back(module.get());
+    }
+    allModules.push_back(track->_fader.get());
+
     bool skip = waitingModule.contains(track.get());
-    for (auto& module : track->_modules) {
+    for (auto& module : allModules) {
         if (skip) {
-            if (module.get() == waitingModule[track.get()]) {
+            if (module == waitingModule[track.get()]) {
                 waitingModule.erase(track.get());
             } else {
                 continue;
             }
         }
         if (module->isStarting()) {
-            if (!processedModules.contains(module.get())) {
+            if (!processedModules.contains(module)) {
                 for (auto& connection : module->_connections) {
-                    if (connection->_to == module.get() && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
-                        waitingModule[track.get()] = module.get();
+                    if (connection->_to == module && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
+                        waitingModule[track.get()] = module;
                         return false;
                     }
 
                 }
-                orderedModules.push_back(module.get());
-                processedModules.insert(module.get());
+                orderedModules.push_back(module);
+                processedModules.insert(module);
             }
             for (auto& connection : module->_connections) {
-                if (connection->_from == module.get() && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
-                    waitingModule[track.get()] = module.get();
+                if (connection->_from == module && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
+                    waitingModule[track.get()] = module;
                     return false;
                 }
             }
         }
     }
-    // TODO PRE POST Fader
-    Module* fader = (Module*)track->_fader.get();
-    orderedModules.push_back(fader);
-    processedModules.insert(fader);
 
     return true;
 }

@@ -22,8 +22,12 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
         addLane(new Lane(x));
     }
 
+    _gain.reset(new GainModule(json["_gain"]));
+    _gain->_track = this;
+
     _fader.reset(new Fader(json["_fader"]));
     _fader->_track = this;
+
     if (json.contains("_modules")) {
         for (const auto& x : json["_modules"]) {
             addModule(gPluginManager.create(x));
@@ -32,8 +36,12 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
 }
 
 Track::Track(std::string name, Composer* composer) :
-    Nameable(name), _fader(new Fader("Fader", this)), _composer(composer) {
+    Nameable(name),
+    _gain(new GainModule("Gain", this)),
+    _fader(new Fader("Fader", this)),
+    _composer(composer) {
     addLane(new Lane());
+    _gain->start();
     _fader->start();
 }
 
@@ -203,6 +211,7 @@ void Track::addTrack(Track* track) {
 
 void Track::addTrack(std::unique_ptr<Track> track) {
     track->_parent = this;
+    this->_gain->connect(track->_fader.get(), 0, 0);
     _tracks.emplace_back(std::move(track));
 }
 
