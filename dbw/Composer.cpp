@@ -158,63 +158,68 @@ void Composer::clear() {
 void Composer::computeProcessOrder() {
     std::vector<Module*> orderedModules;
     std::set<Module*> processedModules;
-    Module* _waitingModule = nullptr;
+    std::map<Track*, Module*> waitingModule;
 
     bool processed = false;
     while (!processed) {
         processed = true;
         for (auto& track : getTracks()) {
-            bool skip = _waitingModule && _waitingModule->_track == track.get();
-            for (auto& module : track->_modules) {
-                if (skip) {
-                    if (module.get() == _waitingModule) {
-                        skip = false;
-                    } else {
-                        continue;
-                    }
-                }
-                if (module->isStarting()) {
-                    if (!processedModules.contains(module.get())) {
-                        bool isWaitingFrom = false;
-                        for (auto& connection : module->_connections) {
-                            if (connection->_to == module.get() && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
-                                isWaitingFrom = true;
-                                break;
-                            }
-
-                        }
-                        if (isWaitingFrom) {
-                            _waitingModule = module.get();
-                            processed = false;
-                            break;
-                        }
-                        orderedModules.push_back(module.get());
-                        processedModules.insert(module.get());
-                    }
-                    bool isWaitingTo = false;
-                    for (auto& connection : module->_connections) {
-                        if (connection->_from == module.get() && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
-                            isWaitingTo = true;
-                            break;
-                        }
-                    }
-                    if (isWaitingTo) {
-                        _waitingModule = module.get();
-                        processed = false;
-                        break;
-                    }
-                }
-            }
-            if (processed) {
-                Module* fader = (Module*)track->_fader.get();
-                orderedModules.push_back(fader);
-                processedModules.insert(fader);
-            }
+            processed &= computeProcessOrder(track, orderedModules, processedModules, waitingModule);
         }
     }
+
     std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
     _orderedModules = orderedModules;
     computeLatency();
+}
+
+bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
+                                   std::vector<Module*>& orderedModules,
+                                   std::set<Module*>& processedModules,
+                                   std::map<Track*, Module*> waitingModule) {
+    bool processed = true;
+    for (auto& x : track->getTracks()) {
+        processed &= computeProcessOrder(x, orderedModules, processedModules, waitingModule);
+    }
+    if (!processed) {
+        return false;
+    }
+
+    bool skip = waitingModule.contains(track.get());
+    for (auto& module : track->_modules) {
+        if (skip) {
+            if (module.get() == waitingModule[track.get()]) {
+                waitingModule.erase(track.get());
+            } else {
+                continue;
+            }
+        }
+        if (module->isStarting()) {
+            if (!processedModules.contains(module.get())) {
+                for (auto& connection : module->_connections) {
+                    if (connection->_to == module.get() && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
+                        waitingModule[track.get()] = module.get();
+                        return false;
+                    }
+
+                }
+                orderedModules.push_back(module.get());
+                processedModules.insert(module.get());
+            }
+            for (auto& connection : module->_connections) {
+                if (connection->_from == module.get() && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
+                    waitingModule[track.get()] = module.get();
+                    return false;
+                }
+            }
+        }
+    }
+    // TODO PRE POST Fader
+    Module* fader = (Module*)track->_fader.get();
+    orderedModules.push_back(fader);
+    processedModules.insert(fader);
+
+    return true;
 }
 
 void Composer::computeLatency() {

@@ -35,6 +35,10 @@ public:
     int maxBar();
     void clear();
     void computeProcessOrder();
+    bool computeProcessOrder(std::unique_ptr<Track>& track,
+                             std::vector<Module*>& orderedModules,
+                             std::set<Module*>& processedModules,
+                             std::map<Track*, Module*> waitingModule);
     void computeLatency();
     Composer* getComposer() override;
     void deleteClips(std::set<Clip*> clips);
