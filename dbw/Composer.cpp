@@ -211,7 +211,8 @@ void Composer::computeLatency() {
         }
         for (auto& connection : module->_connections) {
             if (connection->_to == module) {
-                latency += connection->_from->getComputedLatency();
+                latency = std::max(latency,
+                                   connection->_from->getComputedLatency());
             }
         }
         module->setComputedLatency(latency);

@@ -28,30 +28,31 @@ void Connection::process(Module* to) {
         return;
     }
     for (int channel = 0; channel < 2; ++channel) {
-        bool constantp = _from->_track->_processBuffer._out.at(_fromIndex)._constantp[channel];
+        bool xConstantp = _from->_track->_processBuffer._out.at(_fromIndex)._constantp[channel];
+        bool yConstantp = _to->_track->_processBuffer._in.at(_toIndex)._constantp[channel];
         auto& x = _from->_track->_processBuffer._out.at(_fromIndex).buffer32()[channel];
         auto& y = to->_track->_processBuffer._in.at(_toIndex).buffer32()[channel];
-        if (constantp) {
-            for (size_t i = 0; i < gPreference.bufferSize; ++i) {
-                if (_latency == 0) {
-                    y[i] = x[0];
-                } else {
-                    auto& dcp = _dcpBuffer[channel];
-                    dcp.push_back(x[0]);
-                    y[i] = dcp.front();
-                    dcp.pop_front();
-                }
+        auto y0 = y[0];
+        for (size_t i = 0; i < gPreference.bufferSize; ++i) {
+            size_t xi = i;
+            if (xConstantp) {
+                xi = 0;
             }
-        } else {
-            for (size_t i = 0; i < gPreference.bufferSize; ++i) {
-                if (_latency == 0) {
-                    y[i] = x[i];
+            if (_latency == 0) {
+                if (yConstantp) {
+                    y[i] = y0 + x[xi];
                 } else {
-                    auto& dcp = _dcpBuffer[channel];
-                    dcp.push_back(x[i]);
-                    y[i] = dcp.front();
-                    dcp.pop_front();
+                    y[i] += x[xi];
                 }
+            } else {
+                auto& dcp = _dcpBuffer[channel];
+                dcp.push_back(x[xi]);
+                if (yConstantp) {
+                    y[i] = y0 + dcp.front();
+                } else {
+                    y[i] += dcp.front();
+                }
+                dcp.pop_front();
             }
         }
         to->_track->_processBuffer._in.at(_toIndex)._constantp[channel] = false;
@@ -72,5 +73,7 @@ void Connection::setLatency(uint32_t latency) {
 nlohmann::json Connection::toJson() {
     nlohmann::json json = Nameable::toJson();
     json.update(*this);
+    json["_fromId"] = _from->nekoId();
+    json["_toId"] = _to->nekoId();
     return json;
 }

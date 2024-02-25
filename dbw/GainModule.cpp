@@ -15,6 +15,7 @@ GainModule::GainModule(std::string name, Track* track) :
 nlohmann::json GainModule::toJson() {
     nlohmann::json json = BuiltinModule::toJson();
     json["_id"] = "Gain";
+    json["_gain"] = _gain;
     return json;
 }
 
@@ -34,6 +35,9 @@ bool GainModule::process(ProcessBuffer* buffer, int64_t steadyTime) {
         }
     }
     std::ranges::fill(buffer->_out[0]._constantp, false);
+
+    std::swap(buffer->_eventIn, buffer->_eventOut);
+
     return Module::process(buffer, steadyTime);
 }
 

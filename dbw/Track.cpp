@@ -33,6 +33,12 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
             addModule(gPluginManager.create(x));
         }
     }
+
+    if (json.contains("_tracks")) {
+        for (const auto& x : json["_tracks"]) {
+            addTrack(new Track(x));
+        }
+    }
 }
 
 Track::Track(std::string name, Composer* composer) :
@@ -52,7 +58,10 @@ Composer* Track::getComposer() {
     if (_composer) {
         return _composer;
     }
-    return _parent->getComposer();
+    if (_parent) {
+        return _parent->getComposer();
+    }
+    return nullptr;
 }
 
 void Track::setComposer(Composer* composer) {
@@ -114,7 +123,6 @@ void Track::prepareEvent() {
         track->prepareEvent();
     }
 }
-
 
 void Track::render() {
     ImGui::PushID(this);
@@ -182,6 +190,7 @@ nlohmann::json Track::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["type"] = TYPE;
     json["_width"] = _width;
+    json["_gain"].update(_gain->toJson());
     json["_fader"].update(_fader->toJson());
 
     nlohmann::json modules = nlohmann::json::array();
@@ -195,6 +204,12 @@ nlohmann::json Track::toJson() {
         lanes.emplace_back(lane->toJson());
     }
     json["_lanes"] = lanes;
+
+    nlohmann::json tracks = nlohmann::json::array();
+    for (auto& track : _tracks) {
+        tracks.emplace_back(track->toJson());
+    }
+    json["_tracks"] = tracks;
 
     return json;
 }

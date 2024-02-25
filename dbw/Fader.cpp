@@ -50,7 +50,7 @@ void Fader::renderContent() {
     ImGui::Checkbox("Mute", &_mute);
     ImGui::SameLine();
     ImGui::Checkbox("Solo", &_solo);
-    ImGui::Text(std::to_string(_track->_latency).c_str());
+    ImGui::Text(std::to_string(_computedLatency).c_str());
     ImGui::PopItemWidth();
 }
 

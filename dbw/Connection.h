@@ -26,6 +26,6 @@ public:
     uint32_t _latency = 0;
     std::vector<std::deque<float>> _dcpBuffer;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Connection, _fromId, _fromIndex, _toId, _toIndex);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Connection, _fromIndex, _toIndex);
 };
 

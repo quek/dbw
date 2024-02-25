@@ -91,8 +91,8 @@ void Module::setComputedLatency(uint32_t computedLatency) {
     _computedLatency = computedLatency;
     for (auto& connection : _connections) {
         if (connection->_to == this) {
-            if (connection->_from->getComputedLatency() > computedLatency) {
-                connection->setLatency(connection->_from->getComputedLatency() - computedLatency);
+            if (connection->_from->getComputedLatency() < computedLatency) {
+                connection->setLatency(computedLatency - connection->_from->getComputedLatency());
             } else {
                 connection->setLatency(0);
             }
