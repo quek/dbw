@@ -51,13 +51,16 @@ void command::GroupTracks::execute(Composer* composer) {
             continue;
         }
         _undoPlaces.push_back({ parent->nekoId(), std::distance(parent->getTracks().begin(), it) });
-        group->addTrack(std::move(*it));
         if (first) {
             first = false;
-            (*it).reset(group);
-            group->setParent(parent);
+            std::unique_ptr<Track> p(group);
+            parent->insertTrack(it, p);
+            it = parent->findTrack(track);
+            group->addTrack(std::move(*it));
+            parent->deleteTrack(it);
         } else {
-            parent->getTracks().erase(it);
+            group->addTrack(std::move(*it));
+            parent->deleteTrack(it);
         }
     }
 }

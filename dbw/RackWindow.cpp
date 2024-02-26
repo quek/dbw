@@ -134,6 +134,10 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
             ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
+    if (ImGui::BeginDragDropSource()) {
+        ImGui::SetDragDropPayload("tracks", nullptr, 0);
+        ImGui::EndDragDropSource();
+    }
     ImGui::SameLine();
     if (!isMaster && !track->getTracks().empty()) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
@@ -175,6 +179,7 @@ void RackWindow::renderModules(Track* track) {
 
     ImGui::PushID(track);
     ImGui::BeginGroup();
+    track->_gain->render(track->_width);
     for (auto& module : track->_modules) {
         module->render(track->_width);
     }

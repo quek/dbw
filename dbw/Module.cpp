@@ -50,7 +50,7 @@ void Module::render(float width, float height) {
 
         // TODO とりあえずいまは表示だけ
         for (auto& c : _connections) {
-            auto x = c->_from->_name + " " + std::to_string(c->_fromIndex) + " ⇒ " + c->_to->_name + " " + std::to_string(c->_toIndex);
+            auto x = std::format("{} {} {} ⇒ {} {} {}", c->_from->_track->_name, c->_from->_name, c->_fromIndex, c->_to->_track->_name, c->_to->_name , c->_toIndex);
             ImGui::Text(x.c_str());
         }
 

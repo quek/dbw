@@ -10,6 +10,7 @@ void command::AddTrack::execute(Composer* composer) {
 
 void command::AddTrack::undo(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
-    composer->_masterTrack->getTracks().pop_back();
+    auto x = composer->_masterTrack->getTracks().end() - 1;
+    composer->_masterTrack->deleteTrack(x);
     composer->computeProcessOrder();
 }

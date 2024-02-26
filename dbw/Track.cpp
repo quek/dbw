@@ -205,7 +205,7 @@ void Track::addTrack(std::unique_ptr<Track> track) {
 }
 
 void Track::deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it) {
-    getTracks().erase(it);
+    _tracks.erase(it);
 }
 
 void Track::insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track) {
