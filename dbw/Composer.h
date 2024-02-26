@@ -34,7 +34,7 @@ public:
     int maxBar();
     void clear();
     void computeProcessOrder();
-    bool computeProcessOrder(std::unique_ptr<Track>& track,
+    bool computeProcessOrder(const std::unique_ptr<Track>& track,
                              std::vector<Module*>& orderedModules,
                              std::set<Module*>& processedModules,
                              std::map<Track*, Module*> waitingModule);

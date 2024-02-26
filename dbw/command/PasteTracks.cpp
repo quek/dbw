@@ -23,7 +23,7 @@ void command::PasteTracks::execute(Composer* composer) {
         if (atTrack->isMasterTrack()) {
             for (const auto& track : tracks | std::views::reverse) {
                 std::unique_ptr<Track> p(track);
-                atTrack->insertTrack(atTrack->getTracks().begin(), p);
+                atTrack->insertTrack(atTrack->tracksBegin(), p);
             }
         } else {
             Track* parent = atTrack->getParent();
@@ -41,7 +41,9 @@ void command::PasteTracks::undo(Composer* composer) {
     Track* atTrack = Neko::findByNekoId<Track>(_atTrackId);
     auto parent = atTrack->getParent();
     auto it = atTrack->getParent()->findTrack(atTrack);
+    std::vector<Track*> tracks;
     for (int i = 0; i < _tracks.size(); ++i) {
-        parent->deleteTrack(it + 1);
+        tracks.emplace_back((*(it + i)).get());
     }
+    composer->_masterTrack->deleteTracks(tracks);
 }

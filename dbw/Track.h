@@ -32,8 +32,10 @@ public:
     void addTrack();
     void addTrack(Track* track);
     void addTrack(std::unique_ptr<Track> track);
-    void deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it);
+    std::vector<std::unique_ptr<Track>> deleteTracks(std::vector<Track*> tracks);
+    std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
     void insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track);
+    void insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks);
     bool isMasterTrack();
     Track* getParent();
     void setParent(Track* parent);
@@ -44,8 +46,9 @@ public:
     bool isAllLanesStoped(Scene* scene);
     void allTracks(std::vector<Track*>& tracks);
     std::vector<Module*> allModules();
-    std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
-    std::vector<std::unique_ptr<Track>>& getTracks();
+    const std::vector<std::unique_ptr<Track>>& getTracks();
+    std::vector<std::unique_ptr<Track>>::iterator tracksBegin();
+    std::vector<std::unique_ptr<Track>>::iterator tracksEnd();
 
     std::unique_ptr<GainModule> _gain;
     std::unique_ptr<Fader> _fader;
@@ -60,6 +63,9 @@ public:
     bool _showTracks = true;
 
 private:
+    std::unique_ptr<Track> deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it);
+    std::unique_ptr<Track> deleteTrack(Track* track);
+
     Track* _parent = nullptr;
     Composer* _composer = nullptr;
     std::vector<std::unique_ptr<Track>> _tracks;

@@ -155,12 +155,12 @@ void Composer::computeProcessOrder() {
     computeLatency();
 }
 
-bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
+bool Composer::computeProcessOrder(const std::unique_ptr<Track>& track,
                                    std::vector<Module*>& orderedModules,
                                    std::set<Module*>& processedModules,
                                    std::map<Track*, Module*> waitingModule) {
     bool processed = true;
-    for (auto& x : track->getTracks()) {
+    for (const auto& x : track->getTracks()) {
         processed &= computeProcessOrder(x, orderedModules, processedModules, waitingModule);
     }
 

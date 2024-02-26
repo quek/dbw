@@ -204,14 +204,41 @@ void Track::addTrack(std::unique_ptr<Track> track) {
     insertTrack(_tracks.end(), track);
 }
 
-void Track::deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it) {
-    _tracks.erase(it);
+std::unique_ptr<Track> Track::deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it) {
+    if (it != tracksEnd()) {
+        std::unique_ptr<Track> ptr(std::move(*it));
+        _tracks.erase(it);
+        // TODO delete connections
+        return ptr;
+    }
+    return nullptr;
+}
+
+std::unique_ptr<Track> Track::deleteTrack(Track* track) {
+    auto it = findTrack(track);
+    return deleteTrack(it);
+}
+
+std::vector<std::unique_ptr<Track>> Track::deleteTracks(std::vector<Track*> tracks) {
+     std::vector<std::unique_ptr<Track>> result;
+     for (const auto& track : tracks) {
+         result.emplace_back(deleteTrack(track));
+     }
+     return result;
 }
 
 void Track::insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track) {
     track->_parent = this;
     this->_gain->connect(track->_fader.get(), 0, 0);
     _tracks.insert(it, std::move(track));
+}
+
+void Track::insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks) {
+    auto& i = it;
+    for (auto& track : tracks | std::views::reverse) {
+        insertTrack(i, track);
+        i = findTrack(track.get());
+    }
 }
 
 bool Track::isMasterTrack() {
@@ -307,7 +334,15 @@ std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track) {
     return std::ranges::find_if(_tracks, [track](const auto& x) { return x.get() == track; });
 }
 
-std::vector<std::unique_ptr<Track>>& Track::getTracks() {
+const std::vector<std::unique_ptr<Track>>& Track::getTracks() {
     return _tracks;
+}
+
+std::vector<std::unique_ptr<Track>>::iterator Track::tracksBegin() {
+    return _tracks.begin();
+}
+
+std::vector<std::unique_ptr<Track>>::iterator Track::tracksEnd() {
+    return _tracks.end();
 }
 
