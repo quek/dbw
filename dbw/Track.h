@@ -63,7 +63,6 @@ public:
     bool _showTracks = true;
 
 private:
-    std::unique_ptr<Track> deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it);
     std::unique_ptr<Track> deleteTrack(Track* track);
 
     Track* _parent = nullptr;

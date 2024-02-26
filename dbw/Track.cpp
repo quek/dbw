@@ -204,27 +204,51 @@ void Track::addTrack(std::unique_ptr<Track> track) {
     insertTrack(_tracks.end(), track);
 }
 
-std::unique_ptr<Track> Track::deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it) {
-    if (it != tracksEnd()) {
-        std::unique_ptr<Track> ptr(std::move(*it));
-        _tracks.erase(it);
-        // TODO delete connections
-        return ptr;
+std::unique_ptr<Track> Track::deleteTrack(Track* track) {
+    for (auto it = _tracks.begin(); it != _tracks.end(); ++it) {
+        if ((*it).get() == track) {
+            std::unique_ptr<Track> ptr(std::move(*it));
+            _tracks.erase(it);
+            return ptr;
+        }
+        std::unique_ptr<Track> ptr = (*it)->deleteTrack(track);
+        if (ptr) {
+            return ptr;
+        }
     }
     return nullptr;
 }
 
-std::unique_ptr<Track> Track::deleteTrack(Track* track) {
-    auto it = findTrack(track);
-    return deleteTrack(it);
-}
-
+// TODO MasterTrack 専用なので MasterTrack クラス作るべき？
 std::vector<std::unique_ptr<Track>> Track::deleteTracks(std::vector<Track*> tracks) {
-     std::vector<std::unique_ptr<Track>> result;
-     for (const auto& track : tracks) {
-         result.emplace_back(deleteTrack(track));
-     }
-     return result;
+    std::vector<std::unique_ptr<Track>> result;
+    for (const auto& track : tracks) {
+        result.emplace_back(deleteTrack(track));
+    }
+    // TODO tracks 以外との connections を削除する
+    for (auto& track : result) {
+        for (auto& module : track->_modules) {
+            auto it = std::remove_if(module->_connections.begin(),module->_connections.end(), [&module, &result](auto& x) {
+                if (x->_to == module.get()) {
+                    Track* fromTrack = x->_from->_track;
+                    return std::ranges::find_if(result, [fromTrack](auto& y) { return y.get() == fromTrack; }) == result.end();
+                } else {
+                    Track* toTrack = x->_to->_track;
+                    return std::ranges::find_if(result, [toTrack](auto& y) { return y.get() == toTrack; }) == result.end();
+                }
+            });
+            for (auto i = it; i != module->_connections.end(); ++i) {
+                if ((*i)->_to == module.get()) {
+                    (*i)->_from->deleteConnection(*i);
+                } else {
+                    (*i)->_to->deleteConnection(*i);
+                }
+            }
+            module->_connections.erase(it, module->_connections.end());
+        }
+
+    }
+    return result;
 }
 
 void Track::insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track) {

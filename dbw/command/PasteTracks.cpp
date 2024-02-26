@@ -9,6 +9,7 @@ command::PasteTracks::PasteTracks(const nlohmann::json& tracks, Track* at) :
     _tracks(tracks), _atTrackId(at->nekoId()) {
 }
 
+// TODO 書き直し
 void command::PasteTracks::execute(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     std::vector<Track*> tracks;
@@ -36,11 +37,12 @@ void command::PasteTracks::execute(Composer* composer) {
     }
 }
 
+// TODO 書き直し
 void command::PasteTracks::undo(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     Track* atTrack = Neko::findByNekoId<Track>(_atTrackId);
     auto parent = atTrack->getParent();
-    auto it = atTrack->getParent()->findTrack(atTrack);
+    auto it = parent->findTrack(atTrack);
     std::vector<Track*> tracks;
     for (int i = 0; i < _tracks.size(); ++i) {
         tracks.emplace_back((*(it + i)).get());
