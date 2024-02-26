@@ -15,6 +15,11 @@ Connection::Connection(Module* from, int fromIndex, Module* to, int toIndex) :
     setLatency(0);
 }
 
+void Connection::deleteFromModule() {
+    std::erase_if(_to->_connections, [this](auto& x) { return x->_from == _from; });
+    std::erase_if(_from->_connections, [this](auto& x) { return x->_to == _to; });
+}
+
 void Connection::resolveModuleReference() {
     _from = Neko::findByNekoId<Module>(_fromId);
     _to = Neko::findByNekoId<Module>(_toId);

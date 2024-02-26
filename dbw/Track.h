@@ -20,6 +20,7 @@ public:
     Track(const nlohmann::json& json);
     Track(std::string name, Composer* composer = nullptr);
     virtual ~Track();
+    void allTracks(std::vector<Track*>& tracks);
     Composer* getComposer();
     void setComposer(Composer* composer);
     void prepare(unsigned long framesPerBuffer);
@@ -44,7 +45,6 @@ public:
     void stop(Scene* scene);
     bool isAllLanesPlaying(Scene* scene);
     bool isAllLanesStoped(Scene* scene);
-    void allTracks(std::vector<Track*>& tracks);
     std::vector<Module*> allModules();
     const std::vector<std::unique_ptr<Track>>& getTracks();
     std::vector<std::unique_ptr<Track>>::iterator tracksBegin();

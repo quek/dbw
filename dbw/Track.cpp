@@ -221,34 +221,29 @@ std::unique_ptr<Track> Track::deleteTrack(Track* track) {
 
 // TODO MasterTrack 専用なので MasterTrack クラス作るべき？
 std::vector<std::unique_ptr<Track>> Track::deleteTracks(std::vector<Track*> tracks) {
-    std::vector<std::unique_ptr<Track>> result;
+    std::vector<std::unique_ptr<Track>> deletedTracks;
     for (const auto& track : tracks) {
-        result.emplace_back(deleteTrack(track));
+        deletedTracks.emplace_back(deleteTrack(track));
     }
     // TODO tracks 以外との connections を削除する
-    for (auto& track : result) {
-        for (auto& module : track->_modules) {
-            auto it = std::remove_if(module->_connections.begin(),module->_connections.end(), [&module, &result](auto& x) {
-                if (x->_to == module.get()) {
-                    Track* fromTrack = x->_from->_track;
-                    return std::ranges::find_if(result, [fromTrack](auto& y) { return y.get() == fromTrack; }) == result.end();
-                } else {
-                    Track* toTrack = x->_to->_track;
-                    return std::ranges::find_if(result, [toTrack](auto& y) { return y.get() == toTrack; }) == result.end();
-                }
-            });
-            for (auto i = it; i != module->_connections.end(); ++i) {
-                if ((*i)->_to == module.get()) {
-                    (*i)->_from->deleteConnection(*i);
-                } else {
-                    (*i)->_to->deleteConnection(*i);
+    for (auto& track : deletedTracks) {
+        for (auto& module : track->allModules()) {
+            std::vector<Connection*> willDeleteConnections;
+            for (auto& connection : module->_connections) {
+                if (std::ranges::all_of(deletedTracks, [&connection](auto& deletedTrack) {
+                    return connection->_from->_track != deletedTrack.get(); }) ||
+                    std::ranges::all_of(deletedTracks, [&connection](auto& deletedTrack) {
+                        return connection->_to->_track != deletedTrack.get(); })) {
+                    willDeleteConnections.push_back(connection.get());
                 }
             }
-            module->_connections.erase(it, module->_connections.end());
+            for (auto& connection : willDeleteConnections) {
+                connection->deleteFromModule();
+            }
         }
 
     }
-    return result;
+    return deletedTracks;
 }
 
 void Track::insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track) {
