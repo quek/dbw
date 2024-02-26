@@ -9,7 +9,7 @@ namespace command {
 
 class AddModule : public Command {
 public:
-    AddModule(uint64_t trackRef, const char* type, const std::string& id);
+    AddModule(uint64_t trackRef, const char* type, const std::string& id, bool openGui=true);
     void execute(Composer* composer) override;
     void redo(Composer* composer) override;
     void undo(Composer* composer) override;
@@ -19,6 +19,7 @@ public:
     std::string _id;
 private:
     Module* exec(Composer* composer);
+    bool _openGui;
 };
 
 

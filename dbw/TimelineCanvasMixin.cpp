@@ -36,7 +36,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
 
             ImGui::PushClipRect(clipRectMin + ImVec2(0.0f, offsetTop()), clipRectMax, true);
             renderTimeline();
-            renderPalyhead();
+            renderPlayhead();
             ImGui::PopClipRect();
 
             ImGui::PushClipRect(clipRectMin + ImVec2(offsetLeft(), 0.0f), clipRectMax, true);
@@ -215,6 +215,7 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
                 _state._thingClickedPart = Middle;
                 _state._thingClickedOffset = mousePos.y - bounds.p.y;
             }
+            onClickThing(thingAtMouse);
         } else {
             _state._clickedThing = nullptr;
             if (!io.KeyCtrl && !io.KeyShift) {
@@ -340,6 +341,15 @@ void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
 
         lastY = y;
     }
+    {
+        float x1 = windowPos.x;
+        float y1 = timeToScreenY(_composer->_loopStartTime);
+        ImVec2 pos1(x1, y1);
+        float x2 = x1 + offsetLeft();
+        float y2 = timeToScreenY(_composer->_loopEndTime);
+        ImVec2 pos2(x2, y2);
+        drawList->AddRectFilled(pos1, pos2, IM_COL32(0xcc, 0xcc, 0xcc, 0x80));
+    }
     ImGui::PopClipRect();
 
     ImGuiIO& io = ImGui::GetIO();
@@ -351,7 +361,7 @@ void TimelineCanvasMixin<THING, LANE>::renderTimeline() {
     }
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         double time = timeFromMousePos();
-        handleClickTimeline(time);
+        handleClickTimeline(time, io.KeyCtrl, io.KeyAlt);
     }
 }
 

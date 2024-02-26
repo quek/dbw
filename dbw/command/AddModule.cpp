@@ -5,12 +5,15 @@
 #include "../Composer.h"
 #include "../Track.h"
 
-command::AddModule::AddModule(uint64_t trackRef, const char* type, const std::string& id) :
-    _trackRef(trackRef), _type(type), _id(id) {
+command::AddModule::AddModule(uint64_t trackRef, const char* type, const std::string& id, bool openGui) :
+    _trackRef(trackRef), _type(type), _id(id), _openGui(openGui) {
 }
 
 void command::AddModule::execute(Composer* composer) {
-    exec(composer)->openGui();
+    auto module = exec(composer);
+    if (_openGui) {
+        module->openGui();
+    }
 }
 
 void command::AddModule::redo(Composer* composer) {

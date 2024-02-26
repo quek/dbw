@@ -21,7 +21,7 @@ static int16_t allLanes[128];
 PianoRollWindow::PianoRollWindow(Composer* composer) : TimelineCanvasMixin(composer) {
     _zoomX = 1.0f;
     _zoomY = 40.0f;
-    _grid = gGrids[1].get();
+    _grid = gGrids[2].get();
     for (int16_t i = 0; i < 128; ++i) {
         allLanes[i] = i;
         _allLanes.push_back(&allLanes[i]);
@@ -40,6 +40,11 @@ void PianoRollWindow::edit(Clip* clip) {
     _show = true;
     _scrollHereXKey = "C4";
     _state = State{};
+    if (!clip->_sequence->_notes.empty()) {
+        _defaultNoteDuration = clip->_sequence->_notes[0]->_duration;
+    } else {
+        _defaultNoteDuration = _grid->_unit;
+    }
 }
 
 void PianoRollWindow::handleDoubleClick(Note* thing) {
@@ -50,8 +55,8 @@ Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane) {
     Note* note = new Note();
     note->_time = time;
     note->_key = *lane;
-    std::set<Note*> notes;
-    notes.insert(note);
+    note->_duration = _defaultNoteDuration;
+    std::set<Note*> notes({ note });
     _composer->_commandManager.executeCommand(new command::AddNotes(_clip->_sequence.get(), notes, true));
     return note;
 }
@@ -65,9 +70,19 @@ void PianoRollWindow::handleMove(double oldTime, double newTime, int16_t* oldLan
     }
 }
 
-void PianoRollWindow::handleClickTimeline(double time) {
+void PianoRollWindow::handleClickTimeline(double time, bool ctrl, bool alt) {
     std::lock_guard<std::recursive_mutex> lock(_composer->app()->_mtx);
-    _composer->_playTime = time + _clip->_time;
+    double value = time + _clip->_time;
+    if (ctrl) {
+        _composer->_loopStartTime = value;
+    } else if (alt) {
+        _composer->_loopEndTime = value;
+    } else {
+        _composer->_playTime = value;
+    }
+    if (_composer->_loopStartTime > _composer->_loopEndTime) {
+        std::swap(_composer->_loopStartTime, _composer->_loopEndTime);
+    }
 }
 
 std::pair<std::set<Note*>, Command*> PianoRollWindow::copyThings(std::set<Note*> srcs, bool redoable) {
@@ -81,6 +96,10 @@ std::pair<std::set<Note*>, Command*> PianoRollWindow::copyThings(std::set<Note*>
 
 Command* PianoRollWindow::deleteThings(std::set<Note*> notes, bool undoable) {
     return new command::DeleteNotes(_clip->_sequence.get(), notes, undoable);
+}
+
+void PianoRollWindow::onClickThing(Note* note) {
+    _defaultNoteDuration = note->_duration;
 }
 
 void PianoRollWindow::prepareAllThings() {
@@ -148,7 +167,7 @@ void PianoRollWindow::handleShortcut() {
     }
 }
 
-void PianoRollWindow::renderPalyhead() {
+void PianoRollWindow::renderPlayhead() {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     float scrollX = ImGui::GetScrollX();
     ImVec2 pos1 = canvasToScreen(ImVec2(scrollX, fmod(_composer->_playTime, _clip->_sequence->_duration)));

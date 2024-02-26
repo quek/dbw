@@ -25,9 +25,11 @@ public:
     virtual THING* handleDoubleClick(double time, LANE* lane) = 0;
     virtual void handleMove(double oldTime, double newTime, LANE* oldLane, LANE* newLane) = 0;
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax);
-    virtual void handleClickTimeline(double time) = 0;
+    virtual void handleClickTimeline(double time, bool ctrl, bool alt) = 0;
     virtual std::pair<std::set<THING*>, Command*> copyThings(std::set<THING*> srscs, bool redoable) = 0;
     virtual Command* deleteThings(std::set<THING*> things, bool undoable) = 0;
+
+    virtual void onClickThing(THING*) {};
 
     std::vector<THING*> _allThings;
     std::vector<LANE*> _allLanes;
@@ -89,7 +91,7 @@ protected:
     ImVec2 screenToCanvas(const ImVec2& pos);
     ImVec2 canvasToScreen(const ImVec2& pos);
     virtual void handleShortcut() = 0;
-    virtual void renderPalyhead() = 0;
+    virtual void renderPlayhead() = 0;
     virtual void renderHeader() = 0;
     virtual std::string windowName() = 0;
     virtual std::string canvasName() = 0;

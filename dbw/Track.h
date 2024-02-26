@@ -43,6 +43,7 @@ public:
     bool isAllLanesPlaying(Scene* scene);
     bool isAllLanesStoped(Scene* scene);
     void allTracks(std::vector<Track*>& tracks);
+    std::vector<Module*> allModules();
 
     std::unique_ptr<GainModule> _gain;
     std::unique_ptr<Fader> _fader;

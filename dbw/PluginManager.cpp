@@ -61,6 +61,7 @@ void PluginManager::load() {
 }
 
 void PluginManager::openModuleSelector(Track* track) {
+    auto& io = ImGui::GetIO();
     ImGui::Begin("Module Selector", &track->_openModuleSelector);
     if (ImGui::IsWindowAppearing()) {
         ImGui::SetKeyboardFocusHere();
@@ -101,7 +102,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 auto path = plugin["path"].get<std::string>();
                 auto module = new Vst3Module(name, track);
                 module->load(path);
-                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "vst3", id));
+                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "vst3", id, !io.KeyCtrl));
             }
         }
     }
@@ -116,7 +117,7 @@ void PluginManager::openModuleSelector(Track* track) {
         if (q == _query.end()) {
             if (ImGui::Button(name.c_str())) {
                 track->_openModuleSelector = false;
-                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "builtin", name));
+                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->nekoId(), "builtin", name, !io.KeyCtrl));
             }
         }
     }

@@ -18,7 +18,7 @@ public:
     virtual Clip* handleDoubleClick(double time, Lane* lane) override;
     virtual void handleMove(double oldTime, double newTime, Lane* oldLane, Lane* newLane) override;
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) override;
-    virtual void handleClickTimeline(double time) override;
+    virtual void handleClickTimeline(double time, bool ctrl, bool alt) override;
     virtual std::pair<std::set<Clip*>, Command*> copyThings(std::set<Clip*> clips, bool redoable) override;
     virtual Command* deleteThings(std::set<Clip*> clips, bool undoable) override;
 
@@ -41,7 +41,7 @@ public:
 
 protected:
     void handleShortcut() override;
-    void renderPalyhead()override;
+    void renderPlayhead()override;
     void renderHeader()override;
     std::string windowName() override;
     std::string canvasName() override;

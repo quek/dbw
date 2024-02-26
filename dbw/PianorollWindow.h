@@ -17,9 +17,11 @@ public:
     virtual void handleDoubleClick(Note* thing) override;
     virtual Note* handleDoubleClick(double time, int16_t* lane) override;
     virtual void handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) override;
-    virtual void handleClickTimeline(double time) override;
+    virtual void handleClickTimeline(double time, bool ctrl, bool alt) override;
     virtual std::pair<std::set<Note*>, Command*> copyThings(std::set<Note*> srcs, bool redoable) override;
     virtual Command* deleteThings(std::set<Note*> notes, bool undoable) override;
+
+    virtual void onClickThing(Note* note) override;
 
     virtual void prepareAllThings() override;
 
@@ -38,10 +40,11 @@ public:
     bool _show = false;
     Clip* _clip = nullptr;
     std::string _scrollHereXKey = "";
+    double _defaultNoteDuration = 1.0;
 
 protected:
     void handleShortcut() override;
-    void renderPalyhead() override;
+    void renderPlayhead() override;
     void renderHeader() override;
     std::string windowName() override;
     std::string canvasName() override;

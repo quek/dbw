@@ -24,9 +24,11 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
 
     _gain.reset(new GainModule(json["_gain"]));
     _gain->_track = this;
+    _gain->start();
 
     _fader.reset(new Fader(json["_fader"]));
     _fader->_track = this;
+    _fader->start();
 
     if (json.contains("_modules")) {
         for (const auto& x : json["_modules"]) {
@@ -36,7 +38,9 @@ Track::Track(const nlohmann::json& json) : Nameable(json) {
 
     if (json.contains("_tracks")) {
         for (const auto& x : json["_tracks"]) {
-            addTrack(new Track(x));
+            Track* track = new Track(x);
+            track->_parent = this;
+            _tracks.emplace_back(track);
         }
     }
 }
@@ -239,7 +243,7 @@ void Track::setParent(Track* parent) {
 }
 
 void Track::resolveModuleReference() {
-    for (const auto& module : _modules) {
+    for (const auto& module : allModules()) {
         for (const auto& connection : module->_connections) {
             connection->resolveModuleReference();
         }
@@ -304,6 +308,15 @@ void Track::allTracks(std::vector<Track*>& tracks) {
     for (const auto& x : _tracks) {
         x->allTracks(tracks);
     }
+}
+
+std::vector<Module*> Track::allModules() {
+    std::vector<Module*> vec{ _gain.get() };
+    for (const auto& module : _modules) {
+        vec.push_back(module.get());
+    }
+    vec.push_back(_fader.get());
+    return vec;
 }
 
 std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track) {

@@ -42,6 +42,12 @@ Composer::Composer(const nlohmann::json& json) :
     _commandWindow(std::make_unique<CommandWindow>(this)) {
 
     _bpm = json["_bpm"];
+    _playTime = json["_playTime"];
+    _playStartTime = json["_playStartTime"];
+    _loopStartTime = json["_loopStartTime"];
+    _loopEndTime = json["_loopEndTime"];
+    _looping = json["_looping"];
+    _scrollLock = json["_scrollLock"];
 
     _sceneMatrix = std::make_unique<SceneMatrix>(json["_sceneMatrix"]);
     _sceneMatrix->_composer = this;
@@ -158,12 +164,7 @@ bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
         processed &= computeProcessOrder(x, orderedModules, processedModules, waitingModule);
     }
 
-    std::vector<Module*> allModules;
-    allModules.push_back(track->_gain.get());
-    for (const auto& module : track->_modules) {
-        allModules.push_back(module.get());
-    }
-    allModules.push_back(track->_fader.get());
+    std::vector<Module*> allModules = track->allModules();;
 
     bool skip = waitingModule.contains(track.get());
     for (auto& module : allModules) {
@@ -241,6 +242,12 @@ nlohmann::json Composer::toJson() {
     nlohmann::json json = Nameable::toJson();
 
     json["_bpm"] = _bpm;
+    json["_playTime"] = _playTime;
+    json["_playStartTime"] = _playStartTime;
+    json["_loopStartTime"] = _loopStartTime;
+    json["_loopEndTime"] = _loopEndTime;
+    json["_looping"] = _looping;
+    json["_scrollLock"] = _scrollLock;
 
     json["_masterTrack"] = _masterTrack->toJson();
 
