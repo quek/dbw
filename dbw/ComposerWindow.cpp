@@ -123,6 +123,7 @@ void ComposerWindow::setStatusMessage(std::string message) {
 }
 
 void ComposerWindow::handleGlobalShortcut() {
+    // TODO テキスト入力中などは無効にしたい
     if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
         if (_composer->_playing) {
             _composer->stop();
@@ -145,31 +146,5 @@ void ComposerWindow::handleGlobalShortcut() {
 void ComposerWindow::handleLocalShortcut() {
     if (!canHandleInput()) {
         return;
-    }
-
-    // TODO RackWindow に移動
-    auto& io = ImGui::GetIO();
-    if (io.KeyCtrl) {
-        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C))) {
-            // COPY
-            if (!_selectedTracks.empty()) {
-                nlohmann::json json;
-                for (const auto& track : _selectedTracks) {
-                    json["tracks"].push_back(track->toJson());
-                }
-                ImGui::SetClipboardText(eraseNekoId(json).dump(2).c_str());
-            }
-        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_X))) {
-            // CUT
-        } else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V))) {
-            // PAST
-            nlohmann::json json = nlohmann::json::parse(ImGui::GetClipboardText());
-            if (json.contains("tracks") && json["tracks"].is_array()) {
-                for (const auto& x : json["tracks"]) {
-                    Track* track = new Track(x);
-                    _composer->_masterTrack->addTrack(track);
-                }
-            }
-        }
     }
 }

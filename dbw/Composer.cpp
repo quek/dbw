@@ -200,6 +200,7 @@ bool Composer::computeProcessOrder(std::unique_ptr<Track>& track,
 }
 
 void Composer::computeLatency() {
+    std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
     for (auto& module : _orderedModules) {
         uint32_t latency = module->_latency;
         for (auto& x : _orderedModules) {
@@ -207,7 +208,7 @@ void Composer::computeLatency() {
                 break;
             }
             if (module->_track == x->_track) {
-                latency += x->getComputedLatency();
+                latency = module->_latency + x->getComputedLatency();
             }
         }
         for (auto& connection : module->_connections) {
@@ -218,24 +219,6 @@ void Composer::computeLatency() {
         }
         module->setComputedLatency(latency);
     }
-
-    /* TODO latency
-    uint32_t maxLatency = 0;
-    for (const auto& track : getTracks()) {
-        uint32_t latency = track->computeLatency();
-        if (maxLatency < latency) {
-            maxLatency = latency;
-        }
-    }
-    {
-        std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
-        for (const auto& track : getTracks()) {
-            track->_processBuffer.setLatency(maxLatency - track->_latency);
-        }
-    }
-    // マスタはレイテンシー出すだけでいいかな
-    _masterTrack->computeLatency();
-    */
 }
 
 nlohmann::json Composer::toJson() {

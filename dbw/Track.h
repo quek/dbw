@@ -24,17 +24,17 @@ public:
     void setComposer(Composer* composer);
     void prepare(unsigned long framesPerBuffer);
     void prepareEvent();
-    void render();
     void addModule(std::string path, uint32_t index);
     void addModule(Module* module);
     void addLane(Lane* lane);
     bool isAvailableSidechainSrc(Track* dst);
-    uint32_t computeLatency();
-    void doDCP();
     virtual nlohmann::json toJson() override;
     void addTrack();
     void addTrack(Track* track);
     void addTrack(std::unique_ptr<Track> track);
+    void deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it);
+    void insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track);
+    bool isMasterTrack();
     Track* getParent();
     void setParent(Track* parent);
     void resolveModuleReference();
@@ -44,6 +44,8 @@ public:
     bool isAllLanesStoped(Scene* scene);
     void allTracks(std::vector<Track*>& tracks);
     std::vector<Module*> allModules();
+    std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
+    std::vector<std::unique_ptr<Track>>& getTracks();
 
     std::unique_ptr<GainModule> _gain;
     std::unique_ptr<Fader> _fader;
@@ -52,14 +54,8 @@ public:
     std::vector<std::unique_ptr<Lane>> _lanes;
     std::vector<std::unique_ptr<Module>> _modules;
 
-    uint32_t _latency = 0;
-
     bool _openModuleSelector = false;
     float _width = 150.0f;
-
-
-    std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
-    std::vector<std::unique_ptr<Track>>& getTracks();
 
     bool _showTracks = true;
 

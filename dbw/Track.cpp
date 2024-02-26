@@ -128,22 +128,6 @@ void Track::prepareEvent() {
     }
 }
 
-void Track::render() {
-    ImGui::PushID(this);
-    for (auto& module : _modules) {
-        module->render();
-    }
-    if (ImGui::Button("Add Module")) {
-        _openModuleSelector = true;
-    }
-    if (_openModuleSelector) {
-        gPluginManager.openModuleSelector(this);
-    }
-    _fader->render();
-    ImGui::Text(std::to_string(_latency).c_str());
-    ImGui::PopID();
-}
-
 void Track::addModule(std::string path, uint32_t index) {
     ClapHost* pluginHost = new ClapHost(this);
     pluginHost->load(path.c_str(), index);
@@ -176,18 +160,6 @@ bool Track::isAvailableSidechainSrc(Track* dst) {
     }
     // TODO
     return true;
-}
-
-uint32_t Track::computeLatency() {
-    _latency = 0;
-    for (auto& module : _modules) {
-        _latency += module->getComputedLatency();
-    }
-    return _latency;
-}
-
-void Track::doDCP() {
-    _processBuffer.doDCP();
 }
 
 nlohmann::json Track::toJson() {
@@ -229,9 +201,21 @@ void Track::addTrack(Track* track) {
 }
 
 void Track::addTrack(std::unique_ptr<Track> track) {
+    insertTrack(_tracks.end(), track);
+}
+
+void Track::deleteTrack(std::vector<std::unique_ptr<Track>>::iterator it) {
+    getTracks().erase(it);
+}
+
+void Track::insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track) {
     track->_parent = this;
     this->_gain->connect(track->_fader.get(), 0, 0);
-    _tracks.emplace_back(std::move(track));
+    _tracks.insert(it, std::move(track));
+}
+
+bool Track::isMasterTrack() {
+    return getComposer() && getComposer()->_masterTrack.get() == this;
 }
 
 Track* Track::getParent() {

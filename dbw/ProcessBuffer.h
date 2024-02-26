@@ -15,8 +15,6 @@ public:
     void ensure64();
     void inZero(bool useConstant = true);
     void outZero(bool useConstant = true);
-    void setLatency(uint32_t latency);
-    void doDCP();
 
     std::vector<AudioBuffer> _in;
     std::vector<AudioBuffer> _out;
@@ -29,5 +27,4 @@ public:
     unsigned long _framesPerBuffer;
     int _nbuses;
     int _nchannels;
-    uint32_t _latency;
 };

@@ -1,7 +1,6 @@
 #include "ProcessBuffer.h"
 
-ProcessBuffer::ProcessBuffer() : _framesPerBuffer(0), _nbuses(0), _nchannels(0), _latency(0) {
-    setLatency(0);
+ProcessBuffer::ProcessBuffer() : _framesPerBuffer(0), _nbuses(0), _nchannels(0) {
 }
 
 void ProcessBuffer::ensure(unsigned long framesPerBuffer, int nbuses, int nchannels) {
@@ -53,32 +52,6 @@ void ProcessBuffer::inZero(bool useConstant) {
 void ProcessBuffer::outZero(bool useConstant) {
     for (auto& x : _out) {
         x.zero(useConstant);
-    }
-}
-
-void ProcessBuffer::setLatency(uint32_t latency) {
-    _latency = latency;
-    if (_latency == 0) {
-        return;
-    }
-    _dcpBuffer.clear();
-    for (int i = 0; i < 2; ++i) {
-        _dcpBuffer.emplace_back(latency, 0.0f);
-    }
-}
-
-void ProcessBuffer::doDCP() {
-    if (_latency == 0) {
-        return;
-    }
-    for (int channel = 0; channel < 2; ++channel) {
-        auto& out = _out[0].buffer32()[channel];
-        auto& dcp = _dcpBuffer[channel];
-        for (unsigned long i = 0; i < _framesPerBuffer; ++i) {
-            dcp.push_back(out[i]);
-            out[i] = dcp.front();
-            dcp.pop_front();
-        }
     }
 }
 

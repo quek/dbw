@@ -35,12 +35,9 @@ Module* command::AddModule::exec(Composer* composer) {
     auto module = Module::create(_type, _id);
     _moduleId = module->nekoId();
     auto track = Neko::findByNekoId<Track>(_trackRef);
-    module->_track = track;
 
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
-    track->_modules.emplace_back(module);
-    module->start();
-    track->getComposer()->computeProcessOrder();
+    track->addModule(module);
     return module;
 }
 

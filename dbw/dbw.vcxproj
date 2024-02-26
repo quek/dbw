@@ -181,6 +181,7 @@
     <ClInclude Include="command\DeleteNotes.h" />
     <ClInclude Include="command\GroupTracks.h" />
     <ClInclude Include="Command\OpenProject.h" />
+    <ClInclude Include="command\PasteTracks.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Connection.h" />
@@ -255,6 +256,7 @@
     <ClCompile Include="command\DeleteNotes.cpp" />
     <ClCompile Include="command\GroupTracks.cpp" />
     <ClCompile Include="Command\OpenProject.cpp" />
+    <ClCompile Include="command\PasteTracks.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Connection.cpp" />

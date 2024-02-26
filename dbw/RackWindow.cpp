@@ -8,6 +8,7 @@
 #include "Track.h"
 #include "command/GroupTracks.h"
 #include "command/AddTrack.h"
+#include "command/PasteTracks.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 18.0f;
 constexpr const float GROUP_OFFSET_Y = 5.0f;
@@ -205,7 +206,7 @@ void RackWindow::renderFaders() {
 }
 
 void RackWindow::renderFaders(Track* track) {
-    if (track!= _composer->_masterTrack.get()) {
+    if (track != _composer->_masterTrack.get()) {
         ImGui::SameLine();
     }
     ImGui::BeginGroup();
@@ -228,6 +229,25 @@ void RackWindow::handleShortcut() {
         if (!_selectedTracks.empty()) {
             _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
         }
+    } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_C)) {
+        // COPY
+        if (!_selectedTracks.empty()) {
+            nlohmann::json json;
+            for (const auto& track : _selectedTracks) {
+                json["tracks"].push_back(track->toJson());
+            }
+            ImGui::SetClipboardText(eraseNekoId(json).dump(2).c_str());
+        }
+    } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_X)) {
+        // CUT
+    } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_V)) {
+        // PASTE
+        nlohmann::json json = nlohmann::json::parse(ImGui::GetClipboardText());
+        if (json.contains("tracks") && json["tracks"].is_array()) {
+            if(!_selectedTracks.empty()){
+                _composer->_commandManager.executeCommand(new command::PasteTracks(json["tracks"], _selectedTracks.back()));
+            }
+        }
     }
 }
 
@@ -245,6 +265,5 @@ void RackWindow::computeHeaderHeight(Track* track, int groupLevel) {
             computeHeaderHeight(x.get(), groupLevel + 1);
         }
     }
-
 }
 
