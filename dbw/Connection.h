@@ -10,7 +10,6 @@ class Connection : public Nameable {
 public:
     Connection(const nlohmann::json& josn);
     Connection(Module* from, int fromIndex, Module* to, int toIndex);
-    void deleteFromModule();
     void resolveModuleReference();
     void process(Module* to);
     void setLatency(uint32_t latency);

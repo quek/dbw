@@ -5,6 +5,7 @@
 #include "Command.h"
 #include "CommandWindow.h"
 #include "ComposerWindow.h"
+#include "MasterTrack.h"
 #include "Midi.h"
 #include "PianoRollWindow.h"
 #include "PluginManager.h"
@@ -13,7 +14,6 @@
 #include "SceneMatrix.h"
 #include "SidechainInputSelector.h"
 #include "TimelineWindow.h"
-#include "Track.h"
 
 class App;
 class AudioEngine;
@@ -34,7 +34,7 @@ public:
     int maxBar();
     void clear();
     void computeProcessOrder();
-    bool computeProcessOrder(const std::unique_ptr<Track>& track,
+    bool computeProcessOrder(Track* track,
                              std::vector<Module*>& orderedModules,
                              std::set<Module*>& processedModules,
                              std::map<Track*, Module*> waitingModule);
@@ -55,7 +55,7 @@ public:
     double _loopEndTime = 16.0;
     bool _isScrollFolloPlayhead = true;
     CommandManager _commandManager;
-    std::unique_ptr<Track> _masterTrack;
+    std::unique_ptr<MasterTrack> _masterTrack;
     std::vector<Module*> _orderedModules;
 
     std::unique_ptr<ComposerWindow> _composerWindow;

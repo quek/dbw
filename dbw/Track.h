@@ -37,7 +37,7 @@ public:
     std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
     void insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track);
     void insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks);
-    bool isMasterTrack();
+    virtual bool isMasterTrack();
     Track* getParent();
     void setParent(Track* parent);
     void resolveModuleReference();

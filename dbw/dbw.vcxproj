@@ -193,6 +193,7 @@
     <ClInclude Include="GainModule.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridMixin.h" />
+    <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="Note.h" />
     <ClInclude Include="PianoRollH.h" />
@@ -270,6 +271,7 @@
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridMixin.cpp" />
+    <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="Note.cpp" />
     <ClCompile Include="PianoRollH.cpp" />

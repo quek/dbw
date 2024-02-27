@@ -25,4 +25,6 @@ void command::CutTracks::execute(Composer* composer) {
 }
 
 void command::CutTracks::undo(Composer* composer) {
+    // TODO
+    (void*)composer;
 }

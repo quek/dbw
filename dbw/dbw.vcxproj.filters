@@ -120,6 +120,7 @@
     <ClCompile Include="command\DeleteTracks.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="MasterTrack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -229,6 +230,7 @@
     <ClInclude Include="command\DeleteTracks.h">
       <Filter>command</Filter>
     </ClInclude>
+    <ClInclude Include="MasterTrack.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

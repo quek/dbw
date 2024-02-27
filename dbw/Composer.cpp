@@ -13,6 +13,7 @@
 #include "GuiUtil.h"
 #include "Project.h"
 #include "logger.h"
+#include "MasterTrack.h"
 #include "Track.h"
 #include "Lane.h"
 #include "util.h"
@@ -20,7 +21,7 @@
 Composer::Composer() :
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
-    _masterTrack(std::make_unique<Track>(std::string("MASTER"), this)),
+    _masterTrack(std::make_unique<MasterTrack>(this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
     _rackWindow(std::make_unique<RackWindow>(this)),
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
@@ -52,7 +53,7 @@ Composer::Composer(const nlohmann::json& json) :
     _sceneMatrix = std::make_unique<SceneMatrix>(json["_sceneMatrix"]);
     _sceneMatrix->_composer = this;
 
-    _masterTrack = std::make_unique<Track>(json["_masterTrack"]);
+    _masterTrack = std::make_unique<MasterTrack>(json["_masterTrack"]);
     _masterTrack->setComposer(this);
 
     _masterTrack->resolveModuleReference();
@@ -87,18 +88,6 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         module->process(&module->_track->_processBuffer, steadyTime);
     }
 
-    //for (auto& track : getTracks()) {
-    //    track->doDCP();
-    //    _masterTrack->_processBuffer._in[0].add(track->_processBuffer._out[0]);
-    //}
-
-    //for (auto& module : _masterTrack->_modules) {
-    //    module->_track->_processBuffer.swapInOut();
-    //    module->processConnections();
-    //    module->process(&module->_track->_processBuffer, steadyTime);
-    //}
-    //_masterTrack->_fader->process(&_masterTrack->_processBuffer, steadyTime);
-
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
 
     if (_playing) {
@@ -132,7 +121,7 @@ int Composer::maxBar() {
 }
 
 void Composer::clear() {
-    _masterTrack.reset(new Track(std::string("MASTER"), this));
+    _masterTrack.reset(new MasterTrack(this));
     _orderedModules.clear();
     _commandManager.clear();
     _sceneMatrix->_scenes.clear();
@@ -145,7 +134,7 @@ void Composer::computeProcessOrder() {
     std::map<Track*, Module*> waitingModule;
 
     while (true) {
-        if (computeProcessOrder(_masterTrack, orderedModules, processedModules, waitingModule)) {
+        if (computeProcessOrder(_masterTrack.get(), orderedModules, processedModules, waitingModule)) {
             break;
         }
     }
@@ -155,22 +144,22 @@ void Composer::computeProcessOrder() {
     computeLatency();
 }
 
-bool Composer::computeProcessOrder(const std::unique_ptr<Track>& track,
+bool Composer::computeProcessOrder(Track* track,
                                    std::vector<Module*>& orderedModules,
                                    std::set<Module*>& processedModules,
                                    std::map<Track*, Module*> waitingModule) {
     bool processed = true;
-    for (const auto& x : track->getTracks()) {
-        processed &= computeProcessOrder(x, orderedModules, processedModules, waitingModule);
+    for (auto& x : track->getTracks()) {
+        processed &= computeProcessOrder(x.get(), orderedModules, processedModules, waitingModule);
     }
 
     std::vector<Module*> allModules = track->allModules();;
 
-    bool skip = waitingModule.contains(track.get());
+    bool skip = waitingModule.contains(track);
     for (auto& module : allModules) {
         if (skip) {
-            if (module == waitingModule[track.get()]) {
-                waitingModule.erase(track.get());
+            if (module == waitingModule[track]) {
+                waitingModule.erase(track);
             } else {
                 continue;
             }
@@ -179,7 +168,7 @@ bool Composer::computeProcessOrder(const std::unique_ptr<Track>& track,
             if (!processedModules.contains(module)) {
                 for (auto& connection : module->_connections) {
                     if (connection->_to == module && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
-                        waitingModule[track.get()] = module;
+                        waitingModule[track] = module;
                         return false;
                     }
 
@@ -189,7 +178,7 @@ bool Composer::computeProcessOrder(const std::unique_ptr<Track>& track,
             }
             for (auto& connection : module->_connections) {
                 if (connection->_from == module && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
-                    waitingModule[track.get()] = module;
+                    waitingModule[track] = module;
                     return false;
                 }
             }

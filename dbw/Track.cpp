@@ -222,22 +222,32 @@ std::unique_ptr<Track> Track::deleteTrack(Track* track) {
 // TODO MasterTrack 専用なので MasterTrack クラス作るべき？
 std::vector<std::unique_ptr<Track>> Track::deleteTracks(std::vector<Track*> tracks) {
     std::vector<std::unique_ptr<Track>> deletedTracks;
+    std::vector<Track*> allDeletedTracks;
     for (const auto& track : tracks) {
-        deletedTracks.emplace_back(deleteTrack(track));
+        auto x = deleteTrack(track);
+        std::vector<Track*> includeChildren;
+        x->allTracks(includeChildren);
+        allDeletedTracks.insert(allDeletedTracks.end(), includeChildren.begin(), includeChildren.end());
+        deletedTracks.emplace_back(std::move(x));
     }
     for (auto& track : deletedTracks) {
         for (auto& module : track->allModules()) {
             std::vector<Connection*> willDeleteConnections;
             for (auto& connection : module->_connections) {
-                if (std::ranges::all_of(deletedTracks, [&connection](auto& deletedTrack) {
-                    return connection->_from->_track != deletedTrack.get(); }) ||
-                    std::ranges::all_of(deletedTracks, [&connection](auto& deletedTrack) {
-                        return connection->_to->_track != deletedTrack.get(); })) {
+                if (std::ranges::all_of(allDeletedTracks, [&connection](auto& deletedTrack) {
+                    return connection->_from->_track != deletedTrack; }) ||
+                    std::ranges::all_of(allDeletedTracks, [&connection](auto& deletedTrack) {
+                        return connection->_to->_track != deletedTrack; })) {
                     willDeleteConnections.push_back(connection.get());
                 }
             }
             for (auto& connection : willDeleteConnections) {
-                connection->deleteFromModule();
+                if (connection->_to == module) {
+                    std::erase_if(connection->_from->_connections, [module](auto& x) { return x->_to == module; });
+                } else {
+                    std::erase_if(connection->_to->_connections, [module](auto& x) { return x->_from == module; });
+                }
+                std::erase_if(module->_connections, [connection](auto& x) { return x.get() == connection; });
             }
         }
 
@@ -260,7 +270,7 @@ void Track::insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::
 }
 
 bool Track::isMasterTrack() {
-    return getComposer() && getComposer()->_masterTrack.get() == this;
+    return false;
 }
 
 Track* Track::getParent() {

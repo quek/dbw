@@ -4,12 +4,12 @@
 #include "../Track.h"
 
 command::DeleteTracks::DeleteTracks(std::vector<Track*>& tracks) {
-    // TODO parent が tracks に含まれているものは除外する？
-    for (const auto& track : tracks) {
+    for (const auto& track : removeChildren(tracks)) {
         _trackIds.push_back(track->nekoId());
     }
 }
 
+// TODO Group 削除してアンドゥしたとき子と親がつながっていない
 void command::DeleteTracks::execute(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
 
@@ -46,3 +46,27 @@ void command::DeleteTracks::undo(Composer* composer) {
 
     composer->computeProcessOrder();
 }
+
+std::vector<Track*> command::DeleteTracks::removeChildren(const std::vector<Track*> tracks) {
+    std::vector<Track*> resultTracks;
+    for (const auto& track : tracks) {
+        if (!isChild(track, tracks)) {
+            resultTracks.push_back(track);
+        }
+    }
+    return resultTracks;
+}
+
+bool command::DeleteTracks::isChild(Track* track, const std::vector<Track*> tracks) {
+    Track* parent = track->getParent();
+    if (parent->isMasterTrack()) {
+        return false;
+    }
+    for (auto& x : tracks) {
+        if (parent == x) {
+            return true;
+        }
+    }
+    return isChild(parent, tracks);
+}
+

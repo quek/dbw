@@ -10,6 +10,8 @@ public:
     void undo(Composer* composer) override;
 
 protected:
+    std::vector<Track*> removeChildren(const std::vector<Track*> tracks);
+    bool isChild(Track* track, const std::vector<Track*> tracks);
     std::vector<NekoId> _trackIds;
     nlohmann::json _jsonTracks;
     std::vector<std::pair<NekoId, std::ptrdiff_t>> _undoPlaces;
