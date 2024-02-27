@@ -225,7 +225,6 @@ std::vector<std::unique_ptr<Track>> Track::deleteTracks(std::vector<Track*> trac
     for (const auto& track : tracks) {
         deletedTracks.emplace_back(deleteTrack(track));
     }
-    // TODO tracks 以外との connections を削除する
     for (auto& track : deletedTracks) {
         for (auto& module : track->allModules()) {
             std::vector<Connection*> willDeleteConnections;
