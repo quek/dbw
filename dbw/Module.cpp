@@ -50,11 +50,21 @@ void Module::render(float width, float height) {
 
         // TODO とりあえずいまは表示だけ
         for (auto& c : _connections) {
-            auto x = std::format("{} {} {} ⇒ {} {} {}", c->_from->_track->_name, c->_from->_name, c->_fromIndex, c->_to->_track->_name, c->_to->_name , c->_toIndex);
-            ImGui::Text(x.c_str());
+            if (c->_to == this) {
+                auto x = std::format("{} {} {} ⇒ {}", c->_from->_track->_name, c->_from->_name, c->_fromIndex, c->_toIndex);
+                ImGui::Text(x.c_str());
+            }
         }
 
         renderContent();
+
+        // TODO とりあえずいまは表示だけ
+        for (auto& c : _connections) {
+            if (c->_from == this) {
+                auto x = std::format("{} ⇒ {} {} {}", c->_fromIndex, c->_to->_track->_name, c->_to->_name, c->_toIndex);
+                ImGui::Text(x.c_str());
+            }
+        }
     }
     ImGui::EndChild();
     ImGui::PopID();
