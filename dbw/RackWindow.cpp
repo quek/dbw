@@ -250,7 +250,9 @@ void RackWindow::handleShortcut() {
             for (const auto& track : _selectedTracks) {
                 json["tracks"].push_back(track->toJson());
             }
-            ImGui::SetClipboardText(eraseNekoId(json).dump(2).c_str());
+            ImGui::SetClipboardText(json.dump(2).c_str());
+            auto renewJson = renewNekoId(json);
+            ImGui::SetClipboardText(renewJson.dump(2).c_str());
         }
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_X)) {
         // CUT

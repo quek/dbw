@@ -28,12 +28,11 @@ void command::PasteTracks::execute(Composer* composer) {
     for (auto& track : allTracks) {
         for (auto& module : track->allModules()) {
             std::erase_if(module->_connections, [&allTracks](auto& c) {
-                return std::ranges::all_of(allTracks, [&c](auto& track) { return c->_from->_track != track; }) ||
-                    std::ranges::all_of(allTracks, [&c](auto& track) { return c->_to->_track != track; });
+                return c->_from == nullptr || c->_to == nullptr;
             });
         }
     }
-     
+
     Track* atTrack = Neko::findByNekoId<Track>(_atTrackId);
     if (atTrack) {
         if (atTrack->isMasterTrack()) {

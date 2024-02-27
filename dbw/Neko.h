@@ -34,3 +34,4 @@ private:
 };
 
 nlohmann::json eraseNekoId(const nlohmann::json& josn);
+nlohmann::json renewNekoId(const nlohmann::json& josn);

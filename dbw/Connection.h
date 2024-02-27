@@ -17,11 +17,11 @@ public:
     virtual nlohmann::json toJson() override;
 
     Module* _from = nullptr;
-    NekoId _fromId = 0;
+    NekoId _fromNekoRef = 0;
     int _fromIndex;
 
     Module* _to = nullptr;
-    NekoId _toId = 0;
+    NekoId _toNekoRef = 0;
     int _toIndex;
 
     uint32_t _latency = 0;

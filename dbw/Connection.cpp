@@ -4,9 +4,9 @@
 #include "Track.h"
 
 Connection::Connection(const nlohmann::json& json) : Nameable(json) {
-    _fromId = json["_fromId"];
+    _fromNekoRef = json["_fromNekoRef"];
     _fromIndex = json["_fromIndex"];
-    _toId = json["_toId"];
+    _toNekoRef = json["_toNekoRef"];
     _toIndex = json["_toIndex"];
 }
 
@@ -21,8 +21,8 @@ void Connection::deleteFromModule() {
 }
 
 void Connection::resolveModuleReference() {
-    _from = Neko::findByNekoId<Module>(_fromId);
-    _to = Neko::findByNekoId<Module>(_toId);
+    _from = Neko::findByNekoId<Module>(_fromNekoRef);
+    _to = Neko::findByNekoId<Module>(_toNekoRef);
 }
 
 void Connection::process(Module* to) {
@@ -78,7 +78,7 @@ void Connection::setLatency(uint32_t latency) {
 nlohmann::json Connection::toJson() {
     nlohmann::json json = Nameable::toJson();
     json.update(*this);
-    json["_fromId"] = _from->nekoId();
-    json["_toId"] = _to->nekoId();
+    json["_fromNekoRef"] = _from->nekoId();
+    json["_toNekoRef"] = _to->nekoId();
     return json;
 }
