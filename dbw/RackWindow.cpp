@@ -60,7 +60,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
     ImGui::PushID(track);
     ImGuiStyle& style = ImGui::GetStyle();
     float scrollY = ImGui::GetScrollY();
-    ImGui::SetCursorPosY(scrollY + 5 * groupLevel + style.ItemSpacing.y / 2.0f);
+    ImGui::SetCursorPosY(scrollY + GROUP_OFFSET_Y * groupLevel + style.ItemSpacing.y / 2.0f);
     if (isMaster) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + style.ItemSpacing.x / 2.0f);
     }
@@ -85,10 +85,10 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
     }
     ImVec2 size = ImVec2(track->_width, _headerHeight - GROUP_OFFSET_Y * groupLevel - style.ItemSpacing.y);
     if (!isMaster && !track->getTracks().empty()) {
-        //size.x -= _groupToggleButtonSize.x + style.ItemSpacing.x / 2.0f;
         size.x -= _groupToggleButtonSize.x;
     }
-    if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
+    //if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
+    if (ImGui::Selectable(std::format("{} {}",track->_name, ImGui::GetCursorPosY()).c_str(), selected, ImGuiSelectableFlags_None, size)) {
         auto& io = ImGui::GetIO();
         if (!io.KeyCtrl && !io.KeyShift) {
             _selectedTracks = { track };
@@ -153,7 +153,6 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
         }
         ImGui::SameLine();
     }
-    ImGui::SameLine();
     if (!isMaster && !track->getTracks().empty()) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
     }
@@ -258,8 +257,13 @@ void RackWindow::handleShortcut() {
 
 void RackWindow::computeHeaderHeight() {
     _headerHeight = BASE_HEADER_HEIGHT;
+    bool isMaster = true;
     for (auto& track : _allTracks) {
-        computeHeaderHeight(track, 0);
+        if (isMaster) {
+            isMaster = false;
+        } else {
+            computeHeaderHeight(track, 0);
+        }
     }
 }
 

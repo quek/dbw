@@ -261,7 +261,7 @@ void ClapHost::loadState() {
     //std::ifstream ifs(path, std::ios::binary);
     //clap_istream stream{
     //    .ctx = &ifs,
-    //    .read = [](const struct clap_istream* stream, void* buffer, uint64_t size) -> int64_t {
+    //    .read = [](const struct clap_istream* stream, void* buffer, NekoId size) -> int64_t {
     //        ((std::ifstream*)stream->ctx)->read(static_cast<char*>(buffer), size);
     //        return ((std::ifstream*)stream->ctx)->gcount();
     //    }
@@ -275,7 +275,7 @@ void ClapHost::saveState() {
     //std::ofstream ofs(path, std::ios::binary);
     //clap_ostream stream{
     //    .ctx = &ofs,
-    //    .write = [](const struct clap_ostream* stream, const void* buffer, uint64_t size) -> int64_t {
+    //    .write = [](const struct clap_ostream* stream, const void* buffer, NekoId size) -> int64_t {
     //        ((std::ofstream*)stream->ctx)->write(static_cast<const char*>(buffer), size);
     //        if (((std::ofstream*)stream->ctx)->fail()) {
     //            Error("ステート保存に失敗しました。");

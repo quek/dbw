@@ -13,7 +13,7 @@ public:
 
 private:
     nlohmann::json _tracks;
-    uint64_t _atTrackId;
+    NekoId _atTrackId;
 };
 
 };

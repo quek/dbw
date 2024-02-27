@@ -12,8 +12,8 @@ public:
     void execute(Composer* composer) override;
     void undo(Composer* composer) override;
 private:
-    uint64_t _moduleId;
-    uint64_t _trackId;
+    NekoId _moduleId;
+    NekoId _trackId;
     nlohmann::json _module;
     size_t _index = 0;
 };

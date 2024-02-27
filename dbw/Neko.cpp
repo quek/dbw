@@ -1,12 +1,12 @@
 #include "Neko.h"
 
-std::map<uint64_t, Neko*> Neko::nekoIdMap;
+std::map<NekoId, Neko*> Neko::nekoIdMap;
 
-uint64_t generateNeko() {
+NekoId generateNeko() {
     auto now = std::chrono::system_clock::now();
     auto duration = now.time_since_epoch();
     auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
-    uint64_t neko = static_cast<uint64_t>(nanoseconds);
+    NekoId neko = static_cast<NekoId>(nanoseconds);
     while (true) {
         if (!Neko::nekoIdMap.contains(neko)) {
             return neko;
@@ -36,11 +36,11 @@ Neko::~Neko() {
     nekoIdMap.erase(_nekoId);
 }
 
-const uint64_t Neko::nekoId() const {
+const NekoId Neko::nekoId() const {
     return _nekoId;
 }
 
-void Neko::setNekoId(uint64_t id) {
+void Neko::setNekoId(NekoId id) {
     nekoIdMap.erase(_nekoId);
     _nekoId = id;
     nekoIdMap[_nekoId] = this;

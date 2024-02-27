@@ -15,6 +15,7 @@ void command::GroupTracks::execute(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     int n = std::ranges::count_if(composer->allTracks(), [](auto& track) { return track->_name.starts_with("Group"); });
     Track* group = new Track(std::format("Group{}", n + 1));
+    _groupId = group->nekoId();
     std::vector<Track*> tracks;
     for (const auto& trackId : _ids) {
         Track* track = Neko::findByNekoId<Track>(trackId);
@@ -38,4 +39,29 @@ void command::GroupTracks::execute(Composer* composer) {
 
 void command::GroupTracks::undo(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
+    std::vector<Track*> tracks;
+    for (auto id : _ids) {
+        Track* track = Neko::findByNekoId<Track>(id);
+        if (!track) {
+            return;
+        }
+        tracks.push_back(track);
+    }
+    std::vector<std::unique_ptr<Track>> deletedTracks = composer->_masterTrack->deleteTracks(tracks);
+
+    for (auto [track, undoPlace] : std::views::zip(deletedTracks, _undoPlaces)) {
+        Track* parent = Neko::findByNekoId<Track>(undoPlace.first);
+        if (parent) {
+            parent->insertTrack(parent->tracksBegin() + undoPlace.second, track);
+        }
+    }
+
+    Track* group = Neko::findByNekoId<Track>(_groupId);
+    if (!group) {
+        return;
+    }
+    if (group->getTracks().empty()) {
+        group->getParent()->deleteTracks({ group });
+    }
+
 }

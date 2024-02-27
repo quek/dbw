@@ -1,13 +1,13 @@
 #include "Sequence.h"
 #include <map>
 
-static std::map<uint64_t, std::weak_ptr<Sequence>> nekoIdSequenceMap;
+static std::map<NekoId, std::weak_ptr<Sequence>> nekoIdSequenceMap;
 int Sequence::_no = 0;
 
 Sequence::Sequence(double duration) : Nameable("Seq" + std::to_string(++_no)), _duration(duration) {
 }
 
-std::shared_ptr<Sequence> Sequence::create(double duration, uint64_t id) {
+std::shared_ptr<Sequence> Sequence::create(double duration, NekoId id) {
     std::shared_ptr<Sequence> sequence(new Sequence(duration));
     if (id != 0) {
         sequence->setNekoId(id);
@@ -18,7 +18,7 @@ std::shared_ptr<Sequence> Sequence::create(double duration, uint64_t id) {
 
 std::shared_ptr<Sequence> Sequence::create(const nlohmann::json& json) {
     if (json.contains("sequenceId")) {
-        auto& p = nekoIdSequenceMap[json["sequenceId"].template get<uint64_t>()];
+        auto& p = nekoIdSequenceMap[json["sequenceId"].template get<NekoId>()];
         auto sequence = p.lock();
         if (sequence) {
             return sequence;

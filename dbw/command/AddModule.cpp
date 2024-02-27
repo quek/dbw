@@ -5,7 +5,7 @@
 #include "../Composer.h"
 #include "../Track.h"
 
-command::AddModule::AddModule(uint64_t trackRef, const char* type, const std::string& id, bool openGui) :
+command::AddModule::AddModule(NekoId trackRef, const char* type, const std::string& id, bool openGui) :
     _trackRef(trackRef), _type(type), _id(id), _openGui(openGui) {
 }
 
