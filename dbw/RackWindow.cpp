@@ -10,6 +10,8 @@
 #include "Track.h"
 #include "command/GroupTracks.h"
 #include "command/AddTrack.h"
+#include "command/DeleteTracks.h"
+#include "command/CutTracks.h"
 #include "command/PasteTracks.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 18.0f;
@@ -149,8 +151,13 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                     // TODO
                     ImGui::CloseCurrentPopup();
                 }
-                if (ImGui::MenuItem("Delete", "Delete"))
+                if (ImGui::MenuItem("Delete", "Delete")) {
+                    if (!_selectedTracks.empty()) {
+                        _composer->_commandManager.executeCommand(new command::DeleteTracks(_selectedTracks));
+                        _selectedTracks.clear();
+                    }
                     ImGui::CloseCurrentPopup();
+                }
                 ImGui::EndPopup();
             }
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
@@ -276,6 +283,10 @@ void RackWindow::handleShortcut() {
         }
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_X)) {
         // CUT
+        if (!_selectedTracks.empty()) {
+            _composer->_commandManager.executeCommand(new command::CutTracks(_selectedTracks));
+            _selectedTracks.clear();
+        }
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_V)) {
         // PASTE
         try {

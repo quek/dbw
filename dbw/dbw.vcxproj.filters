@@ -114,6 +114,12 @@
     <ClCompile Include="command\PasteTracks.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="command\CutTracks.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="command\DeleteTracks.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -215,6 +221,12 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="command\PasteTracks.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\CutTracks.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\DeleteTracks.h">
       <Filter>command</Filter>
     </ClInclude>
   </ItemGroup>

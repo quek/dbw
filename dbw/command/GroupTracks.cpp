@@ -7,7 +7,7 @@
 command::GroupTracks::GroupTracks(std::vector<Track*> tracks, bool undoable) :
     Command(undoable) {
     for (const auto& track : tracks) {
-        _ids.emplace_back(track->nekoId());
+        _trackIds.emplace_back(track->nekoId());
     }
 }
 
@@ -17,7 +17,7 @@ void command::GroupTracks::execute(Composer* composer) {
     Track* group = new Track(std::format("Group{}", n + 1));
     _groupId = group->nekoId();
     std::vector<Track*> tracks;
-    for (const auto& trackId : _ids) {
+    for (const auto& trackId : _trackIds) {
         Track* track = Neko::findByNekoId<Track>(trackId);
         if (track) {
             tracks.emplace_back(track);
@@ -35,12 +35,14 @@ void command::GroupTracks::execute(Composer* composer) {
         std::vector<std::unique_ptr<Track>> deletedTracks = composer->_masterTrack->deleteTracks(tracks);
         group->insertTracks(group->tracksBegin(), deletedTracks);
     }
+
+    composer->computeProcessOrder();
 }
 
 void command::GroupTracks::undo(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     std::vector<Track*> tracks;
-    for (auto id : _ids) {
+    for (auto id : _trackIds) {
         Track* track = Neko::findByNekoId<Track>(id);
         if (!track) {
             return;
@@ -64,4 +66,5 @@ void command::GroupTracks::undo(Composer* composer) {
         group->getParent()->deleteTracks({ group });
     }
 
+    composer->computeProcessOrder();
 }
