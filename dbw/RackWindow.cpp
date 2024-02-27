@@ -160,7 +160,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
 
     if (track->_showTracks) {
         for (auto& x : track->getTracks()) {
-            renderHeader(x.get(), groupLevel + isMaster ? 0 : 1, false);
+            renderHeader(x.get(), groupLevel + (isMaster ? 0 : 1), false);
         }
     }
     ImGui::PopID();
