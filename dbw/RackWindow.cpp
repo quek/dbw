@@ -96,6 +96,9 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
         if (ImGui::InputText("##name", &track->_name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue)) {
             _renamingTrack = nullptr;
         }
+        if (!ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            _renamingTrack = nullptr;
+        }
     } else {
         if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
             if (!isMaster) {
@@ -149,6 +152,9 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                 if (ImGui::MenuItem("Delete", "Delete"))
                     ImGui::CloseCurrentPopup();
                 ImGui::EndPopup();
+            }
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                _renamingTrack = track;
             }
             if (ImGui::BeginDragDropSource()) {
                 ImGui::SetDragDropPayload("tracks", nullptr, 0);
