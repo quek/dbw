@@ -13,7 +13,7 @@ public:
 
 private:
     void renderHeader();
-    void renderHeader(Track* track, int groupLevel, bool isMaster);
+    void renderHeader(Track* track, int groupLevel, bool isMaster, bool adjustY);
     void renderModules();
     void renderModules(Track* track);
     void renderFaders();

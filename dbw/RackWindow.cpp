@@ -44,7 +44,7 @@ void RackWindow::renderHeader() {
     computeHeaderHeight();
 
     bool isMaster = true;
-    renderHeader(_composer->_masterTrack.get(), 0, isMaster);
+    renderHeader(_composer->_masterTrack.get(), 0, isMaster, false);
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto& style = ImGui::GetStyle();
@@ -56,7 +56,7 @@ void RackWindow::renderHeader() {
     }
 }
 
-void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
+void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool adjustY) {
     ImGui::PushID(track);
     ImGuiStyle& style = ImGui::GetStyle();
     float scrollY = ImGui::GetScrollY();
@@ -80,7 +80,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
 
     auto it = std::ranges::find(_selectedTracks, track);
     bool selected = it != _selectedTracks.end();
-    if (groupLevel > 0) {
+    if (groupLevel > 0 || adjustY) {
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.ItemSpacing.y / 2 - 1.0f);
     }
     ImVec2 size = ImVec2(track->_width, _headerHeight - GROUP_OFFSET_Y * groupLevel - style.ItemSpacing.y);
@@ -88,7 +88,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
         size.x -= _groupToggleButtonSize.x;
     }
     //if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
-    if (ImGui::Selectable(std::format("{} {}",track->_name, ImGui::GetCursorPosY()).c_str(), selected, ImGuiSelectableFlags_None, size)) {
+    if (ImGui::Selectable(std::format("{} {} {}",track->_name, ImGui::GetCursorPosY(), adjustY).c_str(), selected, ImGuiSelectableFlags_None, size)) {
         auto& io = ImGui::GetIO();
         if (!io.KeyCtrl && !io.KeyShift) {
             _selectedTracks = { track };
@@ -159,7 +159,11 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster) {
 
     if (track->_showTracks) {
         for (auto& x : track->getTracks()) {
-            renderHeader(x.get(), groupLevel + (isMaster ? 0 : 1), false);
+            renderHeader(x.get(), groupLevel + (isMaster ? 0 : 1), false, adjustY);
+            // ImGui::Button("≪", "≫" のあとずれるので、よくわからないけど対処療法
+            if (!x->getTracks().empty()) {
+                adjustY = true;
+            }
         }
     }
     ImGui::PopID();
