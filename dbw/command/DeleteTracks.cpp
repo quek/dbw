@@ -9,7 +9,6 @@ command::DeleteTracks::DeleteTracks(std::vector<Track*>& tracks) {
     }
 }
 
-// TODO Group 削除してアンドゥしたとき子と親がつながっていない
 void command::DeleteTracks::execute(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
 
@@ -38,6 +37,9 @@ void command::DeleteTracks::undo(Composer* composer) {
     }
 
     for (auto [track, undoPlace] : std::views::zip(tracks, _undoPlaces) | std::views::reverse) {
+
+        track->resolveModuleReference();
+
         Track* parent = Neko::findByNekoId<Track>(undoPlace.first);
         if (parent) {
             parent->insertTrack(parent->tracksBegin() + undoPlace.second, track);
