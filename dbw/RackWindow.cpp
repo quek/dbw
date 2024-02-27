@@ -88,72 +88,77 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
     if (!isMaster && !track->getTracks().empty()) {
         size.x -= _groupToggleButtonSize.x;
     }
-    //if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
-    if (ImGui::Selectable(std::format("{} {} {}", track->_name, ImGui::GetCursorPosY(), adjustY).c_str(), selected, ImGuiSelectableFlags_None, size)) {
-        auto& io = ImGui::GetIO();
-        if (!io.KeyCtrl && !io.KeyShift) {
-            _selectedTracks = { track };
-        } else if (io.KeyCtrl) {
-            if (selected) {
-                _selectedTracks.erase(it);
-            } else {
-                _selectedTracks.push_back(track);
-            }
-        } else if (io.KeyShift) {
-            if (_selectedTracks.empty()) {
-                for (auto& x : _allTracks) {
-                    _selectedTracks.push_back(x);
-                    if (x == track) break;
+    if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
+        if (!isMaster) {
+            auto& io = ImGui::GetIO();
+            if (!io.KeyCtrl && !io.KeyShift) {
+                _selectedTracks = { track };
+            } else if (io.KeyCtrl) {
+                if (selected) {
+                    _selectedTracks.erase(it);
+                } else {
+                    _selectedTracks.push_back(track);
                 }
-            } else {
-                auto from = std::ranges::find(_allTracks, _selectedTracks.back());
-                auto to = std::ranges::find(_allTracks, track);
-                if (from > to) {
-                    std::swap(from, to);
-                }
-                while (true) {
-                    if (std::ranges::find(_selectedTracks, *from) == _selectedTracks.end()) {
-                        _selectedTracks.push_back(*from);
+            } else if (io.KeyShift) {
+                if (_selectedTracks.empty()) {
+                    for (auto& x : _allTracks) {
+                        _selectedTracks.push_back(x);
+                        if (x == track) break;
                     }
-                    if (from++ == to) {
-                        break;
+                } else {
+                    auto from = std::ranges::find(_allTracks, _selectedTracks.back());
+                    auto to = std::ranges::find(_allTracks, track);
+                    if (from > to) {
+                        std::swap(from, to);
+                    }
+                    while (true) {
+                        if (std::ranges::find(_selectedTracks, *from) == _selectedTracks.end()) {
+                            _selectedTracks.push_back(*from);
+                        }
+                        if (from++ == to) {
+                            break;
+                        }
                     }
                 }
             }
         }
     }
-    if (ImGui::BeginPopupContextItem()) {
-        if (ImGui::MenuItem("Group", "Ctrl+G")) {
-            _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
-            ImGui::CloseCurrentPopup();
+    if (!isMaster) {
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Group", "Ctrl+G")) {
+                _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
+                ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::MenuItem("Ungroup", "Ctrl+Shift+G")) {
+                // TODO
+                ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::MenuItem("Delete", "Delete"))
+                ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
         }
-        if (ImGui::MenuItem("Ungroup", "Ctrl+Shift+G")) {
-            // TODO
-            ImGui::CloseCurrentPopup();
+        if (ImGui::BeginDragDropSource()) {
+            ImGui::SetDragDropPayload("tracks", nullptr, 0);
+            ImGui::EndDragDropSource();
         }
-        if (ImGui::MenuItem("Delete", "Delete"))
-            ImGui::CloseCurrentPopup();
-        ImGui::EndPopup();
+        if (!track->getTracks().empty()) {
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + GROUP_OFFSET_Y * groupLevel - 1.0f);
+            if (track->_showTracks) {
+                if (ImGui::Button("≪", ImVec2(_groupToggleButtonSize.x, size.y + style.ItemSpacing.y / 2.0f + 1.0f))) {
+                    track->_showTracks = false;
+                }
+            } else {
+                if (ImGui::Button("≫", ImVec2(_groupToggleButtonSize.x, size.y + style.ItemSpacing.y / 2.0f + 1.0f))) {
+                    track->_showTracks = true;
+                }
+            }
+        }
     }
-    if (ImGui::BeginDragDropSource()) {
-        ImGui::SetDragDropPayload("tracks", nullptr, 0);
-        ImGui::EndDragDropSource();
-    }
+
+    // SameLine と SetCurosrPosX の呼び出し順を変えると挙動が変わる
     ImGui::SameLine();
-    if (!isMaster && !track->getTracks().empty()) {
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + GROUP_OFFSET_Y * groupLevel - 1.0f);
-        if (track->_showTracks) {
-            if (ImGui::Button("≪", ImVec2(_groupToggleButtonSize.x, size.y + style.ItemSpacing.y / 2.0f + 1.0f))) {
-                track->_showTracks = false;
-            }
-        } else {
-            if (ImGui::Button("≫", ImVec2(_groupToggleButtonSize.x, size.y + style.ItemSpacing.y / 2.0f + 1.0f))) {
-                track->_showTracks = true;
-            }
-        }
-        ImGui::SameLine();
-    }
     if (!isMaster && !track->getTracks().empty()) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.ItemSpacing.x / 2.0f);
     }

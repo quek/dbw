@@ -13,11 +13,27 @@ void command::PasteTracks::execute(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     std::vector<Track*> tracks;
     for (const auto& x : _jsonTracks) {
-        Track* track = new Track(x);
-        track->_gain->_connections.clear();
-        track->_fader->_connections.clear();
-        tracks.push_back(track);
+        tracks.push_back(new Track(x));
     }
+
+    for (auto& track : tracks) {
+        track->resolveModuleReference();
+    }
+
+    std::vector<Track*> allTracks;
+    for (auto& track : tracks) {
+        track->allTracks(allTracks);
+    }
+
+    for (auto& track : allTracks) {
+        for (auto& module : track->allModules()) {
+            std::erase_if(module->_connections, [&allTracks](auto& c) {
+                return std::ranges::all_of(allTracks, [&c](auto& track) { return c->_from->_track != track; }) ||
+                    std::ranges::all_of(allTracks, [&c](auto& track) { return c->_to->_track != track; });
+            });
+        }
+    }
+     
     Track* atTrack = Neko::findByNekoId<Track>(_atTrackId);
     if (atTrack) {
         if (atTrack->isMasterTrack()) {
@@ -34,6 +50,8 @@ void command::PasteTracks::execute(Composer* composer) {
             }
         }
     }
+
+    composer->computeProcessOrder();
 }
 
 void command::PasteTracks::undo(Composer* composer) {
@@ -46,4 +64,6 @@ void command::PasteTracks::undo(Composer* composer) {
         tracks.emplace_back((*(it + i)).get());
     }
     composer->_masterTrack->deleteTracks(tracks);
+
+    composer->computeProcessOrder();
 }
