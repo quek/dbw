@@ -5,15 +5,14 @@
 #include "../Fader.h"
 #include "../Track.h"
 
-command::PasteTracks::PasteTracks(const nlohmann::json& tracks, Track* at) :
-    _tracks(tracks), _atTrackId(at->nekoId()) {
+command::PasteTracks::PasteTracks(const nlohmann::json& jsonTracks, Track* at) :
+    _jsonTracks(jsonTracks), _atTrackId(at->nekoId()) {
 }
 
-// TODO 書き直し
 void command::PasteTracks::execute(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     std::vector<Track*> tracks;
-    for (const auto& x : _tracks) {
+    for (const auto& x : _jsonTracks) {
         Track* track = new Track(x);
         track->_gain->_connections.clear();
         track->_fader->_connections.clear();
@@ -37,14 +36,13 @@ void command::PasteTracks::execute(Composer* composer) {
     }
 }
 
-// TODO 書き直し
 void command::PasteTracks::undo(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     Track* atTrack = Neko::findByNekoId<Track>(_atTrackId);
     auto parent = atTrack->getParent();
     auto it = parent->findTrack(atTrack);
     std::vector<Track*> tracks;
-    for (int i = 0; i < _tracks.size(); ++i) {
+    for (int i = 0; i < _jsonTracks.size(); ++i) {
         tracks.emplace_back((*(it + i)).get());
     }
     composer->_masterTrack->deleteTracks(tracks);

@@ -12,7 +12,7 @@ public:
     void undo(Composer* composer) override;
 
 private:
-    nlohmann::json _tracks;
+    nlohmann::json _jsonTracks;
     NekoId _atTrackId;
 };
 

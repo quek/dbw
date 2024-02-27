@@ -4,6 +4,7 @@
 #include <imgui.h>
 #include "Composer.h"
 #include "Config.h"
+#include "Error.h"
 #include "Fader.h"
 #include "Track.h"
 #include "command/GroupTracks.h"
@@ -88,7 +89,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
         size.x -= _groupToggleButtonSize.x;
     }
     //if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
-    if (ImGui::Selectable(std::format("{} {} {}",track->_name, ImGui::GetCursorPosY(), adjustY).c_str(), selected, ImGuiSelectableFlags_None, size)) {
+    if (ImGui::Selectable(std::format("{} {} {}", track->_name, ImGui::GetCursorPosY(), adjustY).c_str(), selected, ImGuiSelectableFlags_None, size)) {
         auto& io = ImGui::GetIO();
         if (!io.KeyCtrl && !io.KeyShift) {
             _selectedTracks = { track };
@@ -250,11 +251,16 @@ void RackWindow::handleShortcut() {
         // CUT
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_V)) {
         // PASTE
-        nlohmann::json json = nlohmann::json::parse(ImGui::GetClipboardText());
-        if (json.contains("tracks") && json["tracks"].is_array()) {
-            if(!_selectedTracks.empty()){
-                _composer->_commandManager.executeCommand(new command::PasteTracks(json["tracks"], _selectedTracks.back()));
+        try {
+            nlohmann::json json = nlohmann::json::parse(ImGui::GetClipboardText());
+            if (json.contains("tracks") && json["tracks"].is_array()) {
+                if (!_selectedTracks.empty()) {
+                    _composer->_commandManager.executeCommand(new command::PasteTracks(json["tracks"], _selectedTracks.back()));
+                }
             }
+        } catch (nlohmann::json::exception& e) {
+            Error("Paste error {}", e.what());
+            // ignore
         }
     }
 }

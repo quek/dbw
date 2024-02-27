@@ -10,7 +10,7 @@ public:
     void execute(Composer* composer) override;
     void undo(Composer* composer) override;
 private:
-    NekoId _groupId;
+    NekoId _groupId = 0;
     std::vector<NekoId> _ids;
     std::vector<std::pair<NekoId, std::ptrdiff_t>> _undoPlaces;
 };
