@@ -16,7 +16,7 @@ void command::MoveTracks::execute(Composer* composer) {
     }
 
     std::vector<std::unique_ptr<Track>> removedTracks = removeTracks();
-    atTrack->insertTracksAfterThis(removedTracks);
+    atTrack->insertTracksBeforeThis(removedTracks);
 
     composer->computeProcessOrder();
 }

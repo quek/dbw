@@ -262,14 +262,14 @@ void Track::insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::u
 }
 
 void Track::insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks) {
-    auto& i = it;
     for (auto& track : tracks | std::views::reverse) {
-        insertTrack(i, track);
-        i = findTrack(track.get());
+        Track* p = track.get();
+        insertTrack(it, track);
+        it = findTrack(p);
     }
 }
 
-void Track::insertTracksAfterThis(std::vector<std::unique_ptr<Track>>& tracks) {
+void Track::insertTracksBeforeThis(std::vector<std::unique_ptr<Track>>& tracks) {
     auto at = getAt();
     getParent()->insertTracks(at, tracks);
 }
