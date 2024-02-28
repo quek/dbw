@@ -122,7 +122,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;..\nlohmann;..\VST_SDK\vst3sdk;lib;lib\cppcodec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\clap\include;..\imgui;..\imgui\backends;..\portaudio\include;..\spdlog\include;..\nlohmann;..\VST_SDK\vst3sdk;lib;lib\cppcodec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ImTextureID=ImU64;_UNICODE;UNICODE;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 /std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -182,8 +182,10 @@
     <ClInclude Include="command\DeleteNotes.h" />
     <ClInclude Include="command\DeleteTracks.h" />
     <ClInclude Include="command\GroupTracks.h" />
+    <ClInclude Include="command\MoveTracks.h" />
     <ClInclude Include="Command\OpenProject.h" />
     <ClInclude Include="command\PasteTracks.h" />
+    <ClInclude Include="command\RemoveTracksMixin.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Connection.h" />
@@ -260,8 +262,10 @@
     <ClCompile Include="command\DeleteNotes.cpp" />
     <ClCompile Include="command\DeleteTracks.cpp" />
     <ClCompile Include="command\GroupTracks.cpp" />
+    <ClCompile Include="command\MoveTracks.cpp" />
     <ClCompile Include="Command\OpenProject.cpp" />
     <ClCompile Include="command\PasteTracks.cpp" />
+    <ClCompile Include="command\RemoveTracksMixin.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Connection.cpp" />

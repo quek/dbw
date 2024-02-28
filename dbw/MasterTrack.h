@@ -5,6 +5,8 @@ class MasterTrack : public Track {
 public:
     MasterTrack(const nlohmann::json& json);
     MasterTrack(Composer* composer);
+    std::vector<std::unique_ptr<Track>>::iterator getAt() override;
+    MasterTrack* getMasterTrack() override;
     bool isMasterTrack() override { return true; }
     nlohmann::json toJson() override;
 };

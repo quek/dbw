@@ -11,6 +11,7 @@ class ProcessBuffer;
 class Composer;
 class Fader;
 class Lane;
+class MasterTrack;
 class Module;
 class Scene;
 
@@ -37,7 +38,10 @@ public:
     std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
     void insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track);
     void insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks);
+    void insertTracksAfterThis(std::vector<std::unique_ptr<Track>>& tracks);
     virtual bool isMasterTrack();
+    virtual std::vector<std::unique_ptr<Track>>::iterator getAt();
+    virtual MasterTrack* getMasterTrack();
     Track* getParent();
     void setParent(Track* parent);
     void resolveModuleReference();
@@ -62,7 +66,7 @@ public:
 
     bool _showTracks = true;
 
-private:
+protected:
     std::unique_ptr<Track> deleteTrack(Track* track);
 
     Track* _parent = nullptr;

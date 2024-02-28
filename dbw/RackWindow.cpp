@@ -2,6 +2,7 @@
 #include <ranges>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Composer.h"
 #include "Config.h"
@@ -10,8 +11,9 @@
 #include "Track.h"
 #include "command/GroupTracks.h"
 #include "command/AddTrack.h"
-#include "command/DeleteTracks.h"
 #include "command/CutTracks.h"
+#include "command/DeleteTracks.h"
+#include "command/MoveTracks.h"
 #include "command/PasteTracks.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 18.0f;
@@ -55,6 +57,7 @@ void RackWindow::renderHeader() {
     ImVec2 pos1 = windowToScreen(ImGui::GetCursorPos()) + ImVec2(-style.ItemSpacing.x / 2.0f - ImGui::GetScrollX(), -style.ItemSpacing.y / 2.0f - ImGui::GetScrollY());
     ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
     drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_T);
     if (ImGui::Button("+", ImVec2(0.0f, -FLT_MIN))) {
         _composer->_commandManager.executeCommand(new command::AddTrack());
     }
@@ -102,6 +105,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
             _renamingTrack = nullptr;
         }
     } else {
+        // TODO Selectable だとマウスダウンで選択状態にならないのでドラッグしたとき _selectedTracks に入っていない
         if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
             if (!isMaster) {
                 auto& io = ImGui::GetIO();
@@ -166,6 +170,13 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
             if (ImGui::BeginDragDropSource()) {
                 ImGui::SetDragDropPayload("tracks", nullptr, 0);
                 ImGui::EndDragDropSource();
+            }
+            if (ImGui::BeginDragDropTarget()) {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("tracks")) {
+                    if (!_selectedTracks.empty()) {
+                        _composer->_commandManager.executeCommand(new command::MoveTracks(_selectedTracks, track));
+                    }
+                }
             }
             if (!track->getTracks().empty()) {
                 ImGui::SameLine();
@@ -270,6 +281,11 @@ void RackWindow::handleShortcut() {
         if (!_selectedTracks.empty()) {
             _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
         }
+    } else if (ImGui::IsKeyChordPressed(ImGuiKey_Delete)) {
+        if (!_selectedTracks.empty()) {
+            _composer->_commandManager.executeCommand(new command::DeleteTracks(_selectedTracks));
+        }
+        _selectedTracks.clear();
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_C)) {
         // COPY
         if (!_selectedTracks.empty()) {

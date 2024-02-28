@@ -269,8 +269,21 @@ void Track::insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::
     }
 }
 
+void Track::insertTracksAfterThis(std::vector<std::unique_ptr<Track>>& tracks) {
+    auto at = getAt();
+    getParent()->insertTracks(at, tracks);
+}
+
 bool Track::isMasterTrack() {
     return false;
+}
+
+std::vector<std::unique_ptr<Track>>::iterator Track::getAt() {
+    return _parent->findTrack(this);
+}
+
+MasterTrack* Track::getMasterTrack() {
+    return _parent->getMasterTrack();
 }
 
 Track* Track::getParent() {
@@ -358,7 +371,7 @@ std::vector<Module*> Track::allModules() {
     return vec;
 }
 
-std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track) {
+std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track){
     return std::ranges::find_if(_tracks, [track](const auto& x) { return x.get() == track; });
 }
 
