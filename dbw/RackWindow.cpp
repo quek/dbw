@@ -65,6 +65,7 @@ void RackWindow::renderHeader() {
 
 void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool adjustY) {
     ImGui::PushID(track);
+    ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
     float scrollY = ImGui::GetScrollY();
     ImGui::SetCursorPosY(scrollY + GROUP_OFFSET_Y * groupLevel + style.ItemSpacing.y / 2.0f);
@@ -108,7 +109,6 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
         // TODO Selectable だとマウスダウンで選択状態にならないのでドラッグしたとき _selectedTracks に入っていない
         if (ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size)) {
             if (!isMaster) {
-                auto& io = ImGui::GetIO();
                 if (!io.KeyCtrl && !io.KeyShift) {
                     _selectedTracks = { track };
                 } else if (io.KeyCtrl) {
