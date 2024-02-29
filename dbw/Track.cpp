@@ -380,6 +380,30 @@ std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track){
     return std::ranges::find_if(_tracks, [track](const auto& x) { return x.get() == track; });
 }
 
+bool Track::included(std::vector<Track*>& tracks) {
+    for (auto& track : tracks) {
+        if (track == this) {
+            return true;
+        }
+        if (included(track->_tracks)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Track::included(std::vector<std::unique_ptr<Track>>& tracks) {
+    for (auto& track : tracks) {
+        if (track.get() == this) {
+            return true;
+        }
+        if (included(track->_tracks)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 const std::vector<std::unique_ptr<Track>>& Track::getTracks() {
     return _tracks;
 }

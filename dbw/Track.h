@@ -36,6 +36,8 @@ public:
     void addTrack(std::unique_ptr<Track> track);
     std::vector<std::unique_ptr<Track>> deleteTracks(std::vector<Track*> tracks);
     std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
+    bool included(std::vector<Track*>& tracks);
+    bool included(std::vector<std::unique_ptr<Track>>& tracks);
     void insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track);
     void insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks);
     void insertTracksAfterThis(std::vector<std::unique_ptr<Track>>& tracks);
