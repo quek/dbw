@@ -1,13 +1,13 @@
 #pragma once
-#include "../Command.h"
 #include "CopyTracksMixin.h"
 
 namespace command {
-class DuplicateTracks  : public Command, public CopyTracksMixin {
+class DuplicateTracks : public CopyTracksMixin {
 public:
     DuplicateTracks(std::vector<Track*> tracks);
-    void execute(Composer* composer) override;
-    void undo(Composer* composer) override;
+
+protected:
+    void insertTracks(std::vector<std::unique_ptr<Track>>& tracks, Track* at) override;
 };
 };
 
