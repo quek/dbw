@@ -3,43 +3,18 @@
 #include "../Composer.h"
 #include "../Track.h"
 
-command::RemoveTracksMixin::RemoveTracksMixin(std::vector<Track*>& tracks) {
-    for (const auto& track : removeChildren(tracks)) {
-        _trackIds.push_back(track->nekoId());
-    }
+command::RemoveTracksMixin::RemoveTracksMixin(std::vector<Track*>& tracks) : SelectedTracksMixin(tracks){
 }
 
-bool command::RemoveTracksMixin::isChild(Track* track, const std::vector<Track*> tracks) {
-    Track* parent = track->getParent();
-    if (parent->isMasterTrack()) {
-        return false;
-    }
-    for (auto& x : tracks) {
-        if (parent == x) {
-            return true;
-        }
-    }
-    return isChild(parent, tracks);
-}
-
-std::vector<Track*> command::RemoveTracksMixin::removeChildren(const std::vector<Track*> tracks) {
-    std::vector<Track*> resultTracks;
-    for (const auto& track : tracks) {
-        if (!isChild(track, tracks)) {
-            resultTracks.push_back(track);
-        }
-    }
-    return resultTracks;
-}
 
 std::vector<std::unique_ptr<Track>> command::RemoveTracksMixin::removeTracks() {
     std::vector<std::unique_ptr<Track>> removedTracks;
-    for (const auto& trackId : _trackIds) {
+    for (const auto& trackId : _selectedTrackIds) {
         Track* track = Neko::findByNekoId<Track>(trackId);
         if (track) {
             Track* parent = track->getParent();
             auto it = parent->findTrack(track);
-            _undoPlaces.push_back({ parent->nekoId(), std::distance(parent->tracksBegin(), it) });
+            _undoPlaces.push_back({ parent->getNekoId(), std::distance(parent->tracksBegin(), it) });
             auto removed = track->getMasterTrack()->deleteTracks({ track });
             removedTracks.emplace_back(std::move(removed[0]));
         }

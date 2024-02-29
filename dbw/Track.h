@@ -38,6 +38,7 @@ public:
     std::vector<std::unique_ptr<Track>>::iterator findTrack(Track* track);
     void insertTrack(std::vector<std::unique_ptr<Track>>::iterator it, std::unique_ptr<Track>& track);
     void insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::vector<std::unique_ptr<Track>>& tracks);
+    void insertTracksAfterThis(std::vector<std::unique_ptr<Track>>& tracks);
     void insertTracksBeforeThis(std::vector<std::unique_ptr<Track>>& tracks);
     virtual bool isMasterTrack();
     virtual std::vector<std::unique_ptr<Track>>::iterator getAt();

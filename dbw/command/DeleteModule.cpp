@@ -5,7 +5,7 @@
 #include "../Module.h"
 #include "../Track.h"
 
-command::DeleteModule::DeleteModule(Module* module) : _moduleId(module->nekoId()), _trackId(module->_track->nekoId()) {
+command::DeleteModule::DeleteModule(Module* module) : _moduleId(module->getNekoId()), _trackId(module->_track->getNekoId()) {
 }
 
 void command::DeleteModule::execute(Composer* composer) {

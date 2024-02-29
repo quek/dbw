@@ -29,7 +29,7 @@ nlohmann::json Lane::toJson() {
     nlohmann::json map({});
     for (const auto& scene : _track->getComposer()->_sceneMatrix->_scenes) {
         auto& clipSlot = getClipSlot(scene.get());
-        map[std::to_string(scene->nekoId())] = clipSlot->toJson();
+        map[std::to_string(scene->getNekoId())] = clipSlot->toJson();
     }
     json["_sceneClipSlotMap"] = map;
 

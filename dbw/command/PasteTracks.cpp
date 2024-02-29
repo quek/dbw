@@ -6,7 +6,7 @@
 #include "../Track.h"
 
 command::PasteTracks::PasteTracks(const nlohmann::json& jsonTracks, Track* at) :
-    _jsonTracks(jsonTracks), _atTrackId(at->nekoId()) {
+    _jsonTracks(jsonTracks), _atTrackId(at->getNekoId()) {
 }
 
 void command::PasteTracks::execute(Composer* composer) {

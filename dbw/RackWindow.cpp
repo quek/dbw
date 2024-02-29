@@ -11,8 +11,10 @@
 #include "Track.h"
 #include "command/GroupTracks.h"
 #include "command/AddTrack.h"
+#include "command/CopyDragTracks.h"
 #include "command/CutTracks.h"
 #include "command/DeleteTracks.h"
+#include "command/DuplicateTracks.h"
 #include "command/MoveTracks.h"
 #include "command/PasteTracks.h"
 
@@ -177,7 +179,11 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
             if (ImGui::BeginDragDropTarget()) {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("tracks")) {
                     if (!_selectedTracks.empty()) {
-                        _composer->_commandManager.executeCommand(new command::MoveTracks(_selectedTracks, track));
+                        if (io.KeyCtrl) {
+                            _composer->_commandManager.executeCommand(new command::CopyDragTracks(_selectedTracks, track));
+                        } else {
+                            _composer->_commandManager.executeCommand(new command::MoveTracks(_selectedTracks, track));
+                        }
                     }
                 }
             }
@@ -320,6 +326,12 @@ void RackWindow::handleShortcut() {
             // ignore
         }
     }
+
+    ImGui::SetNextItemShortcut(ImGuiKey_D);
+    if (ImGui::Button("Duplicate Tracks")) {
+        _composer->_commandManager.executeCommand(new command::DuplicateTracks(_selectedTracks));
+    }
+
 }
 
 void RackWindow::computeHeaderHeight() {

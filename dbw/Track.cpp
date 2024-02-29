@@ -269,6 +269,11 @@ void Track::insertTracks(std::vector<std::unique_ptr<Track>>::iterator it, std::
     }
 }
 
+void Track::insertTracksAfterThis(std::vector<std::unique_ptr<Track>>& tracks) {
+    auto at = getAt() + 1;
+    getParent()->insertTracks(at, tracks);
+}
+
 void Track::insertTracksBeforeThis(std::vector<std::unique_ptr<Track>>& tracks) {
     auto at = getAt();
     getParent()->insertTracks(at, tracks);

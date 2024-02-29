@@ -11,7 +11,7 @@ public:
     Neko(const nlohmann::json& json);
     Neko(const Neko& other);
     virtual ~Neko();
-    virtual const NekoId nekoId() const;
+    virtual const NekoId getNekoId() const;
     virtual void setNekoId(NekoId id);
     virtual nlohmann::json toJson();
 

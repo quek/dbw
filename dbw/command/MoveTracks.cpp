@@ -4,7 +4,7 @@
 #include "../Track.h"
 
 command::MoveTracks::MoveTracks(std::vector<Track*>& tracks, Track* at) :
-    RemoveTracksMixin(tracks), _atTrackId(at->nekoId()) {
+    RemoveTracksMixin(tracks), _atTrackId(at->getNekoId()) {
 }
 
 void command::MoveTracks::execute(Composer* composer) {

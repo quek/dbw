@@ -12,7 +12,7 @@ std::shared_ptr<Sequence> Sequence::create(double duration, NekoId id) {
     if (id != 0) {
         sequence->setNekoId(id);
     }
-    nekoIdSequenceMap[sequence->nekoId()] = sequence;
+    nekoIdSequenceMap[sequence->getNekoId()] = sequence;
     return sequence;
 }
 
@@ -25,7 +25,7 @@ std::shared_ptr<Sequence> Sequence::create(const nlohmann::json& json) {
         }
     }
     std::shared_ptr<Sequence> sequence(new Sequence(json));
-    nekoIdSequenceMap[sequence->nekoId()] = sequence;
+    nekoIdSequenceMap[sequence->getNekoId()] = sequence;
     return sequence;
 }
 
@@ -37,12 +37,12 @@ Sequence::Sequence(const nlohmann::json& json) : Nameable(json) {
 }
 
 Sequence::~Sequence() {
-    nekoIdSequenceMap.erase(nekoId());
+    nekoIdSequenceMap.erase(getNekoId());
 }
 
 nlohmann::json Sequence::toJson() {
     nlohmann::json json = Nameable::toJson();
-    json["sequenceId"] = nekoId();
+    json["sequenceId"] = getNekoId();
     json["type"] = TYPE;
     json["_duration"] = _duration;
 

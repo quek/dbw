@@ -73,7 +73,7 @@ void Connection::setLatency(uint32_t latency) {
 nlohmann::json Connection::toJson() {
     nlohmann::json json = Nameable::toJson();
     json.update(*this);
-    json["_fromNekoRef"] = _from->nekoId();
-    json["_toNekoRef"] = _to->nekoId();
+    json["_fromNekoRef"] = _from->getNekoId();
+    json["_toNekoRef"] = _to->getNekoId();
     return json;
 }

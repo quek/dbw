@@ -13,9 +13,9 @@ void command::GroupTracks::execute(Composer* composer) {
 
     int n = std::ranges::count_if(composer->allTracks(), [](auto& track) { return track->_name.starts_with("Group"); });
     Track* group = new Track(std::format("Group{}", n + 1));
-    _groupId = group->nekoId();
+    _groupId = group->getNekoId();
 
-    Track* firstTrack = Neko::findByNekoId<Track>(_trackIds[0]);
+    Track* firstTrack = Neko::findByNekoId<Track>(_selectedTrackIds[0]);
     if (!firstTrack) {
         return;
     }
@@ -34,7 +34,7 @@ void command::GroupTracks::undo(Composer* composer) {
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
 
     std::vector<Track*> tracks;
-    for (auto id : _trackIds) {
+    for (auto id : _selectedTrackIds) {
         Track* track = Neko::findByNekoId<Track>(id);
         if (!track) {
             return;

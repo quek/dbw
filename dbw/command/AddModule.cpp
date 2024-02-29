@@ -22,7 +22,7 @@ void command::AddModule::redo(Composer* composer) {
 
 void command::AddModule::undo(Composer* composer) {
     auto track = Neko::findByNekoId<Track>(_trackRef);
-    auto it = std::ranges::find_if(track->_modules, [this](const auto& x) { return x->nekoId() == _moduleId; });
+    auto it = std::ranges::find_if(track->_modules, [this](const auto& x) { return x->getNekoId() == _moduleId; });
     if (it != track->_modules.end()) {
         std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
         (*it)->stop();
@@ -33,7 +33,7 @@ void command::AddModule::undo(Composer* composer) {
 
 Module* command::AddModule::exec(Composer* composer) {
     auto module = Module::create(_type, _id);
-    _moduleId = module->nekoId();
+    _moduleId = module->getNekoId();
     auto track = Neko::findByNekoId<Track>(_trackRef);
 
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);

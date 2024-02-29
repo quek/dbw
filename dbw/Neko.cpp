@@ -36,7 +36,7 @@ Neko::~Neko() {
     nekoIdMap.erase(_nekoId);
 }
 
-const NekoId Neko::nekoId() const {
+const NekoId Neko::getNekoId() const {
     return _nekoId;
 }
 
