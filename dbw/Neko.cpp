@@ -1,6 +1,6 @@
 #include "Neko.h"
 
-std::map<NekoId, Neko*> Neko::nekoIdMap;
+std::map<NekoId, Neko*> Neko::idNekoMap;
 
 NekoId generateNeko() {
     auto now = std::chrono::system_clock::now();
@@ -8,7 +8,7 @@ NekoId generateNeko() {
     auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
     NekoId neko = static_cast<NekoId>(nanoseconds);
     while (true) {
-        if (!Neko::nekoIdMap.contains(neko)) {
+        if (!Neko::idNekoMap.contains(neko)) {
             return neko;
         }
         ++neko;
@@ -22,7 +22,7 @@ Neko::Neko() {
 Neko::Neko(const nlohmann::json& json) {
     if (json.contains("_nekoId") && json["_nekoId"].is_number()) {
         _nekoId = json["_nekoId"];
-        nekoIdMap[_nekoId] = this;
+        idNekoMap[_nekoId] = this;
     } else {
         setNewNekoId();
     }
@@ -33,7 +33,7 @@ Neko::Neko(const Neko&) {
 }
 
 Neko::~Neko() {
-    nekoIdMap.erase(_nekoId);
+    idNekoMap.erase(_nekoId);
 }
 
 const NekoId Neko::getNekoId() const {
@@ -41,9 +41,9 @@ const NekoId Neko::getNekoId() const {
 }
 
 void Neko::setNekoId(NekoId id) {
-    nekoIdMap.erase(_nekoId);
+    idNekoMap.erase(_nekoId);
     _nekoId = id;
-    nekoIdMap[_nekoId] = this;
+    idNekoMap[_nekoId] = this;
 }
 
 nlohmann::json Neko::toJson() {
@@ -52,7 +52,7 @@ nlohmann::json Neko::toJson() {
 
 void Neko::setNewNekoId() {
     _nekoId = generateNeko();
-    nekoIdMap[_nekoId] = this;
+    idNekoMap[_nekoId] = this;
 }
 
 nlohmann::json eraseNekoId(const nlohmann::json& json) {
@@ -76,11 +76,11 @@ nlohmann::json eraseNekoId(const nlohmann::json& json) {
     return json;
 }
 
-nlohmann::json renewNekoId(const nlohmann::json& json, std::map<NekoId, NekoId>& nekoIdMap) {
+nlohmann::json renewNekoId(const nlohmann::json& json, std::map<NekoId, NekoId>& renewIdMap) {
     if (json.is_array()) {
         nlohmann::json array = nlohmann::json::array();
         for (const auto& x : json) {
-            array.push_back(renewNekoId(x, nekoIdMap));
+            array.push_back(renewNekoId(x, renewIdMap));
         }
         return array;
     }
@@ -90,10 +90,10 @@ nlohmann::json renewNekoId(const nlohmann::json& json, std::map<NekoId, NekoId>&
             if (x.key() == "_nekoId") {
                 NekoId newNekoId = generateNeko();
                 NekoId oldNekoId = x.value();
-                nekoIdMap[oldNekoId] = newNekoId;
+                renewIdMap[oldNekoId] = newNekoId;
                 object["_nekoId"] = newNekoId;
             } else {
-                object[x.key()] = renewNekoId(x.value(), nekoIdMap);
+                object[x.key()] = renewNekoId(x.value(), renewIdMap);
             }
         }
         return object;
@@ -101,11 +101,11 @@ nlohmann::json renewNekoId(const nlohmann::json& json, std::map<NekoId, NekoId>&
     return json;
 }
 
-nlohmann::json renewNekoRef(const nlohmann::json& json, std::map<NekoId, NekoId>& nekoIdMap) {
+nlohmann::json renewNekoRef(const nlohmann::json& json, std::map<NekoId, NekoId>& renewIdMap) {
     if (json.is_array()) {
         nlohmann::json array = nlohmann::json::array();
         for (const auto& x : json) {
-            array.push_back(renewNekoRef(x, nekoIdMap));
+            array.push_back(renewNekoRef(x, renewIdMap));
         }
         return array;
     }
@@ -113,9 +113,14 @@ nlohmann::json renewNekoRef(const nlohmann::json& json, std::map<NekoId, NekoId>
         nlohmann::json object;
         for (auto& x : json.items()) {
             if (x.key().ends_with("NekoRef")) {
-                object[x.key()] = nekoIdMap[x.value()];
+                NekoId nekoRef = x.value();
+                if (renewIdMap.contains(nekoRef)) {
+                    object[x.key()] = renewIdMap[nekoRef];
+                } else {
+                    object[x.key()] = x.value();
+                }
             } else {
-                object[x.key()] = renewNekoRef(x.value(), nekoIdMap);
+                object[x.key()] = renewNekoRef(x.value(), renewIdMap);
             }
         }
         return object;
@@ -124,9 +129,9 @@ nlohmann::json renewNekoRef(const nlohmann::json& json, std::map<NekoId, NekoId>
 }
 
 nlohmann::json renewNekoId(const nlohmann::json& json) {
-    std::map<NekoId, NekoId> nekoIdMap;
-    auto renewNekoIdJson = renewNekoId(json, nekoIdMap);
-    auto renewNekoRefJson = renewNekoRef(renewNekoIdJson, nekoIdMap);
+    std::map<NekoId, NekoId> renewIdMap;
+    auto renewNekoIdJson = renewNekoId(json, renewIdMap);
+    auto renewNekoRefJson = renewNekoRef(renewNekoIdJson, renewIdMap);
     return renewNekoRefJson;
     
 }

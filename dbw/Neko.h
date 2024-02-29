@@ -15,11 +15,11 @@ public:
     virtual void setNekoId(NekoId id);
     virtual nlohmann::json toJson();
 
-    static std::map<NekoId, Neko*> nekoIdMap;
+    static std::map<NekoId, Neko*> idNekoMap;
     template<typename T>
     static T* findByNekoId(NekoId id) {
-        auto it = nekoIdMap.find(id);
-        if (it != nekoIdMap.end()) {
+        auto it = idNekoMap.find(id);
+        if (it != idNekoMap.end()) {
             return dynamic_cast<T*>(it->second);
         }
         return nullptr;

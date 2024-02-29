@@ -178,7 +178,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
             }
             if (ImGui::BeginDragDropTarget()) {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("tracks")) {
-                    if (!_selectedTracks.empty()) {
+                    if (!_selectedTracks.empty() && !track->included(_selectedTracks)) {
                         if (io.KeyCtrl) {
                             _composer->_commandManager.executeCommand(new command::CopyDragTracks(_selectedTracks, track));
                         } else {

@@ -41,5 +41,6 @@ void command::DuplicateTracks::undo(Composer* composer) {
 
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     tracks[0]->getMasterTrack()->deleteTracks(tracks);
+    composer->computeProcessOrder();
 }
 
