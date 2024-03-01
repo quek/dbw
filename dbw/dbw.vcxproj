@@ -202,7 +202,6 @@
     <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="Note.h" />
-    <ClInclude Include="PianoRollH.h" />
     <ClInclude Include="PianoRollWindow.h" />
     <ClInclude Include="PluginEditorWindow.h" />
     <ClInclude Include="ProcessBuffer.h" />
@@ -286,7 +285,6 @@
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="Note.cpp" />
-    <ClCompile Include="PianoRollH.cpp" />
     <ClCompile Include="PianoRollWindow.cpp" />
     <ClCompile Include="PluginEditorWindow.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />

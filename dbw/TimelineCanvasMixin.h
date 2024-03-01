@@ -78,6 +78,7 @@ public:
         float _thingClickedOffset = 0.0f;
         bool _rangeSelecting = false;
         ImVec2 _editCursorPos{ 0.0f, 0.0f };
+        double _defaultThingDuration = 1.0;
 
         std::map <THING*, Bounds> _thingBoundsMap;
         void reset() {
@@ -90,7 +91,7 @@ public:
 protected:
     ImVec2 screenToCanvas(const ImVec2& pos);
     ImVec2 canvasToScreen(const ImVec2& pos);
-    virtual void handleShortcut() = 0;
+    virtual void handleShortcut();
     virtual void renderPlayhead() = 0;
     virtual void renderHeader() = 0;
     virtual std::string windowName() = 0;

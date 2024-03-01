@@ -1,5 +1,6 @@
 #include "TimelineCanvasMixin.h"
 #include <algorithm>
+#include <imgui_internal.h>
 #include "Clip.h"
 #include "Config.h"
 #include "Composer.h"
@@ -27,7 +28,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         if (ImGui::BeginChild(canvasName().c_str(),
-                              ImVec2(0.0f, -22.0f),
+                              ImVec2(0.0f, 0.0f),
                               ImGuiChildFlags_None,
                               ImGuiWindowFlags_HorizontalScrollbar)) {
             ImVec2 windowPos = ImGui::GetWindowPos();
@@ -121,8 +122,10 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
                 _state._draggingThings = copiedThings;
             }
             _state._selectedThings = _state._draggingThings;
+            _state._defaultThingDuration = _state._draggingThing->_duration;
             _state._draggingThing = nullptr;
             _state._draggingThings.clear();
+
         }
     } else if (_state._rangeSelecting) {
         // Ctrl でトグル、Shift で追加 Reason の仕様がいいと思う
@@ -215,6 +218,7 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
                 _state._thingClickedPart = Middle;
                 _state._thingClickedOffset = mousePos.y - bounds.p.y;
             }
+            _state._defaultThingDuration = thingAtMouse->_duration;
             onClickThing(thingAtMouse);
         } else {
             _state._clickedThing = nullptr;
@@ -449,6 +453,14 @@ inline ImVec2 TimelineCanvasMixin<THING, LANE>::canvasToScreen(const ImVec2& pos
     float x = pos.x * _zoomX + windowPos.x + offsetLeft() - scrollX;
     float y = pos.y * _zoomY + windowPos.y + offsetTop() - scrollY + offsetStart();
     return ImVec2(x, y);
+}
+
+template<class THING, typename LANE>
+void TimelineCanvasMixin<THING, LANE>::handleShortcut() {
+    ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
+    if (ImGui::Button("select all", ImVec2(FLT_MIN, FLT_MIN))) {
+        _state._selectedThings = { _allThings.begin(), _allThings.end() };
+    }
 }
 
 template class TimelineCanvasMixin<Clip, Lane>;

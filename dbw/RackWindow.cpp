@@ -180,8 +180,8 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                 }
                 ImGui::SetDragDropPayload("tracks", nullptr, 0);
                 std::string text;
-                for (auto& track : _selectedTracks) {
-                    text += track->_name + ", ";
+                for (auto& x : _selectedTracks) {
+                    text += x->_name + ", ";
                 }
                 ImGui::Text(text.c_str());
                 ImGui::EndDragDropSource();

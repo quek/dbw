@@ -21,8 +21,6 @@ public:
     virtual std::pair<std::set<Note*>, Command*> copyThings(std::set<Note*> srcs, bool redoable) override;
     virtual Command* deleteThings(std::set<Note*> notes, bool undoable) override;
 
-    virtual void onClickThing(Note* note) override;
-
     virtual void prepareAllThings() override;
 
     virtual float offsetTop() const override;
@@ -40,7 +38,6 @@ public:
     bool _show = false;
     Clip* _clip = nullptr;
     std::string _scrollHereXKey = "";
-    double _defaultNoteDuration = 1.0;
 
 protected:
     void handleShortcut() override;

@@ -60,7 +60,6 @@
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="ClipSlot.cpp" />
     <ClCompile Include="Note.cpp" />
-    <ClCompile Include="PianoRollH.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp">
@@ -188,7 +187,6 @@
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="ClipSlot.h" />
     <ClInclude Include="Note.h" />
-    <ClInclude Include="PianoRollH.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h">

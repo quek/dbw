@@ -187,6 +187,8 @@ void TimelineWindow::handleShortcut() {
         _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
         _state._selectedThings.clear();
     }
+
+    TimelineCanvasMixin::handleShortcut();
 }
 
 void TimelineWindow::renderPlayhead() {

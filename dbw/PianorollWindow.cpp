@@ -41,9 +41,9 @@ void PianoRollWindow::edit(Clip* clip) {
     _scrollHereXKey = "C4";
     _state = State{};
     if (!clip->_sequence->_notes.empty()) {
-        _defaultNoteDuration = clip->_sequence->_notes[0]->_duration;
+        _state._defaultThingDuration = clip->_sequence->_notes[0]->_duration;
     } else {
-        _defaultNoteDuration = _grid->_unit;
+        _state._defaultThingDuration = _grid->_unit;
     }
 }
 
@@ -55,7 +55,7 @@ Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane) {
     Note* note = new Note();
     note->_time = time;
     note->_key = *lane;
-    note->_duration = _defaultNoteDuration;
+    note->_duration = _state._defaultThingDuration;
     std::set<Note*> notes({ note });
     _composer->_commandManager.executeCommand(new command::AddNotes(_clip->_sequence.get(), notes, true));
     return note;
@@ -96,10 +96,6 @@ std::pair<std::set<Note*>, Command*> PianoRollWindow::copyThings(std::set<Note*>
 
 Command* PianoRollWindow::deleteThings(std::set<Note*> notes, bool undoable) {
     return new command::DeleteNotes(_clip->_sequence.get(), notes, undoable);
-}
-
-void PianoRollWindow::onClickThing(Note* note) {
-    _defaultNoteDuration = note->_duration;
 }
 
 void PianoRollWindow::prepareAllThings() {
@@ -165,6 +161,8 @@ void PianoRollWindow::handleShortcut() {
         _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
         _state._selectedThings.clear();
     }
+
+    TimelineCanvasMixin::handleShortcut();
 }
 
 void PianoRollWindow::renderPlayhead() {
