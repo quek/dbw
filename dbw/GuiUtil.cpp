@@ -1,5 +1,6 @@
 #include "GuiUtil.h"
 #include <algorithm>
+#include <imgui_internal.h>
 
 float TEXT_BASE_WIDTH;
 float TEXT_BASE_HEIGHT;
@@ -71,3 +72,12 @@ bool Bounds::overlaped(const Bounds& other) const {
     return p.x <= other.q.x && q.x >= other.p.x
         && p.y <= other.q.y && q.y >= other.p.y;
 }
+
+bool defineShortcut(ImGuiKeyChord keyChord, const char* label, const ImVec2& size) {
+    ImGui::SetNextItemShortcut(keyChord);
+    ImGui::PushID(keyChord);
+    bool result = ImGui::Button(label ? label : std::format("##{}", keyChord).c_str(), size);
+    ImGui::PopID();
+    return result;
+}
+

@@ -2,7 +2,6 @@
 #include <ranges>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
-#include <imgui_internal.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Composer.h"
 #include "Config.h"
@@ -59,8 +58,7 @@ void RackWindow::renderHeader() {
     ImVec2 pos1 = windowToScreen(ImGui::GetCursorPos()) + ImVec2(-style.ItemSpacing.x / 2.0f - ImGui::GetScrollX(), -style.ItemSpacing.y / 2.0f - ImGui::GetScrollY());
     ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
     drawList->AddLine(pos1, pos2, gTheme.rackBorder);
-    ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_T);
-    if (ImGui::Button("+", ImVec2(0.0f, -FLT_MIN))) {
+    if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T, "+", ImVec2(0.0f, -FLT_MIN))) {
         _composer->_commandManager.executeCommand(new command::AddTrack());
     }
 }
@@ -337,8 +335,7 @@ void RackWindow::handleShortcut() {
         }
     }
 
-    ImGui::SetNextItemShortcut(ImGuiKey_D);
-    if (ImGui::Button("Duplicate Tracks")) {
+    if (defineShortcut(ImGuiKey_D)) {
         _composer->_commandManager.executeCommand(new command::DuplicateTracks(_selectedTracks));
     }
 

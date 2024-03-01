@@ -42,3 +42,5 @@ struct Bounds {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ImVec4, x, y, z, w);
 
 ImU32 selectedColor(const ImU32 color);
+
+bool defineShortcut(ImGuiKeyChord keyChord, const char* label=nullptr, const ImVec2& size =  ImVec2(FLT_MIN, FLT_MIN));

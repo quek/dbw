@@ -1,6 +1,5 @@
 #include "TimelineCanvasMixin.h"
 #include <algorithm>
-#include <imgui_internal.h>
 #include "Clip.h"
 #include "Config.h"
 #include "Composer.h"
@@ -457,8 +456,7 @@ inline ImVec2 TimelineCanvasMixin<THING, LANE>::canvasToScreen(const ImVec2& pos
 
 template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::handleShortcut() {
-    ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
-    if (ImGui::Button("select all", ImVec2(FLT_MIN, FLT_MIN))) {
+    if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_A)) {
         _state._selectedThings = { _allThings.begin(), _allThings.end() };
     }
 }
