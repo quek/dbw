@@ -1,8 +1,19 @@
 #include "SelectedTracksMixin.h"
+#include "../Composer.h"
 #include "../Track.h"
 
 command::SelectedTracksMixin::SelectedTracksMixin(std::vector<Track*>& tracks) {
-    for (const auto& track : removeChildren(tracks)) {
+    auto xs = removeChildren(tracks);
+    std::unordered_map<Track*, size_t> indexMap;
+    int index = 0;
+    for (auto& track : xs[0]->getComposer()->allTracks()) {
+        indexMap[track] = index++;
+    }
+    std::sort(xs.begin(), xs.end(), [&indexMap](Track* a, Track* b) {
+        return indexMap[a] < indexMap[b];
+    });
+
+    for (const auto& track : xs) {
         _selectedTrackIds.push_back(track->getNekoId());
     }
 }

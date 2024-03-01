@@ -111,7 +111,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
         // Selectable だとマウスダウンで選択状態にならないのでドラッグしたとき _selectedTracks に入っていないので
         // IsItemClicked を使う
         ImGui::Selectable(track->_name.c_str(), selected, ImGuiSelectableFlags_None, size);
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             if (!isMaster) {
                 if (!io.KeyCtrl && !io.KeyShift) {
                     _selectedTracks = { track };
@@ -172,8 +172,18 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                 _renamingTrack = track;
             }
             if (ImGui::BeginDragDropSource()) {
+                if (!track->included(_selectedTracks)) {
+                    if (!io.KeyCtrl) {
+                        _selectedTracks.clear();
+                    }
+                    _selectedTracks.push_back(track);
+                }
                 ImGui::SetDragDropPayload("tracks", nullptr, 0);
-                ImGui::Text(std::format("{}", _selectedTracks.size()).c_str());
+                std::string text;
+                for (auto& track : _selectedTracks) {
+                    text += track->_name + ", ";
+                }
+                ImGui::Text(text.c_str());
                 ImGui::EndDragDropSource();
             }
             if (!_selectedTracks.empty() && !track->included(_selectedTracks)) {
