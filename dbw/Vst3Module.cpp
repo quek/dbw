@@ -282,6 +282,8 @@ bool Vst3Module::load(std::string path) {
                                 index, true);
     }
 
+    getParameterInfo();
+
     return true;
 }
 
@@ -511,6 +513,14 @@ void Vst3Module::loadState(std::filesystem::path path) {
         Error("Steinberg::Vst::PresetFile::loadPreset FAILED!");
     }
     return;
+}
+
+void Vst3Module::getParameterInfo() {
+    for (Steinberg::int32 i = 0; i < _controller->getParameterCount(); ++i) {
+        Steinberg::Vst::ParameterInfo parameterInfo = {};
+        _controller->getParameterInfo(i, parameterInfo);
+        _parameterInfos.push_back(parameterInfo);
+   }
 }
 
 

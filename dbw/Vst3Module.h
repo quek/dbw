@@ -27,6 +27,7 @@ public:
     void renderContent() override;
     virtual void onResize(int width, int height) override;
     virtual void loadState(std::filesystem::path path) override;
+    void getParameterInfo();
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
 
@@ -43,6 +44,7 @@ private:
     Steinberg::Vst::IAudioProcessor* _processor = nullptr;
     Steinberg::Vst::IComponent* _component = nullptr;
     Steinberg::Vst::IEditController* _controller = nullptr;
+    std::vector<Steinberg::Vst::ParameterInfo> _parameterInfos;
     Steinberg::IPlugView* _plugView = nullptr;
 
     Steinberg::Vst::SymbolicSampleSizes _symbolicSampleSizes = Steinberg::Vst::SymbolicSampleSizes::kSample32;
