@@ -29,6 +29,7 @@ public:
     virtual void loadState(std::filesystem::path path) override;
 
     void prepareParameterInfo();
+    void prepareParameterValue();
     Vst::ParameterInfo* getParameterInfo(Vst::ParamID);
     void beginEdit(Vst::ParamID);
     void performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized);
@@ -43,7 +44,7 @@ public:
     Vst::ParamValue updateParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void updateEditedParamIdList(Vst::ParamID id);
-
+    void addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized);
 
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
@@ -69,4 +70,5 @@ private:
     std::map<Vst::ParamID, Vst::ParamValue> _parameterValueMap;
     std::list<Vst::ParamID> _editedParamIdList;
     std::map<Vst::ParamID, ParamEditStatus> _paramEdtiStatusMap;
+    Vst::ParameterChanges _parameterChanges;
 };

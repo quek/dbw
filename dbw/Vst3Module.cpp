@@ -358,8 +358,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     processData.outputs = outputAudioBusBuffers.data();
 
     ///< incoming parameter changes for this block
-    Steinberg::Vst::ParameterChanges inputParams;
-    processData.inputParameterChanges = &inputParams;
+    processData.inputParameterChanges = &_parameterChanges;
     ///< outgoing parameter changes for this block (optional)
     Steinberg::Vst::ParameterChanges outputParams;
     processData.outputParameterChanges = &outputParams;
@@ -487,7 +486,11 @@ void Vst3Module::renderContent() {
     float knobSize = 30.0f;
     std::vector<std::pair<Vst::ParamID, float>> startEditIds;
     std::vector<Vst::ParamID> endEditIds;
+    int i = 0;
     for (auto id : _editedParamIdList) {
+        if (++i > 6) {
+            break;
+        }
         ImGui::PushID(id);
         auto param = getParameterInfo(id);
         float value = static_cast<float>(_parameterValueMap[id]);
@@ -563,14 +566,22 @@ void Vst3Module::loadState(std::filesystem::path path) {
 }
 
 void Vst3Module::prepareParameterInfo() {
+    _parameterInfoMap.clear();
     for (Steinberg::int32 i = 0; i < _controller->getParameterCount(); ++i) {
         Steinberg::Vst::ParameterInfo parameterInfo = {};
         _controller->getParameterInfo(i, parameterInfo);
         Vst::ParamID id = parameterInfo.id;
         _parameterInfoMap[id] = parameterInfo;
-        _parameterValueMap[id] = _controller->getParamNormalized(id);
     }
 
+    prepareParameterValue();
+}
+
+void Vst3Module::prepareParameterValue() {
+    _parameterValueMap.clear();
+    for (auto [id, _] : _parameterInfoMap) {
+        _parameterValueMap[id] = _controller->getParamNormalized(id);
+    }
     _paramEdtiStatusMap.clear();
 }
 
@@ -588,7 +599,6 @@ void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
     if (paramInfo == nullptr) {
         return;
     }
-    updateEditedParamIdList(id);
     if (!_paramEdtiStatusMap.contains(id)) {
         _paramEdtiStatusMap[id] = ParamEditStatus{
             ._paramInfo = paramInfo,
@@ -645,6 +655,7 @@ Vst::ParamValue Vst3Module::updateParameterValue(Vst::ParamID id, Vst::ParamValu
 
 void Vst3Module::setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized) {
     _controller->setParamNormalized(id, valueNormalized);
+    addParameterChange(id, valueNormalized);
     updateParameterValue(id, valueNormalized);
 }
 
@@ -658,6 +669,13 @@ void Vst3Module::updateEditedParamIdList(Vst::ParamID id) {
         _editedParamIdList.erase(it);
     }
     _editedParamIdList.push_front(id);
+}
+
+void Vst3Module::addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized) {
+    int32 index;
+    Vst::IParamValueQueue* queue = _parameterChanges.addParameterData(id, index);
+    int32 sampleOffset = 0; // TODO どうやってもとめるの？
+    queue->addPoint(sampleOffset, valueNormalized, index);
 }
 
 

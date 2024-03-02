@@ -58,7 +58,9 @@ tresult PLUGIN_API Vst3Context::restartComponent(int32 flags) {
         _module->stop();
         _module->start();
         // TODO 他にもフラグ見て色々する
-        if ((flags & Vst::RestartFlags::kParamTitlesChanged) != 0) {
+        if ((flags & Vst::RestartFlags::kParamValuesChanged) != 0) {
+            _module->prepareParameterValue();
+        } else if ((flags & Vst::RestartFlags::kParamTitlesChanged) != 0) {
             _module->prepareParameterInfo();
         }
     }
