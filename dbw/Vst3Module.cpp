@@ -497,7 +497,10 @@ void Vst3Module::renderContent() {
         ImGui::PushID(id);
         auto param = getParameterInfo(id);
         float value = static_cast<float>(_parameterValueMap[id]);
-        std::string title = VST3::StringConvert::convert(param->title);
+        std::string title = VST3::StringConvert::convert(param->shortTitle);
+        if (title.empty()) {
+            title = VST3::StringConvert::convert(param->title);
+        }
         if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, nullptr, ImGuiKnobVariant_Tick, knobSize, 0, 10)) {
             startEditIds.emplace_back(id, value);
         }
