@@ -284,6 +284,7 @@
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridMixin.cpp" />
+    <ClCompile Include="lib\imgui-knobs\imgui-knobs.cpp" />
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="Note.cpp" />

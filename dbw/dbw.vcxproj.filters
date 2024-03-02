@@ -141,6 +141,9 @@
     <ClCompile Include="command\ChangeVst3ParameterValue.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="lib\imgui-knobs\imgui-knobs.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">

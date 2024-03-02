@@ -3,10 +3,13 @@
 #include "Composer.h"
 #include "Command.h"
 #include "Config.h"
+#include "command/AddTrack.h"
 
 App::App() :
     _audioEngine(std::make_unique<AudioEngine>(this)) {
-    addComposer(new Composer());
+    Composer* composer = new Composer();
+    composer->_commandManager.executeCommand(new command::AddTrack());
+    addComposer(composer);
 }
 
 void App::render() {

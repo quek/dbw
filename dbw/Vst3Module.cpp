@@ -12,6 +12,7 @@
 #include <public.sdk/source/vst/utility/stringconvert.h>
 #include <public.sdk/source/vst/vstpresetfile.h>
 #include "imgui.h"
+#include <imgui-knobs/imgui-knobs.h>
 #include <cppcodec/base64_rfc4648.hpp>
 #include "AudioEngine.h"
 #include "Composer.h"
@@ -480,13 +481,14 @@ void Vst3Module::renderContent() {
             openGui();
         }
     }
-    double min = 0.0;
-    double max = 1.0;
+
     for (auto id : _editedParamIdList) {
         auto param = getParameterInfo(id);
-        double value = _parameterValueMap[id];
+        float value = static_cast<float>(_parameterValueMap[id]);
         std::string title = VST3::StringConvert::convert(param->title);
-        ImGui::DragScalar(title.c_str(), ImGuiDataType_Double, &value, 0.1, &min, &max, std::format("{} %.3f", title).c_str());
+        if (ImGuiKnobs::Knob(title.c_str(), &value, 0.0f, 1.0f, 0.0f, nullptr, ImGuiKnobVariant_Tick, 30.0f, 0, 10)) {
+            setParameterValue(id, value);
+        }
     }
 
     auto now = std::chrono::high_resolution_clock::now();

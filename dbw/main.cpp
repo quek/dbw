@@ -80,7 +80,10 @@ std::shared_ptr<spdlog::logger> logger;
 
 // Main code
 int main(int, char**) {
-    auto daily_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("c:\\tmp\\dbw.log", 1024 * 1024 * 5, 3);
+    std::filesystem::path logFile(userDir() / "log");
+    std::filesystem::create_directories(logFile);
+    logFile /= "dbw.log";
+    auto daily_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), 1024 * 1024 * 5, 3);
     logger = std::make_shared<spdlog::logger>("deafult", daily_sink);
     logger->set_level(spdlog::level::debug);
     logger->info("start");
