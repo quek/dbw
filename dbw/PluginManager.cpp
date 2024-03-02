@@ -99,9 +99,6 @@ void PluginManager::openModuleSelector(Track* track) {
             std::string id = plugin["id"].get<std::string>();
             if (ImGui::Button((name + " vst3##" + id).c_str())) {
                 track->_openModuleSelector = false;
-                auto path = plugin["path"].get<std::string>();
-                auto module = new Vst3Module(name, track);
-                module->load(path);
                 track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->getNekoId(), "vst3", id, !io.KeyCtrl));
             }
         }

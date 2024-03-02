@@ -37,20 +37,17 @@ tresult PLUGIN_API Vst3Context::createInstance(TUID cid, TUID _iid, void** obj) 
 }
 
 tresult PLUGIN_API Vst3Context::beginEdit(Vst::ParamID id) {
-    // TODO
-    Error("beginEdit {}", id);
+    _module->beginEdit(id);
     return kResultOk;
 }
 
 tresult PLUGIN_API Vst3Context::performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized) {
-    // TODO
-    Error("performEdit {} {}", id, valueNormalized);
+    _module->performEdit(id, valueNormalized);
     return kResultOk;
 }
 
 tresult PLUGIN_API Vst3Context::endEdit(Vst::ParamID id) {
-    // TODO
-    Error("endEdit {}", id);
+    _module->endEdit(id);
     return kResultOk;
 }
 
@@ -60,6 +57,10 @@ tresult PLUGIN_API Vst3Context::restartComponent(int32 flags) {
     if (_module->_track) {
         _module->stop();
         _module->start();
+        // TODO 他にもフラグ見て色々する
+        if ((flags & Vst::RestartFlags::kParamTitlesChanged) != 0) {
+            _module->prepareParameterInfo();
+        }
     }
     return kResultOk;
 }

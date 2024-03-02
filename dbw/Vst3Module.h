@@ -27,7 +27,18 @@ public:
     void renderContent() override;
     virtual void onResize(int width, int height) override;
     virtual void loadState(std::filesystem::path path) override;
-    void getParameterInfo();
+
+    void prepareParameterInfo();
+    ::Vst::ParameterInfo* getParameterInfo(::Vst::ParamID);
+    void beginEdit(::Vst::ParamID);
+    void performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized);
+    void endEdit(::Vst::ParamID);
+    void commitParameterValue();
+    Vst::ParamValue updateParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
+    void setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
+    void updateEditedParamIdList(Vst::ParamID id);
+
+
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
 
@@ -40,13 +51,20 @@ private:
     std::string _id;
     Vst3Context _pluginContext;
     VST3::Hosting::Module::Ptr _module = nullptr;
-    std::unique_ptr<Steinberg::Vst::PlugProvider> _plugProvider = nullptr;
-    Steinberg::Vst::IAudioProcessor* _processor = nullptr;
-    Steinberg::Vst::IComponent* _component = nullptr;
-    Steinberg::Vst::IEditController* _controller = nullptr;
-    std::vector<Steinberg::Vst::ParameterInfo> _parameterInfos;
-    Steinberg::IPlugView* _plugView = nullptr;
+    std::unique_ptr<::Vst::PlugProvider> _plugProvider = nullptr;
+    ::Vst::IAudioProcessor* _processor = nullptr;
+    ::Vst::IComponent* _component = nullptr;
+    ::Vst::IEditController* _controller = nullptr;
+    ::IPlugView* _plugView = nullptr;
 
-    Steinberg::Vst::SymbolicSampleSizes _symbolicSampleSizes = Steinberg::Vst::SymbolicSampleSizes::kSample32;
+    ::Vst::SymbolicSampleSizes _symbolicSampleSizes = ::Vst::SymbolicSampleSizes::kSample32;
 
+    std::map<::Vst::ParamID, ::Vst::ParameterInfo> _parameterInfoMap;
+    std::map<::Vst::ParamID, ::Vst::ParamValue> _parameterValueMap;
+    bool _isEditing = false;
+    Vst::ParameterInfo* _editingParameterInfo = nullptr;
+    Vst::ParamValue _beforeEditingParamValue = 0.0;
+    bool _isPerformEditWithoutBeginEdit = false;
+    std::chrono::time_point<std::chrono::high_resolution_clock> _performEditStartAt;
+    std::list<::Vst::ParamID> _editedParamIdList;
 };

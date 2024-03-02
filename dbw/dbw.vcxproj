@@ -176,6 +176,7 @@
     <ClInclude Include="command\AddModule.h" />
     <ClInclude Include="command\AddNotes.h" />
     <ClInclude Include="command\AddTrack.h" />
+    <ClInclude Include="command\ChangeVst3ParameterValue.h" />
     <ClInclude Include="command\CopyDragTracks.h" />
     <ClInclude Include="command\CopyTracksMixin.h" />
     <ClInclude Include="command\CutTracks.h" />
@@ -259,6 +260,7 @@
     <ClCompile Include="command\AddModule.cpp" />
     <ClCompile Include="command\AddNotes.cpp" />
     <ClCompile Include="command\AddTrack.cpp" />
+    <ClCompile Include="command\ChangeVst3ParameterValue.cpp" />
     <ClCompile Include="command\CopyDragTracks.cpp" />
     <ClCompile Include="command\CopyTracksMixin.cpp" />
     <ClCompile Include="command\CutTracks.cpp" />

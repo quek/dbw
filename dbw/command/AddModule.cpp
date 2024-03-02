@@ -11,13 +11,18 @@ command::AddModule::AddModule(NekoId trackRef, const char* type, const std::stri
 
 void command::AddModule::execute(Composer* composer) {
     auto module = exec(composer);
+    if (!module) {
+        return;
+    }
     if (_openGui) {
         module->openGui();
     }
+    composer->computeProcessOrder();
 }
 
 void command::AddModule::redo(Composer* composer) {
     exec(composer);
+    composer->computeProcessOrder();
 }
 
 void command::AddModule::undo(Composer* composer) {
@@ -32,9 +37,12 @@ void command::AddModule::undo(Composer* composer) {
 }
 
 Module* command::AddModule::exec(Composer* composer) {
+    auto track = Neko::findByNekoId<Track>(_trackRef);
+    if (!track) {
+        return nullptr;
+    }
     auto module = Module::create(_type, _id);
     _moduleId = module->getNekoId();
-    auto track = Neko::findByNekoId<Track>(_trackRef);
 
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     track->addModule(module);
