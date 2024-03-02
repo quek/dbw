@@ -482,13 +482,25 @@ void Vst3Module::renderContent() {
         }
     }
 
+    ImGuiStyle& style = ImGui::GetStyle();
+    float contentRegionMaxX = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+    float knobSize = 30.0f;
     for (auto id : _editedParamIdList) {
+        ImGui::PushID(id);
         auto param = getParameterInfo(id);
         float value = static_cast<float>(_parameterValueMap[id]);
         std::string title = VST3::StringConvert::convert(param->title);
-        if (ImGuiKnobs::Knob(title.c_str(), &value, 0.0f, 1.0f, 0.0f, nullptr, ImGuiKnobVariant_Tick, 30.0f, 0, 10)) {
+
+        if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, nullptr, ImGuiKnobVariant_Tick, knobSize, 0, 10)) {
             setParameterValue(id, value);
         }
+        ImGui::SetItemTooltip(std::format("{} {}", title, value).c_str());
+        float currnetMaxX = ImGui::GetItemRectMax().x;
+        float nextMaxX = currnetMaxX + style.ItemSpacing.x + knobSize;
+        if (nextMaxX < contentRegionMaxX) {
+            ImGui::SameLine();
+        }
+        ImGui::PopID();
     }
 
     auto now = std::chrono::high_resolution_clock::now();
@@ -553,6 +565,7 @@ Steinberg::Vst::ParameterInfo* Vst3Module::getParameterInfo(Steinberg::Vst::Para
 }
 
 void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
+    logger->debug("beginEdit {}", id);
     updateEditedParamIdList(id);
     _isEditing = true;
     _editingParameterInfo = getParameterInfo(id);
@@ -560,6 +573,7 @@ void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
 }
 
 void Vst3Module::performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized) {
+    logger->debug("performEdit {} {}", id, valueNormalized);
     updateEditedParamIdList(id);
     if (_isEditing) {
         if (_editingParameterInfo && _editingParameterInfo->id == id) {
@@ -584,6 +598,7 @@ void Vst3Module::performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized) {
 }
 
 void Vst3Module::endEdit(Steinberg::Vst::ParamID id) {
+    logger->debug("endEdit {}", id);
     if (_editingParameterInfo && _editingParameterInfo->id == id) {
         commitParameterValue();
     }
@@ -610,6 +625,10 @@ void Vst3Module::setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormali
 }
 
 void Vst3Module::updateEditedParamIdList(Vst::ParamID id) {
+    if ((getParameterInfo(id)->flags & Vst::ParameterInfo::ParameterFlags::kCanAutomate) == 0) {
+        return;
+    }
+
     auto it = std::ranges::find(_editedParamIdList, id);
     if (it != _editedParamIdList.end()) {
         _editedParamIdList.erase(it);

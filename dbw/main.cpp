@@ -83,8 +83,7 @@ int main(int, char**) {
     std::filesystem::path logFile(userDir() / "log");
     std::filesystem::create_directories(logFile);
     logFile /= "dbw.log";
-    auto daily_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), 1024 * 1024 * 5, 3);
-    logger = std::make_shared<spdlog::logger>("deafult", daily_sink);
+    logger = spdlog::rotating_logger_mt("log",logFile.string(), 1024 * 1024 * 5, 3);
     logger->set_level(spdlog::level::debug);
     logger->info("start");
 
@@ -269,6 +268,8 @@ int main(int, char**) {
         g_pd3dCommandQueue->Signal(g_fence, fenceValue);
         g_fenceLastSignaledValue = fenceValue;
         frameCtx->FenceValue = fenceValue;
+
+        logger->flush();
     }
 
     for (auto& composer : app->composers()) {
