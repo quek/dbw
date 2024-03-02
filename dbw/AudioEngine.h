@@ -1,5 +1,5 @@
 #pragma once
-
+#include <chrono>
 #include <clap/clap.h>
 #include <portaudio.h>
 
@@ -17,6 +17,7 @@ public:
     App* _app = nullptr;
     bool _isStarted = false;
     double _cpuLoad = 0.0;
+    std::chrono::steady_clock::time_point _startTime;
 
 private:
     PaStream* _stream = nullptr;

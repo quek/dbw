@@ -15,6 +15,7 @@
 #include <imgui-knobs/imgui-knobs.h>
 #include <cppcodec/base64_rfc4648.hpp>
 #include "AudioEngine.h"
+#include "App.h"
 #include "Composer.h"
 #include "Config.h"
 #include "Error.h"
@@ -402,6 +403,8 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
         }
     }
 
+    _parameterChanges.clearQueue();
+
     return Module::process(buffer, steadyTime);
 }
 
@@ -644,7 +647,9 @@ void Vst3Module::commitParameterValue(ParamEditStatus& status) {
     Vst::ParamID id = status._paramInfo->id;
     Vst::ParamValue before = status._beforeValue;
     Vst::ParamValue after = _parameterValueMap[id];
-    _track->getComposer()->_commandManager.executeCommand(new command::ChangeVst3ParameterValue(this, id, before, after));
+    if (_track != nullptr) {
+        _track->getComposer()->_commandManager.executeCommand(new command::ChangeVst3ParameterValue(this, id, before, after));
+    }
 }
 
 Vst::ParamValue Vst3Module::updateParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized) {
@@ -672,9 +677,22 @@ void Vst3Module::updateEditedParamIdList(Vst::ParamID id) {
 }
 
 void Vst3Module::addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized) {
+    std::lock_guard<std::recursive_mutex> lock(_track->getComposer()->app()->_mtx);
     int32 index;
-    Vst::IParamValueQueue* queue = _parameterChanges.addParameterData(id, index);
-    int32 sampleOffset = 0; // TODO どうやってもとめるの？
+    Vst::IParamValueQueue* queue = nullptr;
+    for (index = 0; index < _parameterChanges.getParameterCount(); ++index) {
+        queue = _parameterChanges.getParameterData(index);
+        if (queue->getParameterId() == id) {
+            break;
+        }
+        queue = nullptr;
+    }
+    if (queue == nullptr) {
+        queue = _parameterChanges.addParameterData(id, index);
+    }
+    // どうせ次のフレームにしか送れないので 0 でいいはず
+    // オートメーション書いたらそのとき考えよう
+    int32 sampleOffset = 0;
     queue->addPoint(sampleOffset, valueNormalized, index);
 }
 

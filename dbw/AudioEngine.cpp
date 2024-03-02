@@ -1,5 +1,4 @@
 #include "AudioEngine.h"
-#include <chrono>
 #include <stdio.h>
 #include <string.h>
 #include "App.h"
@@ -21,9 +20,9 @@ static int paCallback(
     PaStreamCallbackFlags /* statusFlags */,
     void* userData
 ) {
-    auto startTime = std::chrono::high_resolution_clock::now();
-
     AudioEngine* audioEngine = (AudioEngine*)userData;
+    audioEngine->_startTime = std::chrono::high_resolution_clock::now();
+
     int result = 0;
     try {
         std::lock_guard<std::recursive_mutex> lock(audioEngine->_app->_mtx);
@@ -44,7 +43,7 @@ static int paCallback(
     }
 
     auto endTime = std::chrono::high_resolution_clock::now();
-    auto processingTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    auto processingTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - audioEngine->_startTime).count();
     double theoreticalProcessingTimeMs = (framesPerBuffer / gPreference.sampleRate) * 1000.0;
     double cpuLoad = (processingTimeMs / theoreticalProcessingTimeMs) * 100.0;
     audioEngine->_cpuLoad = cpuLoad;
