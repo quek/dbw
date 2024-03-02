@@ -485,14 +485,18 @@ void Vst3Module::renderContent() {
     ImGuiStyle& style = ImGui::GetStyle();
     float contentRegionMaxX = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
     float knobSize = 30.0f;
+    std::vector<std::pair<Vst::ParamID, float>> startEditIds;
+    std::vector<Vst::ParamID> endEditIds;
     for (auto id : _editedParamIdList) {
         ImGui::PushID(id);
         auto param = getParameterInfo(id);
         float value = static_cast<float>(_parameterValueMap[id]);
         std::string title = VST3::StringConvert::convert(param->title);
-
         if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, nullptr, ImGuiKnobVariant_Tick, knobSize, 0, 10)) {
-            setParameterValue(id, value);
+            startEditIds.emplace_back(id, value);
+        }
+        if (ImGui::IsItemDeactivated()) {
+            endEditIds.push_back(id);
         }
         ImGui::SetItemTooltip(std::format("{} {}", title, value).c_str());
         float currnetMaxX = ImGui::GetItemRectMax().x;
@@ -502,13 +506,25 @@ void Vst3Module::renderContent() {
         }
         ImGui::PopID();
     }
-
-    auto now = std::chrono::high_resolution_clock::now();
-    _performEditStartAt = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - _performEditStartAt).count();
-    if (elapsed >= 1000) {
-        commitParameterValue();
+    for (auto [id, value] : startEditIds) {
+        beginEdit(id);
+        setParameterValue(id, value);
     }
+    for (auto id : endEditIds) {
+        endEdit(id);
+    }
+
+    // beginEdit なしで performEdit が呼ばれたものの処理
+    auto now = std::chrono::high_resolution_clock::now();
+    std::erase_if(_paramEdtiStatusMap, [this, &now](const auto& pair) {
+        auto status = pair.second;
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - status._performAt).count();
+        if (elapsed < 1000) {
+            return false;
+        }
+        commitParameterValue(status);
+        return true;
+    });
 }
 
 void Vst3Module::onResize(int width, int height) {
@@ -554,6 +570,8 @@ void Vst3Module::prepareParameterInfo() {
         _parameterInfoMap[id] = parameterInfo;
         _parameterValueMap[id] = _controller->getParamNormalized(id);
     }
+
+    _paramEdtiStatusMap.clear();
 }
 
 Steinberg::Vst::ParameterInfo* Vst3Module::getParameterInfo(Steinberg::Vst::ParamID id) {
@@ -566,49 +584,55 @@ Steinberg::Vst::ParameterInfo* Vst3Module::getParameterInfo(Steinberg::Vst::Para
 
 void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
     logger->debug("beginEdit {}", id);
+    auto paramInfo = getParameterInfo(id);
+    if (paramInfo == nullptr) {
+        return;
+    }
     updateEditedParamIdList(id);
-    _isEditing = true;
-    _editingParameterInfo = getParameterInfo(id);
-    _beforeEditingParamValue = _parameterValueMap[id];
+    if (!_paramEdtiStatusMap.contains(id)) {
+        _paramEdtiStatusMap[id] = ParamEditStatus{
+            ._paramInfo = paramInfo,
+            ._beforeValue = _parameterValueMap[id],
+            ._beginEditCalled = true,
+            ._performAt = std::chrono::high_resolution_clock::now(),
+        };
+    }
 }
 
 void Vst3Module::performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized) {
     logger->debug("performEdit {} {}", id, valueNormalized);
     updateEditedParamIdList(id);
-    if (_isEditing) {
-        if (_editingParameterInfo && _editingParameterInfo->id == id) {
-            updateParameterValue(id, valueNormalized);
-        }
-
+    if (_paramEdtiStatusMap.contains(id)) {
+        _paramEdtiStatusMap[id]._performAt = std::chrono::high_resolution_clock::now();
     } else {
         // マウスホイールなどで beginEdit が呼ばれない場合
-        if (_parameterInfoMap.contains(id)) {
-            if (!_isPerformEditWithoutBeginEdit) {
-                _isPerformEditWithoutBeginEdit = true;
-                _beforeEditingParamValue = _parameterValueMap[id];
-            } else if (_editingParameterInfo->id != id) {
-                commitParameterValue();
-                _beforeEditingParamValue = _parameterValueMap[id];
-            }
-            _editingParameterInfo = &_parameterInfoMap[id];
-            updateParameterValue(id, valueNormalized);
-            _performEditStartAt = std::chrono::high_resolution_clock::now();
+        auto paramInfo = getParameterInfo(id);
+        if (paramInfo == nullptr) {
+            return;
         }
+        _paramEdtiStatusMap[id] = ParamEditStatus{
+            ._paramInfo = paramInfo,
+            ._beforeValue = _parameterValueMap[id],
+            ._beginEditCalled = false,
+            ._performAt = std::chrono::high_resolution_clock::now(),
+        };
     }
+    updateParameterValue(id, valueNormalized);
 }
 
 void Vst3Module::endEdit(Steinberg::Vst::ParamID id) {
     logger->debug("endEdit {}", id);
-    if (_editingParameterInfo && _editingParameterInfo->id == id) {
-        commitParameterValue();
+    if (!_paramEdtiStatusMap.contains(id)) {
+        return;
     }
-    _isEditing = false;
+    auto status = _paramEdtiStatusMap[id];
+    commitParameterValue(status);
+    _paramEdtiStatusMap.erase(id);
 }
 
-void Vst3Module::commitParameterValue() {
-    _isPerformEditWithoutBeginEdit = false;
-    Vst::ParamID id = _editingParameterInfo->id;
-    Vst::ParamValue before = _beforeEditingParamValue;
+void Vst3Module::commitParameterValue(ParamEditStatus& status) {
+    Vst::ParamID id = status._paramInfo->id;
+    Vst::ParamValue before = status._beforeValue;
     Vst::ParamValue after = _parameterValueMap[id];
     _track->getComposer()->_commandManager.executeCommand(new command::ChangeVst3ParameterValue(this, id, before, after));
 }
