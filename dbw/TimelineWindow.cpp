@@ -158,7 +158,8 @@ float TimelineWindow::offsetLeft() const {
 }
 
 float TimelineWindow::offsetStart() const {
-    return TIMELINE_START_OFFSET;
+    //return TIMELINE_START_OFFSET;
+    return 0.0f;
 }
 
 ImU32 TimelineWindow::colorSlectedThing() {

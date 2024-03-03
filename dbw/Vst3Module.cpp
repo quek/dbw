@@ -489,11 +489,8 @@ void Vst3Module::renderContent() {
     float knobSize = 30.0f;
     std::vector<std::pair<Vst::ParamID, float>> startEditIds;
     std::vector<Vst::ParamID> endEditIds;
-    int i = 0;
+    bool isFirstLine = true;
     for (auto id : _editedParamIdList) {
-        if (++i > 6) {
-            break;
-        }
         ImGui::PushID(id);
         auto param = getParameterInfo(id);
         float value = static_cast<float>(_parameterValueMap[id]);
@@ -508,12 +505,23 @@ void Vst3Module::renderContent() {
             endEditIds.push_back(id);
         }
         ImGui::SetItemTooltip(std::format("{} {}", title, value).c_str());
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+            ImGui::Text(title.c_str());
+            ImGui::EndDragDropSource();
+        }
+        ImGui::PopID();
+
         float currnetMaxX = ImGui::GetItemRectMax().x;
         float nextMaxX = currnetMaxX + style.ItemSpacing.x + knobSize;
         if (nextMaxX < contentRegionMaxX) {
             ImGui::SameLine();
+        } else {
+            if (isFirstLine) {
+                isFirstLine = false;
+            } else {
+                break;
+            }
         }
-        ImGui::PopID();
     }
     for (auto [id, value] : startEditIds) {
         beginEdit(id);
@@ -633,6 +641,7 @@ void Vst3Module::performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized) {
             ._performAt = std::chrono::high_resolution_clock::now(),
         };
     }
+    addParameterChange(id, valueNormalized);
     updateParameterValue(id, valueNormalized);
 }
 
