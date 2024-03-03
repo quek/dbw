@@ -24,7 +24,10 @@ SceneMatrix::SceneMatrix(Composer* composer) : _composer(composer) {
 
 void SceneMatrix::render() {
     if (ImGui::Begin("Scene Matrix")) {
-        int ncolumns = static_cast<int>(_composer->_masterTrack->getTracks().size() + 2);
+        int ncolumns = 1;
+        for (const auto& track : _composer->allTracks()) {
+            ncolumns += static_cast<int>(track->_lanes.size());
+        }
         if (ImGui::BeginTable("Scene Matrix Table", ncolumns,
                               ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY,
                               ImVec2(-1.0f, -20.0f))) {

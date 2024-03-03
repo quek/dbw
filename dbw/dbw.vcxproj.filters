@@ -150,6 +150,9 @@
     <ClCompile Include="command\DuplicateClips.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="command\NewLane.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -284,6 +287,9 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="command\DuplicateClips.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\NewLane.h">
       <Filter>command</Filter>
     </ClInclude>
   </ItemGroup>

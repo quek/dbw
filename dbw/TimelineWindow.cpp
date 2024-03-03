@@ -9,6 +9,7 @@
 #include "GuiUtil.h"
 #include "Lane.h"
 #include "command/AddClips.h"
+#include "command/AddTrack.h"
 #include "command/DeleteClips.h"
 #include "command/DuplicateClips.h"
 
@@ -187,6 +188,9 @@ float TimelineWindow::laneToScreenX(Lane* lane) {
 }
 
 void TimelineWindow::handleShortcut() {
+    if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T)) {
+        _composer->_commandManager.executeCommand(new command::AddTrack());
+    }
 
     TimelineCanvasMixin::handleShortcut();
 }
@@ -218,27 +222,37 @@ void TimelineWindow::renderHeader() {
     float scrollY = ImGui::GetScrollY();
     float x = TIMELINE_WIDTH;
     float y = ImGui::GetScrollY();
-    ImGuiStyle& style = ImGui::GetStyle();
-    float padding = style.FramePadding.x;
     ImVec2 clipRectMin = windowPos + ImVec2(TIMELINE_WIDTH, 0.0f);
     ImVec2 clipRectMax = ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight());
     ImGui::PushClipRect(clipRectMin, clipRectMax, true);
 
-    ImVec2 pos = ImVec2(x, y);
-    ImGui::SetCursorPos(pos + ImVec2(padding, 0));
-    ImGui::Text(_composer->_masterTrack->_name.c_str());
-    x += getTrackWidth(_composer->_masterTrack.get()) * _zoomX;
-
-    for (auto& track : _composer->_masterTrack->getTracks()) {
+    ImVec2 pos = {};
+    for (auto& track : _composer->allTracks()) {
         pos = ImVec2(x, y);
-        ImGui::SetCursorPos(pos + ImVec2(padding, 0));
-        ImGui::Text(track->_name.c_str());
+        ImGui::SetCursorPos(pos + ImVec2(0, 0));
+        ImGui::Button(track->_name.c_str(), ImVec2(getTrackWidth(track) * _zoomX, 0.0f));
+        if (ImGui::BeginPopupContextItem(track->_name.c_str())) {
+            if (ImGui::MenuItem("New Lane", "Ctrl+L")) {
+                // TODO
+                track->addLane(new Lane());
+            }
+            ImGui::EndPopup();
+        }
 
         ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
         ImVec2 pos2 = pos1 + ImVec2(0, _composer->maxBar() * 4 * _zoomY);
-        drawList->AddLine(pos1, pos2, BAR_LINE_COLOR);
+        auto color = BAR_LINE_COLOR;
+        float yDelta = offsetTop();
+        for (const auto& lane : track->_lanes) {
+            drawList->AddLine(pos1, pos2, color);
+            float xDelta = getLaneWidth(lane.get()) * _zoomX;
+            pos1 += ImVec2(xDelta, yDelta);
+            pos2.x += xDelta;
+            color = BEAT_LINE_COLOR;
+            yDelta = 0;
+        }
 
-        x += getTrackWidth(track.get()) * _zoomX;
+        x += getTrackWidth(track) * _zoomX;
     }
 
     ImVec2 pos1 = pos + ImVec2(-scrollX, -scrollY) + windowPos;
