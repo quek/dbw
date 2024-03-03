@@ -167,6 +167,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="AudioEngineWindow.h" />
+    <ClInclude Include="AutomationTarget.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
@@ -255,6 +256,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
+    <ClCompile Include="AutomationTarget.cpp" />
     <ClCompile Include="BaseWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />

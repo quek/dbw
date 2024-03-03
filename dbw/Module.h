@@ -31,6 +31,7 @@ public:
     ProcessBuffer& getProcessBuffer();
     virtual uint32_t getComputedLatency();
     virtual void setComputedLatency(uint32_t computedLatency);
+    virtual std::string getParamName(uint32_t) { return "TODO"; };
 
     static Module* create(std::string& type, std::string& id);
     static Module* fromJson(const nlohmann::json&);

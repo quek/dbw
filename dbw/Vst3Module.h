@@ -45,6 +45,7 @@ public:
     void setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void updateEditedParamIdList(Vst::ParamID id);
     void addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized);
+    std::string getParamName(uint32_t id) override;
 
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);

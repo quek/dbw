@@ -156,6 +156,7 @@
     <ClCompile Include="command\ComputeLatency.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="AutomationTarget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -298,6 +299,7 @@
     <ClInclude Include="command\ComputeLatency.h">
       <Filter>command</Filter>
     </ClInclude>
+    <ClInclude Include="AutomationTarget.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

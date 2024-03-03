@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include "AutomationTarget.h"
 #include "ClipSlot.h"
 #include "Nameable.h"
 
@@ -19,4 +20,5 @@ public:
     std::vector<std::unique_ptr<Clip>> _clips;
     std::map<Scene*, std::unique_ptr<ClipSlot>> _sceneClipSlotMap;
     Track* _track = nullptr;
+    std::unique_ptr<AutomationTarget> _automationTarget = nullptr;
 };

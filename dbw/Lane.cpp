@@ -15,6 +15,10 @@ Lane::Lane(const nlohmann::json& json) : Nameable(json) {
             _sceneClipSlotMap[scene] = std::make_unique<ClipSlot>(x.value());
         }
     }
+
+    if (json.contains("_automationTarget")) {
+        _automationTarget.reset(new AutomationTarget(json["_automationTarget"]));
+    }
 }
 
 nlohmann::json Lane::toJson() {
@@ -32,6 +36,10 @@ nlohmann::json Lane::toJson() {
         map[std::to_string(scene->getNekoId())] = clipSlot->toJson();
     }
     json["_sceneClipSlotMap"] = map;
+
+    if (_automationTarget) {
+        json["_automationTarget"] = _automationTarget->toJson();
+    }
 
 
     return json;

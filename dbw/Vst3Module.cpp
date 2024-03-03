@@ -14,8 +14,9 @@
 #include "imgui.h"
 #include <imgui-knobs/imgui-knobs.h>
 #include <cppcodec/base64_rfc4648.hpp>
-#include "AudioEngine.h"
 #include "App.h"
+#include "AudioEngine.h"
+#include "AutomationTarget.h"
 #include "Composer.h"
 #include "Config.h"
 #include "Error.h"
@@ -517,8 +518,8 @@ void Vst3Module::renderContent() {
         }
         ImGui::SetItemTooltip(std::format("{} {}", title, value).c_str());
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-            std::pair<Module*, int> automationTarget = std::pair(this, id);
-            ImGui::SetDragDropPayload(std::format(DDP_AUTOMATION_TARGET, _track->getNekoId()).c_str(), &automationTarget, sizeof(automationTarget));
+            AutomationTarget automationTarget(this, id);
+            ImGui::SetDragDropPayload(std::format(DDP_AUTOMATION_TARGET, _track->getNekoId()).c_str(), &automationTarget, sizeof(AutomationTarget));
             ImGui::Text(std::format("{} {}", _name, title).c_str());
             ImGui::EndDragDropSource();
         }
@@ -720,6 +721,14 @@ void Vst3Module::addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormal
     // オートメーション書いたらそのとき考えよう
     int32 sampleOffset = 0;
     queue->addPoint(sampleOffset, valueNormalized, index);
+}
+
+std::string Vst3Module::getParamName(uint32_t id) {
+    auto parameterInfo = getParameterInfo(id);
+    if (parameterInfo == nullptr) {
+        return "";
+    }
+    return VST3::StringConvert::convert(parameterInfo->title);
 }
 
 
