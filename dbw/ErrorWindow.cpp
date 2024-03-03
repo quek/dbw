@@ -7,22 +7,23 @@ void ErrorWindow::render() {
     if (!_show) {
         return;
     }
-    if (_focus) {
-        ImGui::SetNextWindowFocus();
-        _focus = false;
-    }
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, -1), ImVec2(FLT_MAX, FLT_MAX));
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    //if (_focus) {
+    //    ImGui::SetNextWindowFocus();
+    //    _focus = false;
+    //}
+    //ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    //ImGui::SetNextWindowSizeConstraints(ImVec2(300, -1), ImVec2(FLT_MAX, FLT_MAX));
+    //ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-    if (ImGui::Begin("Error!", &_show, ImGuiWindowFlags_AlwaysAutoResize)) {
+    //if (ImGui::Begin("Error!", &_show, ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::Begin("Error!", &_show)) {
         ImGui::TextWrapped(_message.c_str());
         ImGui::Separator();
         if (ImGui::Button("Close")) {
             _show = false;
         }
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 void ErrorWindow::show(const std::string message) {

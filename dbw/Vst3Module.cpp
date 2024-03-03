@@ -24,6 +24,7 @@
 #include "Track.h"
 #include "util.h"
 #include "command/ChangeVst3ParameterValue.h"
+#include "command/ComputeLatency.h"
 
 Vst3Module::Vst3Module(const nlohmann::json& json) : Module(json), _pluginContext(this) {
     std::ifstream in(configDir() / "plugin.json");
@@ -422,7 +423,7 @@ void Vst3Module::start() {
     if (_processor) {
         _latency = _processor->getLatencySamples();
         if (_track && _track->getComposer()) {
-            _track->getComposer()->computeLatency();
+            _track->getComposer()->_commandManager.executeCommand(new command::ComputeLatency());
         }
 
         Steinberg::uint32 tailSample = _processor->getTailSamples();
