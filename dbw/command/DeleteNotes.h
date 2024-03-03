@@ -8,7 +8,7 @@ class Sequence;
 namespace command {
 class DeleteNotes : public Command {
 public:
-    DeleteNotes(Sequence* sequence, std::set<Note*> notes, bool undoable);
+    DeleteNotes(Sequence* sequence, std::set<Note*>& notes, bool undoable);
     virtual ~DeleteNotes() = default;
     void execute(Composer* composer) override;
     void undo(Composer*) override;

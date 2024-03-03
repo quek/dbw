@@ -92,12 +92,17 @@ std::pair<std::set<Clip*>, Command*> TimelineWindow::copyThings(std::set<Clip*> 
     return { clips,new command::AddClips(targets, redoable) };
 }
 
-Command* TimelineWindow::deleteThings(std::set<Clip*> clips, bool undoable) {
+Command* TimelineWindow::deleteThings(std::set<Clip*>& clips, bool undoable) {
     std::set<std::pair<Lane*, Clip*>> targets;
     for (auto& it : clips) {
         targets.insert(std::pair(_clipLaneMap[it], it));
     }
     return new command::DeleteClips(targets, undoable);
+}
+
+Command* TimelineWindow::duplicateThings(std::set<Clip*>& things, bool undoable) {
+    // TODO
+    return nullptr;
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
@@ -178,15 +183,6 @@ float TimelineWindow::laneToScreenX(Lane* lane) {
 }
 
 void TimelineWindow::handleShortcut() {
-    if (!canHandleInput()) {
-        return;
-    }
-    ImGuiIO& io = ImGui::GetIO();
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)) ||
-        io.KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D))) {
-        _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
-        _state._selectedThings.clear();
-    }
 
     TimelineCanvasMixin::handleShortcut();
 }

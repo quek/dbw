@@ -458,6 +458,11 @@ template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::handleShortcut() {
     if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_A)) {
         _state._selectedThings = { _allThings.begin(), _allThings.end() };
+    } else if (defineShortcut(ImGuiKey_D)) {
+        _composer->_commandManager.executeCommand(duplicateThings(_state._selectedThings, true));
+    } else if (defineShortcut(ImGuiKey_Delete)) {
+        _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
+        _state._selectedThings.clear();
     }
 }
 

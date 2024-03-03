@@ -10,6 +10,7 @@
 #include "Midi.h"
 #include "command/AddNotes.h"
 #include "command/DeleteNotes.h"
+#include "command/DuplicateNotes.h"
 
 constexpr float KEYBOARD_HEIGHT = 30.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -94,8 +95,12 @@ std::pair<std::set<Note*>, Command*> PianoRollWindow::copyThings(std::set<Note*>
     return { notes, new command::AddNotes(_clip->_sequence.get(), notes, redoable) };
 }
 
-Command* PianoRollWindow::deleteThings(std::set<Note*> notes, bool undoable) {
+Command* PianoRollWindow::deleteThings(std::set<Note*>& notes, bool undoable) {
     return new command::DeleteNotes(_clip->_sequence.get(), notes, undoable);
+}
+
+Command* PianoRollWindow::duplicateThings(std::set<Note*>& notes, bool undoable) {
+    return new command::DuplicateNotes(_clip->_sequence.get(), notes, undoable);
 }
 
 void PianoRollWindow::prepareAllThings() {
@@ -152,15 +157,6 @@ float PianoRollWindow::getLaneWidth(Note* /*thing*/) {
 }
 
 void PianoRollWindow::handleShortcut() {
-    if (!canHandleInput()) {
-        return;
-    }
-    ImGuiIO& io = ImGui::GetIO();
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)) ||
-        io.KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D))) {
-        _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
-        _state._selectedThings.clear();
-    }
 
     TimelineCanvasMixin::handleShortcut();
 }

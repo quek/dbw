@@ -14,26 +14,27 @@ public:
     void render() override;
     void edit(Clip* clip);
 
-    virtual void handleDoubleClick(Note* thing) override;
-    virtual Note* handleDoubleClick(double time, int16_t* lane) override;
-    virtual void handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) override;
-    virtual void handleClickTimeline(double time, bool ctrl, bool alt) override;
-    virtual std::pair<std::set<Note*>, Command*> copyThings(std::set<Note*> srcs, bool redoable) override;
-    virtual Command* deleteThings(std::set<Note*> notes, bool undoable) override;
+    void handleDoubleClick(Note* thing) override;
+    Note* handleDoubleClick(double time, int16_t* lane) override;
+    void handleMove(double oldTime, double newTime, int16_t* oldLane, int16_t* newLane) override;
+    void handleClickTimeline(double time, bool ctrl, bool alt) override;
+    std::pair<std::set<Note*>, Command*> copyThings(std::set<Note*> srcs, bool redoable) override;
+    Command* deleteThings(std::set<Note*>& notes, bool undoable) override;
+    Command* duplicateThings(std::set<Note*>& things, bool undoable) override;
 
-    virtual void prepareAllThings() override;
+    void prepareAllThings() override;
 
-    virtual float offsetTop() const override;
-    virtual float offsetLeft() const override;
-    virtual float offsetStart() const override;
+    float offsetTop() const override;
+    float offsetLeft() const override;
+    float offsetStart() const override;
 
-    virtual ImU32 colorSlectedThing() override;
-    virtual ImU32 colorThing() override;
+    ImU32 colorSlectedThing() override;
+    ImU32 colorThing() override;
 
-    virtual int16_t* laneFromPos(ImVec2& pos) override;
-    virtual float xFromThing(Note* thing) override;
-    virtual float laneToScreenX(int16_t* lane);
-    virtual float getLaneWidth(Note* thing) override;
+    int16_t* laneFromPos(ImVec2& pos) override;
+    float xFromThing(Note* thing) override;
+    float laneToScreenX(int16_t* lane);
+    float getLaneWidth(Note* thing) override;
 
     bool _show = false;
     Clip* _clip = nullptr;

@@ -2,7 +2,7 @@
 #include "../Sequence.h"
 
 namespace command {
-DeleteNotes::DeleteNotes(Sequence* sequence, std::set<Note*> notes, bool undoable) :
+DeleteNotes::DeleteNotes(Sequence* sequence, std::set<Note*>& notes, bool undoable) :
     Command(undoable), _sequence(sequence), _targets(notes) {
 }
 void DeleteNotes::execute(Composer*) {

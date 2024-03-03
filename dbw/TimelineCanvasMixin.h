@@ -27,7 +27,8 @@ public:
     virtual void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax);
     virtual void handleClickTimeline(double time, bool ctrl, bool alt) = 0;
     virtual std::pair<std::set<THING*>, Command*> copyThings(std::set<THING*> srscs, bool redoable) = 0;
-    virtual Command* deleteThings(std::set<THING*> things, bool undoable) = 0;
+    virtual Command* deleteThings(std::set<THING*>& things, bool undoable) = 0;
+    virtual Command* duplicateThings(std::set<THING*>& things, bool undoable) = 0;
 
     virtual void onClickThing(THING*) {};
 
