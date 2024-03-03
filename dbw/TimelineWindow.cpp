@@ -10,6 +10,7 @@
 #include "Lane.h"
 #include "command/AddClips.h"
 #include "command/DeleteClips.h"
+#include "command/DuplicateClips.h"
 
 constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -100,9 +101,12 @@ Command* TimelineWindow::deleteThings(std::set<Clip*>& clips, bool undoable) {
     return new command::DeleteClips(targets, undoable);
 }
 
-Command* TimelineWindow::duplicateThings(std::set<Clip*>& things, bool undoable) {
-    // TODO
-    return nullptr;
+Command* TimelineWindow::duplicateThings(std::set<Clip*>& clips, bool undoable) {
+    std::set<std::pair<Lane*, Clip*>> targets;
+    for (auto& it : clips) {
+        targets.insert(std::pair(_clipLaneMap[it], it));
+    }
+    return new command::DuplicateClips(targets, undoable);
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {

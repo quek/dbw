@@ -184,6 +184,7 @@
     <ClInclude Include="command\DeleteModule.h" />
     <ClInclude Include="command\DeleteNotes.h" />
     <ClInclude Include="command\DeleteTracks.h" />
+    <ClInclude Include="command\DuplicateClips.h" />
     <ClInclude Include="command\DuplicateNotes.h" />
     <ClInclude Include="command\DuplicateTracks.h" />
     <ClInclude Include="command\GroupTracks.h" />
@@ -269,6 +270,7 @@
     <ClCompile Include="command\DeleteModule.cpp" />
     <ClCompile Include="command\DeleteNotes.cpp" />
     <ClCompile Include="command\DeleteTracks.cpp" />
+    <ClCompile Include="command\DuplicateClips.cpp" />
     <ClCompile Include="command\DuplicateNotes.cpp" />
     <ClCompile Include="command\DuplicateTracks.cpp" />
     <ClCompile Include="command\GroupTracks.cpp" />

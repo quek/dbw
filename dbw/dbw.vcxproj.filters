@@ -147,6 +147,9 @@
     <ClCompile Include="command\DuplicateNotes.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="command\DuplicateClips.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -278,6 +281,9 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="command\DuplicateNotes.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\DuplicateClips.h">
       <Filter>command</Filter>
     </ClInclude>
   </ItemGroup>
