@@ -4,6 +4,8 @@
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 
+constexpr const char* DDP_AUTOMATION_TARGET = "DDP_AMT{}";
+
 extern float TEXT_BASE_WIDTH;
 extern float TEXT_BASE_HEIGHT;
 

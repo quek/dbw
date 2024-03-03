@@ -34,11 +34,11 @@ void RackWindow::render() {
 
             ImVec2 windowPos = ImGui::GetWindowPos();
             ImVec2 clipRectMin = windowPos;
-            ImVec2 clipRectMax = clipRectMin + ImGui::GetWindowSize();
+            ImVec2 clipRectMax = clipRectMin + ImGui::GetWindowSize() - ImVec2(0.0f, _faderHeight);
             ImGui::PushClipRect(clipRectMin + ImVec2(0.0f, _headerHeight), clipRectMax, true);
             renderModules();
-            renderFaders();
             ImGui::PopClipRect();
+            renderFaders();
 
             ImGui::EndChild();
         }
@@ -253,6 +253,10 @@ void RackWindow::renderModules(Track* track) {
     if (track->_openModuleSelector) {
         gPluginManager.openModuleSelector(track);
     }
+
+    // TODO とりあえずの余白確保
+    ImGui::InvisibleButton("vscpae", ImVec2(track->_width, 300.0f));
+
     ImGui::EndGroup();
     ImGui::PopID();
     if (track->_showTracks) {
@@ -266,7 +270,7 @@ void RackWindow::renderModules(Track* track) {
 void RackWindow::renderFaders() {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x / 2.0f);
     float windowHeight = ImGui::GetWindowHeight();
-    float cursorPosY = windowHeight - _faderHeight;
+    float cursorPosY = windowHeight + ImGui::GetScrollY() - _faderHeight;
     if (cursorPosY < _headerHeight) {
         cursorPosY = _headerHeight;
     }

@@ -246,9 +246,21 @@ void TimelineWindow::renderHeader() {
         float yDelta = offsetTop();
         for (const auto& lane : track->_lanes) {
             drawList->AddLine(pos1, pos2, color);
-            float xDelta = getLaneWidth(lane.get()) * _zoomX;
-            pos1 += ImVec2(xDelta, yDelta);
-            pos2.x += xDelta;
+            float laneWidth = getLaneWidth(lane.get()) * _zoomX;
+            {
+                ImGui::SetCursorPos(screenToWindow(pos1) + ImVec2(scrollX, scrollY));
+                ImGui::InvisibleButton("DragDropTarget", ImVec2(laneWidth, ImGui::GetWindowHeight()));
+                if (ImGui::BeginDragDropTarget()) {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::format(DDP_AUTOMATION_TARGET, track->getNekoId()).c_str())) {
+                        auto pair = (std::pair<Module*, int>*) payload->Data;
+                        // TODO
+
+                        ImGui::EndDragDropTarget();
+                    }
+                }
+            }
+            pos1 += ImVec2(laneWidth, yDelta);
+            pos2.x += laneWidth;
             color = BEAT_LINE_COLOR;
             yDelta = 0;
         }

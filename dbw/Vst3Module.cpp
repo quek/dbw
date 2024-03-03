@@ -288,6 +288,13 @@ bool Vst3Module::load(std::string path) {
 
     prepareParameterInfo();
 
+    // 先頭の3つを初期表示に
+    for (Steinberg::int32 i = 0; i < min(3, _controller->getParameterCount() - 1); ++i) {
+        Steinberg::Vst::ParameterInfo parameterInfo = {};
+        _controller->getParameterInfo(i, parameterInfo);
+        updateEditedParamIdList(parameterInfo.id);
+    }
+
     return true;
 }
 
@@ -506,7 +513,9 @@ void Vst3Module::renderContent() {
         }
         ImGui::SetItemTooltip(std::format("{} {}", title, value).c_str());
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-            ImGui::Text(title.c_str());
+            std::pair<Module*, int> automationTarget = std::pair(this, id);
+            ImGui::SetDragDropPayload(std::format(DDP_AUTOMATION_TARGET, _track->getNekoId()).c_str(), &automationTarget, sizeof(automationTarget));
+            ImGui::Text(std::format("{} {}", _name, title).c_str());
             ImGui::EndDragDropSource();
         }
         ImGui::PopID();
@@ -523,7 +532,7 @@ void Vst3Module::renderContent() {
             }
         }
     }
-    for (auto [id, value] : startEditIds) {
+    for (auto& [id, value] : startEditIds) {
         beginEdit(id);
         setParameterValue(id, value);
     }
@@ -593,7 +602,7 @@ void Vst3Module::prepareParameterInfo() {
 
 void Vst3Module::prepareParameterValue() {
     _parameterValueMap.clear();
-    for (auto [id, _] : _parameterInfoMap) {
+    for (auto& [id, _] : _parameterInfoMap) {
         _parameterValueMap[id] = _controller->getParamNormalized(id);
     }
     _paramEdtiStatusMap.clear();
@@ -650,7 +659,7 @@ void Vst3Module::endEdit(Steinberg::Vst::ParamID id) {
     if (!_paramEdtiStatusMap.contains(id)) {
         return;
     }
-    auto status = _paramEdtiStatusMap[id];
+    auto& status = _paramEdtiStatusMap[id];
     commitParameterValue(status);
     _paramEdtiStatusMap.erase(id);
 }
