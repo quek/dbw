@@ -57,9 +57,12 @@ Vst3Module::~Vst3Module() {
     stop();
     if (_processor) {
         _processor->release();
+        _processor = nullptr;
     }
     if (_plugProvider) {
         _plugProvider->releasePlugIn(_component, _controller);
+        _component = nullptr;
+        _controller = nullptr;
     }
 }
 
@@ -699,6 +702,7 @@ void Vst3Module::updateEditedParamIdList(Vst::ParamID id) {
 }
 
 void Vst3Module::addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized) {
+    if (_track == nullptr) return;
     std::lock_guard<std::recursive_mutex> lock(_track->getComposer()->app()->_mtx);
     int32 index;
     Vst::IParamValueQueue* queue = nullptr;
@@ -733,9 +737,11 @@ nlohmann::json Vst3Module::toJson() {
     return json;
 }
 
-nlohmann::json Vst3Module::scan(const std::string path) {
-    nlohmann::json plugins;
-    plugins["path"] = path;
+nlohmann::json Vst3Module::scan(const std::string& path) {
+    nlohmann::json plugins = nlohmann::json::array();
+    nlohmann::json plugin;
+
+    plugin["path"] = path;
 
     std::string error;
     auto module = VST3::Hosting::Module::create(path, error);
@@ -744,36 +750,37 @@ nlohmann::json Vst3Module::scan(const std::string path) {
         return false;
     }
 
+    std::filesystem::file_time_type writeTime = std::filesystem::last_write_time(path);
+    plugin["timestamp"] = std::chrono::duration_cast<std::chrono::seconds>(writeTime.time_since_epoch()).count();
+
     VST3::Hosting::PluginFactory factory = module->getFactory();
     VST3::Hosting::FactoryInfo factoryInfo = factory.info();
-    plugins["Factory Info"]["Vendor"] = factoryInfo.vendor();
-    plugins["Factory Info"]["URL"] = factoryInfo.url();
-    plugins["Factory Info"]["E-Mail"] = factoryInfo.email();
-    plugins["Factory Info"]["Flags"]["Unicode"] =
+    plugin["Factory Info"]["Vendor"] = factoryInfo.vendor();
+    plugin["Factory Info"]["URL"] = factoryInfo.url();
+    plugin["Factory Info"]["E-Mail"] = factoryInfo.email();
+    plugin["Factory Info"]["Flags"]["Unicode"] =
         (factoryInfo.flags() & Steinberg::PFactoryInfo::FactoryFlags::kUnicode) != 0;
-    plugins["Factory Info"]["Flags"]["Classes Discardable"] = factoryInfo.classesDiscardable();
-    plugins["Factory Info"]["Flags"]["Component Non Discardable"] = factoryInfo.componentNonDiscardable();
+    plugin["Factory Info"]["Flags"]["Classes Discardable"] = factoryInfo.classesDiscardable();
+    plugin["Factory Info"]["Flags"]["Component Non Discardable"] = factoryInfo.componentNonDiscardable();
 
     std::vector<VST3::Hosting::ClassInfo> audioClassInfo;
     for (VST3::Hosting::ClassInfo classInfo : factory.classInfos()) {
-        if (classInfo.category() == "Audio Module Class") {
-            plugins["name"] = classInfo.name();
-            plugins["id"] = classInfo.ID().toString();
+        if (classInfo.category() != "Audio Module Class") {
+            continue;
         }
-        nlohmann::json json;
-        json["CID"] = classInfo.ID().toString();
-        json["Category"] = classInfo.category();
-        json["Name"] = classInfo.name();
-        json["Vendor"] = classInfo.vendor();
-        json["Version"] = classInfo.version();
-        json["SDKVersion"] = classInfo.sdkVersion();
+        plugin["name"] = classInfo.name();
+        plugin["id"] = classInfo.ID().toString();
+        plugin["Category"] = classInfo.category();
+        plugin["Vendor"] = classInfo.vendor();
+        plugin["Version"] = classInfo.version();
+        plugin["SDKVersion"] = classInfo.sdkVersion();
         auto& subCategories = classInfo.subCategories();
         for (auto& subCategory : subCategories) {
-            json["Sub Categories"].push_back(subCategory);
+            plugin["Sub Categories"].push_back(subCategory);
         }
-        json["Class Flags"] = classInfo.classFlags();
+        plugin["Class Flags"] = classInfo.classFlags();
 
-        plugins["Classes"].push_back(json);
+        plugins.push_back(plugin);
     }
 
     return plugins;

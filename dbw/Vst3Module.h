@@ -49,17 +49,17 @@ public:
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
 
-    static nlohmann::json scan(const std::string path);
+    static nlohmann::json scan(const std::string& path);
     static Vst3Module* create(const std::string& id);
 
     std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
+    Vst::IAudioProcessor* _processor = nullptr;
 
 private:
     std::string _id;
     Vst3Context _pluginContext;
     VST3::Hosting::Module::Ptr _module = nullptr;
     std::unique_ptr<Vst::PlugProvider> _plugProvider = nullptr;
-    Vst::IAudioProcessor* _processor = nullptr;
     Vst::IComponent* _component = nullptr;
     Vst::IEditController* _controller = nullptr;
     IPlugView* _plugView = nullptr;

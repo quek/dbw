@@ -10,6 +10,9 @@ command::DeleteModule::DeleteModule(Module* module) : _moduleId(module->getNekoI
 
 void command::DeleteModule::execute(Composer* composer) {
     Module* module = Neko::findByNekoId<Module>(_moduleId);
+    if (module == nullptr) {
+        return;
+    }
     module->closeGui();
     module->stop();
     _module = module->toJson();

@@ -87,21 +87,26 @@ void PluginManager::openModuleSelector(Track* track) {
         }
     }
 
-    for (auto& plugin : _plugins["vst3"]) {
-        auto q = _query.begin();
-        std::string name = plugin["name"].get<std::string>();
-        for (auto c = name.begin(); c != name.end() && q != _query.end(); ++c) {
-            if (std::tolower(*q) == std::tolower(*c)) {
-                ++q;
+    try {
+        for (auto& plugin : _plugins["vst3"]) {
+            auto q = _query.begin();
+            std::string name = plugin["name"];
+            logger->debug(name);
+            for (auto c = name.begin(); c != name.end() && q != _query.end(); ++c) {
+                if (std::tolower(*q) == std::tolower(*c)) {
+                    ++q;
+                }
+            }
+            if (q == _query.end()) {
+                std::string id = plugin["id"];
+                if (ImGui::Button((name + " vst3##" + id).c_str())) {
+                    track->_openModuleSelector = false;
+                    track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->getNekoId(), "vst3", id, !io.KeyCtrl));
+                }
             }
         }
-        if (q == _query.end()) {
-            std::string id = plugin["id"].get<std::string>();
-            if (ImGui::Button((name + " vst3##" + id).c_str())) {
-                track->_openModuleSelector = false;
-                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->getNekoId(), "vst3", id, !io.KeyCtrl));
-            }
-        }
+    } catch (std::exception& e) {
+        logger->error(e.what());
     }
 
     for (const auto& [name, fun] : builtinModuleMap) {
@@ -188,8 +193,10 @@ void PluginManager::scanVst3() {
 
     _plugins["vst3"] = nlohmann::json::array();
     for (auto i = pluginPaths.begin(); i != pluginPaths.end(); ++i) {
-        auto x = Vst3Module::scan(*i);
-        _plugins["vst3"].push_back(x);
+        auto xs = Vst3Module::scan(*i);
+        for (auto& x : xs) {
+            _plugins["vst3"].push_back(x);
+        }
     }
 
     auto path = configDir() / "plugin.json";

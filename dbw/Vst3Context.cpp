@@ -52,6 +52,9 @@ tresult PLUGIN_API Vst3Context::endEdit(Vst::ParamID id) {
 }
 
 tresult PLUGIN_API Vst3Context::restartComponent(int32 flags) {
+    if (_module->_processor == nullptr) {
+        return kResultOk;
+    }
     // TODO
     Error("restartComponent {}", flags);
     if (_module->_track) {
