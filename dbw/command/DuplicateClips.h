@@ -14,8 +14,8 @@ public:
     void execute(Composer* composer) override;
     void undo(Composer* composer) override;
 private:
-    std::vector<std::pair<NekoId, NekoId>> _lanAndClips;
-    std::vector<NekoId> _duplicatedCliIds;
+    std::vector<std::pair<NekoId, NekoId>> _laneIdAndClipIds;
+    std::vector<std::pair<NekoId, NekoId>> _landIdAndduplicatedClipId;
 };
 };
 

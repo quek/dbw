@@ -7,7 +7,7 @@
 class Clip;
 class Scene;
 
-class Lane : Nameable {
+class Lane : public Nameable {
 public:
     inline static const char* TYPE = "lane";
     Lane() = default;
