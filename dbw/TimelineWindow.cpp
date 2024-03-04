@@ -254,7 +254,7 @@ void TimelineWindow::renderHeader() {
                     ImGui::SetCursorPos(screenToWindow(pos1) + ImVec2(scrollX, scrollY + yDelta));
                     ImGui::InvisibleButton("DragDropTarget", ImVec2(laneWidth, ImGui::GetWindowHeight()));
                     if (ImGui::BeginDragDropTarget()) {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::format(DDP_AUTOMATION_TARGET, track->getNekoId()).c_str())) {
+                        if (payload = ImGui::AcceptDragDropPayload(std::format(DDP_AUTOMATION_TARGET, track->getNekoId()).c_str())) {
                             AutomationTarget* automationTarget = (AutomationTarget*)payload->Data;
                             lane->_automationTarget.reset(new AutomationTarget(*automationTarget));
                             ImGui::EndDragDropTarget();
