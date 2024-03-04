@@ -4,9 +4,6 @@
 static std::map<NekoId, std::weak_ptr<Sequence>> nekoIdSequenceMap;
 int Sequence::_no = 0;
 
-Sequence::Sequence(double duration) : Nameable("Seq" + std::to_string(++_no)), _duration(duration) {
-}
-
 std::shared_ptr<Sequence> Sequence::create(double duration, NekoId id) {
     std::shared_ptr<Sequence> sequence(new Sequence(duration));
     if (id != 0) {
@@ -29,6 +26,11 @@ std::shared_ptr<Sequence> Sequence::create(const nlohmann::json& json) {
     return sequence;
 }
 
+// private
+Sequence::Sequence(double duration) : Nameable("Seq" + std::to_string(++_no)), _duration(duration) {
+}
+
+// private
 Sequence::Sequence(const nlohmann::json& json) : Nameable(json) {
     _duration = json["_duration"];
     for (const auto& x : json["_notes"]) {
