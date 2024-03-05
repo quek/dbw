@@ -3,19 +3,21 @@
 #include <imgui.h>
 #include "PianoRollWindow.h"
 
-Clip::Clip(const nlohmann::json& json) : Nameable(json), Thing(json["_time"], json["_duration"]) {
+Clip::Clip(const nlohmann::json& json) : Nameable(json) {
     _sequence = Sequence::create(json["_sequence"]);
+    _time = json["_time"];
+    _duration = json["_duration"];
 }
 
 Clip::Clip(double time, double duration) :
-    Thing(time, duration), _sequence(Sequence::create(duration)) {
+    _time(time), _duration(duration), _sequence(Sequence::create(duration)) {
 }
 
 Clip::Clip(double time, double duration, std::shared_ptr<Sequence> sequence) :
-    Thing(time, duration), _sequence(sequence) {
+    _time(time), _duration(duration), _sequence(sequence) {
 }
 
-Clip::Clip(std::shared_ptr<Sequence> sequence) : Thing(0.0f, sequence->_duration), _sequence(sequence) {
+Clip::Clip(std::shared_ptr<Sequence> sequence) : _time(0.0f), _duration(sequence->_duration), _sequence(sequence) {
 }
 
 std::string Clip::name() const {

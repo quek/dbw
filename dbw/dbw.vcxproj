@@ -167,6 +167,8 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="AudioEngineWindow.h" />
+    <ClInclude Include="AutomationClip.h" />
+    <ClInclude Include="AutomationPoint.h" />
     <ClInclude Include="AutomationTarget.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="BuiltinModule.h" />
@@ -208,6 +210,7 @@
     <ClInclude Include="MasterTrack.h" />
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="Note.h" />
+    <ClInclude Include="NoteClip.h" />
     <ClInclude Include="PianoRollWindow.h" />
     <ClInclude Include="PluginEditorWindow.h" />
     <ClInclude Include="ProcessBuffer.h" />
@@ -224,13 +227,13 @@
     <ClInclude Include="ClapModule.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="RackWindow.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMatrix.h" />
     <ClInclude Include="Sequence.h" />
     <ClInclude Include="SidechainInputSelector.h" />
     <ClInclude Include="TimelineCanvasMixin.h" />
-    <ClInclude Include="Thing.h" />
     <ClInclude Include="TimelineWindow.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Lane.h" />
@@ -256,6 +259,8 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
+    <ClCompile Include="AutomationClip.cpp" />
+    <ClCompile Include="AutomationPoint.cpp" />
     <ClCompile Include="AutomationTarget.cpp" />
     <ClCompile Include="BaseWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
@@ -298,6 +303,7 @@
     <ClCompile Include="MasterTrack.cpp" />
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="Note.cpp" />
+    <ClCompile Include="NoteClip.cpp" />
     <ClCompile Include="PianoRollWindow.cpp" />
     <ClCompile Include="PluginEditorWindow.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />
@@ -320,7 +326,6 @@
     <ClCompile Include="Sequence.cpp" />
     <ClCompile Include="SidechainInputSelector.cpp" />
     <ClCompile Include="TimelineCanvasMixin.cpp" />
-    <ClCompile Include="Thing.cpp" />
     <ClCompile Include="TimelineWindow.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="Lane.cpp" />
@@ -337,6 +342,9 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\imgui\misc\debuggers\imgui.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="dbw.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

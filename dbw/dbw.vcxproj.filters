@@ -71,7 +71,6 @@
     <ClCompile Include="Lane.cpp" />
     <ClCompile Include="TimelineCanvasMixin.cpp" />
     <ClCompile Include="PianoRollWindow.cpp" />
-    <ClCompile Include="Thing.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp">
       <Filter>VST3</Filter>
     </ClCompile>
@@ -157,6 +156,9 @@
       <Filter>command</Filter>
     </ClCompile>
     <ClCompile Include="AutomationTarget.cpp" />
+    <ClCompile Include="NoteClip.cpp" />
+    <ClCompile Include="AutomationClip.cpp" />
+    <ClCompile Include="AutomationPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -220,7 +222,6 @@
     <ClInclude Include="Lane.h" />
     <ClInclude Include="TimelineCanvasMixin.h" />
     <ClInclude Include="PianoRollWindow.h" />
-    <ClInclude Include="Thing.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="Command\OpenProject.h">
       <Filter>command</Filter>
@@ -300,6 +301,10 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="AutomationTarget.h" />
+    <ClInclude Include="NoteClip.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="AutomationClip.h" />
+    <ClInclude Include="AutomationPoint.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
@@ -326,5 +331,8 @@
     <Natvis Include="..\imgui\misc\debuggers\imgui.natvis">
       <Filter>imgui</Filter>
     </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="dbw.rc" />
   </ItemGroup>
 </Project>

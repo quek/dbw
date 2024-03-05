@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "Sequence.h"
-#include "Thing.h"
 #include "Neko.h"
 
 class PianoRollWindow;
 
-class Clip : public Nameable, public Thing {
+class Clip : public Nameable {
 public:
     inline static const char* TYPE = "clip";
     Clip(const nlohmann::json& json);
@@ -20,6 +19,8 @@ public:
 
     virtual nlohmann::json toJson() override;
 
+    double _time;
+    double _duration;
     std::shared_ptr<Sequence> _sequence;
 
     bool _selected = false;
