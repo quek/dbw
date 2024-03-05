@@ -13,6 +13,26 @@ nlohmann::json Note::toJson() {
     return json;
 }
 
+void Note::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) {
+    double sampleRate = gPreference.sampleRate;
+    if (begin < clipTime + clipDuration && clipTime < end) {
+        double noteTime = clipTime + _time;
+        if (begin <= noteTime && noteTime < end) {
+            int16_t channel = 0;
+            uint32_t sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer->_eventOut.noteOn(_key, channel, _velocity, sampleOffset);
+        }
+        double noteDuration = noteTime + _duration;
+        if (begin <= noteDuration && noteDuration < end) {
+            int16_t channel = 0;
+            uint32_t sampleOffsetDouble = (noteDuration - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer->_eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
+        }
+    }
+}
+
 void Note::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double sequenceDuration, double oneBeatSec) {
     double sampleRate = gPreference.sampleRate;
     if ((begin <= _time && _time < end) || (end < begin && (begin <= _time || _time < end))) {
@@ -39,3 +59,4 @@ void Note::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, doub
         processBuffer->_eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
     }
 }
+

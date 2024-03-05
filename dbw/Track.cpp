@@ -100,23 +100,8 @@ void Track::prepareEvent() {
             double begin = getComposer()->_playTime;
             double end = getComposer()->_nextPlayTime;
             // TODO Loop
-            if (begin < clipTime + clipDuration && clipTime < end) {
-                for (auto& note : clip->_sequence->_notes) {
-                    double noteTime = clipTime + note->_time;
-                    if (begin <= noteTime && noteTime < end) {
-                        int16_t channel = 0;
-                        uint32_t sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
-                        uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                        _processBuffer._eventOut.noteOn(note->_key, channel, note->_velocity, sampleOffset);
-                    }
-                    double noteDuration = noteTime + note->_duration;
-                    if (begin <= noteDuration && noteDuration < end) {
-                        int16_t channel = 0;
-                        uint32_t sampleOffsetDouble = (noteDuration - begin) * oneBeatSec * sampleRate;
-                        uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                        _processBuffer._eventOut.noteOff(note->_key, channel, 1.0f, sampleOffset);
-                    }
-                }
+            for (auto& note : clip->_sequence->_notes) {
+                note->prepareProcessBuffer(&_processBuffer, begin, end, clipTime, clipDuration, oneBeatSec);
             }
         }
     }
@@ -376,7 +361,7 @@ std::vector<Module*> Track::allModules() {
     return vec;
 }
 
-std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track){
+std::vector<std::unique_ptr<Track>>::iterator Track::findTrack(Track* track) {
     return std::ranges::find_if(_tracks, [track](const auto& x) { return x.get() == track; });
 }
 
