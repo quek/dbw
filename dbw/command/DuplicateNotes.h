@@ -3,9 +3,9 @@
 #include <vector>
 #include "../Command.h"
 #include "../Neko.h"
+#include "../Sequence.h"
 
 class Note;
-class Sequence;
 
 namespace command {
 class DuplicateNotes : public Command {

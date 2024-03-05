@@ -1,9 +1,8 @@
 #pragma once
 #include <set>
 #include "../Command.h"
-
-class Note;
-class Sequence;
+#include "../Note.h"
+#include "../Sequence.h"
 
 namespace command {
 

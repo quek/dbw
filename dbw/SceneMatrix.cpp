@@ -116,7 +116,6 @@ void SceneMatrix::render() {
 
 void SceneMatrix::process(Track* track) {
     double oneBeatSec = 60.0 / track->getComposer()->_bpm;
-    double sampleRate = gPreference.sampleRate;
     for (auto& scene : _scenes) {
         for (auto& lane : track->_lanes) {
             auto& clipSlot = lane->getClipSlot(scene.get());
@@ -130,30 +129,7 @@ void SceneMatrix::process(Track* track) {
             double begin = fmod(_composer->_playTime, sequenceDuration);
             double end = fmod(_composer->_nextPlayTime, sequenceDuration);
             for (auto& note : clipSlot->_clip->_sequence->_notes) {
-                double time = note->_time;
-                if ((begin <= time && time < end) || (end < begin && (begin <= time || time < end))) {
-                    int16_t channel = 0;
-                    uint32_t sampleOffsetDouble = 0;
-                    if (begin < end) {
-                        sampleOffsetDouble = (time - begin) * oneBeatSec * sampleRate;
-                    } else {
-                        sampleOffsetDouble = (time + sequenceDuration - begin) * oneBeatSec * sampleRate;
-                    }
-                    uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                    track->_processBuffer._eventOut.noteOn(note->_key, channel, note->_velocity, sampleOffset);
-                }
-                time = note->_time + note->_duration;
-                if ((begin <= time && time < end) || (end < begin && (begin <= time || time < end))) {
-                    int16_t channel = 0;
-                    uint32_t sampleOffsetDouble = 0;
-                    if (begin < end) {
-                        sampleOffsetDouble = (time - begin) * oneBeatSec * sampleRate;
-                    } else {
-                        sampleOffsetDouble = (time + sequenceDuration - begin) * oneBeatSec * sampleRate;
-                    }
-                    uint32_t sampleOffset = std::round(sampleOffsetDouble);
-                    track->_processBuffer._eventOut.noteOff(note->_key, channel, 1.0f, sampleOffset);
-                }
+                note->prepareProcessBuffer(&track->_processBuffer, begin, end, sequenceDuration, oneBeatSec);
             }
         }
     }

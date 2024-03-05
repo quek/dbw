@@ -4,45 +4,17 @@
 #include "PianoRollWindow.h"
 
 Clip::Clip(const nlohmann::json& json) : Nameable(json) {
-    _sequence = Sequence::create(json["_sequence"]);
     _time = json["_time"];
     _duration = json["_duration"];
 }
 
 Clip::Clip(double time, double duration) :
-    _time(time), _duration(duration), _sequence(Sequence::create(duration)) {
-}
-
-Clip::Clip(double time, double duration, std::shared_ptr<Sequence> sequence) :
-    _time(time), _duration(duration), _sequence(sequence) {
-}
-
-Clip::Clip(std::shared_ptr<Sequence> sequence) : _time(0.0f), _duration(sequence->_duration), _sequence(sequence) {
+    _time(time), _duration(duration){
 }
 
 std::string Clip::name() const {
     std::string name = (_sequence.use_count() > 1 ? "∞" : "") + _sequence->_name;
     return name;
-}
-
-void Clip::renderInScene(PianoRollWindow* pianoRoll) {
-    std::string sequenceName = name();
-
-    ImVec2 pos = ImGui::GetCursorScreenPos() + ImVec2(-4.0f, 1.0f);
-    ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing()) + ImVec2(8.0f, 0.0f);
-    ImGui::GetWindowDrawList()->AddRectFilled(pos, pos + size, IM_COL32(120, 120, 120, 255)); // 背景色を描画
-    ImGui::PushID(this);
-    if (ImGui::Selectable(sequenceName.c_str(), &_selected, ImGuiSelectableFlags_AllowDoubleClick)) {
-        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            pianoRoll->edit(this);
-        }
-    }
-    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-        ImGui::SetDragDropPayload("Sequence Matrix Clip", this, sizeof(*this));
-        ImGui::Text(sequenceName.c_str());
-        ImGui::EndDragDropSource();
-    }
-    ImGui::PopID();
 }
 
 nlohmann::json Clip::toJson() {

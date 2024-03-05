@@ -1,4 +1,5 @@
 #include "DeleteNotes.h"
+#include "../Note.h"
 #include "../Sequence.h"
 
 namespace command {

@@ -2,7 +2,7 @@
 #include <string>
 #include "TimelineCanvasMixin.h"
 
-class Clip;
+class NoteClip;
 class Command;
 class Composer;
 class Note;
@@ -12,7 +12,7 @@ public:
     PianoRollWindow(Composer* composer);
     virtual ~PianoRollWindow() = default;
     void render() override;
-    void edit(Clip* clip);
+    void edit(NoteClip* clip);
 
     void handleDoubleClick(Note* thing) override;
     Note* handleDoubleClick(double time, int16_t* lane) override;
@@ -37,7 +37,7 @@ public:
     float getLaneWidth(Note* thing) override;
 
     bool _show = false;
-    Clip* _clip = nullptr;
+    NoteClip* _clip = nullptr;
     std::string _scrollHereXKey = "";
 
 protected:

@@ -159,6 +159,9 @@
     <ClCompile Include="NoteClip.cpp" />
     <ClCompile Include="AutomationClip.cpp" />
     <ClCompile Include="AutomationPoint.cpp" />
+    <ClCompile Include="AutomationWindow.cpp" />
+    <ClCompile Include="Aa.cpp" />
+    <ClCompile Include="SequenceItem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -305,6 +308,9 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="AutomationClip.h" />
     <ClInclude Include="AutomationPoint.h" />
+    <ClInclude Include="AutomationWindow.h" />
+    <ClInclude Include="Aa.h" />
+    <ClInclude Include="SequenceItem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

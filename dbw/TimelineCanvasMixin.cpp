@@ -6,6 +6,7 @@
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "Lane.h"
+#include "Note.h"
 
 constexpr float GRID_SKIP_WIDTH = 20.0f;
 

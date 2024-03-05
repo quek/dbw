@@ -164,12 +164,14 @@
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h" />
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="Aa.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="AudioBuffer.h" />
     <ClInclude Include="AudioEngineWindow.h" />
     <ClInclude Include="AutomationClip.h" />
     <ClInclude Include="AutomationPoint.h" />
     <ClInclude Include="AutomationTarget.h" />
+    <ClInclude Include="AutomationWindow.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="BuiltinModule.h" />
     <ClInclude Include="Clip.h" />
@@ -232,6 +234,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMatrix.h" />
     <ClInclude Include="Sequence.h" />
+    <ClInclude Include="SequenceItem.h" />
     <ClInclude Include="SidechainInputSelector.h" />
     <ClInclude Include="TimelineCanvasMixin.h" />
     <ClInclude Include="TimelineWindow.h" />
@@ -256,12 +259,14 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
+    <ClCompile Include="Aa.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
     <ClCompile Include="AutomationClip.cpp" />
     <ClCompile Include="AutomationPoint.cpp" />
     <ClCompile Include="AutomationTarget.cpp" />
+    <ClCompile Include="AutomationWindow.cpp" />
     <ClCompile Include="BaseWindow.cpp" />
     <ClCompile Include="BuiltinModule.cpp" />
     <ClCompile Include="Clip.cpp" />
@@ -324,6 +329,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneMatrix.cpp" />
     <ClCompile Include="Sequence.cpp" />
+    <ClCompile Include="SequenceItem.cpp" />
     <ClCompile Include="SidechainInputSelector.cpp" />
     <ClCompile Include="TimelineCanvasMixin.cpp" />
     <ClCompile Include="TimelineWindow.cpp" />

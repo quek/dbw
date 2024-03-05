@@ -3,7 +3,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "App.h"
-#include "Clip.h"
+#include "NoteClip.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
@@ -36,7 +36,7 @@ void PianoRollWindow::render() {
     TimelineCanvasMixin::render();
 }
 
-void PianoRollWindow::edit(Clip* clip) {
+void PianoRollWindow::edit(NoteClip* clip) {
     _clip = clip;
     _show = true;
     _scrollHereXKey = "C4";
@@ -48,7 +48,7 @@ void PianoRollWindow::edit(Clip* clip) {
     }
 }
 
-void PianoRollWindow::handleDoubleClick(Note* thing) {
+void PianoRollWindow::handleDoubleClick(Note* /*thing*/) {
     // TODO
     //_composer->_commandManager.executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), thing));
 }

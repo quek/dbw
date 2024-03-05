@@ -3,12 +3,14 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "App.h"
+#include "AutomationClip.h"
 #include "AutomationTarget.h"
 #include "Clip.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
 #include "Lane.h"
+#include "NoteClip.h"
 #include "command/AddClips.h"
 #include "command/AddTrack.h"
 #include "command/DeleteClips.h"
@@ -116,7 +118,12 @@ void TimelineWindow::handleDoubleClick(Clip* clip) {
 }
 
 Clip* TimelineWindow::handleDoubleClick(double time, Lane* lane) {
-    Clip* clip = new Clip(time);
+    Clip* clip;
+    if (lane->_automationTarget) {
+     clip = new AutomationClip(time);
+    } else {
+        clip = new NoteClip(time);
+    }
     std::set<std::pair<Lane*, Clip*>> clips;
     clips.insert(std::pair(lane, clip));
     _composer->_commandManager.executeCommand(new command::AddClips(clips, true));
