@@ -49,7 +49,8 @@ void PianoRollWindow::edit(Clip* clip) {
 }
 
 void PianoRollWindow::handleDoubleClick(Note* thing) {
-    _composer->_commandManager.executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), thing));
+    // TODO
+    //_composer->_commandManager.executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), thing));
 }
 
 Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane) {

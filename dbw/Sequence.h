@@ -28,13 +28,3 @@ private:
     Sequence(double duration);
 };
 
-class DeleteNoteCommand : public Command {
-public:
-    DeleteNoteCommand(Sequence* sequence, Note* note, bool undoable = true);
-    void execute(Composer* composer);
-    void undo(Composer* composer);
-
-    Sequence* _sequence;
-    Note* _note;
-    std::unique_ptr<Note> _noteForUndo;
-};
