@@ -76,17 +76,6 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
     TimelineCanvasMixin::handleMouse(clipRectMin, clipRectMax);
 }
 
-void TimelineWindow::handleClickTimeline(double time, bool ctrl, bool alt) {
-    std::lock_guard<std::recursive_mutex> lock(_composer->app()->_mtx);
-    if (ctrl) {
-        _composer->_loopStartTime = time;
-    } else if (alt) {
-        _composer->_loopEndTime = time;
-    } else {
-        _composer->_playTime = time;
-    }
-}
-
 std::pair<std::set<Clip*>, Command*> TimelineWindow::copyThings(std::set<Clip*> srcs, bool redoable) {
     std::set<Clip*> clips;
     std::set<std::pair<Lane*, Clip*>> targets;

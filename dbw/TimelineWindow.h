@@ -18,7 +18,6 @@ public:
     Clip* handleDoubleClick(double time, Lane* lane) override;
     void handleMove(double oldTime, double newTime, Lane* oldLane, Lane* newLane) override;
     void handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRectMax) override;
-    void handleClickTimeline(double time, bool ctrl, bool alt) override;
     std::pair<std::set<Clip*>, Command*> copyThings(std::set<Clip*> clips, bool redoable) override;
     Command* deleteThings(std::set<Clip*>& clips, bool undoable) override;
     Command* duplicateThings(std::set<Clip*>& things, bool undoable) override;

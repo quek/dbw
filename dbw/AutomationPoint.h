@@ -9,7 +9,7 @@ public:
     void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) override;
 
 private:
-    double _value;
+    double _value = 0.0;
 
 };
 

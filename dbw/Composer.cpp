@@ -214,11 +214,11 @@ void Composer::computeLatency() {
     }
 }
 
-void Composer::editAutomationClip(AutomationClip* automationClip) {
+void Composer::editAutomationClip(AutomationClip* automationClip) const {
     _automationWindow->edit(automationClip);
 }
 
-void Composer::editNoteClip(NoteClip* noteClip) {
+void Composer::editNoteClip(NoteClip* noteClip) const {
     _pianoRollWindow->edit(noteClip);
 }
 

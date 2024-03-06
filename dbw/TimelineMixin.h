@@ -12,7 +12,7 @@ public:
     TimelineMixin(Composer* composer);
 
 protected:
-    virtual void handleClickTimeline(double time, bool ctrl, bool alt) = 0;
+    virtual void handleClickTimeline(double time, bool ctrl, bool alt);
     virtual void renderTimeline();
     virtual void renderGridBeat16th(ImDrawList* drawList, float beatY, float x1, float x2);
     virtual float offsetTop() const = 0;

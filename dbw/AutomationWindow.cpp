@@ -17,6 +17,7 @@ void AutomationWindow::render() {
     if (!_show) return;
 
     if (ImGui::Begin("Automation", &_show)) {
+        renderGridSnap();
         renderTimeline();
 
         handleShortcut();

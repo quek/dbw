@@ -42,8 +42,8 @@ public:
                              std::set<Module*>& processedModules,
                              std::map<Track*, Module*> waitingModule);
     void computeLatency();
-    void editAutomationClip(AutomationClip* automationClip);
-    void editNoteClip(NoteClip* noteClip);
+    void editAutomationClip(AutomationClip* automationClip) const;
+    void editNoteClip(NoteClip* noteClip) const;
     virtual nlohmann::json toJson() override;
 
     App* _app = nullptr;

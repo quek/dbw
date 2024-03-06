@@ -1,4 +1,5 @@
 #include "TimelineMixin.h"
+#include "App.h"
 #include "Composer.h"
 #include "Grid.h"
 #include "GuiUtil.h"
@@ -6,6 +7,17 @@
 constexpr float GRID_SKIP_WIDTH = 20.0f;
 
 TimelineMixin::TimelineMixin(Composer* composer) : _composer(composer) {
+}
+
+void TimelineMixin::handleClickTimeline(double time, bool ctrl, bool alt) {
+    std::lock_guard<std::recursive_mutex> lock(_composer->app()->_mtx);
+    if (ctrl) {
+        _composer->_loopStartTime = time;
+    } else if (alt) {
+        _composer->_loopEndTime = time;
+    } else {
+        _composer->_playTime = time;
+    }
 }
 
 void TimelineMixin::renderTimeline() {

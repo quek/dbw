@@ -15,5 +15,3 @@ SequenceItem* SequenceItem::create(const nlohmann::json& json) {
 SequenceItem::SequenceItem(double time, double duration) : _time(time), _duration(duration) {
 }
 
-SequenceItem::SequenceItem(const nlohmann::json& json) : Neko(json) {
-}
