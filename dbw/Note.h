@@ -7,6 +7,7 @@ class ProcessBuffer;
 class Note :  public SequenceItem {
 public:
     inline static const char* TYPE = "Note";
+    Note(const nlohmann::json& json);
     Note(double time = 0.0f, double duration = 1.0f, int16_t key = 64, double velocity = 0.8, int16_t channel = 0);
     virtual ~Note() = default;
     virtual nlohmann::json toJson() override;
