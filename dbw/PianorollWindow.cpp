@@ -41,8 +41,8 @@ void PianoRollWindow::edit(NoteClip* clip) {
     _show = true;
     _scrollHereXKey = "C4";
     _state = State{};
-    if (!clip->_sequence->_notes.empty()) {
-        _state._defaultThingDuration = clip->_sequence->_notes[0]->_duration;
+    if (!clip->_sequence->_items.empty()) {
+        _state._defaultThingDuration = clip->_sequence->_items[0]->_duration;
     } else {
         _state._defaultThingDuration = _grid->_unit;
     }
@@ -106,7 +106,7 @@ Command* PianoRollWindow::duplicateThings(std::set<Note*>& notes, bool undoable)
 
 void PianoRollWindow::prepareAllThings() {
     _allThings.clear();
-    for (auto& note : _clip->_sequence->_notes) {
+    for (auto& note : _clip->_sequence->_items) {
         _allThings.push_back((Note*)note.get());
     }
 }
@@ -158,6 +158,9 @@ float PianoRollWindow::getLaneWidth(Note* /*thing*/) {
 }
 
 void PianoRollWindow::handleShortcut() {
+    if (defineShortcut(ImGuiKey_Escape)) {
+        _show = false;
+    }
 
     TimelineCanvasMixin::handleShortcut();
 }

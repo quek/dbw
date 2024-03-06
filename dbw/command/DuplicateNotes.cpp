@@ -40,7 +40,7 @@ void command::DuplicateNotes::execute(Composer* composer) {
 
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
     for (auto& note : notes) {
-        sequence->_notes.emplace_back(note);
+        sequence->_items.emplace_back(note);
     }
 
 }
@@ -55,7 +55,7 @@ void command::DuplicateNotes::undo(Composer* composer) {
     for (const auto& noteId : _duplicatedNoteIds) {
         const Note* note = Neko::findByNekoId<Note>(noteId);
         if (note) {
-            std::erase_if(sequence->_notes, [note](auto& x) { return x.get() == note; });
+            std::erase_if(sequence->_items, [note](auto& x) { return x.get() == note; });
         }
     }
 }

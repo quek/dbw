@@ -61,6 +61,7 @@ public:
     double toSnapRound(const double time);
 
     Composer* _composer;
+    bool _show = false;
 
     enum ClickedPart {
         Top,

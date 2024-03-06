@@ -6,7 +6,6 @@ NoteClip::NoteClip(double time) : Clip(time) {
 }
 
 NoteClip::NoteClip(const nlohmann::json& json) : Clip(json) {
-    _sequence = Sequence::create(json["_sequence"]);
 }
 
 Clip* NoteClip::clone() {
@@ -14,7 +13,7 @@ Clip* NoteClip::clone() {
 }
 
 void NoteClip::edit(Composer* composer) {
-    composer->_pianoRollWindow->edit(this);
+    composer->editNoteClip(this);
 }
 
 void NoteClip::renderInScene(PianoRollWindow* pianoRoll) {

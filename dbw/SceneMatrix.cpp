@@ -128,7 +128,7 @@ void SceneMatrix::process(Track* track) {
             double sequenceDuration = clipSlot->_clip->_sequence->_duration;
             double begin = fmod(_composer->_playTime, sequenceDuration);
             double end = fmod(_composer->_nextPlayTime, sequenceDuration);
-            for (auto& note : clipSlot->_clip->_sequence->_notes) {
+            for (auto& note : clipSlot->_clip->_sequence->_items) {
                 note->prepareProcessBuffer(&track->_processBuffer, begin, end, 0, sequenceDuration, oneBeatSec);
             }
         }

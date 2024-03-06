@@ -27,6 +27,7 @@ Composer::Composer() :
     _sceneMatrix(std::make_unique<SceneMatrix>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
+    _automationWindow(std::make_unique<AutomationWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
     _commandWindow(std::make_unique<CommandWindow>(this)) {
 }
@@ -39,6 +40,7 @@ Composer::Composer(const nlohmann::json& json) :
     _rackWindow(std::make_unique<RackWindow>(this)),
     _timelineWindow(std::make_unique<TimelineWindow>(this)),
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
+    _automationWindow(std::make_unique<AutomationWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
     _commandWindow(std::make_unique<CommandWindow>(this)) {
 
@@ -65,6 +67,7 @@ void Composer::render() const {
     _sceneMatrix->render();
     _timelineWindow->render();
     _pianoRollWindow->render();
+    _automationWindow->render();
     _sideChainInputSelector->render();
     _commandWindow->render();
 }
@@ -126,6 +129,7 @@ void Composer::clear() {
     _commandManager.clear();
     _sceneMatrix->_scenes.clear();
     _pianoRollWindow->_show = false;
+    _automationWindow->_show = false;
 }
 
 void Composer::computeProcessOrder() {
@@ -208,6 +212,14 @@ void Composer::computeLatency() {
         }
         module->setComputedLatency(latency);
     }
+}
+
+void Composer::editAutomationClip(AutomationClip* automationClip) {
+    _automationWindow->edit(automationClip);
+}
+
+void Composer::editNoteClip(NoteClip* noteClip) {
+    _pianoRollWindow->edit(noteClip);
 }
 
 nlohmann::json Composer::toJson() {

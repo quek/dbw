@@ -8,5 +8,5 @@ void command::ComputeLatency::execute(Composer* composer) {
     composer->computeLatency();
 }
 
-void command::ComputeLatency::undo(Composer* composer) {
+void command::ComputeLatency::undo(Composer* ) {
 }

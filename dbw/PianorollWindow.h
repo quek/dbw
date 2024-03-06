@@ -36,7 +36,6 @@ public:
     float laneToScreenX(int16_t* lane);
     float getLaneWidth(Note* thing) override;
 
-    bool _show = false;
     NoteClip* _clip = nullptr;
     std::string _scrollHereXKey = "";
 

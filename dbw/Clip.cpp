@@ -6,17 +6,20 @@
 #include "PianoRollWindow.h"
 
 Clip* Clip::create(const nlohmann::json& json) {
-    if (json["type"] == "NoteClip") {
-        new NoteClip(json);
-    } else if (json["type"] == "AutomationClip") {
-        new AutomationClip(json);
+    if (json["type"] == NoteClip::TYPE) {
+        return new NoteClip(json);
     }
+    if (json["type"] == AutomationClip::TYPE) {
+        return new AutomationClip(json);
+    }
+    assert(false);
     return nullptr;
 }
 
 Clip::Clip(const nlohmann::json& json) : Nameable(json) {
     _time = json["_time"];
     _duration = json["_duration"];
+    _sequence = Sequence::create(json["_sequence"]);
 }
 
 Clip::Clip(double time, double duration) :

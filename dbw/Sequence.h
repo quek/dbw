@@ -42,16 +42,16 @@ public:
         json["_duration"] = _duration;
 
         nlohmann::json notes = nlohmann::json::array();
-        for (const auto& note : _notes) {
+        for (const auto& note : _items) {
             notes.emplace_back(note->toJson());
         }
-        json["_notes"] = notes;
+        json["_items"] = notes;
 
         return json;
     }
 
 
-    std::vector<std::unique_ptr<SequenceItem>> _notes;
+    std::vector<std::unique_ptr<SequenceItem>> _items;
     double _duration;
 
     static int _no;
@@ -61,8 +61,8 @@ private:
     Sequence() = default;
     Sequence(const nlohmann::json& json) : Nameable(json) {
         _duration = json["_duration"];
-        for (const auto& x : json["_notes"]) {
-            _notes.emplace_back(SequenceItem::create(x));
+        for (const auto& x : json["_items"]) {
+            _items.emplace_back(SequenceItem::create(x));
         }
     }
     Sequence(double duration) : Nameable("Seq" + std::to_string(++_no)), _duration(duration) {

@@ -20,7 +20,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
     prepareAllThings();
 
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(FLT_MAX, FLT_MAX));
-    if (ImGui::Begin(windowName().c_str(), nullptr, ImGuiWindowFlags_NoScrollbar)) {
+    if (ImGui::Begin(windowName().c_str(), &_show, ImGuiWindowFlags_NoScrollbar)) {
         renderGridSnap();
 
         ImGui::SameLine();

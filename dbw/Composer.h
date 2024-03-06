@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <set>
+#include "AutomationWindow.h"
 #include "ProcessBuffer.h"
 #include "Command.h"
 #include "CommandWindow.h"
@@ -17,6 +18,8 @@
 
 class App;
 class AudioEngine;
+class AutomationClip;
+class NoteClip;
 
 class Composer : public Nameable {
 public:
@@ -39,6 +42,8 @@ public:
                              std::set<Module*>& processedModules,
                              std::map<Track*, Module*> waitingModule);
     void computeLatency();
+    void editAutomationClip(AutomationClip* automationClip);
+    void editNoteClip(NoteClip* noteClip);
     virtual nlohmann::json toJson() override;
 
     App* _app = nullptr;
@@ -63,6 +68,7 @@ public:
     std::unique_ptr<SceneMatrix> _sceneMatrix;
     std::unique_ptr<TimelineWindow> _timelineWindow;
     std::unique_ptr<PianoRollWindow> _pianoRollWindow;
+    std::unique_ptr<AutomationWindow> _automationWindow;
     std::unique_ptr<SidechainInputSelector> _sideChainInputSelector;
     std::unique_ptr<CommandWindow> _commandWindow;
 private:

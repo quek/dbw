@@ -13,18 +13,18 @@ command::AddNotes::~AddNotes() {
 
 void command::AddNotes::execute(Composer*) {
     for (auto& note : _notes) {
-        _sequence->_notes.emplace_back(std::move(note));
+        _sequence->_items.emplace_back(std::move(note));
     }
     _notes.clear();
 }
 
 void command::AddNotes::undo(Composer*) {
     for (auto& note : _targets) {
-        auto it = std::ranges::find_if(_sequence->_notes, [&note](const auto& x) { return x.get() == note; });
-        if (it != _sequence->_notes.end()) {
+        auto it = std::ranges::find_if(_sequence->_items, [&note](const auto& x) { return x.get() == note; });
+        if (it != _sequence->_items.end()) {
             Note* p = dynamic_cast<Note*>(it->release());
             _notes.emplace_back(p);
-            _sequence->_notes.erase(it);
+            _sequence->_items.erase(it);
         }
     }
 }
