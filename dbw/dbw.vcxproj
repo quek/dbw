@@ -237,6 +237,7 @@
     <ClInclude Include="SequenceItem.h" />
     <ClInclude Include="SidechainInputSelector.h" />
     <ClInclude Include="TimelineCanvasMixin.h" />
+    <ClInclude Include="TimelineMixin.h" />
     <ClInclude Include="TimelineWindow.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Lane.h" />
@@ -332,6 +333,7 @@
     <ClCompile Include="SequenceItem.cpp" />
     <ClCompile Include="SidechainInputSelector.cpp" />
     <ClCompile Include="TimelineCanvasMixin.cpp" />
+    <ClCompile Include="TimelineMixin.cpp" />
     <ClCompile Include="TimelineWindow.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="Lane.cpp" />

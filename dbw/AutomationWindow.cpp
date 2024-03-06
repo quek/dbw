@@ -1,7 +1,11 @@
 #include "AutomationWindow.h"
 #include "AutomationClip.h"
+#include "Grid.h"
 
-AutomationWindow::AutomationWindow(Composer* composer) : _composer(composer) {
+AutomationWindow::AutomationWindow(Composer* composer) : TimelineMixin(composer) {
+    _zoomX = 1.0f;
+    _zoomY = 40.0f;
+    _grid = gGrids[2].get();
 }
 
 void AutomationWindow::edit(AutomationClip* clip) {
@@ -13,7 +17,7 @@ void AutomationWindow::render() {
     if (!_show) return;
 
     if (ImGui::Begin("Automation", &_show)) {
-        ImGui::Text(_clip->name().c_str());
+        renderTimeline();
 
         handleShortcut();
     }
