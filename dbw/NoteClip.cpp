@@ -1,4 +1,5 @@
 #include "NoteClip.h"
+#include "Composer.h"
 #include "PianorollWindow.h"
 
 NoteClip::NoteClip(double time) : Clip(time) {
@@ -6,6 +7,14 @@ NoteClip::NoteClip(double time) : Clip(time) {
 
 NoteClip::NoteClip(const nlohmann::json& json) : Clip(json) {
     _sequence = Sequence::create(json["_sequence"]);
+}
+
+Clip* NoteClip::clone() {
+    return new NoteClip(*this);
+}
+
+void NoteClip::edit(Composer* composer) {
+    composer->_pianoRollWindow->edit(this);
 }
 
 void NoteClip::renderInScene(PianoRollWindow* pianoRoll) {
@@ -26,5 +35,11 @@ void NoteClip::renderInScene(PianoRollWindow* pianoRoll) {
         ImGui::EndDragDropSource();
     }
     ImGui::PopID();
+}
+
+nlohmann::json NoteClip::toJson() {
+    nlohmann::json json = Clip::toJson();
+    json["type"] = TYPE;
+    return json;
 }
 

@@ -107,7 +107,7 @@ Command* PianoRollWindow::duplicateThings(std::set<Note*>& notes, bool undoable)
 void PianoRollWindow::prepareAllThings() {
     _allThings.clear();
     for (auto& note : _clip->_sequence->_notes) {
-        _allThings.push_back(note.get());
+        _allThings.push_back((Note*)note.get());
     }
 }
 

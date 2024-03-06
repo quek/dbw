@@ -10,7 +10,8 @@ void DeleteNotes::execute(Composer*) {
     for (auto& note : _targets) {
         auto it = std::ranges::find_if(_sequence->_notes, [&note](const auto& x) { return x.get() == note; });
         if (it != _sequence->_notes.end()) {
-            _notes.emplace_back(std::move(*it));
+            Note* p = dynamic_cast<Note*>((*it).release());
+            _notes.emplace_back(p);
             _sequence->_notes.erase(it);
         }
     }

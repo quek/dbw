@@ -6,7 +6,7 @@
 
 Lane::Lane(const nlohmann::json& json) : Nameable(json) {
     for (const auto& x : json["_clips"]) {
-        _clips.emplace_back(new Clip(x));
+        _clips.emplace_back(Clip::create(x));
     }
 
     for (const auto& x : json["_sceneClipSlotMap"].items()) {

@@ -64,7 +64,7 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
     const ImGuiPayload* payload = ImGui::GetDragDropPayload();
     if (payload && payload->IsDataType("Sequence Matrix Clip")) {
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            Clip* clip = new Clip(*(const Clip*)payload->Data);
+            Clip* clip = ((Clip*)payload->Data)->clone();
             float time = timeFromMousePos(0.0f, false);
             Lane* lane = laneFromPos(mousePos);
             clip->_time = time;
@@ -90,7 +90,7 @@ std::pair<std::set<Clip*>, Command*> TimelineWindow::copyThings(std::set<Clip*> 
     std::set<Clip*> clips;
     std::set<std::pair<Lane*, Clip*>> targets;
     for (auto& it : srcs) {
-        Clip* clip = new Clip(*it);
+        Clip* clip = it->clone();
         clips.insert(clip);
         targets.insert(std::pair(_clipLaneMap[it], clip));
     }
@@ -114,7 +114,7 @@ Command* TimelineWindow::duplicateThings(std::set<Clip*>& clips, bool undoable) 
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
-    _composer->_pianoRollWindow->edit(clip);
+    clip->edit(_composer);
 }
 
 Clip* TimelineWindow::handleDoubleClick(double time, Lane* lane) {

@@ -92,7 +92,6 @@ void Track::prepare(unsigned long framesPerBuffer) {
 
 void Track::prepareEvent() {
     double oneBeatSec = 60.0 / getComposer()->_bpm;
-    double sampleRate = gPreference.sampleRate;
     for (auto& lane : _lanes) {
         for (auto& clip : lane->_clips) {
             double clipTime = clip->_time;

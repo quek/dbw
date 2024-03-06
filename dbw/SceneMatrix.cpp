@@ -83,8 +83,8 @@ void SceneMatrix::render() {
                     clipSlot->render(_composer);
                     if (ImGui::BeginDragDropTarget()) {
                         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
-                            const Clip* clip = (Clip*)payload->Data;
-                            clipSlot->_clip.reset(new Clip(*clip));
+                            Clip* clip = (Clip*)payload->Data;
+                            clipSlot->_clip.reset(clip->clone());
                         }
                         ImGui::EndDragDropTarget();
                     }
@@ -96,8 +96,8 @@ void SceneMatrix::render() {
                         clipSlot->render(_composer);
                         if (ImGui::BeginDragDropTarget()) {
                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip")) {
-                                const Clip* clip = (Clip*)payload->Data;
-                                clipSlot->_clip.reset(new Clip(*clip));
+                                Clip* clip = (Clip*)payload->Data;
+                                clipSlot->_clip.reset(clip->clone());
                             }
                             ImGui::EndDragDropTarget();
                         }
@@ -129,7 +129,7 @@ void SceneMatrix::process(Track* track) {
             double begin = fmod(_composer->_playTime, sequenceDuration);
             double end = fmod(_composer->_nextPlayTime, sequenceDuration);
             for (auto& note : clipSlot->_clip->_sequence->_notes) {
-                note->prepareProcessBuffer(&track->_processBuffer, begin, end, sequenceDuration, oneBeatSec);
+                note->prepareProcessBuffer(&track->_processBuffer, begin, end, 0, sequenceDuration, oneBeatSec);
             }
         }
     }

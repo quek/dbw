@@ -24,7 +24,7 @@ void command::DuplicateClips::execute(Composer* composer) {
         if (clip == nullptr) {
             continue;
         }
-        Clip* duplicatedClip = new Clip(*clip);
+        Clip* duplicatedClip = clip->clone();
         _landIdAndduplicatedClipId.emplace_back(laneId, duplicatedClip->getNekoId());
         laneAndClips.emplace_back(lane, duplicatedClip);
         duplicatedClips.push_back(duplicatedClip);

@@ -7,13 +7,15 @@ class PianoRollWindow;
 
 class Clip : public Nameable {
 public:
-    inline static const char* TYPE = "clip";
+    static Clip* create(const nlohmann::json& json);
     Clip(const nlohmann::json& json);
     Clip(double time = 0.0, double duration = 16.0);
     virtual ~Clip() = default;
-
+    virtual Clip* clone() = 0;
+    virtual void edit(Composer* composer) = 0;
     virtual std::string name() const;
     std::shared_ptr<Sequence>& getSequence() { return _sequence; }
+    virtual void renderInScene(PianoRollWindow* pianoRollWindow) = 0;
 
     virtual nlohmann::json toJson() override;
 

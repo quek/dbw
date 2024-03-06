@@ -11,10 +11,7 @@ public:
     virtual ~Note() = default;
     virtual nlohmann::json toJson() override;
     void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) override;
-    void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double sequenceDuration, double oneBeatSec) override;
 
-    double _time;
-    double _duration;
     int16_t _channel;
     int16_t _key;
     double _velocity;

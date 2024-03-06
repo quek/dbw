@@ -5,9 +5,13 @@ class PianoWindow;
 
 class NoteClip : public Clip {
 public:
-    NoteClip(double time);
+    inline static const char* TYPE = "NoteClip";
+    NoteClip(double time = 0);
     NoteClip(const nlohmann::json& json);
-    void renderInScene(PianoRollWindow* pianoRollWindow);
+    Clip* clone() override;
+    void edit(Composer* composer) override;
+    void renderInScene(PianoRollWindow* pianoRollWindow) override;
+    virtual nlohmann::json toJson() override;
 
 private:
 };

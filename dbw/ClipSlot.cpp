@@ -2,6 +2,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include "Composer.h"
+#include "NoteClip.h"
 #include "Track.h"
 
 ClipSlot::ClipSlot() {
@@ -9,7 +10,7 @@ ClipSlot::ClipSlot() {
 
 ClipSlot::ClipSlot(const nlohmann::json& json) : Nameable(json) {
     if (json.contains("_clip")) {
-        _clip.reset(new Clip(json["_clip"]));
+        _clip.reset(Clip::create(json["_clip"]));
     }
 }
 
@@ -32,7 +33,7 @@ void ClipSlot::render(Composer* composer) {
         ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
         if (ImGui::Button("+", ImVec2(-FLT_MIN, 0.0f))) {
             // TODO undo
-            _clip = std::make_unique<Clip>();
+            _clip.reset(new NoteClip());
         }
         ImGui::PopStyleColor();
     }
