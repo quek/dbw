@@ -525,7 +525,12 @@ void Vst3Module::renderContent() {
                 startEditIds.emplace_back(id, normalizedValue);
             }
         }
-        std::string tooltip = std::format("{} {} {}{}({})", _name, title, strValue, units, param->stepCount);
+        //std::string tooltip = std::format("{} {} {}{}({})", _name, title, strValue, units, param->stepCount);
+        double plainValue = _controller->normalizedParamToPlain(id, _parameterValueMap[id]);
+        Steinberg::Vst::String128 str128;
+        _controller->getParamStringByValue(id, _parameterValueMap[id], str128);
+        std::string s128 = VST3::StringConvert::convert(str128);
+        std::string tooltip = std::format("{} {} {}{}({}) -- {} -- {}", _name, title, strValue, units, param->stepCount, plainValue, s128);
         ImGui::SetItemTooltip(tooltip.c_str());
         if (ImGui::IsItemDeactivated()) {
             endEditIds.push_back(id);
