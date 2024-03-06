@@ -498,29 +498,42 @@ void Vst3Module::renderContent() {
 
     ImGuiStyle& style = ImGui::GetStyle();
     float contentRegionMaxX = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-    float knobSize = 30.0f;
+    float knobSize = 35.0f;
     std::vector<std::pair<Vst::ParamID, float>> startEditIds;
     std::vector<Vst::ParamID> endEditIds;
     bool isFirstLine = true;
     for (auto id : _editedParamIdList) {
         ImGui::PushID(id);
         auto param = getParameterInfo(id);
-        float value = static_cast<float>(_parameterValueMap[id]);
         std::string title = VST3::StringConvert::convert(param->shortTitle);
+        std::string units = VST3::StringConvert::convert(param->units);
+        std::string strValue;
         if (title.empty()) {
             title = VST3::StringConvert::convert(param->title);
         }
-        if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, nullptr, ImGuiKnobVariant_Tick, knobSize, 0, 10)) {
-            startEditIds.emplace_back(id, value);
+        if (param->stepCount == 0) {
+            float value = static_cast<float>(_parameterValueMap[id]);
+            strValue = std::to_string(value);
+            if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, std::format("%0.3f{}", units).c_str(), ImGuiKnobVariant_Tick, knobSize)) {
+                startEditIds.emplace_back(id, value);
+            }
+        } else {
+            int value = getParameterDiscreteValue(id);
+            strValue = std::to_string(value);
+            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->stepCount, 1.0f, std::format("%d{}", units).c_str(), ImGuiKnobVariant_Tick, knobSize)) {
+                double normalizedValue = value / (double)param->stepCount;
+                startEditIds.emplace_back(id, normalizedValue);
+            }
         }
+        std::string tooltip = std::format("{} {} {}{}({})", _name, title, strValue, units, param->stepCount);
+        ImGui::SetItemTooltip(tooltip.c_str());
         if (ImGui::IsItemDeactivated()) {
             endEditIds.push_back(id);
         }
-        ImGui::SetItemTooltip(std::format("{} {}", title, value).c_str());
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
             AutomationTarget automationTarget(this, id);
             ImGui::SetDragDropPayload(std::format(DDP_AUTOMATION_TARGET, _track->getNekoId()).c_str(), &automationTarget, sizeof(AutomationTarget));
-            ImGui::Text(std::format("{} {}", _name, title).c_str());
+            ImGui::Text(tooltip.c_str());
             ImGui::EndDragDropSource();
         }
         ImGui::PopID();
@@ -619,6 +632,13 @@ Steinberg::Vst::ParameterInfo* Vst3Module::getParameterInfo(Steinberg::Vst::Para
         return &_parameterInfoMap[id];
     }
     return nullptr;
+}
+
+int Vst3Module::getParameterDiscreteValue(Vst::ParamID id) {
+    auto param = getParameterInfo(id);
+    double normalized = _parameterValueMap[id];
+    int discreteValue = min(param->stepCount, normalized * (param->stepCount + 1));
+    return discreteValue;
 }
 
 void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {

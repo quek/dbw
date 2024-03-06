@@ -31,6 +31,8 @@ public:
     void prepareParameterInfo();
     void prepareParameterValue();
     Vst::ParameterInfo* getParameterInfo(Vst::ParamID);
+    int getParameterDiscreteValue(Vst::ParamID id);
+
     void beginEdit(Vst::ParamID);
     void performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void endEdit(Vst::ParamID);
