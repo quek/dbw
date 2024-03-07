@@ -11,8 +11,8 @@ Clip* AutomationClip::clone() {
     return new AutomationClip(*this);
 }
 
-void AutomationClip::edit(Composer* composer) {
-    composer->editAutomationClip(this);
+void AutomationClip::edit(Composer* composer, Lane* lane) {
+    composer->editAutomationClip(this, lane);
 }
 
 std::string AutomationClip::name() const {

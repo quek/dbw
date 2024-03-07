@@ -7,6 +7,7 @@
 #include "Nameable.h"
 #include "ProcessBuffer.h"
 #include "Neko.h"
+#include "Param.h"
 
 class Track;
 
@@ -31,7 +32,7 @@ public:
     ProcessBuffer& getProcessBuffer();
     virtual uint32_t getComputedLatency();
     virtual void setComputedLatency(uint32_t computedLatency);
-    virtual std::string getParamName(uint32_t) { return "TODO"; };
+    std::unique_ptr<Param>& getParam(uint32_t paramId);
 
     static Module* create(std::string& type, std::string& id);
     static Module* fromJson(const nlohmann::json&);
@@ -49,5 +50,6 @@ public:
 
 protected:
     bool _isStarting = false;
+    std::map<uint32_t, std::unique_ptr<Param>> _idParamMap;
 
 };

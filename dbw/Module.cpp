@@ -110,6 +110,10 @@ void Module::setComputedLatency(uint32_t computedLatency) {
     }
 }
 
+std::unique_ptr<Param>& Module::getParam(uint32_t paramId) {
+    return _idParamMap[paramId];
+}
+
 Module* Module::create(std::string& type, std::string& id) {
     if (type == "builtin") {
         return BuiltinModule::create(id);

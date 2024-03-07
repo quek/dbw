@@ -28,3 +28,7 @@ Module* AutomationTarget::getModule() {
 std::string AutomationTarget::getParamName() {
     return getModule()->getParamName(getParamId());
 }
+
+Param* AutomationTarget::getParam(uint32_t paramId) {
+    return _module->getParam(paramId);
+}

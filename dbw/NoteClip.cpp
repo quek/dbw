@@ -12,7 +12,7 @@ Clip* NoteClip::clone() {
     return new NoteClip(*this);
 }
 
-void NoteClip::edit(Composer* composer) {
+void NoteClip::edit(Composer* composer, Lane*) {
     composer->editNoteClip(this);
 }
 

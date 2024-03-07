@@ -24,7 +24,6 @@
 #include "Project.h"
 #include "Track.h"
 #include "util.h"
-#include "command/ChangeVst3ParameterValue.h"
 #include "command/ComputeLatency.h"
 
 Vst3Module::Vst3Module(const nlohmann::json& json) : Module(json), _pluginContext(this) {
@@ -557,15 +556,9 @@ void Vst3Module::renderContent() {
 
     // beginEdit なしで performEdit が呼ばれたものの処理
     auto now = std::chrono::high_resolution_clock::now();
-    std::erase_if(_paramEdtiStatusMap, [this, &now](const auto& pair) {
-        auto status = pair.second;
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - status._performAt).count();
-        if (elapsed < 1000) {
-            return false;
-        }
-        commitParameterValue(status);
-        return true;
-    });
+    for (auto [id, param] : _idParamMap) {
+        param->maybeCommit(now);
+    }
 }
 
 void Vst3Module::onResize(int width, int height) {
@@ -604,31 +597,21 @@ void Vst3Module::loadState(std::filesystem::path path) {
 }
 
 void Vst3Module::prepareParameterInfo() {
-    _parameterInfoMap.clear();
+    _idParamMap.clear();
     for (Steinberg::int32 i = 0; i < _controller->getParameterCount(); ++i) {
-        Steinberg::Vst::ParameterInfo parameterInfo = {};
+        Steinberg::Vst::ParameterInfo parameterInfo;
         _controller->getParameterInfo(i, parameterInfo);
         Vst::ParamID id = parameterInfo.id;
-        _parameterInfoMap[id] = parameterInfo;
+        std::unique_ptr<Param> param(new Vst3Param(this, parameterInfo, _controller->getParamNormalized(id)));
+        _idParamMap[id] = std::move(param);
     }
-
-    prepareParameterValue();
 }
 
 void Vst3Module::prepareParameterValue() {
-    _parameterValueMap.clear();
-    for (auto& [id, _] : _parameterInfoMap) {
-        _parameterValueMap[id] = _controller->getParamNormalized(id);
+    for (auto& [id, param] : _idParamMap) {
+        param->setValue(_controller->getParamNormalized(id));
+        param->clearEditStatus();
     }
-    _paramEdtiStatusMap.clear();
-}
-
-Steinberg::Vst::ParameterInfo* Vst3Module::getParameterInfo(Steinberg::Vst::ParamID id) {
-    if (_parameterInfoMap.contains(id)) {
-
-        return &_parameterInfoMap[id];
-    }
-    return nullptr;
 }
 
 int Vst3Module::getParameterDiscreteValue(Vst::ParamID id) {
@@ -656,65 +639,20 @@ std::string Vst3Module::getParamStringByValue(Vst::ParamID id, Vst::ParamValue v
 }
 
 void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
-    logger->debug("beginEdit {}", id);
-    auto paramInfo = getParameterInfo(id);
-    if (paramInfo == nullptr) {
-        return;
-    }
-    if (!_paramEdtiStatusMap.contains(id)) {
-        _paramEdtiStatusMap[id] = ParamEditStatus{
-            ._paramInfo = paramInfo,
-            ._beforeValue = _parameterValueMap[id],
-            ._beginEditCalled = true,
-            ._performAt = std::chrono::high_resolution_clock::now(),
-        };
-    }
+    getParam(id)->beginEdit();
 }
 
 void Vst3Module::performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized) {
-    logger->debug("performEdit {} {}", id, valueNormalized);
-    updateEditedParamIdList(id);
-    if (_paramEdtiStatusMap.contains(id)) {
-        _paramEdtiStatusMap[id]._performAt = std::chrono::high_resolution_clock::now();
-    } else {
-        // マウスホイールなどで beginEdit が呼ばれない場合
-        auto paramInfo = getParameterInfo(id);
-        if (paramInfo == nullptr) {
-            return;
-        }
-        _paramEdtiStatusMap[id] = ParamEditStatus{
-            ._paramInfo = paramInfo,
-            ._beforeValue = _parameterValueMap[id],
-            ._beginEditCalled = false,
-            ._performAt = std::chrono::high_resolution_clock::now(),
-        };
-    }
-    addParameterChange(id, valueNormalized);
-    updateParameterValue(id, valueNormalized);
+    getParam(id)->performEdit(valueNormalized);
 }
 
 void Vst3Module::endEdit(Steinberg::Vst::ParamID id) {
-    logger->debug("endEdit {}", id);
-    if (!_paramEdtiStatusMap.contains(id)) {
-        return;
-    }
-    auto& status = _paramEdtiStatusMap[id];
-    commitParameterValue(status);
-    _paramEdtiStatusMap.erase(id);
-}
-
-void Vst3Module::commitParameterValue(ParamEditStatus& status) {
-    Vst::ParamID id = status._paramInfo->id;
-    Vst::ParamValue before = status._beforeValue;
-    Vst::ParamValue after = _parameterValueMap[id];
-    if (_track != nullptr) {
-        _track->getComposer()->_commandManager.executeCommand(new command::ChangeVst3ParameterValue(this, id, before, after));
-    }
+    getParam(id)->endEdit();
 }
 
 Vst::ParamValue Vst3Module::updateParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized) {
-    Vst::ParamValue oldValue = _parameterValueMap[id];
-    _parameterValueMap[id] = valueNormalized;
+    Vst::ParamValue oldValue = getParam(id)->getValue();
+    getParam(id)->setValue(valueNormalized);
     return oldValue;
 }
 
@@ -756,15 +694,6 @@ void Vst3Module::addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormal
     int32 sampleOffset = 0;
     queue->addPoint(sampleOffset, valueNormalized, index);
 }
-
-std::string Vst3Module::getParamName(uint32_t id) {
-    auto parameterInfo = getParameterInfo(id);
-    if (parameterInfo == nullptr) {
-        return "";
-    }
-    return VST3::StringConvert::convert(parameterInfo->title);
-}
-
 
 nlohmann::json Vst3Module::toJson() {
     nlohmann::json json = Module::toJson();

@@ -4,6 +4,7 @@
 #include "Neko.h"
 
 class Module;
+class Param;
 
 class AutomationTarget {
 public:
@@ -13,6 +14,7 @@ public:
     Module* getModule();
     uint32_t getParamId() { return _paramId; }
     std::string getParamName();
+    Param* getParam(uint32_t paramId);
 
 private:
     Module* _module;

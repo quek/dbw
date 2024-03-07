@@ -3,6 +3,7 @@
 #include "Sequence.h"
 #include "Neko.h"
 
+class Lane;
 class PianoRollWindow;
 
 class Clip : public Nameable {
@@ -12,7 +13,7 @@ public:
     Clip(double time = 0.0, double duration = 16.0);
     virtual ~Clip() = default;
     virtual Clip* clone() = 0;
-    virtual void edit(Composer* composer) = 0;
+    virtual void edit(Composer* composer, Lane* lane) = 0;
     virtual std::string name() const;
     std::shared_ptr<Sequence>& getSequence() { return _sequence; }
     virtual void renderInScene(PianoRollWindow* pianoRollWindow) = 0;

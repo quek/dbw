@@ -213,6 +213,7 @@
     <ClInclude Include="Nameable.h" />
     <ClInclude Include="Note.h" />
     <ClInclude Include="NoteClip.h" />
+    <ClInclude Include="Param.h" />
     <ClInclude Include="PianoRollWindow.h" />
     <ClInclude Include="PluginEditorWindow.h" />
     <ClInclude Include="ProcessBuffer.h" />
@@ -245,6 +246,7 @@
     <ClInclude Include="Vst3Context.h" />
     <ClInclude Include="Vst3Module.h" />
     <ClInclude Include="Neko.h" />
+    <ClInclude Include="Vst3Param.h" />
     <ClInclude Include="ZoomMixin.h" />
   </ItemGroup>
   <ItemGroup>
@@ -310,6 +312,7 @@
     <ClCompile Include="Nameable.cpp" />
     <ClCompile Include="Note.cpp" />
     <ClCompile Include="NoteClip.cpp" />
+    <ClCompile Include="Param.cpp" />
     <ClCompile Include="PianoRollWindow.cpp" />
     <ClCompile Include="PluginEditorWindow.cpp" />
     <ClCompile Include="ProcessBuffer.cpp" />
@@ -341,6 +344,7 @@
     <ClCompile Include="Vst3Context.cpp" />
     <ClCompile Include="Vst3Module.cpp" />
     <ClCompile Include="Neko.cpp" />
+    <ClCompile Include="Vst3Param.cpp" />
     <ClCompile Include="ZoomMixin.cpp" />
   </ItemGroup>
   <ItemGroup>

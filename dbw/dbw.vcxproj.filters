@@ -163,6 +163,8 @@
     <ClCompile Include="Aa.cpp" />
     <ClCompile Include="SequenceItem.cpp" />
     <ClCompile Include="TimelineMixin.cpp" />
+    <ClCompile Include="Param.cpp" />
+    <ClCompile Include="Vst3Param.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -313,6 +315,8 @@
     <ClInclude Include="Aa.h" />
     <ClInclude Include="SequenceItem.h" />
     <ClInclude Include="TimelineMixin.h" />
+    <ClInclude Include="Param.h" />
+    <ClInclude Include="Vst3Param.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

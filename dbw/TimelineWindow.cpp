@@ -104,7 +104,7 @@ Command* TimelineWindow::duplicateThings(std::set<Clip*>& clips, bool undoable) 
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip) {
-    clip->edit(_composer);
+    clip->edit(_composer, _clipLaneMap[clip]);
 }
 
 Clip* TimelineWindow::handleDoubleClick(double time, Lane* lane) {

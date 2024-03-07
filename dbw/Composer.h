@@ -19,6 +19,7 @@
 class App;
 class AudioEngine;
 class AutomationClip;
+class Lane;
 class NoteClip;
 
 class Composer : public Nameable {
@@ -42,7 +43,7 @@ public:
                              std::set<Module*>& processedModules,
                              std::map<Track*, Module*> waitingModule);
     void computeLatency();
-    void editAutomationClip(AutomationClip* automationClip) const;
+    void editAutomationClip(AutomationClip* automationClip, Lane* lane) const;
     void editNoteClip(NoteClip* noteClip) const;
     virtual nlohmann::json toJson() override;
 
