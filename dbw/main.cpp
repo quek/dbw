@@ -274,6 +274,7 @@ int main(int, char**) {
 
     for (auto& composer : app->composers()) {
         composer->stop();
+        composer->clear();
     }
     app->audioEngine()->stop();
     app.reset();
