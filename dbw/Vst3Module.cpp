@@ -506,31 +506,32 @@ void Vst3Module::renderContent() {
         ImGui::PushID(id);
         auto param = getParameterInfo(id);
         std::string title = VST3::StringConvert::convert(param->shortTitle);
-        std::string units = VST3::StringConvert::convert(param->units);
-        std::string strValue;
         if (title.empty()) {
             title = VST3::StringConvert::convert(param->title);
         }
+        Steinberg::Vst::String128 paramString128;
+        _controller->getParamStringByValue(id, _parameterValueMap[id], paramString128);
+        std::string paramString = VST3::StringConvert::convert(paramString128);
+        // Khz のプラグイン ナローノンブレイクスペース U+202F が入っていて化けるので
+        size_t startPos = 0;
+        while ((startPos = paramString.find("\xE2\x80\xAF", startPos)) != std::string::npos) {
+            paramString.replace(startPos, 3, " ");
+            startPos += 1;
+        }
         if (param->stepCount == 0) {
             float value = static_cast<float>(_parameterValueMap[id]);
-            strValue = std::to_string(value);
-            if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, std::format("%0.3f{}", units).c_str(), ImGuiKnobVariant_Tick, knobSize)) {
+            if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, paramString.c_str(), ImGuiKnobVariant_Tick, knobSize)) {
                 startEditIds.emplace_back(id, value);
             }
         } else {
             int value = getParameterDiscreteValue(id);
-            strValue = std::to_string(value);
-            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->stepCount, 1.0f, std::format("%d{}", units).c_str(), ImGuiKnobVariant_Tick, knobSize)) {
+            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->stepCount, 1.0f, paramString.c_str(), ImGuiKnobVariant_Tick, knobSize)) {
                 double normalizedValue = value / (double)param->stepCount;
                 startEditIds.emplace_back(id, normalizedValue);
             }
         }
-        //std::string tooltip = std::format("{} {} {}{}({})", _name, title, strValue, units, param->stepCount);
-        double plainValue = _controller->normalizedParamToPlain(id, _parameterValueMap[id]);
-        Steinberg::Vst::String128 str128;
-        _controller->getParamStringByValue(id, _parameterValueMap[id], str128);
-        std::string s128 = VST3::StringConvert::convert(str128);
-        std::string tooltip = std::format("{} {} {}{}({}) -- {} -- {}", _name, title, strValue, units, param->stepCount, plainValue, s128);
+        std::string units = VST3::StringConvert::convert(param->units);
+        std::string tooltip = std::format("{} {} {}({})({})", _name, title, paramString, param->stepCount, units);
         ImGui::SetItemTooltip(tooltip.c_str());
         if (ImGui::IsItemDeactivated()) {
             endEditIds.push_back(id);
