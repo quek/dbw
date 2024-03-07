@@ -509,15 +509,7 @@ void Vst3Module::renderContent() {
         if (title.empty()) {
             title = VST3::StringConvert::convert(param->title);
         }
-        Steinberg::Vst::String128 paramString128;
-        _controller->getParamStringByValue(id, _parameterValueMap[id], paramString128);
-        std::string paramString = VST3::StringConvert::convert(paramString128);
-        // Khz のプラグイン ナローノンブレイクスペース U+202F が入っていて化けるので
-        size_t startPos = 0;
-        while ((startPos = paramString.find("\xE2\x80\xAF", startPos)) != std::string::npos) {
-            paramString.replace(startPos, 3, " ");
-            startPos += 1;
-        }
+        std::string paramString = getParamStringByValue(id);
         if (param->stepCount == 0) {
             float value = static_cast<float>(_parameterValueMap[id]);
             if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, paramString.c_str(), ImGuiKnobVariant_Tick, knobSize)) {
@@ -530,8 +522,7 @@ void Vst3Module::renderContent() {
                 startEditIds.emplace_back(id, normalizedValue);
             }
         }
-        std::string units = VST3::StringConvert::convert(param->units);
-        std::string tooltip = std::format("{} {} {}({})({})", _name, title, paramString, param->stepCount, units);
+        std::string tooltip = std::format("{} {} {}", _name, title, paramString);
         ImGui::SetItemTooltip(tooltip.c_str());
         if (ImGui::IsItemDeactivated()) {
             endEditIds.push_back(id);
@@ -645,6 +636,23 @@ int Vst3Module::getParameterDiscreteValue(Vst::ParamID id) {
     double normalized = _parameterValueMap[id];
     int discreteValue = min(param->stepCount, normalized * (param->stepCount + 1));
     return discreteValue;
+}
+
+std::string Vst3Module::getParamStringByValue(Vst::ParamID id) {
+    return getParamStringByValue(id, _parameterValueMap[id]);
+}
+
+std::string Vst3Module::getParamStringByValue(Vst::ParamID id, Vst::ParamValue value) {
+    Steinberg::Vst::String128 paramString128;
+    _controller->getParamStringByValue(id, value, paramString128);
+    std::string paramString = VST3::StringConvert::convert(paramString128);
+    // Khz のプラグイン ナローノンブレイクスペース U+202F が入っていて化けるので
+    size_t startPos = 0;
+    while ((startPos = paramString.find("\xE2\x80\xAF", startPos)) != std::string::npos) {
+        paramString.replace(startPos, 3, " ");
+        startPos += 1;
+    }
+    return paramString;
 }
 
 void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
