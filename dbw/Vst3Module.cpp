@@ -512,12 +512,12 @@ void Vst3Module::renderContent() {
         std::string paramString = getParamStringByValue(id);
         if (param->stepCount == 0) {
             float value = static_cast<float>(_parameterValueMap[id]);
-            if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, paramString.c_str(), ImGuiKnobVariant_Tick, knobSize)) {
+            if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, paramString.c_str(), ImGuiKnobVariant_Wiper, knobSize)) {
                 startEditIds.emplace_back(id, value);
             }
         } else {
             int value = getParameterDiscreteValue(id);
-            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->stepCount, 1.0f, paramString.c_str(), ImGuiKnobVariant_Tick, knobSize)) {
+            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->stepCount, 1.0f, paramString.c_str(), ImGuiKnobVariant_Wiper, knobSize)) {
                 double normalizedValue = value / (double)param->stepCount;
                 startEditIds.emplace_back(id, normalizedValue);
             }
@@ -649,8 +649,8 @@ std::string Vst3Module::getParamStringByValue(Vst::ParamID id, Vst::ParamValue v
     // Khz のプラグイン ナローノンブレイクスペース U+202F が入っていて化けるので
     size_t startPos = 0;
     while ((startPos = paramString.find("\xE2\x80\xAF", startPos)) != std::string::npos) {
-        paramString.replace(startPos, 3, " ");
-        startPos += 1;
+        paramString.replace(startPos, 3, "");
+        startPos += 0;
     }
     return paramString;
 }
