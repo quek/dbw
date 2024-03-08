@@ -12,9 +12,9 @@ public:
     AutomationTarget(const nlohmann::json& json);
     virtual nlohmann::json toJson();
     Module* getModule();
-    uint32_t getParamId() { return _paramId; }
+    uint32_t getParamId() const { return _paramId; }
     std::string getParamName();
-    Param* getParam(uint32_t paramId);
+    Param* getParam();
 
 private:
     Module* _module;

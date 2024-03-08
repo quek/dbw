@@ -114,6 +114,18 @@ std::unique_ptr<Param>& Module::getParam(uint32_t paramId) {
     return _idParamMap[paramId];
 }
 
+void Module::updateEditedParamIdList(uint32_t id) {
+    if (!getParam(id)->canAutomate()) {
+        return;
+    }
+
+    auto it = std::ranges::find(_editedParamIdList, id);
+    if (it != _editedParamIdList.end()) {
+        _editedParamIdList.erase(it);
+    }
+    _editedParamIdList.push_front(id);
+}
+
 Module* Module::create(std::string& type, std::string& id) {
     if (type == "builtin") {
         return BuiltinModule::create(id);

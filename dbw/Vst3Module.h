@@ -31,17 +31,12 @@ public:
 
     void prepareParameterInfo();
     void prepareParameterValue();
-    int getParameterDiscreteValue(Vst::ParamID id);
-    std::string getParamStringByValue(Vst::ParamID id);
-    std::string getParamStringByValue(Vst::ParamID id, Vst::ParamValue value);
 
     void beginEdit(Vst::ParamID);
     void performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void endEdit(Vst::ParamID);
-    Vst::ParamValue updateParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
-    void updateEditedParamIdList(Vst::ParamID id);
-    void addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized);
+    void addParameterChange(Param* param) override;
 
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
@@ -51,6 +46,7 @@ public:
 
     std::unique_ptr<PluginEditorWindow> _editorWindow = nullptr;
     Vst::IAudioProcessor* _processor = nullptr;
+    Vst::IEditController* _controller = nullptr;
 
 private:
     std::string _id;
@@ -58,12 +54,9 @@ private:
     VST3::Hosting::Module::Ptr _module = nullptr;
     std::unique_ptr<Vst::PlugProvider> _plugProvider = nullptr;
     Vst::IComponent* _component = nullptr;
-    Vst::IEditController* _controller = nullptr;
     IPlugView* _plugView = nullptr;
 
     Vst::SymbolicSampleSizes _symbolicSampleSizes = Vst::SymbolicSampleSizes::kSample32;
 
-    std::list<Vst::ParamID> _editedParamIdList;
-    std::map<Vst::ParamID, ParamEditStatus> _paramEdtiStatusMap;
     Vst::ParameterChanges _parameterChanges;
 };

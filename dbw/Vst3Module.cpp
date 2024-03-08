@@ -503,21 +503,18 @@ void Vst3Module::renderContent() {
     bool isFirstLine = true;
     for (auto id : _editedParamIdList) {
         ImGui::PushID(id);
-        auto param = getParameterInfo(id);
-        std::string title = VST3::StringConvert::convert(param->shortTitle);
-        if (title.empty()) {
-            title = VST3::StringConvert::convert(param->title);
-        }
-        std::string paramString = getParamStringByValue(id);
-        if (param->stepCount == 0) {
-            float value = static_cast<float>(_parameterValueMap[id]);
+        auto& param = getParam(id);
+        std::string title = param->getParamName();
+        std::string paramString = param->getValueText();
+        if (param->getStepCount() == 0) {
+            float value = static_cast<float>(param->getValue());
             if (ImGuiKnobs::Knob(title.substr(0, 5).c_str(), &value, 0.0f, 1.0f, 0.0f, paramString.c_str(), ImGuiKnobVariant_Wiper, knobSize)) {
                 startEditIds.emplace_back(id, value);
             }
         } else {
-            int value = getParameterDiscreteValue(id);
-            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->stepCount, 1.0f, paramString.c_str(), ImGuiKnobVariant_Wiper, knobSize)) {
-                double normalizedValue = value / (double)param->stepCount;
+            int value = param->getDiscreteValue();
+            if (ImGuiKnobs::KnobInt(title.substr(0, 5).c_str(), &value, 0, param->getStepCount(), 1.0f, paramString.c_str(), ImGuiKnobVariant_Wiper, knobSize)) {
+                double normalizedValue = value / (double)param->getStepCount();
                 startEditIds.emplace_back(id, normalizedValue);
             }
         }
@@ -548,7 +545,10 @@ void Vst3Module::renderContent() {
     }
     for (auto& [id, value] : startEditIds) {
         beginEdit(id);
-        setParameterValue(id, value);
+        auto& param = getParam(id);
+        param->setValue(value);
+        _controller->setParamNormalized(id, value);
+        addParameterChange(param.get());
     }
     for (auto id : endEditIds) {
         endEdit(id);
@@ -556,7 +556,7 @@ void Vst3Module::renderContent() {
 
     // beginEdit なしで performEdit が呼ばれたものの処理
     auto now = std::chrono::high_resolution_clock::now();
-    for (auto [id, param] : _idParamMap) {
+    for (auto& [id, param] : _idParamMap) {
         param->maybeCommit(now);
     }
 }
@@ -614,30 +614,6 @@ void Vst3Module::prepareParameterValue() {
     }
 }
 
-int Vst3Module::getParameterDiscreteValue(Vst::ParamID id) {
-    auto param = getParameterInfo(id);
-    double normalized = _parameterValueMap[id];
-    int discreteValue = min(param->stepCount, normalized * (param->stepCount + 1));
-    return discreteValue;
-}
-
-std::string Vst3Module::getParamStringByValue(Vst::ParamID id) {
-    return getParamStringByValue(id, _parameterValueMap[id]);
-}
-
-std::string Vst3Module::getParamStringByValue(Vst::ParamID id, Vst::ParamValue value) {
-    Steinberg::Vst::String128 paramString128;
-    _controller->getParamStringByValue(id, value, paramString128);
-    std::string paramString = VST3::StringConvert::convert(paramString128);
-    // Khz のプラグイン ナローノンブレイクスペース U+202F が入っていて化けるので
-    size_t startPos = 0;
-    while ((startPos = paramString.find("\xE2\x80\xAF", startPos)) != std::string::npos) {
-        paramString.replace(startPos, 3, "");
-        startPos += 0;
-    }
-    return paramString;
-}
-
 void Vst3Module::beginEdit(Steinberg::Vst::ParamID id) {
     getParam(id)->beginEdit();
 }
@@ -650,49 +626,33 @@ void Vst3Module::endEdit(Steinberg::Vst::ParamID id) {
     getParam(id)->endEdit();
 }
 
-Vst::ParamValue Vst3Module::updateParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized) {
-    Vst::ParamValue oldValue = getParam(id)->getValue();
-    getParam(id)->setValue(valueNormalized);
-    return oldValue;
-}
-
 void Vst3Module::setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized) {
+    auto& param = getParam(id);
+    param->setValue(valueNormalized);
     _controller->setParamNormalized(id, valueNormalized);
-    addParameterChange(id, valueNormalized);
-    updateParameterValue(id, valueNormalized);
+    addParameterChange(param.get());
 }
 
-void Vst3Module::updateEditedParamIdList(Vst::ParamID id) {
-    if ((getParameterInfo(id)->flags & Vst::ParameterInfo::ParameterFlags::kCanAutomate) == 0) {
-        return;
-    }
 
-    auto it = std::ranges::find(_editedParamIdList, id);
-    if (it != _editedParamIdList.end()) {
-        _editedParamIdList.erase(it);
-    }
-    _editedParamIdList.push_front(id);
-}
-
-void Vst3Module::addParameterChange(Vst::ParamID id, Vst::ParamValue valueNormalized) {
+void Vst3Module::addParameterChange(Param* param) {
     if (_track == nullptr) return;
     std::lock_guard<std::recursive_mutex> lock(_track->getComposer()->app()->_mtx);
     int32 index;
     Vst::IParamValueQueue* queue = nullptr;
     for (index = 0; index < _parameterChanges.getParameterCount(); ++index) {
         queue = _parameterChanges.getParameterData(index);
-        if (queue->getParameterId() == id) {
+        if (queue->getParameterId() == param->getId()) {
             break;
         }
         queue = nullptr;
     }
     if (queue == nullptr) {
-        queue = _parameterChanges.addParameterData(id, index);
+        queue = _parameterChanges.addParameterData(param->getId(), index);
     }
     // どうせ次のフレームにしか送れないので 0 でいいはず
     // オートメーション書いたらそのとき考えよう
     int32 sampleOffset = 0;
-    queue->addPoint(sampleOffset, valueNormalized, index);
+    queue->addPoint(sampleOffset, param->getValue(), index);
 }
 
 nlohmann::json Vst3Module::toJson() {

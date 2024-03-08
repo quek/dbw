@@ -46,6 +46,18 @@ void AutomationWindow::renderHeader() {
         return;
     }
     Param* param = _lane->_automationTarget->getParam();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle style = ImGui::GetStyle();
+    ImGui::SetCursorPosX(style.WindowPadding.x + offsetLeft());
+    ImGui::Text(param->getValueText(0).c_str());
+    ImGui::SameLine();
+    std::string valueText = param->getValueText(0.5);
+    ImVec2 valueTextSize = ImGui::CalcTextSize(valueText.c_str());
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - valueTextSize.x) / 2);
+    ImGui::Text(valueText.c_str());
+    ImGui::SameLine();
+    valueText = param->getValueText(1.0);
+    valueTextSize = ImGui::CalcTextSize(valueText.c_str());
+    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - valueTextSize.x - style.ScrollbarSize - style.WindowPadding.x);
+    ImGui::Text(valueText.c_str());
 
 }

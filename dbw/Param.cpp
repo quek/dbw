@@ -1,6 +1,7 @@
 #include "Param.h"
+#include "Module.h"
 
-Param::Param(Module* module, double value) : _module(module), _value(value) {
+Param::Param(uint32_t id, Module* module, double value) : _id(id), _module(module), _value(value) {
 }
 
 void Param::beginEdit() {
@@ -18,9 +19,18 @@ void Param::commit() {
     clearEditStatus();
 }
 
+int Param::getDiscreteValue() {
+    int discreteValue = std::min(getStepCount(), static_cast<int32_t>(_value * (getStepCount() + 1)));
+    return discreteValue;
+}
+
 void Param::endEdit() {
     commit();
 
+}
+
+std::string Param::getValueText() {
+    return getValueText(_value);
 }
 
 void Param::maybeCommit(std::chrono::time_point<std::chrono::high_resolution_clock> now) {
@@ -35,7 +45,8 @@ void Param::performEdit(double value) {
     if (!_editStatus._beginEditCalled) {
         _editStatus._beforeValue = _value;
         _editStatus._performAt = std::chrono::high_resolution_clock::now();
-    };
+    }
     _value = value;
     _module->addParameterChange(this);
+    _module->updateEditedParamIdList(_id);
 }
