@@ -13,6 +13,7 @@ public:
     double getDuration() const { return _duration; }
     double getTime() const { return _time; }
     virtual void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) = 0;
+    void setTime(double time) { _time = time; }
     virtual nlohmann::json toJson() override;
 
     double _time;

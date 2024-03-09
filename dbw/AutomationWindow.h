@@ -20,6 +20,7 @@ protected:
     float offsetStart() const override { return 0.0f; };
 
 private:
+    float getCanvasWidth();
     void handleMouse();
     void handleShortcut();
     ImVec2 pointToScreenPos(const AutomationPoint& point);
@@ -30,5 +31,9 @@ private:
 
     AutomationClip* _clip = nullptr;
     Lane* _lane = nullptr;
+
+    AutomationPoint* _draggingPoint = nullptr;
+    AutomationPoint* _pointAtMouse = nullptr;
+    bool _rangeSelecting = false;
 };
 

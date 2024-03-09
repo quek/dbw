@@ -70,6 +70,7 @@ struct Theme : ConfigMixin<Theme>{
     ImU32 rackBorder = IM_COL32(0x80, 0x80, 0x80, 0x80);
 
     ImU32 background = IM_COL32(0x00, 0x00, 0x00, 0x80);
+    ImU32 text = IM_COL32(0xff, 0xff, 0xff, 0xc0);
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         Theme,

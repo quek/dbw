@@ -15,6 +15,16 @@ void AutomationPoint::addTo(std::vector<std::unique_ptr<SequenceItem>>& items) {
 void AutomationPoint::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) {
 }
 
+void AutomationPoint::setValue(double value) {
+    if (value < 0.0) {
+        _value = 0.0;
+    } else if (value > 1.0) {
+        _value = 1.0;
+    } else {
+        _value = value;
+    }
+}
+
 nlohmann::json AutomationPoint::toJson() {
     nlohmann::json json = SequenceItem::toJson();
     json["type"] = TYPE;

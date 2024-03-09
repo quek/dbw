@@ -4,6 +4,8 @@
 #include "Grid.h"
 #include "Lane.h"
 
+constexpr float POINT_RADIUS = 4.0f;
+
 AutomationWindow::AutomationWindow(Composer* composer) : TimelineMixin(composer) {
     _zoomX = 1.0f;
     _zoomY = 40.0f;
@@ -38,6 +40,12 @@ void AutomationWindow::render() {
     ImGui::End();
 }
 
+float AutomationWindow::getCanvasWidth() {
+    auto& style = ImGui::GetStyle();
+    float width = ImGui::GetWindowWidth() - POINT_RADIUS * 2 - style.ScrollbarSize;
+    return width;
+}
+
 void AutomationWindow::handleMouse() {
     if (!canHandleInput()) {
         return;
@@ -45,10 +53,26 @@ void AutomationWindow::handleMouse() {
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
-    auto point = screenPosToPoint(mousePos);
+    std::unique_ptr<AutomationPoint> point(screenPosToPoint(mousePos));
 
-    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-        _clip->_sequence->addItem(point);
+    if (_draggingPoint) {
+        // TODO command
+        _draggingPoint->setValue(point->getValue());
+        _draggingPoint->setTime(point->getTime());
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            _draggingPoint = nullptr;
+        }
+    } else if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+        if (_pointAtMouse) {
+            // point のドラッグ開始
+            _draggingPoint = _pointAtMouse;
+        } else {
+            // 範囲選択開始
+            _rangeSelecting = true;
+
+        }
+    } else if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+        _clip->_sequence->addItem(point.release());
     }
 }
 
@@ -63,14 +87,14 @@ ImVec2 AutomationWindow::pointToScreenPos(const AutomationPoint& point) {
 }
 
 ImVec2 AutomationWindow::pointToScreenPos(double value, double time) {
-    float x = value * ImGui::GetWindowWidth() + offsetLeft() + ImGui::GetWindowPos().x;
+    float x = value * getCanvasWidth() + ImGui::GetWindowPos().x + offsetLeft() + POINT_RADIUS;
     float y = timeToScreenY(time);
     return ImVec2(x, y);
 }
 
 AutomationPoint* AutomationWindow::screenPosToPoint(ImVec2& pos) {
     ImVec2 canvasPos = screenToCanvas(pos);
-    double value = canvasPos.x / ImGui::GetWindowWidth();
+    double value = (canvasPos.x - POINT_RADIUS) / getCanvasWidth();
     double time = toSnapRound(canvasPos.y);
     return new AutomationPoint(value, time);
 }
@@ -97,6 +121,10 @@ void AutomationWindow::renderHeader() {
 }
 
 void AutomationWindow::renderPoints() {
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos;
+    _pointAtMouse = nullptr;
+
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     double defaultValue = _lane->_automationTarget->getDefaultValue();
     ImVec2 pos1 = pointToScreenPos(defaultValue, 0.0);
@@ -109,9 +137,19 @@ void AutomationWindow::renderPoints() {
             pos1 = pointToScreenPos(point->getValue(), 0.0);
         }
         drawList->AddLine(pos1, pos2, gTheme.automationLine);
-        drawList->AddCircle(pos2, 4, gTheme.automationPoint);
+        drawList->AddCircle(pos2, POINT_RADIUS, gTheme.automationPoint);
+        Bounds bounds(pos2 - ImVec2(POINT_RADIUS, POINT_RADIUS), pos2 + ImVec2(POINT_RADIUS, POINT_RADIUS));
+        if (bounds.contains(mousePos)) {
+            _pointAtMouse = point;
+            Param* param = _lane->_automationTarget->getParam();
+            std::string valueText = param->getValueText(point->getValue());
+            drawList->AddText(pos2 + ImVec2((point->getValue() < 0.5) ? 15.0f : -(15.0f + ImGui::CalcTextSize(valueText.c_str()).x), 0.0f),
+                              gTheme.text,
+                              valueText.c_str());
+        }
         pos1 = pos2;
     }
-    ImVec2 pos2  =ImVec2(pos1.x,  timeToScreenY(_clip->_sequence->getDuration()));
+    ImVec2 pos2 = ImVec2(pos1.x, timeToScreenY(_clip->_sequence->getDuration()));
     drawList->AddLine(pos1, pos2, gTheme.automationLine);
 }
+
