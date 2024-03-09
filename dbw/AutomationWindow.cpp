@@ -58,9 +58,9 @@ void AutomationWindow::handleShortcut() {
     }
 }
 
-ImVec2 AutomationWindow::pointToScreenPos(AutomationPoint* point) {
-    float x = point->_value * ImGui::GetWindowWidth() + offsetLeft() + ImGui::GetWindowPos().x;
-    float y = timeToScreenY(point->_time);
+ImVec2 AutomationWindow::pointToScreenPos(const AutomationPoint& point) {
+    float x = point._value * ImGui::GetWindowWidth() + offsetLeft() + ImGui::GetWindowPos().x;
+    float y = timeToScreenY(point._time);
     return ImVec2(x, y);
 }
 
@@ -93,9 +93,12 @@ void AutomationWindow::renderHeader() {
 }
 
 void AutomationWindow::renderPoints() {
-    for (auto& point : _clip->_sequence->_items) {
-        ImVec2 pos = pointToScreenPos((AutomationPoint*)point.get());
+    ImVec2 pos1 = pointToScreenPos(AutomationPoint(_lane->_automationTarget->getDefaultValue(), 0.0));
+    for (auto& point : _clip->_sequence->getItems()) {
+        ImVec2 pos2 = pointToScreenPos(*(AutomationPoint*)point.get());
         ImDrawList* drawList = ImGui::GetWindowDrawList();
-        drawList->AddCircle(pos, 4, gTheme.automationPoint);
+        drawList->AddLine(pos1, pos2, gTheme.automationLine);
+        drawList->AddCircle(pos2, 4, gTheme.automationPoint);
+        pos1 = pos2;
     }
 }

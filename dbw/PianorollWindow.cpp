@@ -41,8 +41,8 @@ void PianoRollWindow::edit(NoteClip* clip) {
     _show = true;
     _scrollHereXKey = "C4";
     _state = State{};
-    if (!clip->_sequence->_items.empty()) {
-        _state._defaultThingDuration = clip->_sequence->_items[0]->_duration;
+    if (!clip->_sequence->getItems().empty()) {
+        _state._defaultThingDuration = clip->_sequence->getItems()[0]->_duration;
     } else {
         _state._defaultThingDuration = _grid->_unit;
     }
@@ -106,7 +106,7 @@ Command* PianoRollWindow::duplicateThings(std::set<Note*>& notes, bool undoable)
 
 void PianoRollWindow::prepareAllThings() {
     _allThings.clear();
-    for (auto& note : _clip->_sequence->_items) {
+    for (auto& note : _clip->_sequence->getItems()) {
         _allThings.push_back((Note*)note.get());
     }
 }

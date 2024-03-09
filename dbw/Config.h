@@ -62,6 +62,7 @@ struct Preference : ConfigMixin<Preference> {
 struct Theme : ConfigMixin<Theme>{
     Theme() : ConfigMixin("theme.json") {}
 
+    ImU32 automationLine = IM_COL32(0xcc, 0xcc, 0xff, 0xcc);
     ImU32 automationPoint = IM_COL32(0x80, 0x80, 0xff, 0xee);
 
     ImU32 editCursor = IM_COL32(0x00, 0xff, 0x00, 0x80);

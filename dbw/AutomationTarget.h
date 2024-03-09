@@ -11,6 +11,7 @@ public:
     AutomationTarget(Module* module, uint32_t paramId);
     AutomationTarget(const nlohmann::json& json);
     virtual nlohmann::json toJson();
+    double getDefaultValue() { return _defaultValue; }
     Module* getModule();
     uint32_t getParamId() const { return _paramId; }
     std::string getParamName();

@@ -24,14 +24,9 @@ void SequenceItem::addTo(std::vector<std::unique_ptr<SequenceItem>>& items) {
     items.emplace_back(this);
 }
 
-bool SequenceItem::operator<(const SequenceItem& other) const {
-    return _time < other._time;
-}
-
 nlohmann::json SequenceItem::toJson() {
     nlohmann::json json = Neko::toJson();
     json["_time"] = _time;
     json["_duration"] = _duration;
     return json;
 }
-

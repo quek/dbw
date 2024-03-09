@@ -22,7 +22,7 @@ protected:
 private:
     void handleMouse();
     void handleShortcut();
-    ImVec2 pointToScreenPos(AutomationPoint* point);
+    ImVec2 pointToScreenPos(const AutomationPoint& point);
     void renderHeader();
     void renderPoints();
     AutomationPoint* screenPosToPoint(ImVec2& pos);

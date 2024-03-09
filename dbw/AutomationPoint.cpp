@@ -9,7 +9,7 @@ AutomationPoint::AutomationPoint(const nlohmann::json& json) : SequenceItem(json
 
 void AutomationPoint::addTo(std::vector<std::unique_ptr<SequenceItem>>& items) {
     SequenceItem::addTo(items);
-    std::ranges::sort(items);
+    std::ranges::sort(items, {}, &AutomationPoint::_time);
 }
 
 void AutomationPoint::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) {

@@ -9,8 +9,7 @@ public:
     SequenceItem(const nlohmann::json& json);
     SequenceItem(double time = 0.0, double duration = 16.0);
     ~SequenceItem() = default;
-    virtual void addTo( std::vector<std::unique_ptr<SequenceItem>>& items);
-    virtual  bool operator<(const SequenceItem& other) const;
+    virtual void addTo(std::vector<std::unique_ptr<SequenceItem>>& items);
     virtual void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) = 0;
     virtual nlohmann::json toJson() override;
 
