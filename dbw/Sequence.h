@@ -35,6 +35,7 @@ public:
     virtual ~Sequence() {
         nekoIdSequenceMap.erase(getNekoId());
     }
+    virtual void addItem(SequenceItem* item);
     virtual nlohmann::json toJson() {
         nlohmann::json json = Nameable::toJson();
         json["sequenceId"] = getNekoId();

@@ -83,7 +83,7 @@ int main(int, char**) {
     std::filesystem::path logFile(userDir() / "log");
     std::filesystem::create_directories(logFile);
     logFile /= "dbw.log";
-    logger = spdlog::rotating_logger_mt("log",logFile.string(), 1024 * 1024 * 5, 3);
+    logger = spdlog::rotating_logger_mt("log", logFile.string(), 1024 * 1024 * 5, 3);
     logger->set_level(spdlog::level::debug);
     logger->info("start");
 
@@ -272,11 +272,14 @@ int main(int, char**) {
         logger->flush();
     }
 
-    for (auto& composer : app->composers()) {
-        composer->stop();
-        composer->clear();
-    }
     app->audioEngine()->stop();
+    {
+        std::lock_guard<std::recursive_mutex> lock(app->_mtx);
+        for (auto& composer : app->composers()) {
+            composer->stop();
+            composer->clear();
+        }
+    }
     app.reset();
 
     WaitForLastSubmittedFrame();

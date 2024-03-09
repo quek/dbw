@@ -62,6 +62,8 @@ struct Preference : ConfigMixin<Preference> {
 struct Theme : ConfigMixin<Theme>{
     Theme() : ConfigMixin("theme.json") {}
 
+    ImU32 automationPoint = IM_COL32(0x80, 0x80, 0xff, 0xee);
+
     ImU32 editCursor = IM_COL32(0x00, 0xff, 0x00, 0x80);
 
     ImU32 rackBorder = IM_COL32(0x80, 0x80, 0x80, 0x80);
@@ -70,10 +72,9 @@ struct Theme : ConfigMixin<Theme>{
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         Theme,
+        automationPoint,
         editCursor,
-
         rackBorder,
-
         background
     );
 };

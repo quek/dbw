@@ -1,5 +1,6 @@
 #include "AutomationWindow.h"
 #include "AutomationClip.h"
+#include "Config.h"
 #include "Grid.h"
 #include "Lane.h"
 
@@ -47,7 +48,7 @@ void AutomationWindow::handleMouse() {
     auto point = screenPosToPoint(mousePos);
 
     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-        _clip->_sequence->_items.emplace_back(point);
+        _clip->_sequence->addItem(point);
     }
 }
 
@@ -58,9 +59,9 @@ void AutomationWindow::handleShortcut() {
 }
 
 ImVec2 AutomationWindow::pointToScreenPos(AutomationPoint* point) {
-    float x = point->_value * ImGui::GetWindowWidth();
+    float x = point->_value * ImGui::GetWindowWidth() + offsetLeft() + ImGui::GetWindowPos().x;
     float y = timeToScreenY(point->_time);
-    return ImVec2(x, y) + ImGui::GetWindowPos();
+    return ImVec2(x, y);
 }
 
 AutomationPoint* AutomationWindow::screenPosToPoint(ImVec2& pos) {
@@ -95,6 +96,6 @@ void AutomationWindow::renderPoints() {
     for (auto& point : _clip->_sequence->_items) {
         ImVec2 pos = pointToScreenPos((AutomationPoint*)point.get());
         ImDrawList* drawList = ImGui::GetWindowDrawList();
-        drawList->AddCircle(pos, 2, IM_COL32_WHITE);
+        drawList->AddCircle(pos, 4, gTheme.automationPoint);
     }
 }

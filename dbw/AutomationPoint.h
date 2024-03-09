@@ -7,7 +7,9 @@ public:
     AutomationPoint(double value, double time);
     AutomationPoint(const nlohmann::json& json);
     virtual ~AutomationPoint() = default;
+    void addTo( std::vector<std::unique_ptr<SequenceItem>>& items) override;
     void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) override;
+    virtual nlohmann::json toJson() override;
 
     double _value = 0.0;
 };
