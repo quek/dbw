@@ -73,7 +73,11 @@ void AutomationWindow::handleMouse() {
         }
     } else if (canHandleInput()) {
         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            _clip->_sequence->addItem(point.release());
+            if (_pointAtMouse) {
+                _clip->_sequence->deleteItem(_pointAtMouse);
+            } else {
+                _clip->_sequence->addItem(point.release());
+            }
         } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             if (_pointAtMouse) {
                 _targetPoint = _pointAtMouse;

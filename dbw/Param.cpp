@@ -34,6 +34,9 @@ std::string Param::getValueText() {
 }
 
 void Param::maybeCommit(std::chrono::time_point<std::chrono::high_resolution_clock> now) {
+    if (!_editStatus._isEditing || _editStatus._beginEditCalled) {
+        return;
+    }
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - _editStatus._performAt).count();
     if (elapsed < 1000) {
         return;
@@ -43,6 +46,7 @@ void Param::maybeCommit(std::chrono::time_point<std::chrono::high_resolution_clo
 
 void Param::performEdit(double value) {
     if (!_editStatus._beginEditCalled) {
+        _editStatus._isEditing = true;
         _editStatus._beforeValue = _value;
         _editStatus._performAt = std::chrono::high_resolution_clock::now();
     }

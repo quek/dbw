@@ -16,6 +16,7 @@ public:
     static std::shared_ptr<Sequence>create(const nlohmann::json& json);
     virtual ~Sequence();
     virtual void addItem(SequenceItem* item);
+    virtual void deleteItem(SequenceItem* item);
     double getDuration() const { return _duration; }
     std::vector<std::unique_ptr<SequenceItem>>& getItems();
     void setDuration(double duration) { _duration = duration; }

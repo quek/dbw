@@ -98,7 +98,6 @@ void Track::prepareEvent() {
             double clipDuration = clip->_duration;
             double begin = getComposer()->_playTime;
             double end = getComposer()->_nextPlayTime;
-            // TODO Loop
             for (auto& note : clip->_sequence->getItems()) {
                 note->prepareProcessBuffer(&_processBuffer, begin, end, clipTime, clipDuration, oneBeatSec);
             }

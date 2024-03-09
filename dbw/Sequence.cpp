@@ -34,6 +34,10 @@ void Sequence::addItem(SequenceItem* item) {
     item->addTo(_items);
 }
 
+void Sequence::deleteItem(SequenceItem* item) {
+    std::erase_if(_items, [item](const auto& x) { return x.get() == item; });
+}
+
 std::vector<std::unique_ptr<SequenceItem>>& Sequence::getItems() {
     return _items;
 }
