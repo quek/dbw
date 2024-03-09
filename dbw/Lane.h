@@ -16,6 +16,8 @@ public:
     virtual ~Lane() = default;
     virtual nlohmann::json toJson() override;
     std::unique_ptr<ClipSlot>& getClipSlot(Scene* scene);
+    void prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec);
+
 
     std::vector<std::unique_ptr<Clip>> _clips;
     std::map<Scene*, std::unique_ptr<ClipSlot>> _sceneClipSlotMap;

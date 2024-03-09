@@ -20,31 +20,43 @@ nlohmann::json Note::toJson() {
     return json;
 }
 
-void Note::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) {
+void Note::prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) {
     double sampleRate = gPreference.sampleRate;
-    double noteTime = clipTime + _time;
-    if ((begin <= noteTime && noteTime < end) || (end < begin && (begin <= noteTime || noteTime < end))) {
-        int16_t channel = 0;
-        uint32_t sampleOffsetDouble = 0;
-        if (begin < end) {
-            sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
-        } else {
-            sampleOffsetDouble = (noteTime + clipDuration - begin) * oneBeatSec * sampleRate;
+    double noteBegin = clipBegin + _time;
+    double noteEnd = noteBegin + _duration;
+    int16_t channel = 0;
+    if (begin < end) {
+        if (begin <= noteBegin && noteBegin < end) {
+            uint32_t sampleOffsetDouble = (noteBegin - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
         }
-        uint32_t sampleOffset = std::round(sampleOffsetDouble);
-        processBuffer->_eventOut.noteOn(_key, channel, _velocity, sampleOffset);
-    }
-    noteTime = noteTime + _duration;
-    if ((begin <= noteTime && noteTime < end) || (end < begin && (begin <= noteTime || noteTime < end))) {
-        int16_t channel = 0;
-        uint32_t sampleOffsetDouble = 0;
-        if (begin < end) {
-            sampleOffsetDouble = (noteTime - begin) * oneBeatSec * sampleRate;
-        } else {
-            sampleOffsetDouble = (noteTime + clipDuration - begin) * oneBeatSec * sampleRate;
+        if (begin < noteEnd && noteEnd <= end) {
+            uint32_t sampleOffsetDouble = (noteEnd - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
         }
-        uint32_t sampleOffset = std::round(sampleOffsetDouble);
-        processBuffer->_eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
+    } else {
+        if (begin <= noteBegin && noteBegin < loopEnd) {
+            uint32_t sampleOffsetDouble = (noteBegin - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
+        }
+        if (loopBegin <= noteBegin && noteBegin < end) {
+            uint32_t sampleOffsetDouble = (noteBegin - loopBegin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
+        }
+        if (begin < noteEnd && noteEnd <= loopEnd) {
+            uint32_t sampleOffsetDouble = (noteEnd - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
+        }
+        if (loopBegin < noteEnd && noteEnd <= end) {
+            uint32_t sampleOffsetDouble = (noteEnd - loopBegin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
+        }
     }
 }
 

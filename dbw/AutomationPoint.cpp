@@ -14,7 +14,7 @@ void AutomationPoint::addTo(std::vector<std::unique_ptr<SequenceItem>>& items) {
     std::ranges::sort(items, {}, &AutomationPoint::_time);
 }
 
-void AutomationPoint::prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) {
+void AutomationPoint::prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) {
 }
 
 void AutomationPoint::setValue(double value) {

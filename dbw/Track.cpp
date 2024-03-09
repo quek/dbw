@@ -92,16 +92,13 @@ void Track::prepare(unsigned long framesPerBuffer) {
 
 void Track::prepareEvent() {
     double oneBeatSec = 60.0 / getComposer()->_bpm;
+    Composer* composer = getComposer();
+    double begin = composer->_playTime;
+    double end = composer->_nextPlayTime;
+    double loopBegin = composer->_loopStartTime;
+    double loopEnd = composer->_loopEndTime;
     for (auto& lane : _lanes) {
-        for (auto& clip : lane->_clips) {
-            double clipTime = clip->_time;
-            double clipDuration = clip->_duration;
-            double begin = getComposer()->_playTime;
-            double end = getComposer()->_nextPlayTime;
-            for (auto& note : clip->_sequence->getItems()) {
-                note->prepareProcessBuffer(&_processBuffer, begin, end, clipTime, clipDuration, oneBeatSec);
-            }
-        }
+        lane->prepareProcessBuffer(_processBuffer, begin, end, loopBegin, loopEnd, oneBeatSec);
     }
 
     getComposer()->_sceneMatrix->process(this);

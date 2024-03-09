@@ -12,7 +12,7 @@ public:
     virtual void addTo(std::vector<std::unique_ptr<SequenceItem>>& items);
     double getDuration() const { return _duration; }
     double getTime() const { return _time; }
-    virtual void prepareProcessBuffer(ProcessBuffer* processBuffer, double begin, double end, double clipTime, double clipDuration, double oneBeatSec) = 0;
+    virtual void prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) = 0;
     void setTime(double time);
     virtual nlohmann::json toJson() override;
 
