@@ -42,14 +42,14 @@ void AutomationWindow::render() {
 
 float AutomationWindow::getCanvasWidth() {
     auto& style = ImGui::GetStyle();
-    float width = ImGui::GetWindowWidth() - POINT_RADIUS * 2 - style.ScrollbarSize;
+    float width = ImGui::GetWindowWidth() - offsetLeft() - POINT_RADIUS * 2 - style.ScrollbarSize;
     return width;
 }
 
 void AutomationWindow::handleMouse() {
-    if (!canHandleInput()) {
-        return;
-    }
+    //if (!canHandleInput()) {
+    //    return;
+    //}
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 mousePos = io.MousePos;
@@ -59,20 +59,28 @@ void AutomationWindow::handleMouse() {
         // TODO command
         _draggingPoint->setValue(point->getValue());
         _draggingPoint->setTime(point->getTime());
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             _draggingPoint = nullptr;
         }
     } else if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-        if (_pointAtMouse) {
+        if (_targetPoint) {
             // point のドラッグ開始
-            _draggingPoint = _pointAtMouse;
+            _draggingPoint = _targetPoint;
         } else {
             // 範囲選択開始
             _rangeSelecting = true;
 
         }
-    } else if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-        _clip->_sequence->addItem(point.release());
+    } else if (canHandleInput()) {
+        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            _clip->_sequence->addItem(point.release());
+        } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            if (_pointAtMouse) {
+                _targetPoint = _pointAtMouse;
+            } else {
+                _targetPoint = nullptr;
+            }
+        }
     }
 }
 
@@ -137,10 +145,16 @@ void AutomationWindow::renderPoints() {
             pos1 = pointToScreenPos(point->getValue(), 0.0);
         }
         drawList->AddLine(pos1, pos2, gTheme.automationLine);
-        drawList->AddCircle(pos2, POINT_RADIUS, gTheme.automationPoint);
+        if (point == _targetPoint) {
+            drawList->AddCircleFilled(pos2, POINT_RADIUS, gTheme.automationPoint);
+        } else {
+            drawList->AddCircle(pos2, POINT_RADIUS, gTheme.automationPoint);
+        }
         Bounds bounds(pos2 - ImVec2(POINT_RADIUS, POINT_RADIUS), pos2 + ImVec2(POINT_RADIUS, POINT_RADIUS));
         if (bounds.contains(mousePos)) {
             _pointAtMouse = point;
+        }
+        if (bounds.contains(mousePos) || point == _targetPoint) {
             Param* param = _lane->_automationTarget->getParam();
             std::string valueText = param->getValueText(point->getValue());
             drawList->AddText(pos2 + ImVec2((point->getValue() < 0.5) ? 15.0f : -(15.0f + ImGui::CalcTextSize(valueText.c_str()).x), 0.0f),

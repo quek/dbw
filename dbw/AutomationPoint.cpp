@@ -1,6 +1,8 @@
 #include "AutomationPoint.h"
 
-AutomationPoint::AutomationPoint(double value, double time) : SequenceItem(time), _value(value) {
+AutomationPoint::AutomationPoint(double value, double time) {
+    setValue(value);
+    setTime(time);
 }
 
 AutomationPoint::AutomationPoint(const nlohmann::json& json) : SequenceItem(json) {

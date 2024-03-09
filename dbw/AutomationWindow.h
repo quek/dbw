@@ -35,5 +35,6 @@ private:
     AutomationPoint* _draggingPoint = nullptr;
     AutomationPoint* _pointAtMouse = nullptr;
     bool _rangeSelecting = false;
+    AutomationPoint* _targetPoint = nullptr;
 };
 
