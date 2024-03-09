@@ -23,6 +23,7 @@ private:
     void handleMouse();
     void handleShortcut();
     ImVec2 pointToScreenPos(const AutomationPoint& point);
+    ImVec2 pointToScreenPos(double value, double time);
     void renderHeader();
     void renderPoints();
     AutomationPoint* screenPosToPoint(ImVec2& pos);

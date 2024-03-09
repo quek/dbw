@@ -16,11 +16,12 @@ public:
     static std::shared_ptr<Sequence>create(const nlohmann::json& json);
     virtual ~Sequence();
     virtual void addItem(SequenceItem* item);
+    double getDuration() const { return _duration; }
     std::vector<std::unique_ptr<SequenceItem>>& getItems();
+    void setDuration(double duration) { _duration = duration; }
     virtual nlohmann::json toJson();
 
 
-    double _duration;
 
     static int _no;
     static std::map<NekoId, std::weak_ptr<Sequence>> nekoIdSequenceMap;
@@ -30,6 +31,7 @@ private:
     Sequence(const nlohmann::json& json);
     Sequence(double duration);
 
+    double _duration;
     std::vector<std::unique_ptr<SequenceItem>> _items;
 };
 
