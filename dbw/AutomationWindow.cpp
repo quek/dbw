@@ -26,6 +26,8 @@ void AutomationWindow::render() {
                               ImVec2(0.0f, 0.0f),
                               ImGuiChildFlags_None)) {
             renderTimeline();
+            renderPoints();
+            handleMouse();
         }
         ImGui::EndChild();
         ImGui::PopStyleVar();
@@ -35,10 +37,37 @@ void AutomationWindow::render() {
     ImGui::End();
 }
 
+void AutomationWindow::handleMouse() {
+    if (!canHandleInput()) {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 mousePos = io.MousePos;
+    auto point = screenPosToPoint(mousePos);
+
+    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+        _clip->_sequence->_items.emplace_back(point);
+    }
+}
+
 void AutomationWindow::handleShortcut() {
     if (defineShortcut(ImGuiKey_Escape)) {
         _show = false;
     }
+}
+
+ImVec2 AutomationWindow::pointToScreenPos(AutomationPoint* point) {
+    float x = point->_value * ImGui::GetWindowWidth();
+    float y = timeToScreenY(point->_time);
+    return ImVec2(x, y) + ImGui::GetWindowPos();
+}
+
+AutomationPoint* AutomationWindow::screenPosToPoint(ImVec2& pos) {
+    ImVec2 canvasPos = screenToCanvas(pos);
+    double value = canvasPos.x / ImGui::GetWindowWidth();
+    double time = toSnapRound(canvasPos.y);
+    return new AutomationPoint(value, time);
 }
 
 void AutomationWindow::renderHeader() {
@@ -60,4 +89,12 @@ void AutomationWindow::renderHeader() {
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - valueTextSize.x - style.ScrollbarSize - style.WindowPadding.x);
     ImGui::Text(valueText.c_str());
 
+}
+
+void AutomationWindow::renderPoints() {
+    for (auto& point : _clip->_sequence->_items) {
+        ImVec2 pos = pointToScreenPos((AutomationPoint*)point.get());
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddCircle(pos, 2, IM_COL32_WHITE);
+    }
 }

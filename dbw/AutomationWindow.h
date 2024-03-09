@@ -2,6 +2,7 @@
 #include "TimelineMixin.h"
 
 class AutomationClip;
+class AutomationPoint;
 class Composer;
 class Lane;
 
@@ -19,8 +20,12 @@ protected:
     float offsetStart() const override { return 0.0f; };
 
 private:
+    void handleMouse();
     void handleShortcut();
+    ImVec2 pointToScreenPos(AutomationPoint* point);
     void renderHeader();
+    void renderPoints();
+    AutomationPoint* screenPosToPoint(ImVec2& pos);
 
     AutomationClip* _clip = nullptr;
     Lane* _lane = nullptr;

@@ -20,5 +20,6 @@ private:
     Module* _module;
     NekoId _moduleNekoRef;
     uint32_t _paramId;
+    double _defaultValue;
 };
 
