@@ -1,7 +1,7 @@
 #include "Param.h"
 #include "Module.h"
 
-Param::Param(uint32_t id, Module* module, double value) : _id(id), _module(module), _value(value) {
+Param::Param(ParamId id, Module* module, double value) : _id(id), _module(module), _value(value) {
 }
 
 void Param::beginEdit() {

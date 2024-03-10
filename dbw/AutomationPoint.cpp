@@ -15,6 +15,13 @@ void AutomationPoint::addTo(std::vector<std::unique_ptr<SequenceItem>>& items) {
 }
 
 void AutomationPoint::prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) {
+    double pointTime = clipBegin + _time;
+    if (begin < end) {
+        if (begin <= pointTime && pointTime < end) {
+
+        }
+    } else {
+    }
 }
 
 void AutomationPoint::setValue(double value) {

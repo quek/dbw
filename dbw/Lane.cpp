@@ -62,11 +62,10 @@ void Lane::prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, doub
                 continue;
             }
         }
-        for (auto& note : clip->_sequence->getItems()) {
-            note->prepareProcessBuffer(processBuffer, begin, end, clipBegin, clipEnd, loopBegin, loopEnd, oneBeatSec);
+        for (auto& item : clip->_sequence->getItems()) {
+            item->prepareProcessBuffer(processBuffer, begin, end, clipBegin, clipEnd, loopBegin, loopEnd, oneBeatSec);
         }
     }
-
 }
 
 std::unique_ptr<ClipSlot>& Lane::getClipSlot(Scene* scene) {

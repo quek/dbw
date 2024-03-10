@@ -4,6 +4,8 @@
 
 class Module;
 
+typedef uint32_t ParamId;
+
 class Param {
 public:
     struct EditStatus {
@@ -13,7 +15,7 @@ public:
         std::chrono::time_point<std::chrono::high_resolution_clock> _performAt;
     };
 
-    Param(uint32_t id, Module* module, double value = 0.0);
+    Param(ParamId id, Module* module, double value = 0.0);
     virtual ~Param() = default;
     void beginEdit();
     virtual bool canAutomate() const { return true; }
@@ -21,7 +23,7 @@ public:
     virtual void commit();
     int getDiscreteValue();
     void endEdit();
-    uint32_t getId() const { return _id; }
+    ParamId getId() const { return _id; }
     virtual std::string getParamName() = 0;
     virtual int32_t getStepCount() { return 0; }
     double getValue() const { return _value; }
@@ -33,7 +35,7 @@ public:
 
 protected:
     Module* _module;
-    uint32_t _id;
+    ParamId _id;
     double _value;
     EditStatus _editStatus;
 };
