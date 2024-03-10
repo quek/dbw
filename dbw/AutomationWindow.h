@@ -26,6 +26,7 @@ private:
     ImVec2 pointToScreenPos(const AutomationPoint& point);
     ImVec2 pointToScreenPos(double value, double time);
     void renderHeader();
+    void renderPlayhead();
     void renderPoints();
     AutomationPoint* screenPosToPoint(ImVec2& pos);
 

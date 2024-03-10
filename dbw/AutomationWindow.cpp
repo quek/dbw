@@ -1,5 +1,6 @@
 #include "AutomationWindow.h"
 #include "AutomationClip.h"
+#include "Composer.h"
 #include "Config.h"
 #include "Grid.h"
 #include "Lane.h"
@@ -29,6 +30,7 @@ void AutomationWindow::render() {
                               ImVec2(0.0f, 0.0f),
                               ImGuiChildFlags_None)) {
             renderTimeline();
+            renderPlayhead();
             renderPoints();
             handleMouse();
         }
@@ -130,6 +132,16 @@ void AutomationWindow::renderHeader() {
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - valueTextSize.x - style.ScrollbarSize - style.WindowPadding.x);
     ImGui::Text(valueText.c_str());
 
+}
+
+void AutomationWindow::renderPlayhead() {
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    float scrollY = ImGui::GetScrollY();
+    float y = (_composer->_playTime * _zoomY) + offsetTop() + offsetStart() - scrollY;
+    ImVec2 pos1 = ImVec2(0.0f, y) + windowPos;
+    ImVec2 pos2 = ImVec2(ImGui::GetWindowWidth(), y) + windowPos;
+    drawList->AddLine(pos1, pos2, PLAY_CURSOR_COLOR);
 }
 
 void AutomationWindow::renderPoints() {

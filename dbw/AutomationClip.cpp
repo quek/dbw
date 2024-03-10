@@ -45,8 +45,11 @@ void AutomationClip::prepareProcessBuffer(Lane* lane, double begin, double end, 
             } else {
                 double valueDelta = value - lastPoint->getValue();
                 int sampleOffsetDelta = sampleOffset - lastSampleOffset;
-                for (int frame = std::max(0, lastSampleOffset + 1); frame < currentFramesPerBuffer; ++frame) {
-                    double valueAtFrame = valueDelta / sampleOffsetDelta * frame + lastPoint->getValue();
+
+                int startFrame = std::max(0, lastSampleOffset + 1);
+                int endFrame = std::min(startFrame + currentFramesPerBuffer, sampleOffset + 1);
+                for (int frame = startFrame; frame < endFrame; ++frame) {
+                    double valueAtFrame = valueDelta / sampleOffsetDelta * (frame - lastSampleOffset) + lastPoint->getValue();
                     module->addParameterChange(param, frame, valueAtFrame);
                 }
             }
