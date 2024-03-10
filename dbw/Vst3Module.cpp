@@ -559,6 +559,7 @@ void Vst3Module::renderContent() {
         param->maybeCommit(now);
     }
 
+    // Automation GUI Playback
     for (auto& [id, value] : _controllerSetParamNormalizedMap) {
             _controller->setParamNormalized(id, value);
     }
