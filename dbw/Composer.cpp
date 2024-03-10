@@ -46,6 +46,7 @@ Composer::Composer(const nlohmann::json& json) :
 
     _bpm = json["_bpm"];
     _playTime = json["_playTime"];
+    _nextPlayTime = _playTime;
     _playStartTime = json["_playStartTime"];
     _loopStartTime = json["_loopStartTime"];
     _loopEndTime = json["_loopEndTime"];
@@ -73,6 +74,7 @@ void Composer::render() const {
 }
 
 void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
+    _currentFramesPerBuffer = framesPerBuffer;
     // TODO オーディオ入力
     _processBuffer.clear();
     _processBuffer.ensure32();

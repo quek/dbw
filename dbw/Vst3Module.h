@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 #include <windows.h>
 #include <pluginterfaces/vst/ivstaudioprocessor.h>
 // plugproviderで必要なPluginContext用のヘッダ
@@ -60,4 +61,5 @@ private:
 
     Vst::ParameterChanges _parameterChanges;
     std::map<ParamId, double> _controllerSetParamNormalizedMap;
+    std::recursive_mutex _parameterChangesMtx;
 };

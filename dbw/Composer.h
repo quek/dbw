@@ -50,6 +50,7 @@ public:
     App* _app = nullptr;
     std::unique_ptr<Project> _project;
     ProcessBuffer _processBuffer;
+    unsigned long _currentFramesPerBuffer = 1024;
     float _bpm = 128.0;
     bool _playing = false;
     bool _looping = false;

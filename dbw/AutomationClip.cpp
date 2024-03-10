@@ -27,33 +27,33 @@ void AutomationClip::prepareProcessBuffer(Lane* lane, double begin, double end, 
     if (items.empty()) {
         return;
     }
+    int currentFramesPerBuffer = lane->_track->getComposer()->_currentFramesPerBuffer;
     double sampleRate = gPreference.sampleRate;
     Module* module = lane->_automationTarget->getModule();
     Param* param = lane->_automationTarget->getParam();
     AutomationPoint* lastPoint = nullptr;
-    uint32_t lastSampleOffset = 0;
+    int lastSampleOffset = -1;
     for (auto& item : items) {
         AutomationPoint* point = (AutomationPoint*)item.get();
-        double pointBegin =point->getTime() + _time;
-        if (begin <= pointBegin && pointBegin < end) {
-            // ok
-        } else {
-            continue;
-        }
-        uint32_t sampleOffsetDouble = (point->getTime() - begin) * oneBeatSec * sampleRate;
-        uint32_t sampleOffset = std::round(sampleOffsetDouble);
+        double pointBegin = point->getTime() + _time;
+        double sampleOffsetDouble = (pointBegin - begin) * oneBeatSec * sampleRate;
+        int sampleOffset = std::round(sampleOffsetDouble);
         double value = point->getValue();
-        if (lastPoint == nullptr) {
-            module->addParameterChange(param, 0, value);
-        } else {
-            double valueDelta = value - lastPoint->getValue();
-            int sampleOffsetDelta = sampleOffset - lastSampleOffset;
-            for (int i = 1; i <= sampleOffsetDelta; ++i) {
-                double value = valueDelta / sampleOffsetDelta * i;
-                module->addParameterChange(param, lastSampleOffset + i, value);
+        if (begin <= pointBegin) {
+            if (lastPoint == nullptr) {
+                module->addParameterChange(param, 0, value);
+            } else {
+                double valueDelta = value - lastPoint->getValue();
+                int sampleOffsetDelta = sampleOffset - lastSampleOffset;
+                for (int frame = std::max(0, lastSampleOffset + 1); frame < currentFramesPerBuffer; ++frame) {
+                    double valueAtFrame = valueDelta / sampleOffsetDelta * frame + lastPoint->getValue();
+                    module->addParameterChange(param, frame, valueAtFrame);
+                }
+            }
+            if (end < pointBegin) {
+                break;
             }
         }
-
         lastPoint = point;
         lastSampleOffset = sampleOffset;
     }

@@ -303,6 +303,8 @@ bool Vst3Module::load(std::string path) {
 }
 
 bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
+    std::lock_guard<std::recursive_mutex> lock(_parameterChangesMtx);
+
     Steinberg::Vst::ProcessData processData;
     ///< processing mode - value of \ref ProcessModes
     processData.processMode = Steinberg::Vst::ProcessModes::kRealtime;
@@ -560,10 +562,13 @@ void Vst3Module::renderContent() {
     }
 
     // Automation GUI Playback
-    for (auto& [id, value] : _controllerSetParamNormalizedMap) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(_parameterChangesMtx);
+        for (auto& [id, value] : _controllerSetParamNormalizedMap) {
             _controller->setParamNormalized(id, value);
+        }
+        _controllerSetParamNormalizedMap.clear();
     }
-    _controllerSetParamNormalizedMap.clear();
 }
 
 void Vst3Module::onResize(int width, int height) {
@@ -642,7 +647,9 @@ void Vst3Module::setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormali
 
 void Vst3Module::addParameterChange(Param* param, int32_t sampleOffset, double value) {
     if (_track == nullptr) return;
-    std::lock_guard<std::recursive_mutex> lock(_track->getComposer()->app()->_mtx);
+
+    std::lock_guard<std::recursive_mutex> lock(_parameterChangesMtx);
+
     int32 index;
     Vst::IParamValueQueue* queue = nullptr;
     for (index = 0; index < _parameterChanges.getParameterCount(); ++index) {
