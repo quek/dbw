@@ -22,7 +22,8 @@ std::string AutomationClip::name() const {
     return "A" + Clip::name();
 }
 
-void AutomationClip::prepareProcessBuffer(Lane* lane, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) {
+// TODO loop
+void AutomationClip::prepareProcessBuffer(Lane* lane, double begin, double end, double /*loopBegin*/, double /*loopEnd*/, double oneBeatSec) {
     auto& items = getSequence()->getItems();
     if (items.empty()) {
         return;

@@ -1,4 +1,5 @@
 #include "GuiUtil.h"
+#include "Config.h"
 #include <algorithm>
 #include <imgui_internal.h>
 
@@ -81,3 +82,18 @@ bool defineShortcut(ImGuiKeyChord keyChord, const char* label, const ImVec2& siz
     return result;
 }
 
+bool ToggleButton(const char* label, bool* isOn) {
+    if (*isOn) {
+        ImGui::PushStyleColor(ImGuiCol_Button, gTheme.buttonOn);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, gTheme.buttonOnHovered);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, gTheme.buttonOnActive);
+    }
+    bool result = ImGui::Button(label);
+    if (*isOn) {
+        ImGui::PopStyleColor(3);
+    }
+    if (result) {
+        *isOn = !*isOn;
+    }
+    return result;
+}

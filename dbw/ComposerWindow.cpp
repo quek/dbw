@@ -21,47 +21,18 @@ void ComposerWindow::render() {
     //auto composerWindowName = _composer->_project->_name.string() + "##Composer";
     ImGui::Begin("Composer", nullptr, ImGuiWindowFlags_NoScrollbar);
 
-    if (_composer->_playing) {
-        ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BUTTON_ON);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_BUTTON_ON_HOVERED);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
-        if (ImGui::Button("Play")) {
+    bool playing = _composer->_playing;
+    if (ToggleButton("Play", &playing)) {
+        if (playing) {
+            _composer->play();
+        } else {
             _composer->stop();
         }
-        ImGui::PopStyleColor(3);
-    } else {
-        if (ImGui::Button("Play")) {
-            _composer->play();
-        }
     }
     ImGui::SameLine();
-    if (_composer->_looping) {
-        ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BUTTON_ON);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_BUTTON_ON_HOVERED);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
-        if (ImGui::Button("Loop")) {
-            _composer->_looping = false;
-        }
-        ImGui::PopStyleColor(3);
-    } else {
-        if (ImGui::Button("Loop")) {
-            _composer->_looping = true;
-        }
-    }
+    ToggleButton("Loop", &_composer->_looping);
     ImGui::SameLine();
-    if (_composer->_scrollLock) {
-        ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BUTTON_ON);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_BUTTON_ON_HOVERED);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_BUTTON_ON_ACTIVE);
-        if (ImGui::Button("ScLk")) {
-            _composer->_scrollLock = false;
-        }
-        ImGui::PopStyleColor(3);
-    } else {
-        if (ImGui::Button("ScLk")) {
-            _composer->_scrollLock = true;
-        }
-    }
+    ToggleButton("ScLk", &_composer->_scrollLock);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 5);
     ImGui::DragFloat("BPM", &_composer->_bpm, 1.0f, 0.0f, 999.0f, "%.02f");

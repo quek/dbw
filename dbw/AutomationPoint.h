@@ -11,7 +11,6 @@ public:
     virtual ~AutomationPoint() = default;
     void addTo(std::vector<std::unique_ptr<SequenceItem>>& items) override;
     double getValue() const { return _value; }
-    void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
     void setValue(double value);
     virtual nlohmann::json toJson() override;
 

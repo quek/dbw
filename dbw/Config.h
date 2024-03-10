@@ -59,7 +59,7 @@ struct Preference : ConfigMixin<Preference> {
     );
 };
 
-struct Theme : ConfigMixin<Theme>{
+struct Theme : ConfigMixin<Theme> {
     Theme() : ConfigMixin("theme.json") {}
 
     ImU32 automationLine = IM_COL32(0x80, 0x80, 0xff, 0xee);
@@ -68,6 +68,10 @@ struct Theme : ConfigMixin<Theme>{
     ImU32 editCursor = IM_COL32(0x00, 0xff, 0x00, 0x80);
 
     ImU32 rackBorder = IM_COL32(0x80, 0x80, 0x80, 0x80);
+
+    ImU32 buttonOn = IM_COL32(0x40, 0x80, 0x80, 0x90);
+    ImU32 buttonOnHovered = IM_COL32(0x60, 0xa0, 0xa0, 0x90);
+    ImU32 buttonOnActive = IM_COL32(0x50, 0x90, 0x90, 0x80);
 
     ImU32 background = IM_COL32(0x00, 0x00, 0x00, 0x80);
     ImU32 text = IM_COL32(0xff, 0xff, 0xff, 0xc0);

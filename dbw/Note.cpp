@@ -22,7 +22,8 @@ nlohmann::json Note::toJson() {
     return json;
 }
 
-void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) {
+// TODO クリップが切り詰めてあるとき
+void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double loopBegin, double loopEnd, double oneBeatSec) {
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
     double sampleRate = gPreference.sampleRate;
     double noteBegin = clipBegin + _time;
