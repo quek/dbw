@@ -1,6 +1,7 @@
 #pragma once
 
 class Composer;
+struct ImVec2;
 class Lane;
 class Track;
 class TrackWidthManager;
@@ -13,6 +14,7 @@ public:
 private:
     void computeHeaderHeight();
     void computeHeaderHeight(Track* track, int groupLevel);
+    ImVec2 posWindowToScreen(const ImVec2& pos);
     void renderLane(Lane* lane, int groupLevel);
     void renderTrack(Track* track, int groupLevel);
 

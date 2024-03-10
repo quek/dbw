@@ -1,5 +1,6 @@
 #include "TrackHeaderView.h"
 #include "Composer.h"
+#include "Config.h"
 #include "Lane.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 22.0f;
@@ -36,6 +37,10 @@ void TrackHeaderView::computeHeaderHeight(Track* track, int groupLevel) {
     }
 }
 
+ImVec2 TrackHeaderView::posWindowToScreen(const ImVec2& pos) {
+    return pos + ImGui::GetWindowPos() - ImVec2(0.0f, _scrollY);
+}
+
 void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
     auto& automationTarget = lane->_automationTarget;
     if (!automationTarget) {
@@ -43,7 +48,8 @@ void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
     }
 
     ImGui::PushID(lane);
-    ImGui::SetCursorPos(ImVec2(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + 22.0f));
+    ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + 22.0f);
+    ImGui::SetCursorPos(pos1);
     ImGui::BeginGroup();
     float width = _trackWidthManager.getLaneWidth(lane);
     Module* module = automationTarget->getModule();
@@ -59,24 +65,34 @@ void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
         automationTarget->setDefaultValue(defaultValue);
     }
     ImGui::EndGroup();
+
+    pos1 = posWindowToScreen(pos1);
+    ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+
     ImGui::PopID();
 }
 
 void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
     ImGui::PushID(track);
-    ImGuiIO& io = ImGui::GetIO();
-    //ImGui::SetCursorPos(ImVec2(_x + 4.0f, scrollY + GROUP_OFFSET_Y * groupLevel));
-    //ImGui::Text(track->_name.c_str());
-    ImGui::SetCursorPos(ImVec2(_x, _scrollY + GROUP_OFFSET_Y * groupLevel));
+    ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel);
+    ImGui::SetCursorPos(pos1);
     float trackWidth = _trackWidthManager.getTrackWidth(track);
     ImGui::Button(track->_name.c_str(), ImVec2(trackWidth, 0.0f));
     if (ImGui::BeginPopupContextItem(track->_name.c_str())) {
         if (ImGui::MenuItem("New Lane", "Ctrl+L")) {
-            // TODO
+            // TODO command
             track->addLane(new Lane());
         }
         ImGui::EndPopup();
     }
+    pos1 = posWindowToScreen(pos1);
+    ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    
+
 
     for (auto& lane : track->_lanes) {
         renderLane(lane.get(), groupLevel);

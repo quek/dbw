@@ -86,12 +86,12 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         computeNextPlayTime(framesPerBuffer);
 
         _masterTrack->prepareEvent();
+    }
 
-        for (auto& module : _orderedModules) {
-            module->_track->_processBuffer.swapInOut();
-            module->processConnections();
-            module->process(&module->_track->_processBuffer, steadyTime);
-        }
+    for (auto& module : _orderedModules) {
+        module->_track->_processBuffer.swapInOut();
+        module->processConnections();
+        module->process(&module->_track->_processBuffer, steadyTime);
     }
 
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
