@@ -1,6 +1,8 @@
 #pragma once
 #include "SequenceItem.h"
 
+class Lane;
+
 class AutomationPoint : public SequenceItem {
 public:
     inline static const char* TYPE = "AutomationPoint";
@@ -9,7 +11,7 @@ public:
     virtual ~AutomationPoint() = default;
     void addTo(std::vector<std::unique_ptr<SequenceItem>>& items) override;
     double getValue() const { return _value; }
-    void prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
+    void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
     void setValue(double value);
     virtual nlohmann::json toJson() override;
 

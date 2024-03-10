@@ -51,6 +51,6 @@ void Param::performEdit(double value) {
         _editStatus._performAt = std::chrono::high_resolution_clock::now();
     }
     _value = value;
-    _module->addParameterChange(this);
+    _module->addParameterChange(this, 0, value);
     _module->updateEditedParamIdList(_id);
 }

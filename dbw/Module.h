@@ -33,8 +33,9 @@ public:
     virtual uint32_t getComputedLatency();
     virtual void setComputedLatency(uint32_t computedLatency);
     std::unique_ptr<Param>& getParam(uint32_t paramId);
-    virtual void addParameterChange(Param*) {};
-    virtual void updateEditedParamIdList(uint32_t id);
+    virtual void addParameterChange(Param*, int32_t sampleOffset);
+    virtual void addParameterChange(Param*, int32_t, double) {};
+    virtual void updateEditedParamIdList(ParamId id);
 
     static Module* create(std::string& type, std::string& id);
     static Module* fromJson(const nlohmann::json&);

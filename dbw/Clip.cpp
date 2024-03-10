@@ -31,6 +31,27 @@ std::string Clip::name() const {
     return name;
 }
 
+void Clip::prepareProcessBuffer(Lane* lane, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) {
+    double clipBegin = _time;
+    double clipEnd = _duration + clipBegin;
+    if (begin < end) {
+        if (clipBegin < end && begin <= clipEnd) {
+            // ok
+        } else {
+            return;
+        }
+    } else {
+        if (clipBegin < end && loopBegin <= clipEnd || begin <= clipEnd && clipBegin < loopEnd) {
+            // ok
+        } else {
+            return;
+        }
+    }
+    for (auto& item : _sequence->getItems()) {
+        item->prepareProcessBuffer(lane, begin, end, clipBegin, clipEnd, loopBegin, loopEnd, oneBeatSec);
+    }
+}
+
 nlohmann::json Clip::toJson() {
     nlohmann::json json = Nameable::toJson();
     json["_sequence"] = _sequence->toJson();

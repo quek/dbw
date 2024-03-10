@@ -36,7 +36,7 @@ public:
     void performEdit(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void endEdit(Vst::ParamID);
     void setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
-    void addParameterChange(Param* param) override;
+    void addParameterChange(Param* param, int32_t sampleOffset, double value) override;
 
     virtual nlohmann::json toJson() override;
     static Vst3Module* fromJson(const nlohmann::json& json);
@@ -59,4 +59,5 @@ private:
     Vst::SymbolicSampleSizes _symbolicSampleSizes = Vst::SymbolicSampleSizes::kSample32;
 
     Vst::ParameterChanges _parameterChanges;
+    std::map<ParamId, double> _controllerSetParamNormalizedMap;
 };

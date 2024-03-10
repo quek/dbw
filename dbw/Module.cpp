@@ -114,7 +114,11 @@ std::unique_ptr<Param>& Module::getParam(uint32_t paramId) {
     return _idParamMap[paramId];
 }
 
-void Module::updateEditedParamIdList(uint32_t id) {
+void Module::addParameterChange(Param* param, int32_t sampleOffset) {
+    addParameterChange(param, param->getValue(), sampleOffset);
+}
+
+void Module::updateEditedParamIdList(ParamId id) {
     if (!getParam(id)->canAutomate()) {
         return;
     }

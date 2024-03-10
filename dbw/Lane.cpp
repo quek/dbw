@@ -45,26 +45,9 @@ nlohmann::json Lane::toJson() {
     return json;
 }
 
-void Lane::prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) {
+void Lane::prepareProcessBuffer(double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) {
     for (auto& clip : _clips) {
-        double clipBegin = clip->_time;
-        double clipEnd = clip->_duration + clipBegin;
-        if (begin < end) {
-            if (clipBegin < end && begin <= clipEnd) {
-                // ok
-            } else {
-                continue;
-            }
-        } else {
-            if (clipBegin < end && loopBegin <= clipEnd || begin <= clipEnd && clipBegin < loopEnd) {
-                // ok
-            } else {
-                continue;
-            }
-        }
-        for (auto& item : clip->_sequence->getItems()) {
-            item->prepareProcessBuffer(processBuffer, begin, end, clipBegin, clipEnd, loopBegin, loopEnd, oneBeatSec);
-        }
+        clip->prepareProcessBuffer(this, begin, end, loopBegin, loopEnd, oneBeatSec);
     }
 }
 

@@ -12,6 +12,7 @@ public:
     Clip* clone() override;
     void edit(Composer* composer, Lane* lane) override;
     std::string name() const override;
+    void prepareProcessBuffer(Lane* lane, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) override;
     void renderInScene(PianoRollWindow* pianoRollWindow) override;
     virtual nlohmann::json toJson() override;
 };

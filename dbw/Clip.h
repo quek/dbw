@@ -16,6 +16,7 @@ public:
     virtual void edit(Composer* composer, Lane* lane) = 0;
     virtual std::string name() const;
     std::shared_ptr<Sequence>& getSequence() { return _sequence; }
+    virtual void prepareProcessBuffer(Lane* lane, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) ;
     virtual void renderInScene(PianoRollWindow* pianoRollWindow) = 0;
 
     virtual nlohmann::json toJson() override;

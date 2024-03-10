@@ -1,6 +1,8 @@
 #include "Note.h"
 #include "Config.h"
+#include "Lane.h"
 #include "ProcessBuffer.h"
+#include "Track.h"
 
 Note::Note(const nlohmann::json& json) : SequenceItem(json) {
     _channel = json["_channel"];
@@ -20,7 +22,8 @@ nlohmann::json Note::toJson() {
     return json;
 }
 
-void Note::prepareProcessBuffer(ProcessBuffer& processBuffer, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) {
+void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) {
+    ProcessBuffer& processBuffer = lane->_track->_processBuffer;
     double sampleRate = gPreference.sampleRate;
     double noteBegin = clipBegin + _time;
     double noteEnd = noteBegin + _duration;

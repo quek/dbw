@@ -98,7 +98,7 @@ void Track::prepareEvent() {
     double loopBegin = composer->_loopStartTime;
     double loopEnd = composer->_loopEndTime;
     for (auto& lane : _lanes) {
-        lane->prepareProcessBuffer(_processBuffer, begin, end, loopBegin, loopEnd, oneBeatSec);
+        lane->prepareProcessBuffer(begin, end, loopBegin, loopEnd, oneBeatSec);
     }
 
     getComposer()->_sceneMatrix->process(this);

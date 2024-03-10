@@ -547,8 +547,7 @@ void Vst3Module::renderContent() {
         beginEdit(id);
         auto& param = getParam(id);
         param->setValue(value);
-        _controller->setParamNormalized(id, value);
-        addParameterChange(param.get());
+        addParameterChange(param.get(), 0, value);
     }
     for (auto id : endEditIds) {
         endEdit(id);
@@ -559,6 +558,11 @@ void Vst3Module::renderContent() {
     for (auto& [id, param] : _idParamMap) {
         param->maybeCommit(now);
     }
+
+    for (auto& [id, value] : _controllerSetParamNormalizedMap) {
+            _controller->setParamNormalized(id, value);
+    }
+    _controllerSetParamNormalizedMap.clear();
 }
 
 void Vst3Module::onResize(int width, int height) {
@@ -630,11 +634,12 @@ void Vst3Module::setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormali
     auto& param = getParam(id);
     param->setValue(valueNormalized);
     _controller->setParamNormalized(id, valueNormalized);
-    addParameterChange(param.get());
+    // どうせ次のフレームにしか送れないので 0 でいいはず
+    int32_t sampleOffset = 0;
+    addParameterChange(param.get(), sampleOffset, valueNormalized);
 }
 
-
-void Vst3Module::addParameterChange(Param* param) {
+void Vst3Module::addParameterChange(Param* param, int32_t sampleOffset, double value) {
     if (_track == nullptr) return;
     std::lock_guard<std::recursive_mutex> lock(_track->getComposer()->app()->_mtx);
     int32 index;
@@ -649,10 +654,9 @@ void Vst3Module::addParameterChange(Param* param) {
     if (queue == nullptr) {
         queue = _parameterChanges.addParameterData(param->getId(), index);
     }
-    // どうせ次のフレームにしか送れないので 0 でいいはず
-    // オートメーション書いたらそのとき考えよう
-    int32 sampleOffset = 0;
-    queue->addPoint(sampleOffset, param->getValue(), index);
+    queue->addPoint(sampleOffset, value, index);
+
+    _controllerSetParamNormalizedMap[param->getId()] = value;
 }
 
 nlohmann::json Vst3Module::toJson() {
