@@ -16,6 +16,7 @@ public:
     uint32_t getParamId() const { return _paramId; }
     std::string getParamName();
     Param* getParam();
+    void setDefaultValue(double value) { _defaultValue = value; }
 
 private:
     Module* _module;

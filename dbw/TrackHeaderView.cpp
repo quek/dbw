@@ -3,7 +3,7 @@
 #include "Lane.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 22.0f;
-constexpr const float HEIGHT_FOR_AUTOMATION = 22.0f;
+constexpr const float HEIGHT_FOR_AUTOMATION = 44.0f;
 constexpr const float GROUP_OFFSET_Y = 5.0f;
 
 TrackHeaderView::TrackHeaderView(Composer* composer, TrackWidthManager& trackWidthManager) :
@@ -44,10 +44,21 @@ void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
 
     ImGui::PushID(lane);
     ImGui::SetCursorPos(ImVec2(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + 22.0f));
+    ImGui::BeginGroup();
     float width = _trackWidthManager.getLaneWidth(lane);
     Module* module = automationTarget->getModule();
     std::string paramName = automationTarget->getParamName();
-    ImGui::Button(std::format("{} {}", module->_name,paramName).c_str(), ImVec2(width, 0.0f));
+    std::string label = std::format("{} {}", module->_name, paramName);
+    ImGui::Button(label.c_str(), ImVec2(width, 0.0f));
+    double defaultValue = automationTarget->getDefaultValue();
+    double min = 0.0;
+    double max = 1.0;
+    std::string format = automationTarget->getParam()->getValueText(defaultValue);
+    ImGui::SetNextItemWidth(width);
+    if (ImGui::DragScalar("##default value", ImGuiDataType_Double, &defaultValue, 0.01f, &min, &max, format.c_str())) {
+        automationTarget->setDefaultValue(defaultValue);
+    }
+    ImGui::EndGroup();
     ImGui::PopID();
 }
 
