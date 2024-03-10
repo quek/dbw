@@ -242,6 +242,8 @@
     <ClInclude Include="TimelineWindow.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Lane.h" />
+    <ClInclude Include="TrackHeaderView.h" />
+    <ClInclude Include="TrackWidthManager.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="Vst3Context.h" />
     <ClInclude Include="Vst3Module.h" />
@@ -340,6 +342,8 @@
     <ClCompile Include="TimelineWindow.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="Lane.cpp" />
+    <ClCompile Include="TrackHeaderView.cpp" />
+    <ClCompile Include="TrackWidthManager.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="Vst3Context.cpp" />
     <ClCompile Include="Vst3Module.cpp" />

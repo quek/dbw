@@ -165,6 +165,8 @@
     <ClCompile Include="TimelineMixin.cpp" />
     <ClCompile Include="Param.cpp" />
     <ClCompile Include="Vst3Param.cpp" />
+    <ClCompile Include="TrackHeaderView.cpp" />
+    <ClCompile Include="TrackWidthManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -317,6 +319,8 @@
     <ClInclude Include="TimelineMixin.h" />
     <ClInclude Include="Param.h" />
     <ClInclude Include="Vst3Param.h" />
+    <ClInclude Include="TrackHeaderView.h" />
+    <ClInclude Include="TrackWidthManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

@@ -2,13 +2,15 @@
 #include <map>
 #include <set>
 #include "TimelineCanvasMixin.h"
+#include "TrackHeaderView.h"
+#include "TrackWidthManager.h"
 
 class Clip;
 class Composer;
 struct Bounds;
 struct ImVec2;
-class Track;
 class Lane;
+class Track;
 
 class TimelineWindow : public TimelineCanvasMixin<Clip, Lane> {
 public:
@@ -37,19 +39,18 @@ public:
     float xFromThing(Clip* clip) override;
     float laneToScreenX(Lane* lane);
     float getLaneWidth(Clip* clip) override;
-    float getLaneWidth(Lane* lane);
 
 protected:
     void handleShortcut() override;
-    void renderPlayhead()override;
-    void renderHeader()override;
+    void renderPlayhead() override;
+    void renderHeader() override;
+    void renderHeader2();
     std::string windowName() override;
     std::string canvasName() override;
 
 private:
-    float getTrackWidth(Track* track);
-    float allTracksWidth();
-
-    std::map<Lane*, float> _laneWidthMap;
     std::map<Clip*, Lane*> _clipLaneMap;
+    float _headerHeight = 0.0f;
+    TrackWidthManager _trackWidthManager;
+    TrackHeaderView _trackHeaderView;
 };

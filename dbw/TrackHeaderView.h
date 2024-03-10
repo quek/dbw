@@ -1,0 +1,25 @@
+#pragma once
+
+class Composer;
+class Lane;
+class Track;
+class TrackWidthManager;
+
+class TrackHeaderView {
+public:
+    TrackHeaderView(Composer* composer, TrackWidthManager& trackWidthManager);
+    float render(float offsetX);
+
+private:
+    void computeHeaderHeight();
+    void computeHeaderHeight(Track* track, int groupLevel);
+    void renderLane(Lane* lane, int groupLevel);
+    void renderTrack(Track* track, int groupLevel);
+
+    Composer* _composer;
+    TrackWidthManager& _trackWidthManager;
+    float _headerHeight = 0.0f;
+    float _scrollY;
+    float _x = 0.0f;
+};
+
