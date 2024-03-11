@@ -218,7 +218,7 @@ void TimelineWindow::renderPlayhead() {
 }
 
 void TimelineWindow::renderHeader() {
-    _headerHeight = _trackHeaderView.render(offsetLeft());
+    _headerHeight = _trackHeaderView.render(offsetLeft(), _zoomX);
 }
 
 void TimelineWindow::renderHeader2() {

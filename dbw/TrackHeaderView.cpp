@@ -13,8 +13,9 @@ TrackHeaderView::TrackHeaderView(Composer* composer, TrackWidthManager& trackWid
     _composer(composer), _trackWidthManager(trackWidthManager) {
 }
 
-float TrackHeaderView::render(float offsetX) {
+float TrackHeaderView::render(float offsetX, float zoomX) {
     _x = offsetX;
+    _zoomX = zoomX;
     _scrollX = ImGui::GetScrollX();
     _scrollY = ImGui::GetScrollY();
     computeHeaderHeight();
@@ -53,6 +54,14 @@ void TrackHeaderView::computeHeaderHeight(Track* track, int groupLevel) {
     }
 }
 
+float TrackHeaderView::getTrackWidth(Track* track) {
+    return _trackWidthManager.getTrackWidth(track) * _zoomX;
+}
+
+float TrackHeaderView::getLaneWidth(Lane* lane) {
+    return _trackWidthManager.getLaneWidth(lane) * _zoomX;
+}
+
 ImVec2 TrackHeaderView::posScreenToWindow(const ImVec2& pos) {
     return pos - ImGui::GetWindowPos() + ImVec2(_scrollX, _scrollY);
 }
@@ -65,7 +74,7 @@ void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
     ImGui::PushID(lane);
     ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + BASE_HEADER_HEIGHT);
     ImGui::SetCursorPos(pos1);
-    float width = _trackWidthManager.getLaneWidth(lane);
+    float width = getLaneWidth(lane);
 
     const ImGuiPayload* payload = ImGui::GetDragDropPayload();
     if (payload && payload->IsDataType(std::format(DDP_AUTOMATION_TARGET, lane->_track->getNekoId()).c_str())) {
@@ -110,7 +119,7 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
     ImGui::PushID(track);
     ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel);
     ImGui::SetCursorPos(pos1);
-    float trackWidth = _trackWidthManager.getTrackWidth(track);
+    float trackWidth = getTrackWidth(track);
     ImGui::Button(track->_name.c_str(), ImVec2(trackWidth, 0.0f));
     if (ImGui::BeginPopupContextItem(track->_name.c_str())) {
         if (ImGui::MenuItem("New Lane", "Ctrl+L")) {
@@ -123,7 +132,7 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
     float x = _x;
     for (auto& lane : track->_lanes) {
         renderLane(lane.get(), groupLevel);
-        _x += _trackWidthManager.getLaneWidth(lane.get());
+        _x += getLaneWidth(lane.get());
     }
 
     if (track->_showTracks) {
