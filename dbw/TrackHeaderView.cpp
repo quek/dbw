@@ -1,6 +1,7 @@
 #include "TrackHeaderView.h"
 #include "Composer.h"
 #include "Config.h"
+#include "GuiUtil.h"
 #include "Lane.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 22.0f;
@@ -13,6 +14,7 @@ TrackHeaderView::TrackHeaderView(Composer* composer, TrackWidthManager& trackWid
 
 float TrackHeaderView::render(float offsetX) {
     _x = offsetX;
+    _scrollX = ImGui::GetScrollX();
     _scrollY = ImGui::GetScrollY();
     computeHeaderHeight();
     renderTrack(_composer->_masterTrack.get(), 0);
@@ -37,39 +39,55 @@ void TrackHeaderView::computeHeaderHeight(Track* track, int groupLevel) {
     }
 }
 
+ImVec2 TrackHeaderView::posScreenToWindow(const ImVec2& pos) {
+    return pos - ImGui::GetWindowPos() + ImVec2(_scrollX, _scrollY);
+}
+
 ImVec2 TrackHeaderView::posWindowToScreen(const ImVec2& pos) {
-    return pos + ImGui::GetWindowPos() - ImVec2(0.0f, _scrollY);
+    return pos + ImGui::GetWindowPos() - ImVec2(_scrollX, _scrollY);
 }
 
 void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
-    auto& automationTarget = lane->_automationTarget;
-    if (!automationTarget) {
-        return;
-    }
-
     ImGui::PushID(lane);
-    ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + 22.0f);
+    ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + BASE_HEADER_HEIGHT);
     ImGui::SetCursorPos(pos1);
-    ImGui::BeginGroup();
     float width = _trackWidthManager.getLaneWidth(lane);
-    Module* module = automationTarget->getModule();
-    std::string paramName = automationTarget->getParamName();
-    std::string label = std::format("{} {}", module->_name, paramName);
-    ImGui::Button(label.c_str(), ImVec2(width, 0.0f));
-    double defaultValue = automationTarget->getDefaultValue();
-    double min = 0.0;
-    double max = 1.0;
-    std::string format = automationTarget->getParam()->getValueText(defaultValue);
-    ImGui::SetNextItemWidth(width);
-    if (ImGui::DragScalar("##default value", ImGuiDataType_Double, &defaultValue, 0.01f, &min, &max, format.c_str())) {
-        automationTarget->setDefaultValue(defaultValue);
-    }
-    ImGui::EndGroup();
 
-    pos1 = posWindowToScreen(pos1);
-    ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+    if (payload && payload->IsDataType(std::format(DDP_AUTOMATION_TARGET, lane->_track->getNekoId()).c_str())) {
+        ImGui::InvisibleButton("DragDropTarget", ImVec2(width, ImGui::GetWindowHeight()));
+        if (ImGui::BeginDragDropTarget()) {
+            if (payload = ImGui::AcceptDragDropPayload(std::format(DDP_AUTOMATION_TARGET, lane->_track->getNekoId()).c_str())) {
+                AutomationTarget* automationTarget = (AutomationTarget*)payload->Data;
+                lane->_automationTarget.reset(new AutomationTarget(*automationTarget));
+                ImGui::EndDragDropTarget();
+            }
+        }
+    }
+
+    auto& automationTarget = lane->_automationTarget;
+    if (automationTarget) {
+        ImGui::SetCursorPos(pos1);
+        ImGui::BeginGroup();
+        Module* module = automationTarget->getModule();
+        std::string paramName = automationTarget->getParamName();
+        std::string label = std::format("{} {}", module->_name, paramName);
+        ImGui::Button(label.c_str(), ImVec2(width, 0.0f));
+        double defaultValue = automationTarget->getDefaultValue();
+        double min = 0.0;
+        double max = 1.0;
+        std::string format = automationTarget->getParam()->getValueText(defaultValue);
+        ImGui::SetNextItemWidth(width);
+        if (ImGui::DragScalar("##default value", ImGuiDataType_Double, &defaultValue, 0.01f, &min, &max, format.c_str())) {
+            automationTarget->setDefaultValue(defaultValue);
+        }
+        ImGui::EndGroup();
+
+        pos1 = posWindowToScreen(pos1);
+        ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    }
 
     ImGui::PopID();
 }
@@ -91,7 +109,7 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
     ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     drawList->AddLine(pos1, pos2, gTheme.rackBorder);
-    
+
 
 
     for (auto& lane : track->_lanes) {

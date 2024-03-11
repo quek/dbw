@@ -14,6 +14,7 @@ public:
 private:
     void computeHeaderHeight();
     void computeHeaderHeight(Track* track, int groupLevel);
+    ImVec2 posScreenToWindow(const ImVec2& pos);
     ImVec2 posWindowToScreen(const ImVec2& pos);
     void renderLane(Lane* lane, int groupLevel);
     void renderTrack(Track* track, int groupLevel);
@@ -21,7 +22,8 @@ private:
     Composer* _composer;
     TrackWidthManager& _trackWidthManager;
     float _headerHeight = 0.0f;
-    float _scrollY;
+    float _scrollX = 0.0f;
+    float _scrollY = 0.0f;
     float _x = 0.0f;
 };
 
