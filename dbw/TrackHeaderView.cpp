@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "GuiUtil.h"
 #include "Lane.h"
+#include "command/AddTrack.h"
 
 constexpr const float BASE_HEADER_HEIGHT = 22.0f;
 constexpr const float HEIGHT_FOR_AUTOMATION = 44.0f;
@@ -18,6 +19,19 @@ float TrackHeaderView::render(float offsetX) {
     _scrollY = ImGui::GetScrollY();
     computeHeaderHeight();
     renderTrack(_composer->_masterTrack.get(), 0);
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 pos1 = ImGui::GetWindowPos();
+    ImVec2 pos2 = pos1 + ImVec2(ImGui::GetWindowWidth(), 0.0f);
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    pos1 = ImVec2(_x, 0.0f) + ImGui::GetWindowPos();
+    pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    ImGui::SetCursorPos(ImVec2(_x, _headerHeight + _scrollY));
+    if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T, "+", ImVec2(0.0f, ImGui::GetWindowHeight()))) {
+        _composer->_commandManager.executeCommand(new command::AddTrack());
+    }
+
     return _headerHeight;
 }
 
@@ -105,13 +119,8 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
         }
         ImGui::EndPopup();
     }
-    pos1 = posWindowToScreen(pos1);
-    ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
 
-
-
+    float x = _x;
     for (auto& lane : track->_lanes) {
         renderLane(lane.get(), groupLevel);
         _x += _trackWidthManager.getLaneWidth(lane.get());
@@ -122,6 +131,13 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
             renderTrack(it.get(), groupLevel + (track->isMasterTrack() ? 0 : 1));
         }
     }
+
+    pos1 = posWindowToScreen(pos1);
+    ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+    pos2 = pos1 + ImVec2(_x - x, 0.0f);
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
 
     ImGui::PopID();
 }
