@@ -18,11 +18,12 @@ private:
     float getLaneWidth(Lane* lane);
     ImVec2 posScreenToWindow(const ImVec2& pos);
     ImVec2 posWindowToScreen(const ImVec2& pos);
-    void renderLane(Lane* lane, int groupLevel);
+    void renderLane(Lane* lane);
     void renderTrack(Track* track, int groupLevel);
 
     Composer* _composer;
     TrackWidthManager& _trackWidthManager;
+    float _groupToggleButtonWidth = 0.0f;
     float _headerHeight = 0.0f;
     float _scrollX = 0.0f;
     float _scrollY = 0.0f;

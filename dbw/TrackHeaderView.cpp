@@ -70,9 +70,9 @@ ImVec2 TrackHeaderView::posWindowToScreen(const ImVec2& pos) {
     return pos + ImGui::GetWindowPos() - ImVec2(_scrollX, _scrollY);
 }
 
-void TrackHeaderView::renderLane(Lane* lane, int groupLevel) {
+void TrackHeaderView::renderLane(Lane* lane) {
     ImGui::PushID(lane);
-    ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel + BASE_HEADER_HEIGHT);
+    ImVec2 pos1(_x, _headerHeight - HEIGHT_FOR_AUTOMATION + _scrollY);
     ImGui::SetCursorPos(pos1);
     float width = getLaneWidth(lane);
 
@@ -119,8 +119,9 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
     ImGui::PushID(track);
     ImVec2 pos1(_x, _scrollY + GROUP_OFFSET_Y * groupLevel);
     ImGui::SetCursorPos(pos1);
+    bool isGroup = !track->getTracks().empty() && !track->isMasterTrack();
     float trackWidth = getTrackWidth(track);
-    ImGui::Button(track->_name.c_str(), ImVec2(trackWidth, 0.0f));
+    ImGui::Button(track->_name.c_str(), ImVec2(trackWidth - (isGroup ? _groupToggleButtonWidth : 0), 0.0f));
     if (ImGui::BeginPopupContextItem(track->_name.c_str())) {
         if (ImGui::MenuItem("New Lane", "Ctrl+L")) {
             // TODO command
@@ -129,9 +130,23 @@ void TrackHeaderView::renderTrack(Track* track, int groupLevel) {
         ImGui::EndPopup();
     }
 
+    if (isGroup) {
+        ImGui::SameLine();
+        if (track->_showTracks) {
+            if (ImGui::Button("≪")) {
+                track->_showTracks = false;
+            }
+        } else {
+            if (ImGui::Button("≫")) {
+                track->_showTracks = true;
+            }
+        }
+        _groupToggleButtonWidth = ImGui::GetItemRectSize().x;
+    }
+
     float x = _x;
     for (auto& lane : track->_lanes) {
-        renderLane(lane.get(), groupLevel);
+        renderLane(lane.get());
         _x += getLaneWidth(lane.get());
     }
 
