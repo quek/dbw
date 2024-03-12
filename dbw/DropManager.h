@@ -3,7 +3,7 @@
 
 class App;
 
-// create a class inheriting from IDropTarget
+// see https://github.com/ocornut/imgui/issues/2602
 class DropManager : public IDropTarget
 {
 public:

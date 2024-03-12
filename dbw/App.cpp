@@ -76,19 +76,14 @@ void App::deleteComposer(Composer* composer)
     }
 }
 
-void App::dragEnter(std::vector<std::string> files)
+void App::dragEnter(const std::vector<std::string>& files)
 {
     _dropFiles = files;
     _isDragging = true;
 }
 
-void App::drop(std::vector<std::string> files)
+void App::drop()
 {
-    for (const auto x : files)
-    {
-        printf("%s\n", x.c_str());
-    }
-    _dropFiles = files;
     _isDragging = false;
 }
 

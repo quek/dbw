@@ -18,8 +18,8 @@ public:
     std::vector<std::unique_ptr<Composer>>& composers() { return _composers; }
     void addComposer(Composer* composer);
     void deleteComposer(Composer* composer);
-    void dragEnter(std::vector<std::string> files);
-    void drop(std::vector<std::string> files);
+    void dragEnter(const std::vector<std::string>& files);
+    void drop();
     std::vector<std::string>& getDropFiles() { return _dropFiles; }
     void runCommand();
     void requestAddComposer(Composer* composer);
