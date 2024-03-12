@@ -52,9 +52,7 @@ HRESULT DropManager::DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL 
                 {
                     std::wstring wFilePath = filePath;
                     std::string file = WideStringToAnsiString(wFilePath);
-                    std::filesystem::path path(file);
-                    auto ext = path.extension();
-                    if (ext == ".wav")
+                    if (file.ends_with(".wav"))
                     {
                         *pdwEffect = DROPEFFECT_COPY; // WAVファイルが見つかった場合の処理
                         files.emplace_back(file);
