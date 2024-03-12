@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 
 constexpr const char* DDP_AUTOMATION_TARGET = "DDP_AMT{}";
+constexpr const char* DDP_EXTERNAL_FILES = "DDP_EXTERNAL_FILES";
 
 extern float TEXT_BASE_WIDTH;
 extern float TEXT_BASE_HEIGHT;

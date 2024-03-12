@@ -17,3 +17,4 @@ std::string yyyyMmDd();
 std::string yyyyMmDdHhMmSs();
 std::filesystem::path userDir();
 std::filesystem::path systemDir();
+std::string WideStringToAnsiString(const std::wstring& wstr);

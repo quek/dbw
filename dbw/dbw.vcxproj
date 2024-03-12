@@ -166,7 +166,9 @@
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="Aa.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="Audio.h" />
     <ClInclude Include="AudioBuffer.h" />
+    <ClInclude Include="AudioClip.h" />
     <ClInclude Include="AudioEngineWindow.h" />
     <ClInclude Include="AutomationClip.h" />
     <ClInclude Include="AutomationPoint.h" />
@@ -203,6 +205,7 @@
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="DropManager.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="Fader.h" />
@@ -249,6 +252,7 @@
     <ClInclude Include="Vst3Module.h" />
     <ClInclude Include="Neko.h" />
     <ClInclude Include="Vst3Param.h" />
+    <ClInclude Include="Wav.h" />
     <ClInclude Include="ZoomMixin.h" />
   </ItemGroup>
   <ItemGroup>
@@ -266,7 +270,9 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
     <ClCompile Include="Aa.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />
+    <ClCompile Include="AudioClip.cpp" />
     <ClCompile Include="AudioEngineWindow.cpp" />
     <ClCompile Include="AutomationClip.cpp" />
     <ClCompile Include="AutomationPoint.cpp" />
@@ -303,6 +309,7 @@
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="DropManager.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="Fader.cpp" />
@@ -349,6 +356,7 @@
     <ClCompile Include="Vst3Module.cpp" />
     <ClCompile Include="Neko.cpp" />
     <ClCompile Include="Vst3Param.cpp" />
+    <ClCompile Include="Wav.cpp" />
     <ClCompile Include="ZoomMixin.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -167,6 +167,10 @@
     <ClCompile Include="Vst3Param.cpp" />
     <ClCompile Include="TrackHeaderView.cpp" />
     <ClCompile Include="TrackWidthManager.cpp" />
+    <ClCompile Include="Wav.cpp" />
+    <ClCompile Include="AudioClip.cpp" />
+    <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="DropManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -321,6 +325,10 @@
     <ClInclude Include="Vst3Param.h" />
     <ClInclude Include="TrackHeaderView.h" />
     <ClInclude Include="TrackWidthManager.h" />
+    <ClInclude Include="Wav.h" />
+    <ClInclude Include="AudioClip.h" />
+    <ClInclude Include="Audio.h" />
+    <ClInclude Include="DropManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
