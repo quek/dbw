@@ -6,7 +6,7 @@
 
 class Audio : public SequenceItem {
 public:
-    Audio(const std::string& wavPath);
+    Audio(const std::string& wavPath, double bpm);
     void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
 private:
     std::string _wavPath;

@@ -86,8 +86,6 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
         }
     } else if (payload && payload->IsDataType(DDP_EXTERNAL_FILES))
     {
-        float time = timeFromMousePos(0.0f, false);
-        Lane* lane = laneFromPos(mousePos);
         ImVec2 pos = mousePos - ImGui::GetWindowPos() - ImVec2(10, 10);
         ImGui::SetCursorPos(pos);
         ImGui::InvisibleButton(DDP_EXTERNAL_FILES, ImVec2(50, 50));
@@ -100,7 +98,7 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
 
             float time = timeFromMousePos(0.0f, false);
             Lane* lane = laneFromPos(mousePos);
-            AudioClip* clip = new AudioClip(time, file);
+            AudioClip* clip = new AudioClip(time, file, _composer->_bpm);
             lane->_clips.emplace_back(clip);
             }
 

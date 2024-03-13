@@ -99,12 +99,6 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
     if (_playing) {
         _playTime = _nextPlayTime;
     }
-    if (_looping) {
-        // TODO ループ時の端数処理
-        if (_playTime >= _loopEndTime) {
-            _playTime = _loopStartTime;
-        }
-    }
 }
 
 App* Composer::app() const {
@@ -119,6 +113,13 @@ void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
     double deltaSec = framesPerBuffer / gPreference.sampleRate;
     double oneBeatSec = 60.0 / _bpm;
     _nextPlayTime = deltaSec / oneBeatSec + _playTime;
+    if (_looping)
+    {
+        if (_loopEndTime < _nextPlayTime)
+        {
+            _nextPlayTime = _loopStartTime + _nextPlayTime - _loopEndTime;
+        }
+    }
 }
 
 int Composer::maxBar() {

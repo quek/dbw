@@ -9,7 +9,9 @@ class Wav
 public:
     Wav(const std::filesystem::path& file);
     virtual ~Wav();
-    void copy(ProcessBuffer& processBuffer, double start, double end, double oneBeatSec);
+    uint32_t copy(ProcessBuffer& processBuffer, int frameOffset, double start, double end, double oneBeatSec);
+    uint64_t getNframes() { return _totalPCMFrameCount; }
+    double getDuration(double bpm);
 private:
     float* _data = nullptr;
     unsigned int _nchannels = 0;
