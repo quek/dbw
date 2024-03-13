@@ -3,13 +3,13 @@
 ProcessBuffer::ProcessBuffer() : _framesPerBuffer(0), _nbuses(0), _nchannels(0) {
 }
 
-void ProcessBuffer::ensure(unsigned long framesPerBuffer, int nbuses, int nchannels) {
+void ProcessBuffer::ensure(unsigned long framesPerBuffer, unsigned int nbuses, unsigned int nchannels) {
     if (_framesPerBuffer >= framesPerBuffer && _nbuses >= nbuses && _nchannels >= nchannels) {
         return;
     }
     _framesPerBuffer = framesPerBuffer;
     _nchannels = nchannels;
-    for (int i = _nbuses; i < nbuses; ++i) {
+    for (unsigned int i = _nbuses; i < nbuses; ++i) {
         _in.emplace_back(AudioBuffer{});
         _out.emplace_back(AudioBuffer{});
     }

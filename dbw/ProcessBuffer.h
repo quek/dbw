@@ -8,7 +8,7 @@
 class ProcessBuffer {
 public:
     ProcessBuffer();
-    void ensure(unsigned long framesPerBuffer, int nbuses, int nchannels);
+    void ensure(unsigned long framesPerBuffer, unsigned int nbuses, unsigned int nchannels);
     void clear(bool useConstant = true);
     void swapInOut();
     void ensure32();
@@ -25,6 +25,6 @@ public:
     PluginEventList _eventOut;
 
     unsigned long _framesPerBuffer;
-    int _nbuses;
-    int _nchannels;
+    unsigned int _nbuses;
+    unsigned int _nchannels;
 };
