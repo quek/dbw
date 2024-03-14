@@ -16,7 +16,7 @@ command::OpenProject::OpenProject(const std::filesystem::path& path) : Command(f
 void command::OpenProject::execute(Composer* composer) {
     if (_path.empty())
     {
-        auto x = FileDialog::getOpenFileName(gConfig.projectDir(), { {L"JSON(*.json)", L"*.json"}, { L"All(*.*)", L"*.*" } });
+        auto x = FileDialog::getOpenFileName(gConfig.projectDir());
         if (!x.first)
         {
             return;

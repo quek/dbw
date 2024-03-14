@@ -61,10 +61,6 @@
     <ClCompile Include="ClipSlot.cpp" />
     <ClCompile Include="Note.cpp" />
     <ClCompile Include="Grid.cpp" />
-    <ClCompile Include="SaveWindow.cpp" />
-    <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="TimelineWindow.cpp" />
     <ClCompile Include="GridMixin.cpp" />
     <ClCompile Include="ZoomMixin.cpp" />
@@ -222,13 +218,6 @@
     <ClInclude Include="ClipSlot.h" />
     <ClInclude Include="Note.h" />
     <ClInclude Include="Grid.h" />
-    <ClInclude Include="SaveWindow.h" />
-    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="TimelineWindow.h" />
     <ClInclude Include="GridMixin.h" />
     <ClInclude Include="ZoomMixin.h" />

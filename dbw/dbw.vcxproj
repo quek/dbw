@@ -161,8 +161,6 @@
     <ClInclude Include="..\.imgui\imgui_internal.h" />
     <ClInclude Include="..\..\backends\imgui_impl_dx12.h" />
     <ClInclude Include="..\.imgui\backends\imgui_impl_win32.h" />
-    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h" />
-    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="Aa.h" />
     <ClInclude Include="App.h" />
@@ -235,7 +233,6 @@
     <ClInclude Include="Project.h" />
     <ClInclude Include="RackWindow.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMatrix.h" />
     <ClInclude Include="Sequence.h" />
@@ -257,7 +254,6 @@
     <ClInclude Include="ZoomMixin.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="..\imgui\imgui.cpp" />
     <ClCompile Include="..\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\imgui\imgui_draw.cpp" />
@@ -340,7 +336,6 @@
     <ClCompile Include="ClapModule.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="RackWindow.cpp" />
-    <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneMatrix.cpp" />
     <ClCompile Include="Sequence.cpp" />

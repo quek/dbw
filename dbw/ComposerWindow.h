@@ -3,7 +3,6 @@
 #include <set>
 #include <string>
 #include "BaseWindow.h"
-#include "SaveWindow.h"
 #include "Track.h"
 
 class Composer;
@@ -21,7 +20,6 @@ private:
     void handleGlobalShortcut();
     void handleLocalShortcut();
 
-    std::unique_ptr<SaveWindow> _saveWindow = nullptr;
     std::string _statusMessage = "";
 
     std::set<Track*> _selectedTracks;

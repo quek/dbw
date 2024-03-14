@@ -1,14 +1,20 @@
 #include "Project.h"
 #include <fstream>
 #include "Composer.h"
+#include "Config.h"
 #include "Error.h"
+#include "FileDialog.h"
+#include "util.h"
 
-Project::Project(Composer* composer) : _composer(composer) {
+Project::Project(Composer* composer) : _composer(composer)
+{
 }
 
-Composer* Project::open(std::filesystem::path path) {
+Composer* Project::open(std::filesystem::path path)
+{
     std::ifstream in(path);
-    if (!in) {
+    if (!in)
+    {
         Error("{} を開けませんでした。", path.string());
     }
     nlohmann::json json;
@@ -22,15 +28,33 @@ Composer* Project::open(std::filesystem::path path) {
     return composer;
 }
 
-void Project::save() {
+void Project::save()
+{
+    if (_isNew)
+    {
+        std::filesystem::path defaultPath(gConfig.projectDir() / (AnsiStringToWideString(yyyyMmDd()) + L".json"));
+        auto x = FileDialog::getSaveFileName(defaultPath);
+        if (!x.first)
+        {
+            return;
+        }
+        _path = x.second;
+        if (_path.extension() != L".json")
+        {
+            _path += L".json";
+        }
+
+    }
     auto json = _composer->toJson();
     std::ofstream out(_path);
-    if (!out) {
+    if (!out)
+    {
         Error("{} を開けませんでした。", _path.string());
     }
     out << json.dump(2);
     out.close();
-    if (!out) {
+    if (!out)
+    {
         Error("保存に失敗しました。{}", _path.string());
     }
 

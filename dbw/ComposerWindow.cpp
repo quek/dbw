@@ -1,7 +1,6 @@
 #include "ComposerWindow.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
-#include "../ImGuiFileDialog/ImGuiFileDialog.h"
 #include "AudioEngine.h"
 #include "Composer.h"
 #include "Command/OpenProject.h"
@@ -62,18 +61,7 @@ void ComposerWindow::render()
     ImGui::SameLine();
     if (ImGui::Button("Save"))
     {
-        if (_composer->_project->_isNew)
-        {
-            if (_saveWindow == nullptr)
-            {
-                _saveWindow = std::make_unique<SaveWindow>(_composer);
-            }
-            _showSaveWindow = true;
-        }
-        else
-        {
-            _composer->_project->save();
-        }
+        _composer->_project->save();
     }
 
     ImGui::SameLine();
@@ -84,12 +72,6 @@ void ComposerWindow::render()
     handleLocalShortcut();
 
     ImGui::End();
-
-    if (_saveWindow != nullptr)
-    {
-        _saveWindow->render();
-    }
-
 
     handleGlobalShortcut();
 }
