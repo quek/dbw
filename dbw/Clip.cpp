@@ -1,6 +1,7 @@
 #include "Clip.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include "AudioClip.h"
 #include "AutomationClip.h"
 #include "NoteClip.h"
 #include "PianoRollWindow.h"
@@ -11,6 +12,9 @@ Clip* Clip::create(const nlohmann::json& json) {
     }
     if (json["type"] == AutomationClip::TYPE) {
         return new AutomationClip(json);
+    }
+    if (json["type"] == AudioClip::TYPE) {
+        return new AudioClip(json);
     }
     assert(false);
     return nullptr;

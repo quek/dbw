@@ -31,7 +31,7 @@ TimelineWindow::TimelineWindow(Composer* composer) :
 {
     _show = true;
     _zoomX = 1.0f;
-    _zoomY = 10.0f;
+    _zoomY = 20.0f;
     _grid = gGrids[0].get();
 }
 

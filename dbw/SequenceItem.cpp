@@ -1,4 +1,5 @@
 #include "SequenceItem.h"
+#include "Audio.h"
 #include "AutomationPoint.h"
 #include "Note.h"
 
@@ -8,6 +9,9 @@ SequenceItem* SequenceItem::create(const nlohmann::json& json) {
     }
     if (json["type"] == AutomationPoint::TYPE) {
         return new AutomationPoint(json);
+    }
+    if (json["type"] == Audio::TYPE) {
+        return new Audio(json);
     }
     return nullptr;
 }

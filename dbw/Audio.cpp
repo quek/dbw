@@ -3,7 +3,14 @@
 #include "ProcessBuffer.h"
 #include "Track.h"
 
-Audio::Audio(const std::string& wavPath, double bpm) : _wavPath(wavPath), _wav(new Wav(wavPath))
+Audio::Audio(const nlohmann::json& json) : SequenceItem(json)
+{
+    _wav = std::make_unique<Wav>(json);
+    std::wstring wavPath = json["_wavPath"];
+    _wavPath = wavPath;
+}
+
+Audio::Audio(const std::filesystem::path& wavPath, double bpm) : _wavPath(wavPath), _wav(new Wav(wavPath))
 {
     _duration = _wav->getDuration(bpm);
 }
@@ -11,19 +18,48 @@ Audio::Audio(const std::string& wavPath, double bpm) : _wavPath(wavPath), _wav(n
 void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec)
 {
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
+    uint32_t frameOffset = 0;
     double wavBegin = begin - clipBegin;
     if (begin < end || loopEnd <= begin)
     {
         double wavEnd = wavBegin + (end - begin);
-        _wav->copy(processBuffer, 0, wavBegin, wavEnd, oneBeatSec);
+        frameOffset = _wav->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
     }
     else
     {
         double duration = loopEnd - begin;
         double wavEnd = wavBegin + duration;
-        uint32_t frameOffset = _wav->copy(processBuffer, 0, wavBegin, wavEnd, oneBeatSec);
+        frameOffset = _wav->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
         wavBegin = 0.0;
         wavEnd = duration;
-        _wav->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
+        frameOffset = _wav->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
     }
+    if (frameOffset == 0)
+    {
+        for (unsigned int channel = 0; channel < processBuffer._nchannels; ++channel)
+        {
+            processBuffer._out[0].buffer32()[channel][0] = 0.0f;
+            processBuffer._out[0]._constantp[channel] = true;
+        }
+    }
+    else
+    {
+        for (uint32_t i = frameOffset; i < processBuffer._framesPerBuffer; ++i)
+        {
+            for (unsigned int channel = 0; channel < processBuffer._nchannels; ++channel)
+            {
+                processBuffer._out[0].buffer32()[channel][i] = 0.0f;
+            }
+        }
+    }
+}
+
+nlohmann::json Audio::toJson()
+{
+    nlohmann::json json = SequenceItem::toJson();
+    json["type"] = TYPE;
+    json["_wav"] = _wav->toJson();
+    json["_wavPath"] = _wavPath.wstring();
+
+    return json;
 }
