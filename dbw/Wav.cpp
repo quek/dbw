@@ -10,11 +10,12 @@ Wav::Wav(const nlohmann::json& json)
     _nchannels = json["_nchannels"];
     _sampleRate = json["_sampleRate"];
     _totalPCMFrameCount = json["_totalPCMFrameCount"];
-    size_t size = sizeof(float) * _totalPCMFrameCount * _nchannels;
-    _data = (float*)malloc(size);
     std::string data = json["_data"];
-    std::vector<uint8_t> buffer = cppcodec::base64_rfc4648::decode(data);
-    memcpy(_data, buffer.data(), size);
+    // sizeof(float) * _totalPCMFrameCount * _nchannels だとなぜか 2 たりないから
+    size_t size =cppcodec::base64_rfc4648::decoded_max_size(data.size());
+    _data = (float*)malloc(size);
+    auto sz = cppcodec::base64_rfc4648::decode((char*)_data, size, data.c_str(), data.size());
+    assert(sizeof(float) * _totalPCMFrameCount * _nchannels == sz);
 }
 
 Wav::Wav(const std::filesystem::path& file)
@@ -76,7 +77,8 @@ double Wav::getDuration(double bpm)
 nlohmann::json Wav::toJson()
 {
     nlohmann::json json;
-    json["_data"] = cppcodec::base64_rfc4648::encode((const char*)_data, _totalPCMFrameCount * _nchannels);
+    std::string data = cppcodec::base64_rfc4648::encode((const char*)_data, sizeof(float) * _totalPCMFrameCount * _nchannels);
+    json["_data"] = data;
     json["_nchannels"] = _nchannels;
     json["_sampleRate"] = _sampleRate;
     json["_totalPCMFrameCount"] = _totalPCMFrameCount;

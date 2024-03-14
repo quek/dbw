@@ -5,7 +5,7 @@
 
 Audio::Audio(const nlohmann::json& json) : SequenceItem(json)
 {
-    _wav = std::make_unique<Wav>(json);
+    _wav = std::make_unique<Wav>(json["_wav"]);
     std::wstring wavPath = json["_wavPath"];
     _wavPath = wavPath;
 }
