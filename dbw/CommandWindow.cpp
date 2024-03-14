@@ -10,6 +10,7 @@
 static std::map<std::string, std::function<void(Composer*)>> table = {
     {"Audio Setup", [](Composer* composer) { composer->app()->showAudioSetupWindow(); }},
     {"Save", [](Composer* composer) { composer->_project->save(); }},
+    {"Save As", [](Composer* composer) { composer->_project->saveAs(); }},
     {"Scan Plugin", [](Composer*) { gPluginManager.scan(); }},
 };
 

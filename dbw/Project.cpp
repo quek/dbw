@@ -32,18 +32,8 @@ void Project::save()
 {
     if (_isNew)
     {
-        std::filesystem::path defaultPath(gConfig.projectDir() / (AnsiStringToWideString(yyyyMmDd()) + L".json"));
-        auto x = FileDialog::getSaveFileName(defaultPath);
-        if (!x.first)
-        {
-            return;
-        }
-        _path = x.second;
-        if (_path.extension() != L".json")
-        {
-            _path += L".json";
-        }
-
+        saveAs();
+        return;
     }
     auto json = _composer->toJson();
     std::ofstream out(_path);
@@ -59,5 +49,22 @@ void Project::save()
     }
 
     _isNew = false;
+}
+
+void Project::saveAs()
+{
+        std::filesystem::path defaultPath(gConfig.projectDir() / (AnsiStringToWideString(yyyyMmDd()) + L".json"));
+        auto x = FileDialog::getSaveFileName(defaultPath);
+        if (!x.first)
+        {
+            return;
+        }
+        _path = x.second;
+        if (_path.extension() != L".json")
+        {
+            _path += L".json";
+        }
+        _isNew = false;
+        save();
 }
 

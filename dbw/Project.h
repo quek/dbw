@@ -8,6 +8,7 @@ public:
     Project(Composer* composer);
     Composer* open(std::filesystem::path dir);
     void save();
+    void saveAs();
 
     Composer* _composer;
     bool _isNew = true;
