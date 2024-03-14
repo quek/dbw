@@ -10,9 +10,7 @@ extern std::mutex gClapRequestCallbackQueueMutex;
 
 std::filesystem::path configDir();
 std::string generateUniqueId();
-std::string GetExecutablePath();
-std::filesystem::path getOpenFileName();
-std::filesystem::path projectDir();
+std::filesystem::path GetExecutablePath();
 std::string yyyyMmDd();
 std::string yyyyMmDdHhMmSs();
 std::filesystem::path userDir();

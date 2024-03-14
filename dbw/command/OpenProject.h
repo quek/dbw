@@ -6,6 +6,7 @@ namespace command {
 
 class OpenProject : public Command {
 public:
+    OpenProject();
     OpenProject(const std::filesystem::path& path);
     void execute(Composer* composer) override;
     void undo(Composer*) override {};

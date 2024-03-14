@@ -586,7 +586,7 @@ void Vst3Module::onResize(int width, int height) {
 
 void Vst3Module::loadState(std::filesystem::path path) {
     auto size = std::filesystem::file_size(path);
-    std::unique_ptr<char[]> buffer(new char[size]);
+    std::unique_ptr<char[]> buffer(new char[size]());
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         Error("{} のステートファイルをオープンできませんでした。{}", _name, path.string());

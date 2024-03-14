@@ -209,6 +209,7 @@
     <ClInclude Include="Error.h" />
     <ClInclude Include="ErrorWindow.h" />
     <ClInclude Include="Fader.h" />
+    <ClInclude Include="FileDialog.h" />
     <ClInclude Include="GainModule.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridMixin.h" />
@@ -313,6 +314,7 @@
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="ErrorWindow.cpp" />
     <ClCompile Include="Fader.cpp" />
+    <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="GainModule.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridMixin.cpp" />

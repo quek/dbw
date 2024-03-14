@@ -8,6 +8,7 @@
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Comdlg32.lib")
+#include "FileDialog.h"
 
 std::queue<const clap_host*> gClapRequestCallbackQueue;
 std::mutex gClapRequestCallbackQueueMutex;
@@ -36,38 +37,11 @@ std::string generateUniqueId() {
     return ss.str();
 }
 
-std::string GetExecutablePath() {
-    char path[MAX_PATH];
-    GetModuleFileNameA(NULL, path, MAX_PATH);
-    PathRemoveFileSpecA(path);
-    return std::string(path);
-}
-
-std::filesystem::path getOpenFileName() {
-    OPENFILENAME ofn;
-    wchar_t szFile[1024] = { 0 };
-
-    ZeroMemory(&ofn, sizeof(ofn));
-    ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = NULL;
-    ofn.lpstrFile = szFile;
-    ofn.nMaxFile = sizeof(szFile);
-    ofn.lpstrFilter = L"All\0*.*\0Text\0*.TXT\0";
-    ofn.nFilterIndex = 1;
-    ofn.lpstrFileTitle = NULL;
-    ofn.nMaxFileTitle = 0;
-    ofn.lpstrInitialDir = NULL;
-    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-    if (GetOpenFileName(&ofn) == TRUE) {
-        return szFile;
-    }
-
-    return std::filesystem::path();
-}
-
-std::filesystem::path projectDir() {
-    return userDir() / "projects";
+std::filesystem::path GetExecutablePath() {
+    std::unique_ptr<TCHAR[]> path(new TCHAR[MAX_PATH_LONG]());
+    GetModuleFileName(NULL, path.get(), MAX_PATH_LONG);
+    PathRemoveFileSpec(path.get());
+    return std::filesystem::path(path.get());
 }
 
 std::string yyyyMmDd() {

@@ -20,7 +20,7 @@ HRESULT DropManager::QueryInterface(REFIID riid, void** ppvObject)
     return E_NOINTERFACE;
 }
 
-HRESULT DropManager::DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect)
+HRESULT DropManager::DragEnter(IDataObject* pDataObj, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* pdwEffect)
 {
     // TODO: check whether we can handle this type of object at all and set *pdwEffect &= DROPEFFECT_NONE if not;
 
@@ -72,13 +72,13 @@ HRESULT DropManager::DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL 
     return S_OK;
 }
 
-HRESULT DropManager::DragOver(DWORD grfKeyState, POINTL pt, DWORD* pdwEffect)
+HRESULT DropManager::DragOver(DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* pdwEffect)
 {
     *pdwEffect &= DROPEFFECT_COPY;
     return S_OK;
 }
 
-HRESULT DropManager::Drop(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect)
+HRESULT DropManager::Drop(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* pdwEffect)
 {
     _app->drop();
     *pdwEffect &= DROPEFFECT_COPY;

@@ -31,7 +31,7 @@ uint32_t Wav::copy(ProcessBuffer& processBuffer, int frameOffset, double start, 
     uint64_t startFrame = std::round(startFrameDouble);
     if (_totalPCMFrameCount < startFrame)
     {
-        return;
+        return 0;
     }
     double endFrameDouble = end * oneBeatSec * sampleRate;
     uint64_t endFrame = std::round(endFrameDouble);
