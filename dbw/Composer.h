@@ -60,7 +60,7 @@ public:
     double _nextPlayTime = 0.0;
     double _loopStartTime = 0.0;
     double _loopEndTime = 16.0;
-    bool _isScrollFolloPlayhead = true;
+    bool _isScrollFollowPlayhead = true;
     CommandManager _commandManager;
     std::unique_ptr<MasterTrack> _masterTrack;
     std::vector<Module*> _orderedModules;

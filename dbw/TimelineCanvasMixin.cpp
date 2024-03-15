@@ -22,7 +22,7 @@ void TimelineCanvasMixin<THING, LANE>::render() {
         renderGridSnap();
 
         ImGui::SameLine();
-        ImGui::Checkbox("Follow Playhead", &_composer->_isScrollFolloPlayhead);
+        ImGui::Checkbox("Follow Playhead", &_composer->_isScrollFollowPlayhead);
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         if (ImGui::BeginChild(canvasName().c_str(),

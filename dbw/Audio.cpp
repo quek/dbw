@@ -30,8 +30,8 @@ void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double cl
         double duration = loopEnd - begin;
         double wavEnd = wavBegin + duration;
         frameOffset = _wav->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
-        wavBegin = 0.0;
-        wavEnd = duration;
+        wavBegin = loopBegin - clipBegin;
+        wavEnd = end - clipBegin;
         frameOffset = _wav->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
     }
     if (frameOffset == 0)

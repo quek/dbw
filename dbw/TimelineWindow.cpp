@@ -261,7 +261,7 @@ void TimelineWindow::renderPlayhead()
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollY = ImGui::GetScrollY();
     float y = (_composer->_playTime * _zoomY) + offsetTop() + offsetStart();
-    if (_composer->_playing && _composer->_isScrollFolloPlayhead)
+    if (_composer->_playing && _composer->_isScrollFollowPlayhead && !_composer->_scrollLock)
     {
         if (y < ImGui::GetWindowHeight() / 2.0f)
         {
