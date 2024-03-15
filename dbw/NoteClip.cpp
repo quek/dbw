@@ -5,7 +5,7 @@
 NoteClip::NoteClip(double time) : Clip(time) {
 }
 
-NoteClip::NoteClip(const nlohmann::json& json) : Clip(json) {
+NoteClip::NoteClip(const nlohmann::json& json, SerializeContext& context) : Clip(json, context) {
 }
 
 Clip* NoteClip::clone() {
@@ -36,8 +36,8 @@ void NoteClip::renderInScene(PianoRollWindow* pianoRoll) {
     ImGui::PopID();
 }
 
-nlohmann::json NoteClip::toJson() {
-    nlohmann::json json = Clip::toJson();
+nlohmann::json NoteClip::toJson(SerializeContext& context) {
+    nlohmann::json json = Clip::toJson(context);
     json["type"] = TYPE;
     return json;
 }

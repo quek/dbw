@@ -9,18 +9,19 @@
 
 class Composer;
 
-class Sequence : public Nameable {
+class Sequence : public Nameable
+{
 public:
     inline static const char* TYPE = "sequence";
     static std::shared_ptr<Sequence>create(double duration = 16.0, NekoId id = 0);
-    static std::shared_ptr<Sequence>create(const nlohmann::json& json);
+    static std::shared_ptr<Sequence>create(const nlohmann::json& json, SerializeContext& context);
     virtual ~Sequence();
     virtual void addItem(SequenceItem* item);
     virtual void deleteItem(SequenceItem* item);
     double getDuration() const { return _duration; }
     std::vector<std::unique_ptr<SequenceItem>>& getItems();
     void setDuration(double duration) { _duration = duration; }
-    virtual nlohmann::json toJson();
+    nlohmann::json toJson(SerializeContext& context) override;
 
 
 
@@ -29,7 +30,7 @@ public:
 
 private:
     Sequence() = default;
-    Sequence(const nlohmann::json& json);
+    Sequence(const nlohmann::json& json, SerializeContext& context);
     Sequence(double duration);
 
     double _duration;

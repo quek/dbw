@@ -4,7 +4,7 @@
 #include <imgui.h>
 #include "Track.h"
 
-Fader::Fader(const nlohmann::json& json) : BuiltinModule(json) {
+Fader::Fader(const nlohmann::json& json, SerializeContext& context) : BuiltinModule(json, context) {
     _level = json["_level"];
     _pan = json["_pan"];
     _mute = json["_mute"];
@@ -54,8 +54,8 @@ void Fader::renderContent() {
     ImGui::PopItemWidth();
 }
 
-nlohmann::json Fader::toJson() {
-    nlohmann::json json = BuiltinModule::toJson();
+nlohmann::json Fader::toJson(SerializeContext& context) {
+    nlohmann::json json = BuiltinModule::toJson(context);
     json.update(*this);
     return json;
 }

@@ -8,8 +8,8 @@ class PianoRollWindow;
 
 class Clip : public Nameable {
 public:
-    static Clip* create(const nlohmann::json& json);
-    Clip(const nlohmann::json& json);
+    static Clip* create(const nlohmann::json& json, SerializeContext& context);
+    Clip(const nlohmann::json& json, SerializeContext& context);
     Clip(double time = 0.0, double duration = 16.0);
     virtual ~Clip() = default;
     virtual Clip* clone() = 0;
@@ -19,7 +19,7 @@ public:
     virtual void prepareProcessBuffer(Lane* lane, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) ;
     virtual void renderInScene(PianoRollWindow* pianoRollWindow) = 0;
 
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     double _time;
     double _duration;

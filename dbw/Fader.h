@@ -3,13 +3,13 @@
 
 class Fader : public BuiltinModule {
 public:
-    Fader(const nlohmann::json& json);
+    Fader(const nlohmann::json& json, SerializeContext& context);
     Fader(std::string name, Track* track);
     virtual ~Fader() = default;
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     void renderContent() override;
 
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     float _level = 1.0f;
     float _pan = 0.5f;

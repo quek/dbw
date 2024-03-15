@@ -8,7 +8,7 @@ AutomationPoint::AutomationPoint(double value, double time) {
     setTime(time);
 }
 
-AutomationPoint::AutomationPoint(const nlohmann::json& json) : SequenceItem(json) {
+AutomationPoint::AutomationPoint(const nlohmann::json& json, SerializeContext& context) : SequenceItem(json, context) {
     _value = json["_value"];
 }
 
@@ -27,8 +27,8 @@ void AutomationPoint::setValue(double value) {
     }
 }
 
-nlohmann::json AutomationPoint::toJson() {
-    nlohmann::json json = SequenceItem::toJson();
+nlohmann::json AutomationPoint::toJson(SerializeContext& context) {
+    nlohmann::json json = SequenceItem::toJson(context);
     json["type"] = TYPE;
     json["_value"] = _value;
     return json;

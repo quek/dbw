@@ -3,20 +3,20 @@
 #include "AutomationPoint.h"
 #include "Note.h"
 
-SequenceItem* SequenceItem::create(const nlohmann::json& json) {
+SequenceItem* SequenceItem::create(const nlohmann::json& json, SerializeContext& context) {
     if (json["type"] == Note::TYPE) {
-        return new Note(json);
+        return new Note(json, context);
     }
     if (json["type"] == AutomationPoint::TYPE) {
-        return new AutomationPoint(json);
+        return new AutomationPoint(json, context);
     }
     if (json["type"] == Audio::TYPE) {
-        return new Audio(json);
+        return new Audio(json, context);
     }
     return nullptr;
 }
 
-SequenceItem::SequenceItem(const nlohmann::json& json) : Neko(json) {
+SequenceItem::SequenceItem(const nlohmann::json& json, SerializeContext& context) : Neko(json, context) {
     _time = json["_time"];
     _duration = json["_duration"];
 }
@@ -32,8 +32,8 @@ void SequenceItem::setTime(double time) {
     _time = std::max(0.0, time);
 }
 
-nlohmann::json SequenceItem::toJson() {
-    nlohmann::json json = Neko::toJson();
+nlohmann::json SequenceItem::toJson(SerializeContext& context) {
+    nlohmann::json json = Neko::toJson(context);
     json["_time"] = _time;
     json["_duration"] = _duration;
     return json;

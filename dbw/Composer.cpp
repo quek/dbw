@@ -32,8 +32,8 @@ Composer::Composer() :
     _commandWindow(std::make_unique<CommandWindow>(this)) {
 }
 
-Composer::Composer(const nlohmann::json& json) :
-    Nameable(json),
+Composer::Composer(const nlohmann::json& json, SerializeContext& context) :
+    Nameable(json, context),
     _commandManager(this),
     _project(std::make_unique<Project>(this)),
     _composerWindow(std::make_unique<ComposerWindow>(this)),
@@ -53,10 +53,10 @@ Composer::Composer(const nlohmann::json& json) :
     _looping = json["_looping"];
     _scrollLock = json["_scrollLock"];
 
-    _sceneMatrix = std::make_unique<SceneMatrix>(json["_sceneMatrix"]);
+    _sceneMatrix = std::make_unique<SceneMatrix>(json["_sceneMatrix"], context);
     _sceneMatrix->_composer = this;
 
-    _masterTrack = std::make_unique<MasterTrack>(json["_masterTrack"]);
+    _masterTrack = std::make_unique<MasterTrack>(json["_masterTrack"], context);
     _masterTrack->setComposer(this);
 
     _masterTrack->resolveModuleReference();
@@ -226,8 +226,8 @@ void Composer::editNoteClip(NoteClip* noteClip) const {
     _pianoRollWindow->edit(noteClip);
 }
 
-nlohmann::json Composer::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json Composer::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
 
     json["_bpm"] = _bpm;
     json["_playTime"] = _playTime;
@@ -237,9 +237,9 @@ nlohmann::json Composer::toJson() {
     json["_looping"] = _looping;
     json["_scrollLock"] = _scrollLock;
 
-    json["_masterTrack"] = _masterTrack->toJson();
+    json["_masterTrack"] = _masterTrack->toJson(context);
 
-    json["_sceneMatrix"] = _sceneMatrix->toJson();
+    json["_sceneMatrix"] = _sceneMatrix->toJson(context);
 
     return json;
 }

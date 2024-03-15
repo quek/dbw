@@ -6,7 +6,7 @@
 #include "Track.h"
 #include "SceneMatrix.h"
 
-Scene::Scene(const nlohmann::json& json) : Nameable(json) {
+Scene::Scene(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
 }
 
 Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
@@ -30,8 +30,8 @@ bool Scene::isAllLaneStoped() {
     return _sceneMatrix->_composer->_masterTrack->isAllLanesStoped(this);
 }
 
-nlohmann::json Scene::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json Scene::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
     return json;
 }
 

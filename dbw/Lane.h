@@ -12,9 +12,9 @@ class Lane : public Nameable {
 public:
     inline static const char* TYPE = "lane";
     Lane() = default;
-    Lane(const nlohmann::json& json);
+    Lane(const nlohmann::json& json, SerializeContext& context);
     virtual ~Lane() = default;
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
     std::unique_ptr<ClipSlot>& getClipSlot(Scene* scene);
     void prepareProcessBuffer(double begin, double end, double loopBegin, double loopEnd, double oneBeatSec);
 

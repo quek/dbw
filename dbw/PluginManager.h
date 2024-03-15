@@ -3,15 +3,16 @@
 #include <nlohmann/json.hpp>
 
 class Module;
+class SerializeContext;
+class PluginManager;
 class Track;
 
-class PluginManager;
 extern PluginManager gPluginManager;
 
 class PluginManager {
 public:
     PluginManager();
-    Module* create(const nlohmann::json& json);
+    Module* create(const nlohmann::json& json, SerializeContext& context);
     void scan();
     void load();
     void openModuleSelector(Track* track);

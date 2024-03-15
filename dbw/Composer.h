@@ -25,7 +25,7 @@ class NoteClip;
 class Composer : public Nameable {
 public:
     Composer();
-    Composer(const nlohmann::json& json);
+    Composer(const nlohmann::json& json, SerializeContext& context);
     void render() const;
     void process(float* in, float* out, unsigned long framesPerBuffer, int64_t steadyTime);
     App* app() const;
@@ -45,7 +45,7 @@ public:
     void computeLatency();
     void editAutomationClip(AutomationClip* automationClip, Lane* lane) const;
     void editNoteClip(NoteClip* noteClip) const;
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     App* _app = nullptr;
     std::unique_ptr<Project> _project;

@@ -18,7 +18,7 @@ class Scene;
 class Track : public Nameable {
 public:
     inline static const char* TYPE = "track";
-    Track(const nlohmann::json& json);
+    Track(const nlohmann::json& json, SerializeContext& context);
     Track(std::string name, Composer* composer = nullptr);
     virtual ~Track();
     void allTracks(std::vector<Track*>& tracks);
@@ -30,7 +30,7 @@ public:
     void addModule(Module* module);
     void addLane(Lane* lane);
     bool isAvailableSidechainSrc(Track* dst);
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
     void addTrack();
     void addTrack(Track* track);
     void addTrack(std::unique_ptr<Track> track);

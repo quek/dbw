@@ -13,7 +13,7 @@ class Track;
 
 class Module : public Nameable {
 public:
-    Module(const nlohmann::json& json);
+    Module(const nlohmann::json& json, SerializeContext& context);
     Module(std::string name, Track* track) : Nameable(name), _track(track) {}
     virtual ~Module();
     virtual void openGui() { _didOpenGui = true; }
@@ -38,8 +38,8 @@ public:
     virtual void updateEditedParamIdList(ParamId id);
 
     static Module* create(std::string& type, std::string& id);
-    static Module* fromJson(const nlohmann::json&);
-    virtual nlohmann::json toJson() override;
+    static Module* fromJson(const nlohmann::json&, SerializeContext& context);
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     Track* _track = nullptr;
     bool _didOpenGui = false;

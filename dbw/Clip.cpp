@@ -6,24 +6,24 @@
 #include "NoteClip.h"
 #include "PianoRollWindow.h"
 
-Clip* Clip::create(const nlohmann::json& json) {
+Clip* Clip::create(const nlohmann::json& json, SerializeContext& context) {
     if (json["type"] == NoteClip::TYPE) {
-        return new NoteClip(json);
+        return new NoteClip(json, context);
     }
     if (json["type"] == AutomationClip::TYPE) {
-        return new AutomationClip(json);
+        return new AutomationClip(json, context);
     }
     if (json["type"] == AudioClip::TYPE) {
-        return new AudioClip(json);
+        return new AudioClip(json, context);
     }
     assert(false);
     return nullptr;
 }
 
-Clip::Clip(const nlohmann::json& json) : Nameable(json) {
+Clip::Clip(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
     _time = json["_time"];
     _duration = json["_duration"];
-    _sequence = Sequence::create(json["_sequence"]);
+    _sequence = Sequence::create(json["_sequence"], context);
 }
 
 Clip::Clip(double time, double duration) :
@@ -56,9 +56,9 @@ void Clip::prepareProcessBuffer(Lane* lane, double begin, double end, double loo
     }
 }
 
-nlohmann::json Clip::toJson() {
-    nlohmann::json json = Nameable::toJson();
-    json["_sequence"] = _sequence->toJson();
+nlohmann::json Clip::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
+    json["_sequence"] = _sequence->toJson(context);
     json["_time"] = _time;
     json["_duration"] = _duration;
     return json;

@@ -11,9 +11,9 @@
 #include "Vst3Module.h"
 #include "command/DeleteModule.h"
 
-Module::Module(const nlohmann::json& json) : Nameable(json) {
-    for (const auto& connection : json["_connections"]) {
-        _connections.emplace_back(new Connection(connection));
+Module::Module(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
+    for (const auto& jsn : json["_connections"]) {
+        _connections.emplace_back(new Connection(jsn, context));
     }
 }
 
@@ -141,24 +141,24 @@ Module* Module::create(std::string& type, std::string& id) {
     return nullptr;
 }
 
-Module* Module::fromJson(const nlohmann::json& json) {
+Module* Module::fromJson(const nlohmann::json& json, SerializeContext& context) {
     auto& type = json["type"];
     if (type == "builtin") {
-        //return BuiltinModule::fromJson(json);
+        //return BuiltinModule::fromJson(json, context);
     } else if (type == "vst3") {
-        return new Vst3Module(json);
+        return new Vst3Module(json, context);
     } else if (type == "clap") {
-        //return PluginModule::fromJson(json);
+        //return PluginModule::fromJson(json, context);
     }
     return nullptr;
 }
 
-nlohmann::json Module::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json Module::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
 
     nlohmann::json connections = nlohmann::json::array();
     for (const auto& connection : _connections) {
-        connections.emplace_back(connection->toJson());
+        connections.emplace_back(connection->toJson(context));
     }
     json["_connections"] = connections;
 

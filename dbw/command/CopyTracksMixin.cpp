@@ -1,6 +1,7 @@
 #include "CopyTracksMixin.h"
 #include "../App.h"
 #include "../Composer.h"
+#include "../SerializeContext.h"
 #include "../Track.h"
 
 command::CopyTracksMixin::CopyTracksMixin(std::vector<Track*> tracks) : SelectedTracksMixin(tracks){
@@ -49,9 +50,10 @@ std::vector<Track*> command::CopyTracksMixin::copy(std::vector<NekoId> trackIds)
         if (!track) {
             continue;
         }
-        nlohmann::json json = track->toJson();
+        SerializeContext context;
+        nlohmann::json json = track->toJson(context);
         json = renewNekoId(json);
-        Track* copiedTrack = new Track(json);
+        Track* copiedTrack = new Track(json, context);
         copiedTrack->resolveModuleReference();
         _copiedTrackIds.push_back(copiedTrack->getNekoId());
         tracks.push_back(copiedTrack);

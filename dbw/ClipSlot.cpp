@@ -8,9 +8,9 @@
 ClipSlot::ClipSlot() {
 }
 
-ClipSlot::ClipSlot(const nlohmann::json& json) : Nameable(json) {
+ClipSlot::ClipSlot(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
     if (json.contains("_clip")) {
-        _clip.reset(Clip::create(json["_clip"]));
+        _clip.reset(Clip::create(json["_clip"], context));
     }
 }
 
@@ -54,10 +54,10 @@ void ClipSlot::stop() {
     _playing = false;
 }
 
-nlohmann::json ClipSlot::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json ClipSlot::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
     if (_clip) {
-        json["_clip"] = _clip->toJson();
+        json["_clip"] = _clip->toJson(context);
     }
     return json;
 }

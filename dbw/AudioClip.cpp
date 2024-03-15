@@ -1,7 +1,7 @@
 #include "AudioClip.h"
 #include "Audio.h"
 
-AudioClip::AudioClip(const nlohmann::json& json) : Clip(json)
+AudioClip::AudioClip(const nlohmann::json& json, SerializeContext& context) : Clip(json, context)
 {
 }
 
@@ -32,9 +32,9 @@ void AudioClip::renderInScene(PianoRollWindow*)
     // TODO
 }
 
-nlohmann::json AudioClip::toJson()
+nlohmann::json AudioClip::toJson(SerializeContext& context)
 {
-    nlohmann::json json = Clip::toJson();
+    nlohmann::json json = Clip::toJson(context);
     json["type"] = TYPE;
     return json;
 }

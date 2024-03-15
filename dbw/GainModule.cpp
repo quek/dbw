@@ -4,7 +4,7 @@
 #include "Composer.h"
 #include "Track.h"
 
-GainModule::GainModule(const nlohmann::json& json) : BuiltinModule(json) {
+GainModule::GainModule(const nlohmann::json& json, SerializeContext& context) : BuiltinModule(json, context) {
     _gain = json["_gain"];
 }
 
@@ -12,8 +12,8 @@ GainModule::GainModule(std::string name, Track* track) :
     BuiltinModule(name, track), _gain(1.0) {
 }
 
-nlohmann::json GainModule::toJson() {
-    nlohmann::json json = BuiltinModule::toJson();
+nlohmann::json GainModule::toJson(SerializeContext& context) {
+    nlohmann::json json = BuiltinModule::toJson(context);
     json["_id"] = "Gain";
     json["_gain"] = _gain;
     return json;

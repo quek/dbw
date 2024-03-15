@@ -9,8 +9,8 @@ class Param;
 class AutomationTarget {
 public:
     AutomationTarget(Module* module, uint32_t paramId);
-    AutomationTarget(const nlohmann::json& json);
-    virtual nlohmann::json toJson();
+    AutomationTarget(const nlohmann::json& json, SerializeContext& context);
+    virtual nlohmann::json toJson(SerializeContext& context);
     double getDefaultValue() const { return _defaultValue; }
     Module* getModule();
     uint32_t getParamId() const { return _paramId; }

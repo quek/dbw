@@ -7,7 +7,7 @@
 AutomationClip::AutomationClip(double time) : Clip(time) {
 }
 
-AutomationClip::AutomationClip(const nlohmann::json& json) : Clip(json) {
+AutomationClip::AutomationClip(const nlohmann::json& json, SerializeContext& context) : Clip(json, context) {
 }
 
 Clip* AutomationClip::clone() {
@@ -67,8 +67,8 @@ void AutomationClip::renderInScene(PianoRollWindow*) {
     // TODO
 }
 
-nlohmann::json AutomationClip::toJson() {
-    nlohmann::json json = Clip::toJson();
+nlohmann::json AutomationClip::toJson(SerializeContext& context) {
+    nlohmann::json json = Clip::toJson(context);
     json["type"] = TYPE;
     return json;
 }

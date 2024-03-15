@@ -3,9 +3,9 @@
 #include "ProcessBuffer.h"
 #include "Track.h"
 
-Audio::Audio(const nlohmann::json& json) : SequenceItem(json)
+Audio::Audio(const nlohmann::json& json, SerializeContext& context) : SequenceItem(json, context)
 {
-    _wav = std::make_unique<Wav>(json["_wav"]);
+    _wav = std::make_unique<Wav>(json["_wav"], context);
     std::wstring wavPath = json["_wavPath"];
     _wavPath = wavPath;
 }
@@ -54,11 +54,11 @@ void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double cl
     }
 }
 
-nlohmann::json Audio::toJson()
+nlohmann::json Audio::toJson(SerializeContext& context)
 {
-    nlohmann::json json = SequenceItem::toJson();
+    nlohmann::json json = SequenceItem::toJson(context);
     json["type"] = TYPE;
-    json["_wav"] = _wav->toJson();
+    json["_wav"] = _wav->toJson(context);
     json["_wavPath"] = _wavPath.wstring();
 
     return json;

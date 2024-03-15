@@ -8,12 +8,12 @@ class Module;
 
 class Connection : public Nameable {
 public:
-    Connection(const nlohmann::json& josn);
+    Connection(const nlohmann::json& json, SerializeContext& context);
     Connection(Module* from, int fromIndex, Module* to, int toIndex);
     void resolveModuleReference();
     void process(Module* to);
     void setLatency(uint32_t latency);
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     Module* _from = nullptr;
     NekoId _fromNekoRef = 0;

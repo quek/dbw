@@ -17,7 +17,7 @@
 class Vst3Module : public Module {
 public:
     inline static const char* TYPE = "vst3";
-    Vst3Module(const nlohmann::json& json);
+    Vst3Module(const nlohmann::json& json, SerializeContext& context);
     Vst3Module(std::string name, Track* track);
     virtual ~Vst3Module();
     bool load(std::string path);
@@ -39,8 +39,8 @@ public:
     void setParameterValue(Vst::ParamID id, Vst::ParamValue valueNormalized);
     void addParameterChange(Param* param, int32_t sampleOffset, double value) override;
 
-    virtual nlohmann::json toJson() override;
-    static Vst3Module* fromJson(const nlohmann::json& json);
+    virtual nlohmann::json toJson(SerializeContext& context) override;
+    static Vst3Module* fromJson(const nlohmann::json& json, SerializeContext& context);
 
     static nlohmann::json scan(const std::string& path);
     static Vst3Module* create(const std::string& id);

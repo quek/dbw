@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "Error.h"
 #include "FileDialog.h"
+#include "SerializeContext.h"
 #include "util.h"
 
 Project::Project(Composer* composer) : _composer(composer)
@@ -21,7 +22,8 @@ Composer* Project::open(std::filesystem::path path)
     in >> json;
 
 
-    Composer* composer = new Composer(json);
+    SerializeContext context;
+    Composer* composer = new Composer(json, context);
     composer->_project->_path = path;
     composer->_project->_isNew = false;
 
@@ -35,7 +37,9 @@ void Project::save()
         saveAs();
         return;
     }
-    auto json = _composer->toJson();
+    SerializeContext context;
+    auto json = _composer->toJson(context);
+    context.edit(json);
     std::ofstream out(_path);
     if (!out)
     {

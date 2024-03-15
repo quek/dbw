@@ -16,8 +16,8 @@
 
 PluginManager gPluginManager;
 
-std::map<std::string, std::function<BuiltinModule* (const nlohmann::json& json)>> builtinModuleMap = {
-    {"Gain", [](const nlohmann::json& json) -> BuiltinModule* { return new GainModule(json); }},
+std::map<std::string, std::function<BuiltinModule* (const nlohmann::json& json, SerializeContext& context)>> builtinModuleMap = {
+    {"Gain", [](const nlohmann::json& json, SerializeContext& context) -> BuiltinModule* { return new GainModule(json, context); }},
 };
 
 void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::string& filename, std::string content) {
@@ -33,14 +33,14 @@ void CreateConfigDirectoryAndSaveFile(const std::string& directory, const std::s
 PluginManager::PluginManager() {
 }
 
-Module* PluginManager::create(const nlohmann::json& json) {
+Module* PluginManager::create(const nlohmann::json& json, SerializeContext& context) {
     auto& type = json["type"];
     if (type == "builtin") {
-        return builtinModuleMap[json["_id"]](json);
+        return builtinModuleMap[json["_id"]](json, context);
     } else if (type == "vst3") {
-        return new Vst3Module(json);
+        return new Vst3Module(json, context);
     } else if (type == "clap") {
-        return new ClapModule(json);
+        return new ClapModule(json, context);
     }
     return nullptr;
 }

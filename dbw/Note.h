@@ -7,10 +7,10 @@ class Lane;
 class Note :  public SequenceItem {
 public:
     inline static const char* TYPE = "Note";
-    Note(const nlohmann::json& json);
+    Note(const nlohmann::json& json, SerializeContext& context);
     Note(double time = 0.0f, double duration = 1.0f, int16_t key = 64, double velocity = 0.8, int16_t channel = 0);
     virtual ~Note() = default;
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
     void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
 
     int16_t _channel;

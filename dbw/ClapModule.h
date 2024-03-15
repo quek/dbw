@@ -9,7 +9,7 @@ class ClapHost;
 class ClapModule : public Module {
 public:
     inline static const char* TYPE = "clap";
-    ClapModule(const nlohmann::json& json);
+    ClapModule(const nlohmann::json& json, SerializeContext& context);
     ClapModule(std::string name, Track* track, ClapHost* pluginHost);
     ~ClapModule();
     void openGui() override;

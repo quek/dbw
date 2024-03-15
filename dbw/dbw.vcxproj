@@ -237,6 +237,7 @@
     <ClInclude Include="SceneMatrix.h" />
     <ClInclude Include="Sequence.h" />
     <ClInclude Include="SequenceItem.h" />
+    <ClInclude Include="SerializeContext.h" />
     <ClInclude Include="SidechainInputSelector.h" />
     <ClInclude Include="TimelineCanvasMixin.h" />
     <ClInclude Include="TimelineMixin.h" />
@@ -340,6 +341,7 @@
     <ClCompile Include="SceneMatrix.cpp" />
     <ClCompile Include="Sequence.cpp" />
     <ClCompile Include="SequenceItem.cpp" />
+    <ClCompile Include="SerializeContext.cpp" />
     <ClCompile Include="SidechainInputSelector.cpp" />
     <ClCompile Include="TimelineCanvasMixin.cpp" />
     <ClCompile Include="TimelineMixin.cpp" />

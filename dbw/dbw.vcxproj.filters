@@ -168,6 +168,7 @@
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="DropManager.cpp" />
     <ClCompile Include="FileDialog.cpp" />
+    <ClCompile Include="SerializeContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -320,6 +321,7 @@
     <ClInclude Include="Audio.h" />
     <ClInclude Include="DropManager.h" />
     <ClInclude Include="FileDialog.h" />
+    <ClInclude Include="SerializeContext.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

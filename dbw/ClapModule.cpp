@@ -6,7 +6,7 @@
 #include "Config.h"
 #include "AudioEngine.h"
 
-ClapModule::ClapModule(const nlohmann::json& json) : Module(json) {
+ClapModule::ClapModule(const nlohmann::json& json, SerializeContext& context) : Module(json, context) {
     // TODO
 }
 

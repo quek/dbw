@@ -5,8 +5,8 @@ class Lane;
 
 class SequenceItem : public Neko {
 public:
-    static SequenceItem* create(const nlohmann::json& json);
-    SequenceItem(const nlohmann::json& json);
+    static SequenceItem* create(const nlohmann::json& json, SerializeContext& context);
+    SequenceItem(const nlohmann::json& json, SerializeContext& context);
     SequenceItem(double time = 0.0, double duration = 16.0);
     ~SequenceItem() = default;
     virtual void addTo(std::vector<std::unique_ptr<SequenceItem>>& items);
@@ -14,7 +14,7 @@ public:
     double getTime() const { return _time; }
     virtual void prepareProcessBuffer(Lane* /*lane*/, double /*begin*/, double /*end*/, double /*clipBegin*/, double /*clipEnd*/, double /*loopBegin*/, double /*loopEnd*/, double /*oneBeatSec*/) {};
     void setTime(double time);
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     double _time;
     double _duration;

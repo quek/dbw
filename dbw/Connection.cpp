@@ -3,7 +3,7 @@
 #include "Module.h"
 #include "Track.h"
 
-Connection::Connection(const nlohmann::json& json) : Nameable(json) {
+Connection::Connection(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
     _fromNekoRef = json["_fromNekoRef"];
     _fromIndex = json["_fromIndex"];
     _toNekoRef = json["_toNekoRef"];
@@ -70,8 +70,8 @@ void Connection::setLatency(uint32_t latency) {
     }
 }
 
-nlohmann::json Connection::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json Connection::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
     json.update(*this);
     json["_fromNekoRef"] = _from->getNekoId();
     json["_toNekoRef"] = _to->getNekoId();

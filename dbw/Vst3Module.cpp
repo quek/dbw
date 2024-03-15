@@ -26,7 +26,7 @@
 #include "util.h"
 #include "command/ComputeLatency.h"
 
-Vst3Module::Vst3Module(const nlohmann::json& json) : Module(json), _pluginContext(this) {
+Vst3Module::Vst3Module(const nlohmann::json& json, SerializeContext& context) : Module(json, context), _pluginContext(this) {
     std::ifstream in(configDir() / "plugin.json");
     if (!in) {
         return;
@@ -667,8 +667,8 @@ void Vst3Module::addParameterChange(Param* param, int32_t sampleOffset, double v
     _controllerSetParamNormalizedMap[param->getId()] = value;
 }
 
-nlohmann::json Vst3Module::toJson() {
-    nlohmann::json json = Module::toJson();
+nlohmann::json Vst3Module::toJson(SerializeContext& context) {
+    nlohmann::json json = Module::toJson(context);
     json["type"] = "vst3";
     json["_id"] = _id;
 
@@ -747,7 +747,7 @@ Vst3Module* Vst3Module::create(const std::string& id) {
     return module;
 }
 
-Vst3Module* Vst3Module::fromJson(const nlohmann::json& json) {
+Vst3Module* Vst3Module::fromJson(const nlohmann::json& json, SerializeContext& ) {
     auto& id = json["_id"];
     auto module = Vst3Module::create(id);
 

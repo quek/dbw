@@ -3,6 +3,7 @@
 #include "../App.h"
 #include "../Composer.h"
 #include "../Module.h"
+#include "../SerializeContext.h"
 #include "../Track.h"
 
 command::DeleteModule::DeleteModule(Module* module) : _moduleId(module->getNekoId()), _trackId(module->_track->getNekoId()) {
@@ -15,7 +16,8 @@ void command::DeleteModule::execute(Composer* composer) {
     }
     module->closeGui();
     module->stop();
-    _module = module->toJson();
+    SerializeContext context;
+    _module = module->toJson(context);
 
     auto modules = &module->_track->_modules;
 
@@ -34,7 +36,8 @@ void command::DeleteModule::execute(Composer* composer) {
 }
 
 void command::DeleteModule::undo(Composer* composer) {
-    Module* module = Module::fromJson(_module);
+    SerializeContext context;
+    Module* module = Module::fromJson(_module, context);
     Track* track = Neko::findByNekoId<Track>(_trackId);
     module->_track = track;
 

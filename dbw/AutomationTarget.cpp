@@ -8,14 +8,14 @@ AutomationTarget::AutomationTarget(Module* module, uint32_t paramId) :
     _defaultValue(module->getParam(paramId)->getValue()) {
 }
 
-AutomationTarget::AutomationTarget(const nlohmann::json& json) {
+AutomationTarget::AutomationTarget(const nlohmann::json& json, SerializeContext& ) {
     _module = nullptr;
     _moduleNekoRef = json["_moduleNekoRef"];
     _paramId = json["_paramId"];
     _defaultValue = json["_defaultValue"];
 }
 
-nlohmann::json AutomationTarget::toJson() {
+nlohmann::json AutomationTarget::toJson(SerializeContext& ) {
     nlohmann::json json;
     json["_moduleNekoRef"] = _module->getNekoId();
     json["_paramId"] = _paramId;

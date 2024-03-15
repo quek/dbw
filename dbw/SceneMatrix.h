@@ -10,14 +10,14 @@ class Track;
 
 class SceneMatrix : public Nameable {
 public:
-    SceneMatrix(const nlohmann::json& json);
+    SceneMatrix(const nlohmann::json& json, SerializeContext& context);
     SceneMatrix(Composer* composer);
     Composer* composer() const { return _composer; }
     void render();
     void process(Track* track);
     void stop();
     void addScene(bool undoable = true);
-    virtual nlohmann::json toJson() override;
+    virtual nlohmann::json toJson(SerializeContext& context) override;
 
     std::vector<std::unique_ptr<Scene>> _scenes;
     Composer* _composer = nullptr;

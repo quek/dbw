@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "Error.h"
 #include "Fader.h"
+#include "SerializeContext.h"
 #include "Track.h"
 #include "command/GroupTracks.h"
 #include "command/AddTrack.h"
@@ -310,9 +311,10 @@ void RackWindow::handleShortcut() {
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_C)) {
         // COPY
         if (!_selectedTracks.empty()) {
+            SerializeContext context;
             nlohmann::json json;
             for (const auto& track : _selectedTracks) {
-                json["tracks"].push_back(track->toJson());
+                json["tracks"].push_back(track->toJson(context));
             }
             ImGui::SetClipboardText(json.dump(2).c_str());
             auto renewJson = renewNekoId(json);

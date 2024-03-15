@@ -10,9 +10,9 @@
 #include "Config.h"
 #include "Lane.h"
 
-SceneMatrix::SceneMatrix(const nlohmann::json& json) : Nameable(json) {
+SceneMatrix::SceneMatrix(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
     for (const auto& x : json["_scenes"]) {
-        Scene* scene = new Scene(x);
+        Scene* scene = new Scene(x, context);
         scene->_sceneMatrix = this;
         _scenes.emplace_back(scene);
     }
@@ -145,12 +145,12 @@ void SceneMatrix::addScene(bool undoable) {
     _composer->_commandManager.executeCommand(new AddSceneCommand(this, undoable));
 }
 
-nlohmann::json SceneMatrix::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json SceneMatrix::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
 
     nlohmann::json scenes = nlohmann::json::array();
     for (const auto& scene : _scenes) {
-        scenes.emplace_back(scene->toJson());
+        scenes.emplace_back(scene->toJson(context));
     }
     json["_scenes"] = scenes;
 

@@ -5,7 +5,7 @@
 #include "Config.h"
 #include "ProcessBuffer.h"
 
-Wav::Wav(const nlohmann::json& json)
+Wav::Wav(const nlohmann::json& json, SerializeContext& context)
 {
     _nchannels = json["_nchannels"];
     _sampleRate = json["_sampleRate"];
@@ -66,7 +66,7 @@ uint32_t Wav::copy(ProcessBuffer& processBuffer, int frameOffset, double start, 
     return nframes;
 }
 
-double Wav::getDuration(double bpm)
+double Wav::getDuration(double bpm) const
 {
     double sampleRate = gPreference.sampleRate;
     double oneBeatSec = 60.0 / bpm;
@@ -74,7 +74,7 @@ double Wav::getDuration(double bpm)
     return duration;
 }
 
-nlohmann::json Wav::toJson()
+nlohmann::json Wav::toJson(SerializeContext& context)
 {
     nlohmann::json json;
     std::string data = cppcodec::base64_rfc4648::encode((const char*)_data, sizeof(float) * _totalPCMFrameCount * _nchannels);

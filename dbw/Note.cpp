@@ -4,7 +4,7 @@
 #include "ProcessBuffer.h"
 #include "Track.h"
 
-Note::Note(const nlohmann::json& json) : SequenceItem(json) {
+Note::Note(const nlohmann::json& json, SerializeContext& context) : SequenceItem(json, context) {
     _channel = json["_channel"];
     _key = json["_key"];
     _velocity = json["_velocity"];
@@ -15,8 +15,8 @@ Note::Note(double time, double duration, int16_t key, double velocity, int16_t c
     SequenceItem(time, duration), _key(key), _velocity(velocity), _channel(channel), _rel(velocity) {
 }
 
-nlohmann::json Note::toJson() {
-    nlohmann::json json = SequenceItem::toJson();
+nlohmann::json Note::toJson(SerializeContext& context) {
+    nlohmann::json json = SequenceItem::toJson(context);
     json["type"] = TYPE;
     json.update(*this);
     return json;

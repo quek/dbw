@@ -1,6 +1,6 @@
 #include "MasterTrack.h"
 
-MasterTrack::MasterTrack(const nlohmann::json& json) : Track(json) {
+MasterTrack::MasterTrack(const nlohmann::json& json, SerializeContext& context) : Track(json, context) {
     _parent = this;
 }
 
@@ -15,7 +15,7 @@ MasterTrack* MasterTrack::getMasterTrack() {
     return this;
 }
 
-nlohmann::json MasterTrack::toJson() {
-    nlohmann::json json = Track::toJson();
+nlohmann::json MasterTrack::toJson(SerializeContext& context) {
+    nlohmann::json json = Track::toJson(context);
     return json;
 }

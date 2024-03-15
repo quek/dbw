@@ -16,29 +16,29 @@
 #include "Lane.h"
 #include "command/AddModule.h"
 
-Track::Track(const nlohmann::json& json) : Nameable(json) {
+Track::Track(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
     _width = json["_width"];
     for (const auto& x : json["_lanes"]) {
-        addLane(new Lane(x));
+        addLane(new Lane(x, context));
     }
 
-    _gain.reset(new GainModule(json["_gain"]));
+    _gain.reset(new GainModule(json["_gain"], context));
     _gain->_track = this;
     _gain->start();
 
-    _fader.reset(new Fader(json["_fader"]));
+    _fader.reset(new Fader(json["_fader"], context));
     _fader->_track = this;
     _fader->start();
 
     if (json.contains("_modules")) {
         for (const auto& x : json["_modules"]) {
-            addModule(gPluginManager.create(x));
+            addModule(gPluginManager.create(x, context));
         }
     }
 
     if (json.contains("_tracks")) {
         for (const auto& x : json["_tracks"]) {
-            Track* track = new Track(x);
+            Track* track = new Track(x, context);
             track->_parent = this;
             _tracks.emplace_back(track);
         }
@@ -142,28 +142,28 @@ bool Track::isAvailableSidechainSrc(Track* dst) {
     return true;
 }
 
-nlohmann::json Track::toJson() {
-    nlohmann::json json = Nameable::toJson();
+nlohmann::json Track::toJson(SerializeContext& context) {
+    nlohmann::json json = Nameable::toJson(context);
     json["type"] = TYPE;
     json["_width"] = _width;
-    json["_gain"].update(_gain->toJson());
-    json["_fader"].update(_fader->toJson());
+    json["_gain"].update(_gain->toJson(context));
+    json["_fader"].update(_fader->toJson(context));
 
     nlohmann::json modules = nlohmann::json::array();
     for (auto& module : _modules) {
-        modules.emplace_back(module->toJson());
+        modules.emplace_back(module->toJson(context));
     }
     json["_modules"] = modules;
 
     nlohmann::json lanes = nlohmann::json::array();
     for (auto& lane : _lanes) {
-        lanes.emplace_back(lane->toJson());
+        lanes.emplace_back(lane->toJson(context));
     }
     json["_lanes"] = lanes;
 
     nlohmann::json tracks = nlohmann::json::array();
     for (auto& track : _tracks) {
-        tracks.emplace_back(track->toJson());
+        tracks.emplace_back(track->toJson(context));
     }
     json["_tracks"] = tracks;
 
