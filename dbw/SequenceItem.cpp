@@ -16,7 +16,7 @@ SequenceItem* SequenceItem::create(const nlohmann::json& json, SerializeContext&
     return nullptr;
 }
 
-SequenceItem::SequenceItem(const nlohmann::json& json, SerializeContext& context) : Neko(json, context) {
+SequenceItem::SequenceItem(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context) {
     _time = json["_time"];
     _duration = json["_duration"];
 }
@@ -33,7 +33,7 @@ void SequenceItem::setTime(double time) {
 }
 
 nlohmann::json SequenceItem::toJson(SerializeContext& context) {
-    nlohmann::json json = Neko::toJson(context);
+    nlohmann::json json = Nameable::toJson(context);
     json["_time"] = _time;
     json["_duration"] = _duration;
     return json;

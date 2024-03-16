@@ -32,9 +32,6 @@ public:
     float offsetLeft() const override;
     float offsetStart() const override;
 
-    ImU32 colorSlectedThing() override;
-    ImU32 colorThing() override;
-
     Lane* laneFromPos(ImVec2& pos) override;
     float xFromThing(Clip* clip) override;
     float laneToScreenX(Lane* lane);

@@ -56,6 +56,13 @@ void Clip::prepareProcessBuffer(Lane* lane, double begin, double end, double loo
     }
 }
 
+void Clip::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
+{
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImU32 color = selected? selectedColor(_color) : _color;
+    drawList->AddRectFilled(pos1, pos2, color, 2.5f);
+}
+
 nlohmann::json Clip::toJson(SerializeContext& context) {
     nlohmann::json json = Nameable::toJson(context);
     json["_sequence"] = _sequence->toJson(context);

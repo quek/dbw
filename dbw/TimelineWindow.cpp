@@ -21,9 +21,6 @@
 constexpr float TIMELINE_START_OFFSET = 10.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
 
-ImU32 CLIP_COLOR = IM_COL32(0x00, 0xcc, 0xcc, 0x88);
-ImU32 SELECTED_CLIP_COLOR = IM_COL32(0x66, 0x66, 0xff, 0x88);
-
 TimelineWindow::TimelineWindow(Composer* composer) :
     TimelineCanvasMixin(composer),
     _trackWidthManager(composer->_masterTrack.get()),
@@ -210,16 +207,6 @@ float TimelineWindow::offsetStart() const
 {
     //return TIMELINE_START_OFFSET;
     return 0.0f;
-}
-
-ImU32 TimelineWindow::colorSlectedThing()
-{
-    return SELECTED_CLIP_COLOR;
-}
-
-ImU32 TimelineWindow::colorThing()
-{
-    return CLIP_COLOR;
 }
 
 float TimelineWindow::xFromThing(Clip* clip)

@@ -15,7 +15,7 @@ Audio::Audio(const std::filesystem::path& wavPath, double bpm) : _wavPath(wavPat
     _duration = _wav->getDuration(bpm);
 }
 
-void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec)
+void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double loopBegin, double loopEnd, double oneBeatSec)
 {
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
     uint32_t frameOffset = 0;

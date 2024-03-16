@@ -5,14 +5,14 @@
 #include "Config.h"
 #include "ProcessBuffer.h"
 
-Wav::Wav(const nlohmann::json& json, SerializeContext& context)
+Wav::Wav(const nlohmann::json& json, SerializeContext&)
 {
     _nchannels = json["_nchannels"];
     _sampleRate = json["_sampleRate"];
     _totalPCMFrameCount = json["_totalPCMFrameCount"];
     std::string data = json["_data"];
     // sizeof(float) * _totalPCMFrameCount * _nchannels だとなぜか 2 たりないから
-    size_t size =cppcodec::base64_rfc4648::decoded_max_size(data.size());
+    size_t size = cppcodec::base64_rfc4648::decoded_max_size(data.size());
     _data = (float*)malloc(size);
     auto sz = cppcodec::base64_rfc4648::decode((char*)_data, size, data.c_str(), data.size());
     assert(sizeof(float) * _totalPCMFrameCount * _nchannels == sz);
@@ -74,7 +74,7 @@ double Wav::getDuration(double bpm) const
     return duration;
 }
 
-nlohmann::json Wav::toJson(SerializeContext& context)
+nlohmann::json Wav::toJson(SerializeContext&)
 {
     nlohmann::json json;
     std::string data = cppcodec::base64_rfc4648::encode((const char*)_data, sizeof(float) * _totalPCMFrameCount * _nchannels);

@@ -23,8 +23,6 @@ extern ImU32 RANGE_SELECTING_COLOR;
 
 extern ImU32 BACKGROUD_WHITE_KEY_COLOR;
 extern ImU32 BACKGROUD_BLACK_KEY_COLOR;
-extern ImU32 NOTE_COLOR;
-extern ImU32 SELECTED_NOTE_COLOR;
 
 extern float widthWithPadding(int nchars);
 

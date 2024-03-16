@@ -123,14 +123,6 @@ float PianoRollWindow::offsetStart() const {
     return TIMELINE_START_OFFSET;
 }
 
-ImU32 PianoRollWindow::colorSlectedThing() {
-    return SELECTED_NOTE_COLOR;
-}
-
-ImU32 PianoRollWindow::colorThing() {
-    return NOTE_COLOR;
-}
-
 int16_t* PianoRollWindow::laneFromPos(ImVec2& pos) {
     ImVec2 windowPos = ImGui::GetWindowPos();
     float scrollX = ImGui::GetScrollX();

@@ -17,6 +17,7 @@ public:
     virtual std::string name() const;
     std::shared_ptr<Sequence>& getSequence() { return _sequence; }
     virtual void prepareProcessBuffer(Lane* lane, double begin, double end, double loopBegin, double loopEnd, double oneBeatSec) ;
+    virtual void render(const ImVec2& pos1, const ImVec2& pos2, const bool selected);
     virtual void renderInScene(PianoRollWindow* pianoRollWindow) = 0;
 
     virtual nlohmann::json toJson(SerializeContext& context) override;

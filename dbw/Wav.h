@@ -13,7 +13,7 @@ public:
     Wav(const std::filesystem::path& file);
     virtual ~Wav();
     uint32_t copy(ProcessBuffer& processBuffer, int frameOffset, double start, double end, double oneBeatSec);
-    uint64_t getNframes() { return _totalPCMFrameCount; }
+    uint64_t getNframes() const { return _totalPCMFrameCount; }
     double getDuration(double bpm) const;
     virtual nlohmann::json toJson(SerializeContext& context);
 

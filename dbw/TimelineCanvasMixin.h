@@ -37,9 +37,6 @@ public:
     virtual void renderThing(THING* thing, const ImVec2& pos1, const ImVec2& pos2);
     virtual void renderEditCursor();
 
-    virtual ImU32 colorSlectedThing() = 0;
-    virtual ImU32 colorThing() = 0;
-
     virtual LANE* laneFromPos(ImVec2& pos) = 0;
     THING* thingAtPos(ImVec2& pos);
     virtual float xFromThing(THING* thing) = 0;

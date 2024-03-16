@@ -18,9 +18,9 @@ std::shared_ptr<Sequence> Sequence::create(double duration, NekoId id)
 
 std::shared_ptr<Sequence> Sequence::create(const nlohmann::json& json, SerializeContext& context)
 {
-    if (json.contains("sequenceId"))
+    if (json.contains("_nekoId"))
     {
-        auto& p = nekoIdSequenceMap[json["sequenceId"].template get<NekoId>()];
+        auto& p = nekoIdSequenceMap[json["_nekoId"].template get<NekoId>()];
         auto sequence = p.lock();
         if (sequence)
         {
@@ -71,8 +71,6 @@ nlohmann::json Sequence::toJson(SerializeContext& context)
         }
         json["_items"] = notes;
     }
-    json["sequenceId"] = getNekoId();
-    json["type"] = TYPE;
 
     return json;
 }

@@ -1,9 +1,9 @@
 #pragma once
-#include "Neko.h"
+#include "Nameable.h"
 
 class Lane;
 
-class SequenceItem : public Neko {
+class SequenceItem : public Nameable {
 public:
     static SequenceItem* create(const nlohmann::json& json, SerializeContext& context);
     SequenceItem(const nlohmann::json& json, SerializeContext& context);

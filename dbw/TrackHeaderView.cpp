@@ -28,7 +28,7 @@ float TrackHeaderView::render(float offsetX, float zoomX) {
     pos1 = ImVec2(_x, 0.0f) + ImGui::GetWindowPos();
     pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
     drawList->AddLine(pos1, pos2, gTheme.rackBorder);
-    ImGui::SetCursorPos(ImVec2(_x, _headerHeight + _scrollY));
+    ImGui::SetCursorPos(ImVec2(_x + 2.0f, _headerHeight + _scrollY));
     if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T, "+", ImVec2(0.0f, ImGui::GetWindowHeight()))) {
         _composer->_commandManager.executeCommand(new command::AddTrack());
     }

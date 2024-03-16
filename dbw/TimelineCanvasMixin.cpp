@@ -284,14 +284,8 @@ void TimelineCanvasMixin<THING, LANE>::renderThings() {
 
 template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::renderThing(THING* thing, const ImVec2& pos1, const ImVec2& pos2) {
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    ImU32 thingColor;
-    if (_state._selectedThings.contains(thing)) {
-        thingColor = colorSlectedThing();
-    } else {
-        thingColor = colorThing();
-    }
-    drawList->AddRectFilled(pos1, pos2, thingColor, 2.5f);
+    bool selected = _state._selectedThings.contains(thing);
+    thing->render(pos1, pos2, selected);
 }
 
 template<class THING, typename LANE>

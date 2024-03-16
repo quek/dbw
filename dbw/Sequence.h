@@ -12,7 +12,6 @@ class Composer;
 class Sequence : public Nameable
 {
 public:
-    inline static const char* TYPE = "sequence";
     static std::shared_ptr<Sequence>create(double duration = 16.0, NekoId id = 0);
     static std::shared_ptr<Sequence>create(const nlohmann::json& json, SerializeContext& context);
     virtual ~Sequence();
