@@ -77,7 +77,7 @@ void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double cli
     }
 }
 
-void Note::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
+void Note::render(const ImVec2& pos1, const ImVec2& pos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImU32 color = selected ? selectedColor(_color) : _color;

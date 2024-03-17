@@ -22,9 +22,13 @@ void AudioClip::edit(Composer*, Lane*)
     // TODO
 }
 
-std::string AudioClip::name() const
+void AudioClip::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected)
 {
-    return "W" + Clip::name();
+    Clip::render(screenPos1, screenPos2, canvasPos1, canvasPos2, selected);
+    for (auto& audio : _sequence->getItems())
+    {
+        audio->render(screenPos1, screenPos2, canvasPos1, canvasPos2, selected);
+    }
 }
 
 void AudioClip::renderInScene(PianoRollWindow*)

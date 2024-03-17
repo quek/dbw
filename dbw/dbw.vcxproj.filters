@@ -163,12 +163,21 @@
     <ClCompile Include="Vst3Param.cpp" />
     <ClCompile Include="TrackHeaderView.cpp" />
     <ClCompile Include="TrackWidthManager.cpp" />
-    <ClCompile Include="Wav.cpp" />
+    <ClCompile Include="AudioFile.cpp" />
     <ClCompile Include="AudioClip.cpp" />
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="DropManager.cpp" />
     <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="SerializeContext.cpp" />
+    <ClCompile Include="lib\implot\implot.cpp">
+      <Filter>implot</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\implot\implot_demo.cpp">
+      <Filter>implot</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\implot\implot_items.cpp">
+      <Filter>implot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -316,12 +325,18 @@
     <ClInclude Include="Vst3Param.h" />
     <ClInclude Include="TrackHeaderView.h" />
     <ClInclude Include="TrackWidthManager.h" />
-    <ClInclude Include="Wav.h" />
+    <ClInclude Include="AudioFile.h" />
     <ClInclude Include="AudioClip.h" />
     <ClInclude Include="Audio.h" />
     <ClInclude Include="DropManager.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="SerializeContext.h" />
+    <ClInclude Include="lib\implot\implot.h">
+      <Filter>implot</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\implot\implot_internal.h">
+      <Filter>implot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
@@ -342,6 +357,9 @@
     </Filter>
     <Filter Include="command">
       <UniqueIdentifier>{aff0781d-9f84-4228-98a1-2c60fec426f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="implot">
+      <UniqueIdentifier>{6c73242b-a0de-4d33-9ca4-2fe91ac43c1f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

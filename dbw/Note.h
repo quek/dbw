@@ -13,7 +13,7 @@ public:
     virtual ~Note() = default;
     virtual nlohmann::json toJson(SerializeContext& context) override;
     void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
-    virtual void render(const ImVec2& pos1, const ImVec2& pos2, const bool selected);
+    virtual void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected);
 
     int16_t _channel;
     int16_t _key;

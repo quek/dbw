@@ -41,7 +41,6 @@ protected:
     void handleShortcut() override;
     void renderPlayhead() override;
     void renderHeader() override;
-    void renderHeader2();
     std::string windowName() override;
     std::string canvasName() override;
 

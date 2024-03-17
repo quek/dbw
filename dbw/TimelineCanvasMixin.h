@@ -34,7 +34,7 @@ public:
     virtual void prepareAllThings() = 0;
 
     void renderThings();
-    virtual void renderThing(THING* thing, const ImVec2& pos1, const ImVec2& pos2);
+    virtual void renderThing(THING* thing, const ImVec2& screenPos1, const ImVec2& screenPos2);
     virtual void renderEditCursor();
 
     virtual LANE* laneFromPos(ImVec2& pos) = 0;
