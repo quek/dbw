@@ -3,7 +3,8 @@
 
 class Lane;
 
-class SequenceItem : public Nameable {
+class SequenceItem : public Nameable
+{
 public:
     static SequenceItem* create(const nlohmann::json& json, SerializeContext& context);
     SequenceItem(const nlohmann::json& json, SerializeContext& context);
@@ -13,7 +14,7 @@ public:
     double getDuration() const { return _duration; }
     double getTime() const { return _time; }
     virtual void prepareProcessBuffer(Lane* /*lane*/, double /*begin*/, double /*end*/, double /*clipBegin*/, double /*clipEnd*/, double /*loopBegin*/, double /*loopEnd*/, double /*oneBeatSec*/) {};
-    virtual void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected);
+    virtual void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const bool selected);
     void setTime(double time);
     virtual nlohmann::json toJson(SerializeContext& context) override;
 

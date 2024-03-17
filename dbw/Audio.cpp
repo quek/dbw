@@ -54,10 +54,21 @@ void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double cl
     }
 }
 
-void Audio::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected)
+void Audio::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
 {
-    ImGui::SetCursorPos(canvasPos1);
-    ImVec2 size = canvasPos2 - canvasPos1;
+    ImGui::SetCursorPos(pos1 - ImGui::GetWindowPos() + ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY()));
+    ImVec2 size = pos2 - pos1;
+
+    //int count = _audioFile->getNframes();
+    //uint32_t nchannels = _audioFile->getNchannels();
+    //const float* data = _audioFile->getData();
+    //std::unique_ptr<float[]> xs(new float[count]);
+    //for (int i = 0; i < count; ++i)
+    //{
+    //    xs[i] = data[nchannels * i];
+    //}
+    //ImGui::PlotLines("_", xs.get(), count, 0, nullptr, -1.0f, 1.0f, size);
+
     ImPlotFlags plotFlags = ImPlotFlags_NoTitle | ImPlotFlags_NoLegend | ImPlotFlags_NoMouseText | ImPlotFlags_NoInputs | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoFrame;
     if (ImPlot::BeginPlot("Audio", size, plotFlags))
     {

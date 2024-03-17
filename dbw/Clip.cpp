@@ -56,7 +56,7 @@ void Clip::prepareProcessBuffer(Lane* lane, double begin, double end, double loo
     }
 }
 
-void Clip::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected)
+void Clip::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const bool selected)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImU32 color = selected? selectedColor(_color) : _color;

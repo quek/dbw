@@ -22,12 +22,12 @@ void AudioClip::edit(Composer*, Lane*)
     // TODO
 }
 
-void AudioClip::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected)
+void AudioClip::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const bool selected)
 {
-    Clip::render(screenPos1, screenPos2, canvasPos1, canvasPos2, selected);
+    Clip::render(screenPos1, screenPos2, selected);
     for (auto& audio : _sequence->getItems())
     {
-        audio->render(screenPos1, screenPos2, canvasPos1, canvasPos2, selected);
+        audio->render(screenPos1, screenPos2, selected);
     }
 }
 

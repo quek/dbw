@@ -366,11 +366,7 @@ template<class THING, typename LANE>
 void TimelineCanvasMixin<THING, LANE>::renderThing(THING* thing, const ImVec2& screenPos1, const ImVec2& screenPos2)
 {
     bool selected = _state._selectedThings.contains(thing);
-    // zoom は screenPos1, screenPos2 の距離に含まれているので計算に入れる必要はない
-    ImVec2 delta = -ImGui::GetWindowPos() + ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY());
-    ImVec2 canvasPos1 = screenPos1 + delta;
-    ImVec2 canvasPos2 = screenPos2 + delta;
-    thing->render(screenPos1, screenPos2, canvasPos1, canvasPos2, selected);
+    thing->render(screenPos1, screenPos2, selected);
 }
 
 template<class THING, typename LANE>

@@ -9,7 +9,7 @@ public:
     AudioClip(double time, const std::string& wavPath, double bpm);
     Clip* clone() override;
     void edit(Composer* composer, Lane* lane) override;
-    void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected) override;
+    void render(const ImVec2& screenPos1, const ImVec2& screenPos2,  const bool selected) override;
     void renderInScene(PianoRollWindow* pianoRollWindow) override;
     virtual nlohmann::json toJson(SerializeContext& context) override;
 };

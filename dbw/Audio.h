@@ -11,7 +11,7 @@ public:
     Audio(const nlohmann::json& json, SerializeContext& context);
     Audio(const std::filesystem::path& path, double bpm);
     void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
-    void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const ImVec2& canvasPos1, const ImVec2& canvasPos2, const bool selected) override;
+    void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const bool selected) override;
     virtual nlohmann::json toJson(SerializeContext& context) override;
 
 private:

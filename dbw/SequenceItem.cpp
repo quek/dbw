@@ -35,7 +35,7 @@ void SequenceItem::addTo(std::vector<std::unique_ptr<SequenceItem>>& items)
     items.emplace_back(this);
 }
 
-void SequenceItem::render(const ImVec2&, const ImVec2&, const ImVec2&, const ImVec2&, const bool)
+void SequenceItem::render(const ImVec2&, const ImVec2&, const bool)
 {
 }
 
