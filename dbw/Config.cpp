@@ -7,7 +7,7 @@ Theme gTheme;
 
 Config::Config()
 {
-    _dir = std::filesystem::path(GetExecutablePath()) / L"system" / L"config";
+    _dir = std::filesystem::path(GetExecutablePath()) / L"user" / L"config";
     std::filesystem::create_directories(_dir);
 }
 
