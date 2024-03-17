@@ -4,6 +4,7 @@
 #include "Command.h"
 #include "Config.h"
 #include "DropManager.h"
+#include "MidiDevice.h"
 #include "command/AddTrack.h"
 
 extern HWND gHwnd;
@@ -17,6 +18,8 @@ App::App() :
 
     _dropManager = new DropManager(this);
     RegisterDragDrop(gHwnd, _dropManager);
+
+    MidiDevice::scan();
 }
 
 App::~App()
@@ -59,6 +62,8 @@ void App::render()
     {
         _audioEngineWindow->render();
     }
+
+    MidiDevice::renderMidiInPorts();
 }
 
 void App::addComposer(Composer* composer)

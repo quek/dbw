@@ -170,6 +170,10 @@
     <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="SerializeContext.cpp" />
     <ClCompile Include="PlotLinesV.cpp" />
+    <ClCompile Include="MidiDevice.cpp" />
+    <ClCompile Include="lib\rtmidi\RtMidi.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -324,6 +328,7 @@
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="SerializeContext.h" />
     <ClInclude Include="PlotLinesV.h" />
+    <ClInclude Include="MidiDevice.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

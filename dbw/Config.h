@@ -1,5 +1,7 @@
 #pragma once
 #include <fstream>
+#include <string>
+#include <vector>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <nlohmann/json.hpp>
@@ -13,7 +15,8 @@ extern Config gConfig;
 extern Preference gPreference;
 extern Theme gTheme;
 
-class Config {
+class Config
+{
 public:
     Config();
     std::filesystem::path projectDir();
@@ -21,46 +24,52 @@ public:
     std::filesystem::path _dir;
 };
 
-template<typename T>
-struct ConfigMixin {
-    explicit ConfigMixin(const char* _fileName) : fileName(_fileName) {}
+struct ConfigMixin
+{
+    explicit ConfigMixin(std::filesystem::path _fileName) : fileName(_fileName) {}
 
-    void load() {
+    virtual void from_json(const nlohmann::json& json) = 0;
+    virtual nlohmann::json to_json() = 0;
+    void load()
+    {
         std::ifstream in(gConfig._dir / fileName);
-        if (!in) {
+        if (!in)
+        {
             return;
         }
         nlohmann::json json;
         in >> json;
-        *static_cast<T*>(this) = json.template get<T>();
+        from_json(json);
     }
 
-    void save() {
+    void save()
+    {
         std::ofstream out(gConfig._dir / fileName);
-        nlohmann::json json = *static_cast<T*>(this);
+        nlohmann::json json= to_json();
         out << json.dump(2) << std::endl;
     }
 
-    const char* fileName;
+    std::filesystem::path fileName;
 };
 
-struct Preference : ConfigMixin<Preference> {
-    Preference() : ConfigMixin("preference.json") {}
+struct Preference : ConfigMixin
+{
+    Preference() : ConfigMixin(L"preference.json") {}
+    void from_json(const nlohmann::json& json) override;
+    nlohmann::json to_json() override;
+    
 
     int audioDeviceIndex = -1;
     double sampleRate = 48000.0;
     unsigned long bufferSize = 1024;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        Preference,
-        audioDeviceIndex,
-        sampleRate,
-        bufferSize
-    );
+    std::vector<std::string> midiInDevices;
 };
 
-struct Theme : ConfigMixin<Theme> {
-    Theme() : ConfigMixin("theme.json") {}
+struct Theme : ConfigMixin
+{
+    Theme() : ConfigMixin(L"theme.json") {}
+    void from_json(const nlohmann::json& json) override;
+    nlohmann::json to_json() override;
 
     ImU32 automationLine = IM_COL32(0x80, 0x80, 0xff, 0xee);
     ImU32 automationPoint = IM_COL32(0xcc, 0xcc, 0xff, 0xcc);
@@ -75,13 +84,5 @@ struct Theme : ConfigMixin<Theme> {
 
     ImU32 background = IM_COL32(0x00, 0x00, 0x00, 0x80);
     ImU32 text = IM_COL32(0xff, 0xff, 0xff, 0xc0);
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        Theme,
-        automationPoint,
-        editCursor,
-        rackBorder,
-        background
-    );
 };
 

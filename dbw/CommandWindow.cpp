@@ -5,10 +5,12 @@
 #include <misc/cpp/imgui_stdlib.h>
 #include "App.h"
 #include "Composer.h"
+#include "MidiDevice.h"
 #include "Project.h"
 
 static std::map<std::string, std::function<void(Composer*)>> table = {
     {"Audio Setup", [](Composer* composer) { composer->app()->showAudioSetupWindow(); }},
+    {"Midi In Ports", [](Composer*) { MidiDevice::showMidiInPortsWindow(); }},
     {"Save", [](Composer* composer) { composer->_project->save(); }},
     {"Save As", [](Composer* composer) { composer->_project->saveAs(); }},
     {"Scan Plugin", [](Composer*) { gPluginManager.scan(); }},
