@@ -112,7 +112,14 @@ AudioEngine* Composer::audioEngine() const {
 void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
     double deltaSec = framesPerBuffer / gPreference.sampleRate;
     double oneBeatSec = 60.0 / _bpm;
+
+    if (_looping && _loopEndTime <= _playTime)
+    {
+        _playTime = _loopStartTime;
+    }
+
     _nextPlayTime = deltaSec / oneBeatSec + _playTime;
+
     if (_looping)
     {
         if (_loopEndTime < _nextPlayTime)

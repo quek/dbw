@@ -59,6 +59,17 @@ uint32_t AudioFile::copy(ProcessBuffer& processBuffer, int frameOffset, double s
             {
                 buffer[channel][i + frameOffset] = _data[_nchannels * (startFrame + i) + channel];
             }
+            else
+            {
+                if (processBuffer._in[0]._constantp[channel])
+                {
+                    buffer[channel][i + frameOffset] = processBuffer._in[0].buffer32()[channel][0];
+                }
+                else
+                {
+                    buffer[channel][i + frameOffset] = processBuffer._in[0].buffer32()[channel][i + frameOffset];
+                }
+            }
         }
         processBuffer._out[0]._constantp[channel] = false;
     }
