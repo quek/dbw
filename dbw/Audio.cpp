@@ -1,6 +1,6 @@
 #include "Audio.h"
-#include "implot/implot.h"
 #include "Lane.h"
+#include "PlotLinesV.h"
 #include "ProcessBuffer.h"
 #include "Track.h"
 #include "util.h"
@@ -59,37 +59,15 @@ void Audio::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
     ImGui::SetCursorPos(pos1 - ImGui::GetWindowPos() + ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY()));
     ImVec2 size = pos2 - pos1;
 
-    //int count = _audioFile->getNframes();
-    //uint32_t nchannels = _audioFile->getNchannels();
-    //const float* data = _audioFile->getData();
-    //std::unique_ptr<float[]> xs(new float[count]);
-    //for (int i = 0; i < count; ++i)
-    //{
-    //    xs[i] = data[nchannels * i];
-    //}
-    //ImGui::PlotLines("_", xs.get(), count, 0, nullptr, -1.0f, 1.0f, size);
-
-    ImPlotFlags plotFlags = ImPlotFlags_NoTitle | ImPlotFlags_NoLegend | ImPlotFlags_NoMouseText | ImPlotFlags_NoInputs | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoFrame;
-    if (ImPlot::BeginPlot("Audio", size, plotFlags))
+    int count = _audioFile->getNframes();
+    uint32_t nchannels = _audioFile->getNchannels();
+    float* data = _audioFile->getData();
+    std::unique_ptr<float[]> values(new float[count]);
+    for (int i = 0; i < count; ++i)
     {
-        int count = _audioFile->getNframes();
-        uint32_t nchannels = _audioFile->getNchannels();
-        float* data = _audioFile->getData();
-        std::unique_ptr<float[]> xs(new float[count]);
-        std::unique_ptr<float[]> ys(new float[count]);
-        for (int i = 0; i < count; ++i)
-        {
-            xs[i] = data[nchannels * i];
-            ys[i] = count - i;
-        }
-
-        ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-        ImPlotAxisFlags axisFlags = ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoMenus | ImPlotAxisFlags_NoSideSwitch;
-        ImPlot::SetupAxes("x", "y", axisFlags, axisFlags);
-        ImPlot::PlotLine("l", xs.get(), ys.get(), count);
-        ImPlot::PopStyleVar();
-        ImPlot::EndPlot();
+        values[i] = data[nchannels * i];
     }
+    ImGui::PlotLinesV("_", values.get(), count, 0, nullptr, -1.0f, 1.0f, size);
 }
 
 nlohmann::json Audio::toJson(SerializeContext& context)
