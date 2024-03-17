@@ -42,14 +42,14 @@ uint32_t AudioFile::copy(ProcessBuffer& processBuffer, int frameOffset, double s
     auto nchannels = std::min(processBuffer._nchannels, _nchannels);
     double startFrameDouble = start * oneBeatSec * sampleRate;
     int64_t startFrame = std::round(startFrameDouble);
-    if (static_cast<int64_t>(_nframes) < startFrame)
-    {
-        return 0;
-    }
     double endFrameDouble = end * oneBeatSec * sampleRate;
     int64_t endFrame = std::round(endFrameDouble);
     int64_t nframes = std::min(std::min(endFrame - startFrame, static_cast<int64_t>(_nframes) - startFrame),
                                static_cast<int64_t>(processBuffer._framesPerBuffer - frameOffset));
+    if (static_cast<int64_t>(_nframes) < startFrame)
+    {
+        return endFrame - startFrame;
+    }
     std::vector<std::vector<float>>& buffer = processBuffer._out[0].buffer32();
     for (unsigned int channel = 0; channel < nchannels; ++channel)
     {

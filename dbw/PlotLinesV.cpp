@@ -71,7 +71,6 @@ IMGUI_API void ImGui::PlotLinesV(const char* label, const float* values, int val
         // Tooltip on hover
         if (hovered && inner_bb.Contains(g.IO.MousePos))
         {
-            //const float t = ImClamp((g.IO.MousePos.x - inner_bb.Min.x) / (inner_bb.Max.x - inner_bb.Min.x), 0.0f, 0.9999f);
             const float t = ImClamp((g.IO.MousePos.y - inner_bb.Min.y) / (inner_bb.Max.y - inner_bb.Min.y), 0.0f, 0.9999f);
             const int v_idx = (int)(t * item_count);
             IM_ASSERT(v_idx >= 0 && v_idx < values_count);
@@ -87,7 +86,6 @@ IMGUI_API void ImGui::PlotLinesV(const char* label, const float* values, int val
 
         float v0 = Plot_ArrayGetter(&data, (0 + values_offset) % values_count);
         float t0 = 0.0f;
-        //ImVec2 tp0 = ImVec2(t0, 1.0f - ImSaturate((v0 - scale_min) * inv_scale));                       // Point in the normalized space of our target rectangle
         ImVec2 tp0 = ImVec2(1.0f - ImSaturate((v0 - scale_min) * inv_scale), t0);                       // Point in the normalized space of our target rectangle
         float histogram_zero_line_t = (scale_min * scale_max < 0.0f) ? (1 + scale_min * inv_scale) : (scale_min < 0.0f ? 0.0f : 1.0f);   // Where does the zero line stands
 
@@ -100,10 +98,10 @@ IMGUI_API void ImGui::PlotLinesV(const char* label, const float* values, int val
         {
             const float t1 = t0 + t_step;
             int v1_idx = (int)(t0 * item_count + 0.5f);
+            // すごく拡大すると下の MI_ASSERT 失敗するので
             if (v1_idx >= values_count) v1_idx = values_count - 1;
             IM_ASSERT(v1_idx >= 0 && v1_idx < values_count);
             const float v1 = Plot_ArrayGetter(&data, (v1_idx + values_offset + 1) % values_count);
-            //const ImVec2 tp1 = ImVec2(t1, 1.0f - ImSaturate((v1 - scale_min) * inv_scale));
             const ImVec2 tp1 = ImVec2(1.0f - ImSaturate((v1 - scale_min) * inv_scale), t1);
 
             // NB: Draw calls are merged together by the DrawList system. Still, we should render our batch are lower level to save a bit of CPU.

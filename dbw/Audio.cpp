@@ -32,7 +32,7 @@ void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double cl
         frameOffset = _audioFile->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
         wavBegin = loopBegin - clipBegin;
         wavEnd = end - clipBegin;
-        frameOffset = _audioFile->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
+        frameOffset += _audioFile->copy(processBuffer, frameOffset, wavBegin, wavEnd, oneBeatSec);
     }
     if (frameOffset == 0)
     {
