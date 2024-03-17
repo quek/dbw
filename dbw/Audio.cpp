@@ -58,16 +58,23 @@ void Audio::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
 {
     ImGui::SetCursorPos(pos1 - ImGui::GetWindowPos() + ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY()));
     ImVec2 size = pos2 - pos1;
-
     int count = _audioFile->getNframes();
-    uint32_t nchannels = _audioFile->getNchannels();
-    float* data = _audioFile->getData();
-    std::unique_ptr<float[]> values(new float[count]);
-    for (int i = 0; i < count; ++i)
+
+    if (_plotPos1 != pos1 || _plotPos2 != pos2)
     {
-        values[i] = data[nchannels * i];
+        _plotPos1 = pos1;
+        _plotPos2 = pos2;
+        uint32_t nchannels = _audioFile->getNchannels();
+        float* data = _audioFile->getData();
+        _plotData.reset(new float[count]);
+        for (int i = 0; i < count; ++i)
+        {
+            _plotData[i] = data[nchannels * i];
+        }
     }
-    ImGui::PlotLinesV("_", values.get(), count, 0, nullptr, -1.0f, 1.0f, size);
+    ImGui::PushID(this);
+    ImGui::PlotLinesV("##_", _plotData.get(), count, 0, -1.0f, 1.0f, size);
+    ImGui::PopID();
 }
 
 nlohmann::json Audio::toJson(SerializeContext& context)

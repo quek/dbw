@@ -16,5 +16,8 @@ public:
 
 private:
     std::unique_ptr<AudioFile> _audioFile;
+    std::unique_ptr<float[]> _plotData;
+    ImVec2 _plotPos1;
+    ImVec2 _plotPos2;
 };
 
