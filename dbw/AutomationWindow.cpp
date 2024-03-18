@@ -179,7 +179,7 @@ void AutomationWindow::renderPoints() {
         }
         pos1 = pos2;
     }
-    ImVec2 pos2 = ImVec2(pos1.x, timeToScreenY(_clip->_sequence->getDuration()));
+    ImVec2 pos2 = ImVec2(pos1.x, timeToScreenY(_clip->_sequence->durationGet()));
     drawList->AddLine(pos1, pos2, gTheme.automationLine);
 }
 

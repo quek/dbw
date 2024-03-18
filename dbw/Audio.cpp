@@ -12,7 +12,7 @@ Audio::Audio(const nlohmann::json& json, SerializeContext& context) : SequenceIt
 
 Audio::Audio(const std::filesystem::path& path, double bpm) : _audioFile(new AudioFile(path))
 {
-    _duration = _audioFile->getDuration(bpm);
+    _duration = _audioFile->durationGet(bpm);
 }
 
 void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double loopBegin, double loopEnd, double oneBeatSec)

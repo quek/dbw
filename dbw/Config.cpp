@@ -63,6 +63,10 @@ void Theme::from_json(const nlohmann::json& json)
         {
             automationPoint = x.value();
         }
+        else if (x.key() == "sequenceEnd")
+        {
+            sequenceEnd = x.value();
+        }
     }
 }
 
@@ -71,5 +75,6 @@ nlohmann::json Theme::to_json()
     return nlohmann::json{
         {"automationLine", automationLine },
         {"automationPoint", automationPoint},
+        {"sequenceEnd", sequenceEnd },
     };
 }

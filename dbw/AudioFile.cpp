@@ -76,7 +76,7 @@ uint32_t AudioFile::copy(ProcessBuffer& processBuffer, int frameOffset, double s
     return nframes;
 }
 
-double AudioFile::getDuration(double bpm) const
+double AudioFile::durationGet(double bpm) const
 {
     double sampleRate = gPreference.sampleRate;
     double oneBeatSec = 60.0 / bpm;

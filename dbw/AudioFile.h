@@ -13,7 +13,7 @@ public:
     virtual ~AudioFile() = default;
     uint32_t copy(ProcessBuffer& processBuffer, int frameOffset, double start, double end, double oneBeatSec);
     float* getData() const { return _data.get(); }
-    double getDuration(double bpm) const;
+    double durationGet(double bpm) const;
     uint32_t getNchannels() const { return _nchannels; }
     uint64_t getNframes() const { return _nframes; }
     const std::filesystem::path& getPath() const { return _path; }

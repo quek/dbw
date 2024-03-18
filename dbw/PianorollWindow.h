@@ -7,7 +7,8 @@ class Command;
 class Composer;
 class Note;
 
-class PianoRollWindow : public TimelineCanvasMixin<Note, int16_t> {
+class PianoRollWindow : public TimelineCanvasMixin<Note, int16_t>
+{
 public:
     PianoRollWindow(Composer* composer);
     virtual ~PianoRollWindow() = default;
@@ -40,6 +41,8 @@ protected:
     void handleShortcut() override;
     void renderPlayhead() override;
     void renderHeader() override;
+    void renderSequenceEnd();
+    void renderTimeline() override;
     std::string windowName() override;
     std::string canvasName() override;
 };

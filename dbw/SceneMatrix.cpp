@@ -125,7 +125,7 @@ void SceneMatrix::process(Track* track) {
             if (!clipSlot->_clip) {
                 continue;
             }
-            double sequenceDuration = clipSlot->_clip->_sequence->getDuration();
+            double sequenceDuration = clipSlot->_clip->_sequence->durationGet();
             double begin = fmod(_composer->_playTime, sequenceDuration);
             double end = fmod(_composer->_nextPlayTime, sequenceDuration);
             for (auto& item : clipSlot->_clip->_sequence->getItems()) {

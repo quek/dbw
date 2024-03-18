@@ -17,9 +17,9 @@ public:
     virtual ~Sequence();
     virtual void addItem(SequenceItem* item);
     virtual void deleteItem(SequenceItem* item);
-    double getDuration() const { return _duration; }
+    double durationGet() const { return _duration; }
+    void durationSet(double duration) { _duration = duration; }
     std::vector<std::unique_ptr<SequenceItem>>& getItems();
-    void setDuration(double duration) { _duration = duration; }
     nlohmann::json toJson(SerializeContext& context) override;
 
 
