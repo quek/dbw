@@ -251,6 +251,11 @@ nlohmann::json Composer::toJson(SerializeContext& context) {
     return json;
 }
 
+bool Composer::selectedTracksContain(Track* track)
+{
+    return std::ranges::find(_selectedTracks, track) != _selectedTracks.end();
+}
+
 void Composer::play() {
     if (_playing) {
         return;

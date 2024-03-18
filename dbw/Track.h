@@ -52,6 +52,7 @@ public:
     void stop(Scene* scene);
     bool isAllLanesPlaying(Scene* scene);
     bool isAllLanesStoped(Scene* scene);
+    bool isSelected();
     std::vector<Module*> allModules();
     const std::vector<std::unique_ptr<Track>>& getTracks();
     std::vector<std::unique_ptr<Track>>::iterator tracksBegin();

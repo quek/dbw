@@ -79,12 +79,13 @@ clap_output_events_t* PluginEventList::clapOutputEvents() {
 
 Steinberg::Vst::EventList PluginEventList::vst3InputEvents() {
     Steinberg::Vst::EventList _vstInputEvents;
-    for (auto& eventNote : _event_notes) {
+    for (auto& x : _events) {
         Steinberg::Vst::Event event{};
-        event.sampleOffset = eventNote->header.time;
+        event.sampleOffset = x->time;
         event.ppqPosition = 0;
         event.flags = Steinberg::Vst::Event::kIsLive;
-        if (eventNote->header.type == CLAP_EVENT_NOTE_ON) {
+        if (x->type == CLAP_EVENT_NOTE_ON) {
+            clap_event_note* eventNote = (clap_event_note*)x;
             event.type = Steinberg::Vst::Event::kNoteOnEvent;
             event.noteOn.channel = eventNote->channel;
             event.noteOn.pitch = eventNote->key;
@@ -92,7 +93,8 @@ Steinberg::Vst::EventList PluginEventList::vst3InputEvents() {
             event.noteOn.length = 0;
             event.noteOn.tuning = 0;
             event.noteOn.noteId = -1;
-        } else if (eventNote->header.type == CLAP_EVENT_NOTE_OFF) {
+        } else if (x->type == CLAP_EVENT_NOTE_OFF) {
+            clap_event_note* eventNote = (clap_event_note*)x;
             event.type = Steinberg::Vst::Event::kNoteOffEvent;
             event.noteOff.channel = eventNote->channel;
             event.noteOff.pitch = eventNote->key;

@@ -26,17 +26,7 @@ static int paCallback(
     int result = 0;
     try {
         std::lock_guard<std::recursive_mutex> lock(audioEngine->_app->_mtx);
-
         audioEngine->process((float*)inputBuffer, (float*)outputBuffer, framesPerBuffer);
-        float* out = (float*)outputBuffer;
-        for (unsigned long i = 0; i < framesPerBuffer * 2; ++i) {
-            if (*out != 0.0) {
-                if (*out > 1.0) {
-                    *out = 1.0;
-                }
-            }
-            ++out;
-        }
     } catch (...) {
         logger->error("catch(...) in paCallback!");
         result = -1;
@@ -135,6 +125,7 @@ void AudioEngine::stop() {
 }
 
 void AudioEngine::process(float* in, float* out, unsigned long framesPerBuffer) {
+    _app->processMidiDevices();
     for (auto& composer : _app->composers()) {
         composer->process(in, out, framesPerBuffer, _steadyTime);
     }

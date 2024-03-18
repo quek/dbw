@@ -21,7 +21,7 @@
 constexpr const float BASE_HEADER_HEIGHT = 18.0f;
 constexpr const float GROUP_OFFSET_Y = 5.0f;
 
-RackWindow::RackWindow(Composer* composer) : _composer(composer) {
+RackWindow::RackWindow(Composer* composer) : _composer(composer), _selectedTracks(composer->selectedTracksGet()) {
 }
 
 void RackWindow::render() {
@@ -113,7 +113,8 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             if (!isMaster) {
                 if (!io.KeyCtrl && !io.KeyShift) {
-                    _selectedTracks = { track };
+                    _selectedTracks.clear();
+                    _selectedTracks.push_back(track);
                 } else if (io.KeyCtrl) {
                     if (selected) {
                         _selectedTracks.erase(it);

@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <string>
+#include <set>
 #include <vector>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
@@ -62,7 +63,7 @@ struct Preference : ConfigMixin
     int audioDeviceIndex = -1;
     double sampleRate = 48000.0;
     unsigned long bufferSize = 1024;
-    std::vector<std::string> midiInDevices;
+    std::set<std::string> midiInDevices;
 };
 
 struct Theme : ConfigMixin

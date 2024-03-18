@@ -161,7 +161,7 @@ int main(int, char**)
 
     Grid::init();
     std::unique_ptr<App> app(new App());
-    app->audioEngine()->start();
+    app->start();
 
     // Main loop
     bool done = false;
@@ -285,7 +285,7 @@ int main(int, char**)
         logger->flush();
     }
 
-    app->audioEngine()->stop();
+    app->stop();
     {
         std::lock_guard<std::recursive_mutex> lock(app->_mtx);
         for (auto& composer : app->composers())

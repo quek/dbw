@@ -63,7 +63,12 @@ void App::render()
         _audioEngineWindow->render();
     }
 
-    MidiDevice::renderMidiInPorts();
+    if (MidiDevice::renderMidiInPorts())
+    {
+        std::lock_guard<std::recursive_mutex> lock(_mtx);
+        closeMidiDevices();
+        openMidiDevices();
+    }
 }
 
 void App::addComposer(Composer* composer)
@@ -148,6 +153,8 @@ void App::start()
 {
     _audioEngine->start();
     _isStarted = true;
+
+    openMidiDevices();
 }
 
 void App::stop()
@@ -156,6 +163,35 @@ void App::stop()
     {
         x->stop();
     }
+
+    closeMidiDevices();
+
     _audioEngine->stop();
     _isStarted = false;
+}
+
+void App::openMidiDevices()
+{
+    _midiInDevices.clear();
+    for (auto& deviceName : gPreference.midiInDevices)
+    {
+        _midiInDevices.emplace_back(new MidiDevice(deviceName));
+
+    }
+}
+
+void App::closeMidiDevices()
+{
+    for (auto& midiDevice : _midiInDevices)
+    {
+        midiDevice->close();
+    }
+}
+
+void App::processMidiDevices()
+{
+    for (auto& midiDevice : _midiInDevices)
+    {
+        midiDevice->read();
+    }
 }

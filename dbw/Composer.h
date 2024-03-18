@@ -47,6 +47,9 @@ public:
     void editNoteClip(NoteClip* noteClip) const;
     virtual nlohmann::json toJson(SerializeContext& context) override;
 
+    bool selectedTracksContain(Track* track);
+    std::vector<Track*>& selectedTracksGet() { return _selectedTracks; }
+
     App* _app = nullptr;
     std::unique_ptr<Project> _project;
     ProcessBuffer _processBuffer;
@@ -74,4 +77,5 @@ public:
     std::unique_ptr<SidechainInputSelector> _sideChainInputSelector;
     std::unique_ptr<CommandWindow> _commandWindow;
 private:
+    std::vector<Track*> _selectedTracks;
 };
