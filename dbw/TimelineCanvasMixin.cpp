@@ -97,13 +97,15 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
         {
             float time = timeFromMousePos();
             float timeDelta = time - _state._draggingThing->_time;
-            if (std::ranges::all_of(_state._selectedThings,
-                                    [timeDelta](auto x) { return x->_duration > timeDelta; }))
+            if (timeDelta != 0)
             {
-                for (auto thing : _state._selectedThings)
+                if (std::ranges::all_of(_state._selectedThings,
+                                        [timeDelta](auto x) { return x->_duration > timeDelta; }))
                 {
-                    thing->_time += timeDelta;
-                    thing->_duration += -timeDelta;
+                    for (auto thing : _state._selectedThings)
+                    {
+                        thing->dragTop(timeDelta);
+                    }
                 }
             }
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);

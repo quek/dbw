@@ -84,3 +84,9 @@ void Note::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
     drawList->AddRectFilled(pos1, pos2, color, 2.5f);
 }
 
+void Note::dragTop(double delta)
+{
+    _time += delta;
+    _duration -= delta;
+}
+

@@ -44,12 +44,12 @@ void ComposerWindow::render()
     ImGui::SameLine();
     if (ImGui::Button("Undo"))
     {
-        _composer->_commandManager.undo();
+        _composer->undo();
     }
     ImGui::SameLine();
     if (ImGui::Button("Redo"))
     {
-        _composer->_commandManager.redo();
+        _composer->redo();
     }
 
     ImGui::SameLine();
@@ -102,11 +102,11 @@ void ComposerWindow::handleGlobalShortcut()
     {
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)))
         {
-            _composer->_commandManager.redo();
+            _composer->redo();
         }
         else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
         {
-            _composer->_commandManager.undo();
+            _composer->undo();
         }
     }
 }

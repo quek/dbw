@@ -266,6 +266,21 @@ bool Composer::selectedTracksContain(Track* track)
     return std::ranges::find(_selectedTracks, track) != _selectedTracks.end();
 }
 
+void Composer::undo()
+{
+    _commandManager.undo();
+}
+
+void Composer::redo()
+{
+    _commandManager.redo();
+}
+
+void Composer::runCommands()
+{
+    _commandManager.run();
+}
+
 void Composer::play() {
     if (_playing) {
         return;

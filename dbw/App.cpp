@@ -104,7 +104,7 @@ void App::runCommand()
 
     for (auto& composer : _composers)
     {
-        composer->_commandManager.run();
+        composer->runCommands();
     }
 
     if (_requestAddComposers.empty() && _requestDeleteComposers.empty())

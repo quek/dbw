@@ -21,6 +21,7 @@ public:
     virtual void renderInScene(PianoRollWindow* pianoRollWindow) = 0;
     double offsetGet() const { return _offset; }
     double offsetSet(const double value) { _offset = value; }
+    virtual void dragTop(double delta);
 
     virtual nlohmann::json toJson(SerializeContext& context) override;
 
@@ -31,5 +32,5 @@ public:
     std::shared_ptr<Sequence> _sequence;
 
 private:
-    double _offset;
+    double _offset = 0.0;
 };

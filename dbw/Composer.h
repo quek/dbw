@@ -23,6 +23,9 @@ class Lane;
 class NoteClip;
 
 class Composer : public Nameable {
+private:
+    CommandManager _commandManager;
+
 public:
     Composer();
     Composer(const nlohmann::json& json, SerializeContext& context);
@@ -52,6 +55,10 @@ public:
     bool selectedTracksContain(Track* track);
     std::vector<Track*>& selectedTracksGet() { return _selectedTracks; }
 
+    void undo();
+    void redo();
+    void runCommands();
+
     App* _app = nullptr;
     std::unique_ptr<Project> _project;
     ProcessBuffer _processBuffer;
@@ -66,7 +73,6 @@ public:
     double _loopStartTime = 0.0;
     double _loopEndTime = 16.0;
     bool _isScrollFollowPlayhead = true;
-    CommandManager _commandManager;
     std::unique_ptr<MasterTrack> _masterTrack;
     std::vector<Module*> _orderedModules;
 
@@ -78,6 +84,7 @@ public:
     std::unique_ptr<AutomationWindow> _automationWindow;
     std::unique_ptr<SidechainInputSelector> _sideChainInputSelector;
     std::unique_ptr<CommandWindow> _commandWindow;
+
 private:
     std::vector<Track*> _selectedTracks;
 };
