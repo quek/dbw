@@ -37,6 +37,7 @@ public:
     std::vector<Track*> allTracks() const;
     int maxBar();
     void clear();
+    void commandExecute(Command* command);
     void computeProcessOrder();
     bool computeProcessOrder(Track* track,
                              std::vector<Module*>& orderedModules,

@@ -12,6 +12,7 @@
 #include "command/AddNotes.h"
 #include "command/DeleteNotes.h"
 #include "command/DuplicateNotes.h"
+#include "command/SequenceDurationSet.h"
 
 constexpr float KEYBOARD_HEIGHT = 30.0f;
 constexpr float TIMELINE_WIDTH = 20.0f;
@@ -269,7 +270,7 @@ void PianoRollWindow::renderSequenceEnd()
         ImVec2 pos = ImGui::GetMousePos() - ImGui::GetWindowPos();
         if (pos.x < offsetLeft()) {
             double time = timeFromMousePos();
-            _clip->getSequence()->durationSet(time);
+            _composer->commandExecute(new command::SequenceDurationSet(_clip->getSequence().get(), time));
         }
     }
 }

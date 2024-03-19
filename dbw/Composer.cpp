@@ -143,6 +143,11 @@ void Composer::clear() {
     _automationWindow->_show = false;
 }
 
+void Composer::commandExecute(Command* command)
+{
+    _commandManager.executeCommand(command);
+}
+
 void Composer::computeProcessOrder() {
     std::vector<Module*> orderedModules;
     std::set<Module*> processedModules;

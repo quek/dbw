@@ -200,6 +200,7 @@
     <ClInclude Include="command\PasteTracks.h" />
     <ClInclude Include="command\RemoveTracksMixin.h" />
     <ClInclude Include="command\SelectedTracksMixin.h" />
+    <ClInclude Include="command\SequenceDurationSet.h" />
     <ClInclude Include="ComposerWindow.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Connection.h" />
@@ -306,6 +307,7 @@
     <ClCompile Include="command\PasteTracks.cpp" />
     <ClCompile Include="command\RemoveTracksMixin.cpp" />
     <ClCompile Include="command\SelectedTracksMixin.cpp" />
+    <ClCompile Include="command\SequenceDurationSet.cpp" />
     <ClCompile Include="ComposerWindow.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Connection.cpp" />
