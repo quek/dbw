@@ -129,7 +129,7 @@ void SceneMatrix::process(Track* track) {
             double begin = fmod(_composer->_playTime, sequenceDuration);
             double end = fmod(_composer->_nextPlayTime, sequenceDuration);
             for (auto& item : clipSlot->_clip->_sequence->getItems()) {
-                item->prepareProcessBuffer(lane.get(), begin, end, 0, sequenceDuration, 0, sequenceDuration, oneBeatSec);
+                item->prepareProcessBuffer(lane.get(), begin, end, 0.0, sequenceDuration, 0.0, sequenceDuration, 0.0, sequenceDuration, oneBeatSec);
             }
         }
     }

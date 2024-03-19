@@ -13,7 +13,7 @@ public:
     Note(double time = 0.0f, double duration = 1.0f, int16_t key = 64, double velocity = 0.8, int16_t channel = 0);
     virtual ~Note() = default;
     virtual nlohmann::json toJson(SerializeContext& context) override;
-    void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double loopBegin, double loopEnd, double oneBeatSec) override;
+    void prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double clipOffset, double sequenceDuration, double loopBegin, double loopEnd, double oneBeatSec) override;
     virtual void render(const ImVec2& screenPos1, const ImVec2& screenPos2, const bool selected);
     virtual void dragTop(double delta);
 

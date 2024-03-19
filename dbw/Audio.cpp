@@ -15,7 +15,7 @@ Audio::Audio(const std::filesystem::path& path, double bpm) : _audioFile(new Aud
     _duration = _audioFile->durationGet(bpm);
 }
 
-void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double loopBegin, double loopEnd, double oneBeatSec)
+void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double /*clipOffset*/, double /*sequenceDuration*/, double loopBegin, double loopEnd, double oneBeatSec)
 {
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
     uint32_t frameOffset = 0;
@@ -54,7 +54,7 @@ void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double cl
     }
 }
 
-void Audio::render(const ImVec2& pos1, const ImVec2& pos2, const bool selected)
+void Audio::render(const ImVec2& pos1, const ImVec2& pos2, const bool /*selected*/)
 {
     ImGui::SetCursorPos(pos1 - ImGui::GetWindowPos() + ImVec2(ImGui::GetScrollX(), ImGui::GetScrollY()));
     ImVec2 size = pos2 - pos1;

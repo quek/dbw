@@ -26,9 +26,25 @@ Clip* Clip::create(const nlohmann::json& json, SerializeContext& context)
 
 Clip::Clip(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context)
 {
-    _time = json["_time"];
-    _duration = json["_duration"];
-    _sequence = Sequence::create(json["_sequence"], context);
+    for (const auto& x : json.items())
+    {
+        if (x.key() == "_time")
+        {
+            _time = x.value();
+        }
+        else if (x.key() == "_duration")
+        {
+            _duration = x.value();
+        }
+        else if (x.key() == "_offset")
+        {
+            _offset = x.value();
+        }
+        else if (x.key() == "_sequence")
+        {
+            _sequence = Sequence::create(x.value(), context);
+        }
+    }
 }
 
 Clip::Clip(double time, double duration) :
@@ -70,7 +86,7 @@ void Clip::prepareProcessBuffer(Lane* lane, double begin, double end, double loo
     }
     for (auto& item : _sequence->getItems())
     {
-        item->prepareProcessBuffer(lane, begin, end, clipBegin, clipEnd, loopBegin, loopEnd, oneBeatSec);
+        item->prepareProcessBuffer(lane, begin, end, clipBegin, clipEnd, _offset, _sequence->durationGet(), loopBegin, loopEnd, oneBeatSec);
     }
 }
 
@@ -84,7 +100,8 @@ void Clip::render(const ImVec2& screenPos1, const ImVec2& screenPos2, const bool
     double sequenceHeight = (screenPos2.y - screenPos1.y) / _duration * sequenceDuration;
     for (float y = screenPos1.y + (screenPos2.y - screenPos1.y) / _duration * _offset;
          y < screenPos2.y;
-         y += sequenceHeight) {
+         y += sequenceHeight)
+    {
         ImVec2 pos1(screenPos1.x, y);
         ImVec2 pos2(screenPos2.x, y);
         drawList->AddLine(pos1, pos2, IM_COL32(0x20, 0x20, 0x20, 0x80));
@@ -104,5 +121,6 @@ nlohmann::json Clip::toJson(SerializeContext& context)
     json["_sequence"] = _sequence->toJson(context);
     json["_time"] = _time;
     json["_duration"] = _duration;
+    json["_offset"] = _offset;
     return json;
 }
