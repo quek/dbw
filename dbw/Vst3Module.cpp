@@ -428,7 +428,7 @@ void Vst3Module::start() {
     if (_processor) {
         _latency = _processor->getLatencySamples();
         if (_track && _track->getComposer()) {
-            _track->getComposer()->_commandManager.executeCommand(new command::ComputeLatency());
+            _track->getComposer()->commandExecute(new command::ComputeLatency());
         }
 
         Steinberg::uint32 tailSample = _processor->getTailSamples();

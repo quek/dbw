@@ -142,7 +142,7 @@ void SceneMatrix::stop() {
 }
 
 void SceneMatrix::addScene(bool undoable) {
-    _composer->_commandManager.executeCommand(new AddSceneCommand(this, undoable));
+    _composer->commandExecute(new AddSceneCommand(this, undoable));
 }
 
 nlohmann::json SceneMatrix::toJson(SerializeContext& context) {

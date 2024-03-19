@@ -13,7 +13,7 @@ App::App() :
     _audioEngine(std::make_unique<AudioEngine>(this))
 {
     Composer* composer = new Composer();
-    composer->_commandManager.executeCommand(new command::AddTrack());
+    composer->commandExecute(new command::AddTrack());
     addComposer(composer);
 
     _dropManager = new DropManager(this);

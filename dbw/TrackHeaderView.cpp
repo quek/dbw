@@ -30,7 +30,7 @@ float TrackHeaderView::render(float offsetX, float zoomX) {
     drawList->AddLine(pos1, pos2, gTheme.rackBorder);
     ImGui::SetCursorPos(ImVec2(_x + 2.0f, _headerHeight + _scrollY));
     if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T, "+", ImVec2(0.0f, ImGui::GetWindowHeight()))) {
-        _composer->_commandManager.executeCommand(new command::AddTrack());
+        _composer->commandExecute(new command::AddTrack());
     }
 
     return _headerHeight;

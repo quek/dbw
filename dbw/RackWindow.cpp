@@ -60,7 +60,7 @@ void RackWindow::renderHeader() {
     ImVec2 pos2 = pos1 + ImVec2(0.0f, ImGui::GetWindowHeight());
     drawList->AddLine(pos1, pos2, gTheme.rackBorder);
     if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T, "+", ImVec2(0.0f, -FLT_MIN))) {
-        _composer->_commandManager.executeCommand(new command::AddTrack());
+        _composer->commandExecute(new command::AddTrack());
     }
 }
 
@@ -152,7 +152,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                     _renamingTrack = track;
                 }
                 if (ImGui::MenuItem("Group", "Ctrl+G")) {
-                    _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
+                    _composer->commandExecute(new command::GroupTracks(_selectedTracks, true));
                     ImGui::CloseCurrentPopup();
                 }
                 if (ImGui::MenuItem("Ungroup", "Ctrl+Shift+G")) {
@@ -161,7 +161,7 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                 }
                 if (ImGui::MenuItem("Delete", "Delete")) {
                     if (!_selectedTracks.empty()) {
-                        _composer->_commandManager.executeCommand(new command::DeleteTracks(_selectedTracks));
+                        _composer->commandExecute(new command::DeleteTracks(_selectedTracks));
                         _selectedTracks.clear();
                     }
                     ImGui::CloseCurrentPopup();
@@ -190,9 +190,9 @@ void RackWindow::renderHeader(Track* track, int groupLevel, bool isMaster, bool 
                 if (ImGui::BeginDragDropTarget()) {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("tracks")) {
                         if (io.KeyCtrl) {
-                            _composer->_commandManager.executeCommand(new command::CopyDragTracks(_selectedTracks, track));
+                            _composer->commandExecute(new command::CopyDragTracks(_selectedTracks, track));
                         } else {
-                            _composer->_commandManager.executeCommand(new command::MoveTracks(_selectedTracks, track));
+                            _composer->commandExecute(new command::MoveTracks(_selectedTracks, track));
                         }
                     }
                 }
@@ -302,11 +302,11 @@ void RackWindow::handleShortcut() {
 
     if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_G)) {
         if (!_selectedTracks.empty()) {
-            _composer->_commandManager.executeCommand(new command::GroupTracks(_selectedTracks, true));
+            _composer->commandExecute(new command::GroupTracks(_selectedTracks, true));
         }
     } else if (ImGui::IsKeyChordPressed(ImGuiKey_Delete)) {
         if (!_selectedTracks.empty()) {
-            _composer->_commandManager.executeCommand(new command::DeleteTracks(_selectedTracks));
+            _composer->commandExecute(new command::DeleteTracks(_selectedTracks));
         }
         _selectedTracks.clear();
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_C)) {
@@ -324,7 +324,7 @@ void RackWindow::handleShortcut() {
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_X)) {
         // CUT
         if (!_selectedTracks.empty()) {
-            _composer->_commandManager.executeCommand(new command::CutTracks(_selectedTracks));
+            _composer->commandExecute(new command::CutTracks(_selectedTracks));
             _selectedTracks.clear();
         }
     } else if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_V)) {
@@ -333,7 +333,7 @@ void RackWindow::handleShortcut() {
             nlohmann::json json = nlohmann::json::parse(ImGui::GetClipboardText());
             if (json.contains("tracks") && json["tracks"].is_array()) {
                 if (!_selectedTracks.empty()) {
-                    _composer->_commandManager.executeCommand(new command::PasteTracks(json["tracks"], _selectedTracks.back()));
+                    _composer->commandExecute(new command::PasteTracks(json["tracks"], _selectedTracks.back()));
                 }
             }
         } catch (nlohmann::json::exception& e) {
@@ -343,7 +343,7 @@ void RackWindow::handleShortcut() {
     }
 
     if (defineShortcut(ImGuiKey_D)) {
-        _composer->_commandManager.executeCommand(new command::DuplicateTracks(_selectedTracks));
+        _composer->commandExecute(new command::DuplicateTracks(_selectedTracks));
     }
 
 }

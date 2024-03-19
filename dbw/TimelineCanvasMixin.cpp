@@ -134,9 +134,9 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
                 }
                 auto [copiedThings, copyCommand] = copyThings(_state._draggingThings, true);
                 commands.push_back(copyCommand);
-                _composer->_commandManager.executeCommand(commands, true);
+                _composer->commandExecute(commands);
                 auto deleteCommand = deleteThings(_state._draggingThings, false);
-                _composer->_commandManager.executeCommand(deleteCommand);
+                _composer->commandExecute(deleteCommand);
                 _state._draggingThings = copiedThings;
             }
             _state._selectedThings = _state._draggingThings;
@@ -215,8 +215,8 @@ void TimelineCanvasMixin<THING, LANE>::handleMouse(const ImVec2& clipRectMin, co
 
                 _state._draggingThings.insert(_state._draggingThing);
 
-                _composer->_commandManager.executeCommand(c1);
-                _composer->_commandManager.executeCommand(c2);
+                _composer->commandExecute(c1);
+                _composer->commandExecute(c2);
             }
             else
             {
@@ -403,11 +403,11 @@ void TimelineCanvasMixin<THING, LANE>::handleShortcut()
     }
     else if (defineShortcut(ImGuiKey_D))
     {
-        _composer->_commandManager.executeCommand(duplicateThings(_state._selectedThings, true));
+        _composer->commandExecute(duplicateThings(_state._selectedThings, true));
     }
     else if (defineShortcut(ImGuiKey_Delete))
     {
-        _composer->_commandManager.executeCommand(deleteThings(_state._selectedThings, true));
+        _composer->commandExecute(deleteThings(_state._selectedThings, true));
         _state._selectedThings.clear();
     }
 }

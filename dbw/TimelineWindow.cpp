@@ -156,7 +156,7 @@ Clip* TimelineWindow::handleDoubleClick(double time, Lane* lane)
     }
     std::set<std::pair<Lane*, Clip*>> clips;
     clips.insert(std::pair(lane, clip));
-    _composer->_commandManager.executeCommand(new command::AddClips(clips, true));
+    _composer->commandExecute(new command::AddClips(clips, true));
     return clip;
 }
 
@@ -236,7 +236,7 @@ void TimelineWindow::handleShortcut()
 {
     if (defineShortcut(ImGuiMod_Ctrl | ImGuiKey_T))
     {
-        _composer->_commandManager.executeCommand(new command::AddTrack());
+        _composer->commandExecute(new command::AddTrack());
     }
 
     TimelineCanvasMixin::handleShortcut();

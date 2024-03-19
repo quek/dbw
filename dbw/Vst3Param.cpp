@@ -15,7 +15,7 @@ bool Vst3Param::canAutomate() const {
 
 void Vst3Param::commit() {
     if (_module->_track != nullptr) {
-        _module->_track->getComposer()->_commandManager.executeCommand(
+        _module->_track->getComposer()->commandExecute(
             new command::ChangeVst3ParameterValue(_module, _param.id, _editStatus._beforeValue, _value));
     }
     Param::commit();

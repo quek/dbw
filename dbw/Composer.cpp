@@ -148,6 +148,11 @@ void Composer::commandExecute(Command* command)
     _commandManager.executeCommand(command);
 }
 
+void Composer::commandExecute(std::vector<Command*> commands)
+{
+    _commandManager.executeCommand(commands, true);
+}
+
 void Composer::computeProcessOrder() {
     std::vector<Module*> orderedModules;
     std::set<Module*> processedModules;

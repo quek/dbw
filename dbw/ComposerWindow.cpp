@@ -55,7 +55,7 @@ void ComposerWindow::render()
     ImGui::SameLine();
     if (ImGui::Button("Open"))
     {
-        _composer->_commandManager.executeCommand(new command::OpenProject());
+        _composer->commandExecute(new command::OpenProject());
     }
 
     ImGui::SameLine();

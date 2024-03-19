@@ -61,7 +61,7 @@ void PianoRollWindow::edit(NoteClip* clip)
 void PianoRollWindow::handleDoubleClick(Note* /*thing*/)
 {
     // TODO
-    //_composer->_commandManager.executeCommand(new DeleteNoteCommand(_clip->_sequence.get(), thing));
+    //_composer->commandExecute(new DeleteNoteCommand(_clip->_sequence.get(), thing));
 }
 
 Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane)
@@ -71,7 +71,7 @@ Note* PianoRollWindow::handleDoubleClick(double time, int16_t* lane)
     note->_key = *lane;
     note->_duration = _state._defaultThingDuration;
     std::set<Note*> notes({ note });
-    _composer->_commandManager.executeCommand(new command::AddNotes(_clip->_sequence.get(), notes, true));
+    _composer->commandExecute(new command::AddNotes(_clip->_sequence.get(), notes, true));
     return note;
 }
 

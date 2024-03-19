@@ -38,6 +38,7 @@ public:
     int maxBar();
     void clear();
     void commandExecute(Command* command);
+    void commandExecute(std::vector<Command*> commands);
     void computeProcessOrder();
     bool computeProcessOrder(Track* track,
                              std::vector<Module*>& orderedModules,

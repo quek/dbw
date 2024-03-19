@@ -35,7 +35,7 @@ void Module::render(float width, float height) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu(_name.c_str())) {
                 if (ImGui::MenuItem("Delete")) {
-                    _track->getComposer()->_commandManager.executeCommand(new command::DeleteModule(this));
+                    _track->getComposer()->commandExecute(new command::DeleteModule(this));
                 }
                 ImGui::EndMenu();
             }

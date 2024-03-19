@@ -101,7 +101,7 @@ void PluginManager::openModuleSelector(Track* track) {
                 std::string id = plugin["id"];
                 if (ImGui::Button((name + " vst3##" + id).c_str())) {
                     track->_openModuleSelector = false;
-                    track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->getNekoId(), "vst3", id, !io.KeyCtrl));
+                    track->getComposer()->commandExecute(new command::AddModule(track->getNekoId(), "vst3", id, !io.KeyCtrl));
                 }
             }
         }
@@ -119,7 +119,7 @@ void PluginManager::openModuleSelector(Track* track) {
         if (q == _query.end()) {
             if (ImGui::Button(name.c_str())) {
                 track->_openModuleSelector = false;
-                track->getComposer()->_commandManager.executeCommand(new command::AddModule(track->getNekoId(), "builtin", name, !io.KeyCtrl));
+                track->getComposer()->commandExecute(new command::AddModule(track->getNekoId(), "builtin", name, !io.KeyCtrl));
             }
         }
     }
