@@ -2,6 +2,7 @@
 #define DR_WAV_IMPLEMENTATION
 #include <cppcodec/base64_rfc4648.hpp>
 #include <libsndfile-1.2.2-win64/include/sndfile.hh>
+#include <libsamplerate-0.2.2-win64/include/samplerate.h>
 #include "Config.h"
 #include "ProcessBuffer.h"
 
@@ -33,6 +34,47 @@ AudioFile::AudioFile(const std::filesystem::path& path) : _path(path)
     _nchannels = snd.channels();
     _sampleRate = snd.samplerate();
     _nframes = snd.frames();
+
+    if (_sampleRate != gPreference.sampleRate)
+    {
+        int error;
+        SRC_DATA src_data;
+        SRC_STATE* src_state;
+
+        src_state = src_new(SRC_SINC_BEST_QUALITY, _nchannels, &error);
+        if (src_state == NULL)
+        {
+            printf("Error: %s\n", src_strerror(error));
+            return;
+        }
+
+        double src_ratio = gPreference.sampleRate / _sampleRate;
+        int max_output_frames = ceil(_nframes * src_ratio);
+        max_output_frames += 10; // 10の余裕を加える
+
+        float* out = new float[max_output_frames * _nchannels];
+        src_data.data_in = _data.get(); // 入力データ
+        src_data.input_frames = _nframes; // 入力フレーム数
+        src_data.data_out = out; // 出力データバッファ
+        src_data.output_frames = max_output_frames; // 出力データバッファの最大フレーム数
+        src_data.src_ratio = src_ratio; // サンプルレートの変換比
+
+        error = src_process(src_state, &src_data);
+        if (error)
+        {
+            printf("Error: %s\n", src_strerror(error));
+            src_delete(src_state);
+            return;
+        }
+
+        src_delete(src_state);
+
+        _data.reset(out);
+        _sampleRate = gPreference.sampleRate;
+        _nframes = src_data.output_frames_gen;
+
+        assert(max_output_frames - 10 == _nframes);
+    }
 }
 
 uint32_t AudioFile::copy(ProcessBuffer& processBuffer, int frameOffset, double start, double end, double oneBeatSec)

@@ -29,7 +29,7 @@ void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double cli
 {
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
     double sampleRate = gPreference.sampleRate;
-    int nloops = floor((end - clipBegin + (sequenceDuration - clipOffset)) / sequenceDuration);
+    int nloops = ceil((std::min(end, clipEnd) - clipBegin + (sequenceDuration - clipOffset)) / sequenceDuration) - 1;
     double noteBegin = clipBegin + _time - (sequenceDuration - clipOffset) + (sequenceDuration * nloops);
     if (noteBegin >= clipEnd) return;
     double noteEnd = noteBegin + _duration;
