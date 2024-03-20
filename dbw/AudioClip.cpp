@@ -10,6 +10,7 @@ AudioClip::AudioClip(double time, const std::string& wavPath, double bpm) : Clip
     Audio* audio = new Audio(wavPath, bpm);
     _sequence->addItem(audio);
     _duration = audio->_duration;
+    _sequence->durationSet(_duration);
 }
 
 Clip* AudioClip::clone()
