@@ -15,11 +15,12 @@ Audio::Audio(const std::filesystem::path& path, double bpm) : _audioFile(new Aud
     _duration = _audioFile->durationGet(bpm);
 }
 
-void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double /*clipOffset*/, double /*sequenceDuration*/, double loopBegin, double loopEnd, double oneBeatSec)
+void Audio::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double /*clipEnd*/, double clipOffset, double sequenceDuration, double loopBegin, double loopEnd, double oneBeatSec)
 {
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
+    int nloops = floor((end - clipBegin + (sequenceDuration - clipOffset)) / sequenceDuration);
+    double wavBegin = begin - (clipBegin - (sequenceDuration - clipOffset) + (sequenceDuration * nloops));
     uint32_t frameOffset = 0;
-    double wavBegin = begin - clipBegin;
     if (begin < end || loopEnd <= begin)
     {
         double wavEnd = wavBegin + (end - begin);
