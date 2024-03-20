@@ -25,16 +25,12 @@ nlohmann::json Note::toJson(SerializeContext& context)
     return json;
 }
 
-// TODO クリップが切り詰めてあるとき
 void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double clipBegin, double clipEnd, double clipOffset, double sequenceDuration, double loopBegin, double loopEnd, double oneBeatSec)
 {
-
-    sequenceDuration でなんかする
-
-
     ProcessBuffer& processBuffer = lane->_track->_processBuffer;
     double sampleRate = gPreference.sampleRate;
-    double noteBegin = clipBegin + _time + clipOffset;
+    int nloops = floor((end - clipBegin + (sequenceDuration - clipOffset)) / sequenceDuration);
+    double noteBegin = clipBegin + _time - (sequenceDuration - clipOffset) + (sequenceDuration * nloops);
     if (noteBegin >= clipEnd) return;
     double noteEnd = noteBegin + _duration;
     int16_t channel = 0;
