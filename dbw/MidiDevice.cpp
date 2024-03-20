@@ -20,7 +20,14 @@ MidiDevice::MidiDevice(const std::string& name) : _name(name)
     {
         if (_midiIn->getPortName(i) == _name)
         {
-            _midiIn->openPort(i);
+            try
+            {
+                _midiIn->openPort(i);
+            }
+            catch (const RtMidiError& error)
+            {
+                Error("{} {}", name, error.what());
+            }
             break;
         }
     }

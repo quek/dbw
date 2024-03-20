@@ -17,5 +17,12 @@ public:
     bool _solo = false;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Fader, _level, _pan, _mute, _solo);
+
+private:
+    float linearToGainRatio(float linearValue);
+    float gainRatioToDB(float gainRatio);
+
+    float _peakValue = 0.0f;
+    int _peakSampleElapsed = 0;
 };
 
