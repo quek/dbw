@@ -29,7 +29,8 @@ Composer::Composer() :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _automationWindow(std::make_unique<AutomationWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
-    _commandWindow(std::make_unique<CommandWindow>(this)) {
+    _commandWindow(std::make_unique<CommandWindow>(this))
+{
 }
 
 Composer::Composer(const nlohmann::json& json, SerializeContext& context) :
@@ -42,7 +43,8 @@ Composer::Composer(const nlohmann::json& json, SerializeContext& context) :
     _pianoRollWindow(std::make_unique<PianoRollWindow>(this)),
     _automationWindow(std::make_unique<AutomationWindow>(this)),
     _sideChainInputSelector(std::make_unique<SidechainInputSelector>(this)),
-    _commandWindow(std::make_unique<CommandWindow>(this)) {
+    _commandWindow(std::make_unique<CommandWindow>(this))
+{
 
     _bpm = json["_bpm"];
     _playTime = json["_playTime"];
@@ -62,7 +64,8 @@ Composer::Composer(const nlohmann::json& json, SerializeContext& context) :
     _masterTrack->resolveModuleReference();
 }
 
-void Composer::render() const {
+void Composer::render() const
+{
     _composerWindow->render();
     _rackWindow->render();
     _sceneMatrix->render();
@@ -73,7 +76,8 @@ void Composer::render() const {
     _commandWindow->render();
 }
 
-void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime) {
+void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffer, int64_t steadyTime)
+{
     _currentFramesPerBuffer = framesPerBuffer;
     // TODO オーディオ入力
     _processBuffer.clear();
@@ -82,13 +86,23 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
 
     _masterTrack->prepare(framesPerBuffer);
 
-    if (_playing) {
+    if (_playing)
+    {
         computeNextPlayTime(framesPerBuffer);
 
         _masterTrack->prepareEvent();
     }
+    else if (_justStopped)
+    {
+        for (auto& track : allTracks())
+        {
+            track->_processBuffer._eventOut.noteAllOff(0, 0);
+        }
+        _justStopped = false;
+    }
 
-    for (auto& module : _orderedModules) {
+    for (auto& module : _orderedModules)
+    {
         module->_track->_processBuffer.swapInOut();
         module->processConnections();
         module->process(&module->_track->_processBuffer, steadyTime);
@@ -96,20 +110,24 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
 
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
 
-    if (_playing) {
+    if (_playing)
+    {
         _playTime = _nextPlayTime;
     }
 }
 
-App* Composer::app() const {
+App* Composer::app() const
+{
     return _app;
 }
 
-AudioEngine* Composer::audioEngine() const {
+AudioEngine* Composer::audioEngine() const
+{
     return app()->audioEngine();
 }
 
-void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
+void Composer::computeNextPlayTime(unsigned long framesPerBuffer)
+{
     double deltaSec = framesPerBuffer / gPreference.sampleRate;
     double oneBeatSec = 60.0 / _bpm;
 
@@ -129,12 +147,14 @@ void Composer::computeNextPlayTime(unsigned long framesPerBuffer) {
     }
 }
 
-int Composer::maxBar() {
+int Composer::maxBar()
+{
     // TODO
     return 50;
 }
 
-void Composer::clear() {
+void Composer::clear()
+{
     _masterTrack.reset(new MasterTrack(this));
     _orderedModules.clear();
     _commandManager.clear();
@@ -153,13 +173,16 @@ void Composer::commandExecute(std::vector<Command*> commands)
     _commandManager.executeCommand(commands, true);
 }
 
-void Composer::computeProcessOrder() {
+void Composer::computeProcessOrder()
+{
     std::vector<Module*> orderedModules;
     std::set<Module*> processedModules;
     std::map<Track*, Module*> waitingModule;
 
-    while (true) {
-        if (computeProcessOrder(_masterTrack.get(), orderedModules, processedModules, waitingModule)) {
+    while (true)
+    {
+        if (computeProcessOrder(_masterTrack.get(), orderedModules, processedModules, waitingModule))
+        {
             break;
         }
     }
@@ -172,27 +195,38 @@ void Composer::computeProcessOrder() {
 bool Composer::computeProcessOrder(Track* track,
                                    std::vector<Module*>& orderedModules,
                                    std::set<Module*>& processedModules,
-                                   std::map<Track*, Module*> waitingModule) {
+                                   std::map<Track*, Module*> waitingModule)
+{
     bool processed = true;
-    for (auto& x : track->getTracks()) {
+    for (auto& x : track->getTracks())
+    {
         processed &= computeProcessOrder(x.get(), orderedModules, processedModules, waitingModule);
     }
 
     std::vector<Module*> allModules = track->allModules();;
 
     bool skip = waitingModule.contains(track);
-    for (auto& module : allModules) {
-        if (skip) {
-            if (module == waitingModule[track]) {
+    for (auto& module : allModules)
+    {
+        if (skip)
+        {
+            if (module == waitingModule[track])
+            {
                 waitingModule.erase(track);
-            } else {
+            }
+            else
+            {
                 continue;
             }
         }
-        if (module->isStarting()) {
-            if (!processedModules.contains(module)) {
-                for (auto& connection : module->_connections) {
-                    if (connection->_to == module && !processedModules.contains(connection->_from) && connection->_from->isStarting()) {
+        if (module->isStarting())
+        {
+            if (!processedModules.contains(module))
+            {
+                for (auto& connection : module->_connections)
+                {
+                    if (connection->_to == module && !processedModules.contains(connection->_from) && connection->_from->isStarting())
+                    {
                         waitingModule[track] = module;
                         return false;
                     }
@@ -201,8 +235,10 @@ bool Composer::computeProcessOrder(Track* track,
                 orderedModules.push_back(module);
                 processedModules.insert(module);
             }
-            for (auto& connection : module->_connections) {
-                if (connection->_from == module && !processedModules.contains(connection->_to) && connection->_to->isStarting()) {
+            for (auto& connection : module->_connections)
+            {
+                if (connection->_from == module && !processedModules.contains(connection->_to) && connection->_to->isStarting())
+                {
                     waitingModule[track] = module;
                     return false;
                 }
@@ -213,20 +249,27 @@ bool Composer::computeProcessOrder(Track* track,
     return processed;
 }
 
-void Composer::computeLatency() {
+void Composer::computeLatency()
+{
     std::lock_guard<std::recursive_mutex> lock(app()->_mtx);
-    for (auto& module : _orderedModules) {
+    for (auto& module : _orderedModules)
+    {
         uint32_t latency = module->_latency;
-        for (auto& x : _orderedModules) {
-            if (module == x) {
+        for (auto& x : _orderedModules)
+        {
+            if (module == x)
+            {
                 break;
             }
-            if (module->_track == x->_track) {
+            if (module->_track == x->_track)
+            {
                 latency = module->_latency + x->getComputedLatency();
             }
         }
-        for (auto& connection : module->_connections) {
-            if (connection->_to == module) {
+        for (auto& connection : module->_connections)
+        {
+            if (connection->_to == module)
+            {
                 latency = std::max(latency,
                                    connection->_from->getComputedLatency());
             }
@@ -235,15 +278,18 @@ void Composer::computeLatency() {
     }
 }
 
-void Composer::editAutomationClip(AutomationClip* automationClip, Lane* lane) const {
+void Composer::editAutomationClip(AutomationClip* automationClip, Lane* lane) const
+{
     _automationWindow->edit(automationClip, lane);
 }
 
-void Composer::editNoteClip(NoteClip* noteClip) const {
+void Composer::editNoteClip(NoteClip* noteClip) const
+{
     _pianoRollWindow->edit(noteClip);
 }
 
-nlohmann::json Composer::toJson(SerializeContext& context) {
+nlohmann::json Composer::toJson(SerializeContext& context)
+{
     nlohmann::json json = Nameable::toJson(context);
 
     json["_bpm"] = _bpm;
@@ -281,25 +327,31 @@ void Composer::runCommands()
     _commandManager.run();
 }
 
-void Composer::play() {
-    if (_playing) {
+void Composer::play()
+{
+    if (_playing)
+    {
         return;
     }
     _playing = true;
     _playStartTime = _playTime;
 }
 
-void Composer::stop() {
-    if (!_playing) {
+void Composer::stop()
+{
+    if (!_playing)
+    {
         return;
     }
     _playing = false;
     _playTime = _playStartTime;
     _nextPlayTime = _playStartTime;
     _sceneMatrix->stop();
+    _justStopped = true;
 }
 
-std::vector<Track*> Composer::allTracks() const {
+std::vector<Track*> Composer::allTracks() const
+{
     std::vector<Track*> tracks;
     _masterTrack->allTracks(tracks);
     return tracks;

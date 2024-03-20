@@ -62,4 +62,7 @@ private:
     Vst::ParameterChanges _parameterChanges;
     std::map<ParamId, double> _controllerSetParamNormalizedMap;
     std::recursive_mutex _parameterChangesMtx;
+
+    std::set<int16_t> _noteOnKeys;
 };
+

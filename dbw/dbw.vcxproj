@@ -193,6 +193,7 @@
     <ClInclude Include="command\DuplicateClips.h" />
     <ClInclude Include="command\DuplicateNotes.h" />
     <ClInclude Include="command\DuplicateTracks.h" />
+    <ClInclude Include="command\EditedParamIdListUpdate.h" />
     <ClInclude Include="command\GroupTracks.h" />
     <ClInclude Include="command\MoveTracks.h" />
     <ClInclude Include="command\NewLane.h" />
@@ -300,6 +301,7 @@
     <ClCompile Include="command\DuplicateClips.cpp" />
     <ClCompile Include="command\DuplicateNotes.cpp" />
     <ClCompile Include="command\DuplicateTracks.cpp" />
+    <ClCompile Include="command\EditedParamIdListUpdate.cpp" />
     <ClCompile Include="command\GroupTracks.cpp" />
     <ClCompile Include="command\MoveTracks.cpp" />
     <ClCompile Include="command\NewLane.cpp" />

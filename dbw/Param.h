@@ -30,6 +30,7 @@ public:
     std::string getValueText();
     virtual std::string getValueText(double value) = 0;
     virtual void maybeCommit(std::chrono::time_point<std::chrono::high_resolution_clock> now);
+    Module* moduleGet() const { return _module; }
     void performEdit(double value);
     void setValue(double value) { _value = value; }
 

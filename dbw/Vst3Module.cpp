@@ -377,7 +377,7 @@ bool Vst3Module::process(ProcessBuffer* buffer, int64_t steadyTime) {
     Steinberg::Vst::ParameterChanges outputParams;
     processData.outputParameterChanges = &outputParams;
     ///< incoming events for this block (optional)
-    Steinberg::Vst::EventList inputEventList = buffer->_eventIn.vst3InputEvents();
+    Steinberg::Vst::EventList inputEventList = buffer->_eventIn.vst3InputEvents(_noteOnKeys);
     processData.inputEvents = (Steinberg::Vst::IEventList*)&inputEventList;
     ///< outgoing events for this block (optional)
     Steinberg::Vst::EventList outputEventList = buffer->_eventIn.vst3OutputEvents();

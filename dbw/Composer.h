@@ -65,6 +65,7 @@ public:
     unsigned long _currentFramesPerBuffer = 1024;
     float _bpm = 128.0;
     bool _playing = false;
+    bool _justStopped = false;
     bool _looping = false;
     bool _scrollLock = false;
     double _playStartTime = 0.0;

@@ -1,5 +1,8 @@
 #include "Param.h"
+#include "Composer.h"
 #include "Module.h"
+#include "Track.h"
+#include "command/EditedParamIdListUpdate.h"
 
 Param::Param(ParamId id, Module* module, double value) : _id(id), _module(module), _value(value) {
 }
@@ -53,4 +56,5 @@ void Param::performEdit(double value) {
     _value = value;
     _module->addParameterChange(this, 0, value);
     _module->updateEditedParamIdList(_id);
+    _module->_track->getComposer()->commandExecute(new command::EditedParamIdListUpdate(this));
 }
