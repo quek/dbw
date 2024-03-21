@@ -112,7 +112,7 @@ void Fader::renderContent()
     ImGui::Text(std::format("{}dB", dB).c_str());
     ImGui::Text(std::format("{}", gr).c_str());
 
-    ImGui::Text(std::format("{}%", gainRatioToLinear(1)).c_str());
+    ImGui::Text(std::format("{}%", gainRatioToLinear(gr)).c_str());
 }
 
 nlohmann::json Fader::toJson(SerializeContext& context)
@@ -125,8 +125,9 @@ nlohmann::json Fader::toJson(SerializeContext& context)
 float Fader::gainRatioToDB(float gainRatio)
 {
     if (gainRatio == 0.0f) return -180.0f;
-    //float dB = 20.0f * log10(gainRatio / 0.65f);
-    float dB = 20.0f * log10(gainRatio);
+    // 0.7 が 0dB になる
+    float dB = 20.0f * log10(gainRatio / 0.7f);
+    //float dB = 20.0f * log10(gainRatio);
     return dB;
 }
 
@@ -141,7 +142,7 @@ float Fader::gainRatioToLinear(float gainRatio)
 float Fader::linearToGainRatio(float linear)
 {
     const float minDb = -180.0f;
-    const float maxDb = 3.0f;
+    const float maxDb = 0.0f;
 
     //float gainRatio = normalizedValue * (pow(10.0f, maxDb / 20.0f) - pow(10.0f, minDb / 20.0f)) + pow(10.0f, minDb / 20.0f);
     float gainRatio = linear * (pow(10.0f, maxDb / 20.0f) - pow(10.0f, minDb / 20.0f));
