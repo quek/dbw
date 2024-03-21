@@ -21,8 +21,10 @@ public:
 private:
     float linearToGainRatio(float linearValue);
     float gainRatioToDB(float gainRatio);
+    float gainRatioToLinear(float gainRatio);
 
     float _peakValue = 0.0f;
+    float _peakValueHold = 0.0f;
     int _peakSampleElapsed = 0;
 };
 

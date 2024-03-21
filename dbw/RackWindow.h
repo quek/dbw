@@ -26,7 +26,7 @@ private:
     std::vector<Track*> _allTracks;
     std::vector<Track*>& _selectedTracks;
     float _headerHeight = 0.0f;
-    float _faderHeight = 170.0f;
+    float _faderHeight = 200.0f;
     ImVec2 _groupToggleButtonSize = ImVec2(16.0f, 22.0f);
     Track* _renamingTrack = nullptr;
 };

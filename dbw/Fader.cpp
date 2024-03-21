@@ -19,11 +19,13 @@ Fader::Fader(std::string name, Track* track) : BuiltinModule(name, track)
 
 bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime)
 {
-    double peakHoldTime = gPreference.sampleRate * 3000 / 1000;
+    _peakValue = 0.0f;
+    double peakHoldTime = gPreference.sampleRate * 3.0;
     _peakSampleElapsed += buffer->_framesPerBuffer;
     if (_peakSampleElapsed > peakHoldTime)
     {
-        _peakValue = std::max(0.0f, _peakValue - 0.1f);
+        _peakValueHold = std::max(0.0f, _peakValueHold - 0.02f);
+        _peakSampleElapsed -= gPreference.sampleRate * 0.1;
     }
 
     if (_mute)
@@ -61,10 +63,15 @@ bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime)
             if (_peakValue < b)
             {
                 _peakValue = b;
-                _peakSampleElapsed = 0;
             }
         }
         pan = _pan * 2.0f;
+    }
+
+    if (_peakValueHold < _peakValue)
+    {
+        _peakValueHold = _peakValue;
+        _peakSampleElapsed = 0;
     }
 
     return Module::process(buffer, steadyTime);
@@ -77,26 +84,35 @@ void Fader::renderContent()
     ImVec2 pos1 = ImGui::GetCursorPos() + ImGui::GetWindowPos();
     ImVec2 pos2 = pos1 + ImVec2(10.0f, 100.0f);
     ImDrawList* drawList = ImGui::GetWindowDrawList();
-    drawList->AddRectFilled(pos1, pos2, IM_COL32_BLACK);
-    pos1.y += (pos2.y - pos1.y) * _peakValue;
-    drawList->AddRectFilled(pos1, pos2, IM_COL32_WHITE);
+    drawList->AddRectFilled(pos1, pos2, IM_COL32(0x80, 0xff, 0x80, 0x80));
+    pos1.y += (pos2.y - pos1.y) * (1.0f - std::min(1.0f, _peakValue));
+    drawList->AddRectFilled(pos1, pos2, IM_COL32(0x00, 0x80, 0xff, 0x80));
+    pos1 = ImGui::GetCursorPos() + ImGui::GetWindowPos();
+    pos1.y += (pos2.y - pos1.y) * (1.0f - std::min(1.0f, _peakValueHold));
+    pos2 = pos1 + ImVec2(10.0f, 2.0f);
+    drawList->AddRectFilled(pos1, pos2, IM_COL32(0xff, 0, 0, 0x80));
     ImGui::VSliderFloat("VU", ImVec2(5.0f, 100.0f), &_level, 0.0f, 1.0f);
     ImGui::EndGroup();
 
     ImGui::SameLine();
 
     ImGui::BeginGroup();
-    //ImGui::PushItemWidth(-FLT_MIN);
+    ImGui::PushItemWidth(-FLT_MIN);
     ImGui::SliderFloat("##Level", &_level, 0.0f, 1.0f, "Level %.3f");
     ImGui::SliderFloat("##Pan", &_pan, 0.0f, 1.0f, "Pan %.3f");
     ImGui::Checkbox("Mute", &_mute);
     ImGui::SameLine();
     ImGui::Checkbox("Solo", &_solo);
     ImGui::Text(std::to_string(_computedLatency).c_str());
-    //ImGui::PopItemWidth();
+    ImGui::PopItemWidth();
     ImGui::EndGroup();
 
-    ImGui::Text(std::format("{} {}", linearToGainRatio(_level), gainRatioToDB(linearToGainRatio(_level))).c_str());
+    float gr = linearToGainRatio(_level);
+    float dB = gainRatioToDB(gr);
+    ImGui::Text(std::format("{}dB", dB).c_str());
+    ImGui::Text(std::format("{}", gr).c_str());
+
+    ImGui::Text(std::format("{}%", gainRatioToLinear(1)).c_str());
 }
 
 nlohmann::json Fader::toJson(SerializeContext& context)
@@ -108,21 +124,27 @@ nlohmann::json Fader::toJson(SerializeContext& context)
 
 float Fader::gainRatioToDB(float gainRatio)
 {
-    if (gainRatio == 0.0f) return -100.0f;
+    if (gainRatio == 0.0f) return -180.0f;
+    //float dB = 20.0f * log10(gainRatio / 0.65f);
     float dB = 20.0f * log10(gainRatio);
     return dB;
 }
 
-float Fader::linearToGainRatio(float linearValue)
+float Fader::gainRatioToLinear(float gainRatio)
 {
-    const float minDb = -100.0f;
-    const float maxDb = 12.0f;
+    const float minDb = -180.0f;
+    const float maxDb = 3.0f;
+    float lenear = gainRatio / (pow(10.0f, maxDb / 20.0f) - pow(10.0f, minDb / 20.0f));
+    return lenear;
+}
 
-    // 0.0を-∞ dBに直接マッピングするための対策
-    if (linearValue <= 0.0f) return 0.0f;
+float Fader::linearToGainRatio(float linear)
+{
+    const float minDb = -180.0f;
+    const float maxDb = 3.0f;
 
-    // リニア値をゲイン比に変換
-    float gainRatio = linearValue * (pow(10.0f, maxDb / 20.0f) - pow(10.0f, minDb / 20.0f)) + pow(10.0f, minDb / 20.0f);
+    //float gainRatio = normalizedValue * (pow(10.0f, maxDb / 20.0f) - pow(10.0f, minDb / 20.0f)) + pow(10.0f, minDb / 20.0f);
+    float gainRatio = linear * (pow(10.0f, maxDb / 20.0f) - pow(10.0f, minDb / 20.0f));
 
     return gainRatio;
 }

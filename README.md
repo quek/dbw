@@ -10,6 +10,10 @@ cmake -G "Visual Studio 17 2022" -A x64 ../vst3sdk -DSMTG_CREATE_PLUGIN_LINK=0 -
 cmake --build . --config Release
 ```
 
+# DSP library
+
+https://github.com/kfrlib/kfr
+
 # etc
 
 https://github.com/robbert-vdh/nih-plug
