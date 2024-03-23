@@ -104,7 +104,7 @@ void Fader::render(float width, float height)
         float windowHeight = ImGui::GetWindowHeight();
         auto& style = ImGui::GetStyle();
         float meterHeight = windowHeight - style.WindowPadding.y * 2;
-        float meterWidth = 20.0f;
+        float meterWidth = 24.0f;
 
         ImVec2 meterPos1 = ImGui::GetCursorPos() + ImGui::GetWindowPos();
         ImVec2 meterPos2 = meterPos1 + ImVec2(meterWidth, meterHeight);
@@ -116,7 +116,7 @@ void Fader::render(float width, float height)
         ImVec2 pos2 = pos1 + ImVec2(meterWidth, 0.0f);
         drawList->AddLine(pos1, pos2, gTheme.rackBorder);
         drawList->AddText(pos1 + ImVec2(7.0f, 0.0f), gTheme.text, "0");
-        
+
         pos1 = meterPos1 + ImVec2(0.0f, meterHeight * (1.0f - dbToLinear(-6.0f)));
         pos2 = pos1 + ImVec2(meterWidth, 0.0f);
         drawList->AddLine(pos1, pos2, gTheme.rackBorder);
@@ -125,15 +125,20 @@ void Fader::render(float width, float height)
         pos1 = meterPos1 + ImVec2(0.0f, meterHeight * (1.0f - dbToLinear(-12.0f)));
         pos2 = pos1 + ImVec2(meterWidth, 0.0f);
         drawList->AddLine(pos1, pos2, gTheme.rackBorder);
-        drawList->AddText(pos1 + ImVec2(7.0f, 0.0f), gTheme.text, "12");
+        drawList->AddText(pos1 + ImVec2(5.0f, 0.0f), gTheme.text, "12");
+
+        pos1 = meterPos1 + ImVec2(0.0f, meterHeight * (1.0f - dbToLinear(-24.0f)));
+        pos2 = pos1 + ImVec2(meterWidth, 0.0f);
+        drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+        drawList->AddText(pos1 + ImVec2(5.0f, 0.0f), gTheme.text, "24");
 
 
         pos1 = meterPos1;
-        pos2 = meterPos2 - ImVec2(10.0f, 0);
+        pos2 = meterPos2 - ImVec2(meterWidth / 2.0f, 0);
         pos1.y += (pos2.y - pos1.y) * (1.0f - std::min(1.0f, _peakValueLeft));
         drawList->AddRectFilled(pos1, pos2, IM_COL32(0x00, 0x80, 0xff, 0x80));
 
-        pos1 = meterPos1 + ImVec2(10.0f, 0);
+        pos1 = meterPos1 + ImVec2(meterWidth / 2.0f, 0);
         pos2 = meterPos2;
         pos1.y += (pos2.y - pos1.y) * (1.0f - std::min(1.0f, _peakValueRight));
         drawList->AddRectFilled(pos1, pos2, IM_COL32(0x00, 0x80, 0xff, 0x80));
@@ -142,20 +147,24 @@ void Fader::render(float width, float height)
         {
             pos1 = meterPos1;
             pos1.y += meterHeight * (1.0f - std::min(1.0f, _peakValueHoldLeft)) - 1.0f;
-            pos2 = pos1 + ImVec2(10.0f, 1.0f);
+            pos2 = pos1 + ImVec2(meterWidth / 2.0f, 1.0f);
             drawList->AddRectFilled(pos1, pos2, IM_COL32(0xff, 0, 0, 0x80));
         }
         if (_peakValueHoldRight > 0.001f)
         {
-            pos1 = meterPos1 + ImVec2(10.0f, meterHeight * (1.0f - std::min(1.0f, _peakValueHoldRight)) - 1.0f);
-            pos2 = pos1 + ImVec2(10.0f, 1.0f);
+            pos1 = meterPos1 + ImVec2(meterWidth / 2.0f, meterHeight * (1.0f - std::min(1.0f, _peakValueHoldRight)) - 1.0f);
+            pos2 = pos1 + ImVec2(meterWidth / 2.0f, 1.0f);
             drawList->AddRectFilled(pos1, pos2, IM_COL32(0xff, 0, 0, 0x80));
         }
 
         {
             float gainRatio = linearToGainRatio(_level);
             float db = normalizedValueToDb(gainRatio);
-            ImGui::VSliderFloat("##level", ImVec2(20.0f, meterHeight), &_level, 0.0f, 1.0f, std::format("{:.3}", db).c_str());
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32_BLACK_TRANS);
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, IM_COL32_BLACK_TRANS);
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32_BLACK_TRANS);
+            ImGui::VSliderFloat("##level", ImVec2(meterWidth, meterHeight), &_level, 0.0f, 1.0f, std::format("{:.2}", db).c_str());
+            ImGui::PopStyleColor(3);
         }
 
         ImGui::EndGroup();
@@ -168,9 +177,9 @@ void Fader::render(float width, float height)
                                 normalizedValueToDb(_peakValueHoldRight)).c_str());
         ImGui::PushItemWidth(-FLT_MIN);
         ImGui::SliderFloat("##Pan", &_pan, 0.0f, 1.0f, "Pan %.3f");
-        ImGui::Checkbox("Mute", &_mute);
+        ToggleButton("M", &_mute);
         ImGui::SameLine();
-        ImGui::Checkbox("Solo", &_solo);
+        ToggleButton("S", &_solo);
         ImGui::Text(std::to_string(_computedLatency).c_str());
         ImGui::PopItemWidth();
         ImGui::EndGroup();
@@ -188,8 +197,8 @@ nlohmann::json Fader::toJson(SerializeContext& context)
 
 float Fader::gainRatioToLinear(float gainRatio)
 {
-    float a = 1.0f / (ZERO_DB_NORMALIZED_VALUE * ZERO_DB_NORMALIZED_VALUE * ZERO_DB_NORMALIZED_VALUE);
-    float linear = cbrt((gainRatio - 0.00000006f) / a);
+    float a = 1.0f / (ZERO_DB_NORMALIZED_VALUE * ZERO_DB_NORMALIZED_VALUE);
+    float linear = sqrt((gainRatio - 0.00000006f) / a);
     return linear;
 }
 
@@ -208,8 +217,8 @@ float Fader::dbToLinear(float db)
 
 float Fader::linearToGainRatio(float linear)
 {
-    float a = 1.0f / (ZERO_DB_NORMALIZED_VALUE * ZERO_DB_NORMALIZED_VALUE * ZERO_DB_NORMALIZED_VALUE);
-    float gainRatio = a * linear * linear * linear + 0.00000006f;
+    float a = 1.0f / (ZERO_DB_NORMALIZED_VALUE * ZERO_DB_NORMALIZED_VALUE);
+    float gainRatio = a * linear * linear + 0.00000006f;
     return gainRatio;
 }
 
