@@ -112,7 +112,7 @@ void Fader::render(float width, float height)
         drawList->AddRect(meterPos1, meterPos2, gTheme.rackBorder);
 
 
-        ImVec2 pos1 = meterPos1 + ImVec2(0.0f, meterHeight * (1.0f - ZERO_DB_NORMALIZED_VALUE));
+        ImVec2 pos1 = meterPos1 + ImVec2(0.0f, meterHeight * (1.0f - ZERO_DB_NORMALIZED_VALUE) + 2.0f);
         ImVec2 pos2 = pos1 + ImVec2(meterWidth, 0.0f);
         drawList->AddLine(pos1, pos2, gTheme.rackBorder);
         drawList->AddText(pos1 + ImVec2(7.0f, 0.0f), gTheme.text, "0");
@@ -163,8 +163,14 @@ void Fader::render(float width, float height)
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32_BLACK_TRANS);
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, IM_COL32_BLACK_TRANS);
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32_BLACK_TRANS);
+            ImGui::PushStyleColor(ImGuiCol_SliderGrab, IM_COL32(0xff, 0xff, 0xff, 0x80));
+            ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, IM_COL32(0xff, 0xff, 0xff, 0x80));
             ImGui::VSliderFloat("##level", ImVec2(meterWidth, meterHeight), &_level, 0.0f, 1.0f, std::format("{:.2}", db).c_str());
-            ImGui::PopStyleColor(3);
+            ImGui::PopStyleColor(5);
+            if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+            {
+                _level = ZERO_DB_NORMALIZED_VALUE;
+            }
         }
 
         ImGui::EndGroup();
@@ -177,9 +183,10 @@ void Fader::render(float width, float height)
                                 normalizedValueToDb(_peakValueHoldRight)).c_str());
         ImGui::PushItemWidth(-FLT_MIN);
         ImGui::SliderFloat("##Pan", &_pan, 0.0f, 1.0f, "Pan %.3f");
-        ToggleButton("M", &_mute);
+        ImVec2 size(20.0f, 0.0f);
+        ToggleButton("M", &_mute, size);
         ImGui::SameLine();
-        ToggleButton("S", &_solo);
+        ToggleButton("S", &_solo, size);
         ImGui::Text(std::to_string(_computedLatency).c_str());
         ImGui::PopItemWidth();
         ImGui::EndGroup();

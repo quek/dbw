@@ -80,13 +80,13 @@ bool defineShortcut(ImGuiKeyChord keyChord, const char* label, const ImVec2& siz
     return result;
 }
 
-bool ToggleButton(const char* label, bool* isOn) {
+bool ToggleButton(const char* label, bool* isOn, const ImVec2& size) {
     if (*isOn) {
         ImGui::PushStyleColor(ImGuiCol_Button, gTheme.buttonOn);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, gTheme.buttonOnHovered);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, gTheme.buttonOnActive);
     }
-    bool result = ImGui::Button(label);
+    bool result = ImGui::Button(label, size);
     if (*isOn) {
         ImGui::PopStyleColor(3);
     }

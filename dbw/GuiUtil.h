@@ -46,4 +46,4 @@ ImU32 selectedColor(const ImU32 color);
 
 bool defineShortcut(ImGuiKeyChord keyChord, const char* label=nullptr, const ImVec2& size =  ImVec2(FLT_MIN, FLT_MIN));
 
-bool ToggleButton(const char* label, bool* isOn);
+bool ToggleButton(const char* label, bool* isOn, const ImVec2& size = ImVec2(0, 0));
