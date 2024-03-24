@@ -200,6 +200,10 @@ void Fader::render(float width, float height)
         }
         ImGui::PushItemWidth(-FLT_MIN);
         ImGui::SliderFloat("##Pan", &_pan, 0.0f, 1.0f, "Pan %.3f");
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+        {
+            _pan = 0.5f;
+        }
         ImVec2 size(20.0f, 0.0f);
         ToggleButton("M", &_mute, size);
         ImGui::SameLine();

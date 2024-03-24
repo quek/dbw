@@ -66,7 +66,7 @@ public:
     std::vector<std::unique_ptr<Module>> _modules;
 
     bool _openModuleSelector = false;
-    float _width = 150.0f;
+    float _width = 160.0f;
 
     bool _showTracks = true;
 
