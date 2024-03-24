@@ -14,20 +14,20 @@ Scene::Scene(SceneMatrix* sceneMatrix) : _sceneMatrix(sceneMatrix) {
 }
 
 void Scene::play() {
-    _sceneMatrix->_composer->_masterTrack->play(this);
-    _sceneMatrix->_composer->play();
+    _sceneMatrix->composerGet()->_masterTrack->play(this);
+    _sceneMatrix->composerGet()->play();
 }
 
 void Scene::stop() {
-    _sceneMatrix->_composer->_masterTrack->stop(this);
+    _sceneMatrix->composerGet()->_masterTrack->stop(this);
 }
 
 bool Scene::isAllLanePlaying() {
-    return _sceneMatrix->_composer->_masterTrack->isAllLanesPlaying(this);
+    return _sceneMatrix->composerGet()->_masterTrack->isAllLanesPlaying(this);
 }
 
 bool Scene::isAllLaneStoped() {
-    return _sceneMatrix->_composer->_masterTrack->isAllLanesStoped(this);
+    return _sceneMatrix->composerGet()->_masterTrack->isAllLanesStoped(this);
 }
 
 nlohmann::json Scene::toJson(SerializeContext& context) {

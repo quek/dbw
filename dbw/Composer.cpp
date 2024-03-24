@@ -56,7 +56,7 @@ Composer::Composer(const nlohmann::json& json, SerializeContext& context) :
     _scrollLock = json["_scrollLock"];
 
     _sceneMatrix = std::make_unique<SceneMatrix>(json["_sceneMatrix"], context);
-    _sceneMatrix->_composer = this;
+    _sceneMatrix->composerSet(this);
 
     _masterTrack = std::make_unique<MasterTrack>(json["_masterTrack"], context);
     _masterTrack->setComposer(this);

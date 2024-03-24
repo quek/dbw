@@ -9,13 +9,13 @@ class TrackWidthManager;
 class TrackHeaderView {
 public:
     TrackHeaderView(Composer* composer, TrackWidthManager& trackWidthManager);
+    float getLaneWidth(Lane* lane);
     float render(float offsetX, float zoomX);
 
 private:
     void computeHeaderHeight();
     void computeHeaderHeight(Track* track, int groupLevel);
     float getTrackWidth(Track* track);
-    float getLaneWidth(Lane* lane);
     ImVec2 posScreenToWindow(const ImVec2& pos);
     ImVec2 posWindowToScreen(const ImVec2& pos);
     void renderLane(Lane* lane);
