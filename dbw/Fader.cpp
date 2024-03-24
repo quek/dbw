@@ -94,6 +94,9 @@ bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime)
 
 void Fader::render(float width, float height)
 {
+    // RackWindow で微妙に縦スクロールするので 0 にしたのを、元に戻す
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImGui::GetStyle().ItemSpacing);
+
     ImGui::PushID(this);
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border;
@@ -223,6 +226,8 @@ void Fader::render(float width, float height)
     }
     ImGui::EndChild();
     ImGui::PopID();
+
+    ImGui::PopStyleVar();
 }
 
 nlohmann::json Fader::toJson(SerializeContext& context)

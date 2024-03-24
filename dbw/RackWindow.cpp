@@ -361,14 +361,16 @@ void RackWindow::renderFaders()
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x / 2.0f);
     float windowHeight = ImGui::GetWindowHeight();
     auto& style = ImGui::GetStyle();
-    // -4.0f なんかわかんないけど必要
-    float cursorPosY = windowHeight - _faderHeight - style.WindowPadding.y - style.ScrollbarSize - 4.0f;
+    float cursorPosY = windowHeight - _faderHeight - style.WindowPadding.y - style.ScrollbarSize;
     if (cursorPosY < _headerHeight)
     {
         cursorPosY = _headerHeight;
     }
     ImGui::SetCursorPosY(cursorPosY);
+    // 微妙に縦スクロールするので
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, 0));
     renderFaders(_composer->_masterTrack.get());
+    ImGui::PopStyleVar();
 }
 
 void RackWindow::renderFaders(Track* track)
