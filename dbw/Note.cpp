@@ -36,33 +36,21 @@ void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double cli
     int16_t channel = 0;
     if (begin < end)
     {
-        if (begin <= noteBegin && noteBegin < end)
-        {
-            double sampleOffsetDouble = (noteBegin - begin) * oneBeatSec * sampleRate;
-            uint32_t sampleOffset = std::round(sampleOffsetDouble);
-            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
-        }
         if (begin < noteEnd && noteEnd <= end)
         {
             double sampleOffsetDouble = (noteEnd - begin) * oneBeatSec * sampleRate;
             uint32_t sampleOffset = std::round(sampleOffsetDouble);
             processBuffer._eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
         }
-    }
-    else
-    {
-        if (begin <= noteBegin && noteBegin < loopEnd)
+        if (begin <= noteBegin && noteBegin < end)
         {
             double sampleOffsetDouble = (noteBegin - begin) * oneBeatSec * sampleRate;
             uint32_t sampleOffset = std::round(sampleOffsetDouble);
             processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
         }
-        if (loopBegin <= noteBegin && noteBegin < end)
-        {
-            double sampleOffsetDouble = (noteBegin - loopBegin) * oneBeatSec * sampleRate;
-            uint32_t sampleOffset = std::round(sampleOffsetDouble);
-            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
-        }
+    }
+    else
+    {
         if (begin < noteEnd && noteEnd <= loopEnd)
         {
             double sampleOffsetDouble = (noteEnd - begin) * oneBeatSec * sampleRate;
@@ -74,6 +62,18 @@ void Note::prepareProcessBuffer(Lane* lane, double begin, double end, double cli
             double sampleOffsetDouble = (noteEnd - loopBegin) * oneBeatSec * sampleRate;
             uint32_t sampleOffset = std::round(sampleOffsetDouble);
             processBuffer._eventOut.noteOff(_key, channel, 1.0f, sampleOffset);
+        }
+        if (begin <= noteBegin && noteBegin < loopEnd)
+        {
+            double sampleOffsetDouble = (noteBegin - begin) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
+        }
+        if (loopBegin <= noteBegin && noteBegin < end)
+        {
+            double sampleOffsetDouble = ((loopEnd - begin) + (noteBegin - loopBegin)) * oneBeatSec * sampleRate;
+            uint32_t sampleOffset = std::round(sampleOffsetDouble);
+            processBuffer._eventOut.noteOn(_key, channel, _velocity, sampleOffset);
         }
     }
 }
