@@ -18,7 +18,7 @@ private:
     float getTrackWidth(Track* track);
     ImVec2 posScreenToWindow(const ImVec2& pos);
     ImVec2 posWindowToScreen(const ImVec2& pos);
-    void renderLane(Lane* lane);
+    void renderLane(Lane* lane, bool first);
     void renderTrack(Track* track, int groupLevel);
 
     Composer* _composer;
