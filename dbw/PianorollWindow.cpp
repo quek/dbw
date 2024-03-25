@@ -56,6 +56,8 @@ void PianoRollWindow::edit(NoteClip* clip)
     {
         _state._defaultThingDuration = _grid->_unit;
     }
+
+    _fitContentRequired = true;
 }
 
 void PianoRollWindow::handleDoubleClick(Note* /*thing*/)
@@ -192,6 +194,13 @@ void PianoRollWindow::handleShortcut()
     {
         _show = false;
     }
+    else if (defineShortcut(ImGuiKey_X) || _fitContentRequired)
+    {
+        if (fitContent())
+        {
+        _fitContentRequired = false;
+        }
+    }
 
     TimelineCanvasMixin::handleShortcut();
 }
@@ -268,7 +277,8 @@ void PianoRollWindow::renderSequenceEnd()
     if (canHandleInput() && io.KeyShift && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
         ImVec2 pos = ImGui::GetMousePos() - ImGui::GetWindowPos();
-        if (pos.x < offsetLeft()) {
+        if (pos.x < offsetLeft())
+        {
             double time = timeFromMousePos();
             _composer->commandExecute(new command::SequenceDurationSet(_clip->getSequence().get(), time));
         }
@@ -294,4 +304,49 @@ std::string PianoRollWindow::windowName()
 std::string PianoRollWindow::canvasName()
 {
     return "##Piano Roll Canvas";
+}
+
+bool PianoRollWindow::fitContent()
+{
+    double timeMin = std::numeric_limits<double>::max();
+    double timeMax = std::numeric_limits<double>::min();
+    int16_t keyMin = std::numeric_limits<int16_t>::max();
+    int16_t keyMax = std::numeric_limits<int16_t>::min();
+    for (auto& item : _clip->_sequence->getItems())
+    {
+        Note* note = (Note*)item.get();
+        auto key = note->_key;
+        if (key < keyMin)
+        {
+            keyMin = key;
+        }
+        if (keyMax < key)
+        {
+            keyMax = key;
+        }
+        auto time = note->getTime();
+        if (time < timeMin)
+        {
+            timeMin = time;
+        }
+        if (timeMax < time)
+        {
+            timeMax = time;
+        }
+    }
+
+    keyMin--;
+    keyMax++;
+    float zoomXOld = _zoomX;
+    _zoomX = ImGui::GetWindowWidth() / (KEY_WIDTH * (keyMax - keyMin + 1));
+
+    float xMin = KEY_WIDTH * (keyMin + 0.5f) * _zoomX;
+    float xMax = KEY_WIDTH * keyMax * _zoomX;
+    float yMin = timeMin * _zoomY;
+    float yMax = timeMax * _zoomY;
+
+    ImGui::SetScrollX(xMin);
+    ImGui::SetScrollY(yMin);
+
+    return _zoomX == zoomXOld;
 }

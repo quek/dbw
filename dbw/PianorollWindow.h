@@ -45,4 +45,8 @@ protected:
     void renderTimeline() override;
     std::string windowName() override;
     std::string canvasName() override;
+
+private:
+    bool _fitContentRequired = false;
+    bool fitContent();
 };
