@@ -312,38 +312,39 @@ void SceneMatrix::renderSceneTrackLane(Scene* scene, Track*, Lane* lane)
     float width = _trackHeaderView->getLaneWidth(lane);
     if (clip)
     {
-        width -= PLAY_STOP_BUTTON_WIDTH * 2.0f;
-        if (ImGui::Button(lane->_name.c_str(), ImVec2(width, 0.0f)))
+        width -= PLAY_STOP_BUTTON_WIDTH;
+        ImGui::Button(clip->name().c_str(), ImVec2(width, 0.0f));
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left()))
         {
             clip->edit(_composer, lane);
         }
         dragDropTarget(clip);
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
-            ImGui::SetDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS, this, sizeof(*this));
+            ImGui::SetDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS, clip.get(), sizeof(*(clip.get())));
             ImGui::Text(clip->name().c_str());
             ImGui::EndDragDropSource();
         }
 
         ImGui::SameLine();
-        ImGui::BeginDisabled(scene->isAllLanePlaying());
-        if (ImGui::Button("▶", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+        if (!lane->getClipSlot(scene)->_playing)
         {
-            lane->getClipSlot(scene)->play();
+            if (ImGui::Button("▶", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+            {
+                lane->getClipSlot(scene)->play();
+            }
         }
-        ImGui::EndDisabled();
-
-        ImGui::SameLine();
-        ImGui::BeginDisabled(scene->isAllLaneStoped());
-        if (ImGui::Button("■", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+        else
         {
-            lane->getClipSlot(scene)->stop();
+            if (ImGui::Button("■", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+            {
+                lane->getClipSlot(scene)->stop();
+            }
         }
-        ImGui::EndDisabled();
     }
     else
     {
-        width /= 2.0f;
+        width -= PLAY_STOP_BUTTON_WIDTH;
         if (ImGui::Button("+", ImVec2(width, 0.0f)))
         {
             // TODO undo
@@ -351,7 +352,7 @@ void SceneMatrix::renderSceneTrackLane(Scene* scene, Track*, Lane* lane)
         }
         dragDropTarget(clip);
         ImGui::SameLine();
-        if (ImGui::Button("●", ImVec2(width, 0.0f)))
+        if (ImGui::Button("●", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
         {
             // TODO rec
         }
