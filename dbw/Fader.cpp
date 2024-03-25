@@ -95,7 +95,7 @@ bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime)
 void Fader::render(float width, float height)
 {
     // RackWindow で微妙に縦スクロールするので 0 にしたのを、元に戻す
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImGui::GetStyle().ItemSpacing);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
 
     ImGui::PushID(this);
     ImVec2 windowPos = ImGui::GetWindowPos();

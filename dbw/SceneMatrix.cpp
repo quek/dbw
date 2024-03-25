@@ -9,6 +9,7 @@
 #include "Composer.h"
 #include "Config.h"
 #include "Lane.h"
+#include "NoteClip.h"
 
 constexpr float PLAY_STOP_BUTTON_WIDTH = 20.0f;
 
@@ -42,6 +43,7 @@ void SceneMatrix::render()
         {
             renderScene(scene.get());
         }
+        renderSceneAdd();
         ImGui::PopStyleVar();
 
         if (false)
@@ -226,6 +228,11 @@ float SceneMatrix::offsetX()
 void SceneMatrix::renderScene(Scene* scene)
 {
     ImGui::PushID(scene);
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 pos1 = windowToScreen(ImGui::GetCursorPos());
+    ImVec2 pos2 = pos1 + ImVec2(ImGui::GetWindowWidth(), 0.0f);
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+
     auto& style = ImGui::GetStyle();
     float width = offsetX() - style.WindowPadding.x - PLAY_STOP_BUTTON_WIDTH * 2;
     ImGui::Button(scene->_name.c_str(), ImVec2(width, 0.0f));
@@ -250,6 +257,23 @@ void SceneMatrix::renderScene(Scene* scene)
     ImGui::PopID();
 }
 
+void SceneMatrix::renderSceneAdd()
+{
+    ImGui::PushID("renderSceneAdd");
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 pos1 = windowToScreen(ImGui::GetCursorPos());
+    ImVec2 pos2 = pos1 + ImVec2(ImGui::GetWindowWidth(), 0.0f);
+    drawList->AddLine(pos1, pos2, gTheme.rackBorder);
+
+    auto& style = ImGui::GetStyle();
+    float width = offsetX() - style.WindowPadding.x;
+    if (ImGui::Button("+", ImVec2(width, 0.0f)))
+    {
+        addScene();
+    }
+    ImGui::PopID();
+}
+
 void SceneMatrix::renderSceneTrack(Scene* scene, Track* track)
 {
     for (auto& lane : track->_lanes)
@@ -270,24 +294,43 @@ void SceneMatrix::renderSceneTrackLane(Scene* scene, Track* track, Lane* lane)
 {
     ImGui::PushID(lane);
     ImGui::SameLine();
-    float width = _trackHeaderView->getLaneWidth(lane) - PLAY_STOP_BUTTON_WIDTH * 2.0f ;
-    ImGui::Button(lane->_name.c_str(), ImVec2(width, 0.0f));
-
-    ImGui::SameLine();
-    ImGui::BeginDisabled(scene->isAllLanePlaying());
-    if (ImGui::Button("▶", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+    auto& clip = lane->getClipSlot(scene)->_clip;
+    float width = _trackHeaderView->getLaneWidth(lane);
+    if (clip)
     {
-        lane->getClipSlot(scene)-> play();
-    }
-    ImGui::EndDisabled();
+        width -= PLAY_STOP_BUTTON_WIDTH * 2.0f;
+        ImGui::Button(lane->_name.c_str(), ImVec2(width, 0.0f));
 
-    ImGui::SameLine();
-    ImGui::BeginDisabled(scene->isAllLaneStoped());
-    if (ImGui::Button("■", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
-    {
-        lane->getClipSlot(scene)-> stop();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(scene->isAllLanePlaying());
+        if (ImGui::Button("▶", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+        {
+            lane->getClipSlot(scene)->play();
+        }
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled(scene->isAllLaneStoped());
+        if (ImGui::Button("■", ImVec2(PLAY_STOP_BUTTON_WIDTH, 0.0f)))
+        {
+            lane->getClipSlot(scene)->stop();
+        }
+        ImGui::EndDisabled();
     }
-    ImGui::EndDisabled();
+    else
+    {
+        width /= 2.0f;
+        if (ImGui::Button("+", ImVec2(width, 0.0f)))
+        {
+            // TODO undo
+            clip.reset(new NoteClip());
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("●", ImVec2(width, 0.0f)))
+        {
+            // TODO rec
+        }
+    }
     ImGui::PopID();
 }
 

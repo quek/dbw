@@ -31,6 +31,7 @@ public:
 private:
     float offsetX();
     void renderScene(Scene* scene);
+    void renderSceneAdd();
     void renderSceneTrack(Scene* scene, Track* track);
     void renderSceneTrackLane(Scene* scene, Track* track, Lane* lane);
 
