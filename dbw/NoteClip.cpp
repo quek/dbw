@@ -29,7 +29,7 @@ void NoteClip::renderInScene(PianoRollWindow* pianoRoll) {
         }
     }
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-        ImGui::SetDragDropPayload("Sequence Matrix Clip", this, sizeof(*this));
+        ImGui::SetDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS, this, sizeof(*this));
         ImGui::Text(sequenceName.c_str());
         ImGui::EndDragDropSource();
     }

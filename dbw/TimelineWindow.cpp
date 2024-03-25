@@ -71,7 +71,7 @@ void TimelineWindow::handleMouse(const ImVec2& clipRectMin, const ImVec2& clipRe
         return;
     }
     const ImGuiPayload* payload = ImGui::GetDragDropPayload();
-    if (payload && payload->IsDataType("Sequence Matrix Clip"))
+    if (payload && payload->IsDataType(DDP_SEQUENCE_MATRIX_CLIPS))
     {
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
         {

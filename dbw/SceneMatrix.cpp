@@ -115,7 +115,7 @@ void SceneMatrix::render()
                         clipSlot->render(_composer);
                         if (ImGui::BeginDragDropTarget())
                         {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip"))
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS))
                             {
                                 Clip* clip = (Clip*)payload->Data;
                                 clipSlot->_clip.reset(clip->clone());
@@ -132,7 +132,7 @@ void SceneMatrix::render()
                             clipSlot->render(_composer);
                             if (ImGui::BeginDragDropTarget())
                             {
-                                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Sequence Matrix Clip"))
+                                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS))
                                 {
                                     Clip* clip = (Clip*)payload->Data;
                                     clipSlot->_clip.reset(clip->clone());
@@ -220,6 +220,19 @@ nlohmann::json SceneMatrix::toJson(SerializeContext& context)
     return json;
 }
 
+void SceneMatrix::dragDropTarget(std::unique_ptr<Clip>& clip)
+{
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS))
+        {
+            Clip* dragClip = (Clip*)payload->Data;
+            clip.reset(dragClip->clone());
+        }
+        ImGui::EndDragDropTarget();
+    }
+}
+
 float SceneMatrix::offsetX()
 {
     return 100.0f;
@@ -290,16 +303,27 @@ void SceneMatrix::renderSceneTrack(Scene* scene, Track* track)
     }
 }
 
-void SceneMatrix::renderSceneTrackLane(Scene* scene, Track* track, Lane* lane)
+void SceneMatrix::renderSceneTrackLane(Scene* scene, Track*, Lane* lane)
 {
     ImGui::PushID(lane);
+    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
     ImGui::SameLine();
     auto& clip = lane->getClipSlot(scene)->_clip;
     float width = _trackHeaderView->getLaneWidth(lane);
     if (clip)
     {
         width -= PLAY_STOP_BUTTON_WIDTH * 2.0f;
-        ImGui::Button(lane->_name.c_str(), ImVec2(width, 0.0f));
+        if (ImGui::Button(lane->_name.c_str(), ImVec2(width, 0.0f)))
+        {
+            clip->edit(_composer, lane);
+        }
+        dragDropTarget(clip);
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        {
+            ImGui::SetDragDropPayload(DDP_SEQUENCE_MATRIX_CLIPS, this, sizeof(*this));
+            ImGui::Text(clip->name().c_str());
+            ImGui::EndDragDropSource();
+        }
 
         ImGui::SameLine();
         ImGui::BeginDisabled(scene->isAllLanePlaying());
@@ -325,12 +349,14 @@ void SceneMatrix::renderSceneTrackLane(Scene* scene, Track* track, Lane* lane)
             // TODO undo
             clip.reset(new NoteClip());
         }
+        dragDropTarget(clip);
         ImGui::SameLine();
         if (ImGui::Button("●", ImVec2(width, 0.0f)))
         {
             // TODO rec
         }
     }
+    ImGui::PopStyleColor();
     ImGui::PopID();
 }
 

@@ -6,6 +6,7 @@
 
 constexpr const char* DDP_AUTOMATION_TARGET = "DDP_AMT{}";
 constexpr const char* DDP_EXTERNAL_FILES = "DDP_EXTERNAL_FILES";
+constexpr const char* DDP_SEQUENCE_MATRIX_CLIPS = "DDP_SEQUENCE_MATRIX_CLIPS";
 
 extern float TEXT_BASE_WIDTH;
 extern float TEXT_BASE_HEIGHT;

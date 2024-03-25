@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "BaseWindow.h"
+#include "Clip.h"
 #include "Command.h"
 #include "Nameable.h"
 #include "Scene.h"
@@ -29,6 +30,7 @@ public:
     std::vector<std::unique_ptr<Scene>> _scenes;
 
 private:
+    void dragDropTarget(std::unique_ptr<Clip>& clip);
     float offsetX();
     void renderScene(Scene* scene);
     void renderSceneAdd();
