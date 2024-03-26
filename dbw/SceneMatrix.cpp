@@ -314,7 +314,7 @@ void SceneMatrix::renderSceneTrackLane(Scene* scene, Track*, Lane* lane)
     {
         width -= PLAY_STOP_BUTTON_WIDTH;
         ImGui::Button(clip->name().c_str(), ImVec2(width, 0.0f));
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left()))
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
             clip->edit(_composer, lane);
         }

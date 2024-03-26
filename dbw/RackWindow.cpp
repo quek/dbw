@@ -13,6 +13,7 @@
 #include "command/AddTrack.h"
 #include "command/CopyDragTracks.h"
 #include "command/CutTracks.h"
+#include "command/DeleteModule.h"
 #include "command/DeleteTracks.h"
 #include "command/DuplicateTracks.h"
 #include "command/MoveTracks.h"
@@ -310,7 +311,7 @@ void RackWindow::renderModules(Track* track)
 
     ImGui::PushID(track);
     ImGui::BeginGroup();
-    track->_gain->render(track->_width);
+    track->_gain->render(_selectedModules, track->_width);
 
     auto& style = ImGui::GetStyle();
     float modulesHeightStart = ImGui::GetCursorPosY();
@@ -324,7 +325,7 @@ void RackWindow::renderModules(Track* track)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
         for (auto& module : track->_modules)
         {
-            module->render(width);
+            module->render(_selectedModules, width);
         }
         if (ImGui::Button("Add Module", ImVec2(width, 0.0f)))
         {
@@ -380,7 +381,7 @@ void RackWindow::renderFaders(Track* track)
         ImGui::SameLine();
     }
     ImGui::BeginGroup();
-    track->_fader->render(track->_width, _faderHeight);
+    track->_fader->render(_selectedModules, track->_width, _faderHeight);
     ImGui::EndGroup();
     if (track->_showTracks)
     {
@@ -464,6 +465,16 @@ void RackWindow::handleShortcut()
     {
         _composer->commandExecute(new command::DuplicateTracks(_selectedTracks));
     }
+    else        if (defineShortcut(ImGuiKey_Delete))
+    {
+        if (_selectedModules.size() == 1)
+        {
+            _composer->commandExecute(new command::DeleteModule(_selectedModules[0]));
+            _selectedModules.clear();
+        }
+    }
+
+
 
 }
 

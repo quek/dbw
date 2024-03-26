@@ -4,6 +4,7 @@
 #include "BaseWindow.h"
 
 class Composer;
+class Module;
 class Track;
 
 class RackWindow : public BaseWindow {
@@ -24,6 +25,7 @@ private:
 
     Composer* _composer;
     std::vector<Track*> _allTracks;
+    std::vector<Module*> _selectedModules;
     std::vector<Track*>& _selectedTracks;
     float _headerHeight = 0.0f;
     float _faderHeight = 200.0f;

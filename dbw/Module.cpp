@@ -9,7 +9,6 @@
 #include "Config.h"
 #include "Track.h"
 #include "Vst3Module.h"
-#include "command/DeleteModule.h"
 
 Module::Module(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context)
 {
@@ -31,11 +30,18 @@ void Module::start()
     _isStarting = true;
 }
 
-void Module::render(float width, float height)
+void Module::render(std::vector<Module*>& selectedModules, float width, float height)
 {
     ImGui::PushID(this);
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
+
+    bool selected = std::ranges::find(selectedModules, this) != selectedModules.end();
+    if (selected)
+    {
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0x40, 0x40, 0x40, 0x80));
+    }
+     
     if (ImGui::BeginChild("##module", ImVec2(width, height), childFlags, windowFlags))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
@@ -89,12 +95,14 @@ void Module::render(float width, float height)
             renderContent();
         }
 
-        if (defineShortcut(ImGuiKey_Delete))
+        if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
-            _track->getComposer()->commandExecute(new command::DeleteModule(this));
+            selectedModules.clear();
+            selectedModules.push_back(this);
         }
     }
     ImGui::EndChild();
+    if (selected) ImGui::PopStyleColor();
     ImGui::PopID();
 }
 

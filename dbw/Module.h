@@ -21,7 +21,7 @@ public:
     virtual void start();
     virtual bool isStarting() { return _isStarting; }
     virtual void stop() { _isStarting = false; }
-    virtual void render(float width = 0.0f, float height = 0.0f);
+    virtual void render(std::vector<Module*>& selectedModules, float width = 0.0f, float height = 0.0f);
     virtual void renderContent() {}
     virtual bool process(ProcessBuffer* buffer, int64_t steadyTime);
     void processConnections();

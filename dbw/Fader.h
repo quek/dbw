@@ -10,7 +10,7 @@ public:
     Fader(std::string name, Track* track);
     virtual ~Fader() = default;
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
-    void render(float width = 0.0f, float height = 0.0f) override;
+    void render(std::vector<Module*>& selectedModules, float width = 0.0f, float height = 0.0f) override;
 
     virtual nlohmann::json toJson(SerializeContext& context) override;
 
