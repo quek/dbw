@@ -9,6 +9,9 @@
 #include <future>
 #include <type_traits>
 
+class ThreadPool;
+extern ThreadPool* gThreadPool;
+
 class ThreadPool
 {
 public:

@@ -40,6 +40,7 @@
 #include "GuiUtil.h"
 #include "ClapHost.h"
 #include "PluginManager.h"
+#include "ThreadPool.h"
 #include "util.h"
 
 struct FrameContext
@@ -90,6 +91,8 @@ int main(int, char**)
     logger = spdlog::rotating_logger_mt("log", logFile.string(), 1024 * 1024 * 5, 3);
     logger->set_level(spdlog::level::debug);
     logger->info("start");
+
+    gThreadPool = new ThreadPool();
 
     gPreference.load();
     gTheme.load();
@@ -308,6 +311,8 @@ int main(int, char**)
     CleanupDeviceD3D();
     ::DestroyWindow(gHwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+
+    delete gThreadPool;
 
     spdlog::drop_all();
 
