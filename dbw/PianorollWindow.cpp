@@ -196,9 +196,11 @@ void PianoRollWindow::handleShortcut()
     }
     else if (defineShortcut(ImGuiKey_X) || _fitContentRequired)
     {
+        // ショートカットのとき _scrollX/Y を反映させるために
+        _fitContentRequired = true;
         if (fitContent())
         {
-        _fitContentRequired = false;
+            _fitContentRequired = false;
         }
     }
 
@@ -308,6 +310,8 @@ std::string PianoRollWindow::canvasName()
 
 bool PianoRollWindow::fitContent()
 {
+    if (_clip->_sequence->getItems().empty()) return true;
+
     double timeMin = std::numeric_limits<double>::max();
     double timeMax = std::numeric_limits<double>::min();
     int16_t keyMin = std::numeric_limits<int16_t>::max();
@@ -316,37 +320,32 @@ bool PianoRollWindow::fitContent()
     {
         Note* note = (Note*)item.get();
         auto key = note->_key;
-        if (key < keyMin)
-        {
-            keyMin = key;
-        }
-        if (keyMax < key)
-        {
-            keyMax = key;
-        }
+        if (key < keyMin) keyMin = key;
+        if (keyMax < key) keyMax = key;
+
         auto time = note->getTime();
-        if (time < timeMin)
-        {
-            timeMin = time;
-        }
-        if (timeMax < time)
-        {
-            timeMax = time;
-        }
+        if (time < timeMin) timeMin = time;
+        time += note->getDuration();
+        if (timeMax < time) timeMax = time;
     }
 
     keyMin--;
-    keyMax++;
+    //keyMax++;
+    timeMax += 0.5;
     float zoomXOld = _zoomX;
-    _zoomX = ImGui::GetWindowWidth() / (KEY_WIDTH * (keyMax - keyMin + 1));
+    float zoomYOld = _zoomY;
+    auto& style = ImGui::GetStyle();
+    _zoomX = (ImGui::GetWindowWidth() - offsetLeft() - style.ScrollbarSize) / (KEY_WIDTH * (keyMax - keyMin + 1));
+    _zoomY = (ImGui::GetWindowHeight() - offsetTop() - offsetStart() - style.ScrollbarSize) / (timeMax - timeMin);
 
     float xMin = KEY_WIDTH * (keyMin + 0.5f) * _zoomX;
-    float xMax = KEY_WIDTH * keyMax * _zoomX;
+    //float xMax = KEY_WIDTH * keyMax * _zoomX;
     float yMin = timeMin * _zoomY;
-    float yMax = timeMax * _zoomY;
+    //float yMax = timeMax * _zoomY;
 
     ImGui::SetScrollX(xMin);
     ImGui::SetScrollY(yMin);
 
-    return _zoomX == zoomXOld;
+    // ここで算出したズームを反映してからスクロールしなきゃ、なので
+    return _zoomX == zoomXOld && _zoomY == zoomYOld;
 }
