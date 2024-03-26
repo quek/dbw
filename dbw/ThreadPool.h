@@ -52,7 +52,6 @@ public:
     }
 
 private:
-
     template <typename F>
     void push_task(const F& task)
     {
