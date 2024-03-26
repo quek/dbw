@@ -58,15 +58,6 @@ void ClapModule::closeGui() {
 }
 
 void ClapModule::renderContent() {
-    if (_didOpenGui) {
-        if (ImGui::Button("Close")) {
-            closeGui();
-        }
-    } else {
-        if (ImGui::Button("Open")) {
-            openGui();
-        }
-    }
 }
 
 void ClapModule::start() {

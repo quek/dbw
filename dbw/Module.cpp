@@ -35,54 +35,64 @@ void Module::render(float width, float height)
 {
     ImGui::PushID(this);
     ImGuiChildFlags childFlags = ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY;
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
     if (ImGui::BeginChild("##module", ImVec2(width, height), childFlags, windowFlags))
     {
-        if (ImGui::BeginMenuBar())
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
+        if (ImGui::Button(_collapsed ? "▶" : "▼"))
         {
-            if (ImGui::BeginMenu(_name.c_str()))
-            {
-                if (ImGui::MenuItem("Delete"))
-                {
-                    _track->getComposer()->commandExecute(new command::DeleteModule(this));
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
+            _collapsed = !_collapsed;
         }
 
-        if (ImGui::IsItemHovered() && !_connections.empty())
+        ImGui::SameLine();
+        if (ImGui::Button(_name.c_str()))
         {
-            std::ostringstream ost;
-            for (auto& c : _connections)
+            if (_didOpenGui) closeGui(); else openGui();
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
+
+        if (!_collapsed)
+        {
+            if (ImGui::IsItemHovered() && !_connections.empty())
             {
-                if (c->_to == this)
+                std::ostringstream ost;
+                for (auto& c : _connections)
                 {
-                    ost << std::format("{} {} {} ⇒ {}", c->_from->_track->_name, c->_from->_name, c->_fromIndex, c->_toIndex)
-                        << std::endl;
+                    if (c->_to == this)
+                    {
+                        ost << std::format("{} {} {} ⇒ {}", c->_from->_track->_name, c->_from->_name, c->_fromIndex, c->_toIndex)
+                            << std::endl;
+                    }
+                    else
+                    {
+                        ost << std::format("{} ⇒ {} {} {}", c->_fromIndex, c->_to->_track->_name, c->_to->_name, c->_toIndex) << std::endl;
+                    }
                 }
-                else
+                auto str = ost.str();
+                if (!str.empty())
                 {
-                    ost << std::format("{} ⇒ {} {} {}", c->_fromIndex, c->_to->_track->_name, c->_to->_name, c->_toIndex) << std::endl;
+                    ImGui::SetTooltip(str.c_str());
                 }
             }
-            auto str = ost.str();
-            if (!str.empty())
+
+            if (_ninputs > 1)
             {
-                ImGui::SetTooltip(str.c_str());
+                if (ImGui::Button("Sidechain"))
+                {
+                    // TODO inputIndex
+                    _track->getComposer()->_sideChainInputSelector->open(this, 1);
+                }
             }
+
+            renderContent();
         }
 
-        if (_ninputs > 1)
+        if (defineShortcut(ImGuiKey_Delete))
         {
-            if (ImGui::Button("Sidechain"))
-            {
-                // TODO inputIndex
-                _track->getComposer()->_sideChainInputSelector->open(this, 1);
-            }
+            _track->getComposer()->commandExecute(new command::DeleteModule(this));
         }
-
-        renderContent();
     }
     ImGui::EndChild();
     ImGui::PopID();

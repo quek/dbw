@@ -52,6 +52,7 @@ public:
     uint32_t _computedLatency = 0;
 
 protected:
+    bool _collapsed = false;
     bool _isStarting = false;
     std::map<uint32_t, std::unique_ptr<Param>> _idParamMap;
     std::list<uint32_t> _editedParamIdList;
