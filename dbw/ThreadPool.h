@@ -80,10 +80,7 @@ private:
                 std::unique_lock<std::mutex> lock(_mutex);
                 _condition.wait(lock, [&] { return !_tasks.empty() || !_running; });
 
-                if (!_running && _tasks.empty())
-                {
-                    return;
-                }
+                if (!_running && _tasks.empty()) return;
 
                 task = std::move(_tasks.front());
                 _tasks.pop();
