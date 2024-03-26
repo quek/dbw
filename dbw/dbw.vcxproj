@@ -162,7 +162,6 @@
     <ClInclude Include="..\..\backends\imgui_impl_dx12.h" />
     <ClInclude Include="..\.imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="..\imgui\misc\cpp\imgui_stdlib.h" />
-    <ClInclude Include="Aa.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Audio.h" />
     <ClInclude Include="AudioBuffer.h" />
@@ -270,7 +269,6 @@
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\common\memorystream.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
     <ClCompile Include="..\VST_SDK\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
-    <ClCompile Include="Aa.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="AudioBuffer.cpp" />

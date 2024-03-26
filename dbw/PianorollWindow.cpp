@@ -330,7 +330,6 @@ bool PianoRollWindow::fitContent()
     }
 
     keyMin--;
-    //keyMax++;
     timeMax += 0.5;
     float zoomXOld = _zoomX;
     float zoomYOld = _zoomY;
@@ -339,9 +338,7 @@ bool PianoRollWindow::fitContent()
     _zoomY = (ImGui::GetWindowHeight() - offsetTop() - offsetStart() - style.ScrollbarSize) / (timeMax - timeMin);
 
     float xMin = KEY_WIDTH * (keyMin + 0.5f) * _zoomX;
-    //float xMax = KEY_WIDTH * keyMax * _zoomX;
     float yMin = timeMin * _zoomY;
-    //float yMax = timeMax * _zoomY;
 
     ImGui::SetScrollX(xMin);
     ImGui::SetScrollY(yMin);

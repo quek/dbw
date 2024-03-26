@@ -123,6 +123,8 @@ int main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigDockingWithShift = true; // you instead need to hold SHIFT to enable docking.
     io.ConfigWindowsMoveFromTitleBarOnly = true;
+    std::string imguiIni = WideStringToAnsiString((gConfig._dir / "imgui.ini").wstring());
+    io.IniFilename = imguiIni.c_str();
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
