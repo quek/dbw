@@ -18,6 +18,11 @@ Fader::Fader(std::string name, Track* track) : BuiltinModule(name, track)
 {
 }
 
+bool Fader::isWaitingForTo()
+{
+    return false;
+}
+
 bool Fader::process(ProcessBuffer* buffer, int64_t steadyTime)
 {
     double peakHoldTime = gPreference.sampleRate * 3.0;

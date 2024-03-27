@@ -7,6 +7,7 @@
 #include "Composer.h"
 #include "Command.h"
 #include "Config.h"
+#include "Fader.h"
 #include "Track.h"
 #include "Vst3Module.h"
 
@@ -30,6 +31,30 @@ void Module::start()
     _isStarting = true;
 }
 
+bool Module::isWaitingForFrom()
+{
+    for (auto& connection : _connections)
+    {
+        if (connection->_to == this && !connection->_from->processedGet() && connection->_from->isStarting())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Module::isWaitingForTo()
+{
+    for (auto& connection : _connections)
+    {
+        if (connection->_from == this && !connection->_to->processedGet() && connection->_to->isStarting())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Module::render(std::vector<Module*>& selectedModules, float width, float height)
 {
     ImGui::PushID(this);
@@ -41,7 +66,7 @@ void Module::render(std::vector<Module*>& selectedModules, float width, float he
     {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0x40, 0x40, 0x40, 0x80));
     }
-     
+
     if (ImGui::BeginChild("##module", ImVec2(width, height), childFlags, windowFlags))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
@@ -108,7 +133,13 @@ void Module::render(std::vector<Module*>& selectedModules, float width, float he
 
 bool Module::process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/)
 {
+    _processed = true;
     return true;
+}
+
+void Module::prepare()
+{
+    _processed = false;
 }
 
 void Module::processConnections()
@@ -119,7 +150,23 @@ void Module::processConnections()
     }
 }
 
+bool Module::processedGet()
+{
+    return _processed;
+}
+
+void Module::processedSet(bool value)
+{
+    _processed = value;
+}
+
 void Module::connect(Module* from, int outputIndex, int inputIndex)
+{
+    _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+    from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+}
+
+void Module::connectPre(Fader* from, int outputIndex, int inputIndex)
 {
     _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
     from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));

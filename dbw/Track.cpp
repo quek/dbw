@@ -87,6 +87,15 @@ void Track::setComposer(Composer* composer)
 
 void Track::prepare(unsigned long framesPerBuffer)
 {
+    _moduleWaiteFor = nullptr;
+    _processed = false;
+    _gain->prepare();
+    _fader->prepare();
+    for (auto& module : _modules)
+    {
+        module->prepare();
+    }
+
     _processBuffer.clear();
     int nbuses = 1;
     for (auto& module : _modules)
@@ -345,6 +354,41 @@ MasterTrack* Track::getMasterTrack()
 Track* Track::getParent()
 {
     return _parent;
+}
+
+Track* Track::process(int64_t steadyTime)
+{
+    std::vector<Module*> modules = allModules();
+    for (auto& module : modules)
+    {
+        if (_moduleWaiteFor)
+        {
+            if (_moduleWaiteFor != module) continue;
+            _moduleWaiteFor = nullptr;
+        }
+        if (!module->isStarting()) continue;
+
+        if (!module->processedGet())
+        {
+            if (module->isWaitingForFrom())
+            {
+                _moduleWaiteFor = module;
+                return this;
+            }
+
+            _processBuffer.swapInOut();
+            module->processConnections();
+            module->process(&_processBuffer, steadyTime);
+        }
+
+        if (module->isWaitingForTo())
+        {
+            _moduleWaiteFor = module;
+            return this;
+        }
+    }
+
+    return nullptr;
 }
 
 void Track::setParent(Track* parent)

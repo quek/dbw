@@ -1,5 +1,6 @@
 #include "Composer.h"
 #include <cstdlib>
+#include <future>
 #include <map>
 #include <ranges>
 #include <sstream>
@@ -12,10 +13,11 @@
 #include "Fader.h"
 #include "GuiUtil.h"
 #include "Project.h"
+#include "Lane.h"
 #include "logger.h"
 #include "MasterTrack.h"
 #include "Track.h"
-#include "Lane.h"
+#include "ThreadPool.h"
 #include "util.h"
 
 Composer::Composer() :
@@ -101,19 +103,30 @@ void Composer::process(float* /* in */, float* out, unsigned long framesPerBuffe
         _justStopped = false;
     }
 
-    for (auto& module : _orderedModules)
+    auto tracks = allTracks();
+    std::vector<std::future<Track*>> futures;
+
+    for (;;)
     {
-        module->_track->_processBuffer.swapInOut();
-        module->processConnections();
-        module->process(&module->_track->_processBuffer, steadyTime);
+        for (auto& track : tracks)
+        {
+            futures.emplace_back(gThreadPool->submit([&]() { return track->process(steadyTime); }));
+        }
+        tracks.clear();
+        for (auto& future : futures)
+        {
+            Track* track = future.get();
+            if (track) tracks.push_back(track);
+        }
+        if (tracks.empty()) break;
+
+        futures.clear();
     }
 
+    _masterTrack->process(steadyTime);
     _masterTrack->_processBuffer._out[0].copyTo(out, framesPerBuffer, 2);
 
-    if (_playing)
-    {
-        _playTime = _nextPlayTime;
-    }
+    if (_playing) _playTime = _nextPlayTime;
 }
 
 App* Composer::app() const
@@ -173,6 +186,8 @@ void Composer::commandExecute(std::vector<Command*> commands)
     _commandManager.executeCommand(commands, true);
 }
 
+// スレッドプール対応したのでこれはいらなくなった。
+// でもこの中の computeLatency は必要。
 void Composer::computeProcessOrder()
 {
     std::vector<Module*> orderedModules;
@@ -203,7 +218,7 @@ bool Composer::computeProcessOrder(Track* track,
         processed &= computeProcessOrder(x.get(), orderedModules, processedModules, waitingModule);
     }
 
-    std::vector<Module*> allModules = track->allModules();;
+    std::vector<Module*> allModules = track->allModules();
 
     bool skip = waitingModule.contains(track);
     for (auto& module : allModules)

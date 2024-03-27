@@ -27,5 +27,7 @@ public:
     std::vector<std::deque<float>> _dcpBuffer;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Connection, _fromIndex, _toIndex);
+private:
+    bool _post = true;
 };
 

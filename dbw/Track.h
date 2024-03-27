@@ -46,6 +46,7 @@ public:
     virtual std::vector<std::unique_ptr<Track>>::iterator getAt();
     virtual MasterTrack* getMasterTrack();
     Track* getParent();
+    Track* process(int64_t steadyTime);
     void setParent(Track* parent);
     void resolveModuleReference();
     void play(Scene* scene);
@@ -73,7 +74,9 @@ public:
 protected:
     std::unique_ptr<Track> deleteTrack(Track* track);
 
-    Track* _parent = nullptr;
     Composer* _composer = nullptr;
+    Module* _moduleWaiteFor = nullptr;
+    Track* _parent = nullptr;
+    bool _processed = false;
     std::vector<std::unique_ptr<Track>> _tracks;
 };

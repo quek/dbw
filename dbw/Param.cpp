@@ -56,5 +56,8 @@ void Param::performEdit(double value) {
     _value = value;
     _module->addParameterChange(this, 0, value);
     _module->updateEditedParamIdList(_id);
-    _module->_track->getComposer()->commandExecute(new command::EditedParamIdListUpdate(this));
+    if (_module->_track)
+    {
+        _module->_track->getComposer()->commandExecute(new command::EditedParamIdListUpdate(this));
+    }
 }

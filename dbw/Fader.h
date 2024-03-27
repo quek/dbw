@@ -9,6 +9,7 @@ public:
     Fader(const nlohmann::json& json, SerializeContext& context);
     Fader(std::string name, Track* track);
     virtual ~Fader() = default;
+    virtual bool isWaitingForTo();
     bool process(ProcessBuffer* buffer, int64_t steadyTime) override;
     void render(std::vector<Module*>& selectedModules, float width = 0.0f, float height = 0.0f) override;
 

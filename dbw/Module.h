@@ -20,14 +20,20 @@ public:
     virtual void closeGui() { _didOpenGui = false; }
     virtual void start();
     virtual bool isStarting() { return _isStarting; }
+    bool isWaitingForFrom();
+    virtual bool isWaitingForTo();
     virtual void stop() { _isStarting = false; }
     virtual void render(std::vector<Module*>& selectedModules, float width = 0.0f, float height = 0.0f);
     virtual void renderContent() {}
+    virtual void prepare();
     virtual bool process(ProcessBuffer* buffer, int64_t steadyTime);
+    virtual bool processedGet();
+    virtual void processedSet(bool value);
     void processConnections();
     virtual void onResize(int /*width*/, int /*height*/) {}
     virtual void loadState(std::filesystem::path /*path*/) {}
     virtual void connect(Module* from, int outputIndex, int inputIndex);
+    virtual void connectPre(Fader* from, int outputIndex, int inputIndex);
     int nbuses() const;
     ProcessBuffer& getProcessBuffer();
     virtual uint32_t getComputedLatency();
@@ -56,4 +62,5 @@ protected:
     bool _isStarting = false;
     std::map<uint32_t, std::unique_ptr<Param>> _idParamMap;
     std::list<uint32_t> _editedParamIdList;
+    bool _processed = false;
 };

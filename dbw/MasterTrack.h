@@ -1,7 +1,8 @@
 #pragma once
 #include "Track.h"
 
-class MasterTrack : public Track {
+class MasterTrack : public Track
+{
 public:
     MasterTrack(const nlohmann::json& json, SerializeContext& context);
     MasterTrack(Composer* composer);

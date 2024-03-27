@@ -32,9 +32,15 @@ void SidechainInputSelector::render(Track* track) {
     if (ImGui::TreeNode(track->_name.c_str())) {
         if (track != _module->_track) {
             if (ImGui::Button("PRE")) {
+                _module->connectPre(track->_fader.get(), 0, _inputIndex);
+                _show = false;
+                _composer->computeProcessOrder();
             }
             ImGui::SameLine();
             if (ImGui::Button("POST")) {
+                _module->connect((Module*)track->_fader.get(), 0, _inputIndex);
+                _show = false;
+                _composer->computeProcessOrder();
             }
         }
         for (auto& module : track->_modules) {
