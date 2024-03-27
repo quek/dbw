@@ -10,6 +10,7 @@
 #include "Fader.h"
 #include "Track.h"
 #include "Vst3Module.h"
+#include "command/ModuleDisconnect.h"
 
 Module::Module(const nlohmann::json& json, SerializeContext& context) : Nameable(json, context)
 {
@@ -110,9 +111,30 @@ void Module::render(std::vector<Module*>& selectedModules, float width, float he
 
             if (_ninputs > 1)
             {
-                if (ImGui::Button("Sidechain"))
+                bool sced = false;
+                for (auto& connection : _connections)
                 {
-                    // TODO inputIndex
+                    sced = true;
+                    if (connection->_to == this && connection->_toIndex >= 1)
+                    {
+                        ImGui::PushID(connection.get());
+                        if (ImGui::Button(connection->scLabel().c_str()))
+                        {
+                            _track->getComposer()->_sideChainInputSelector->open(this, connection->_toIndex);
+                        }
+                        if (ImGui::BeginPopupContextItem())
+                        {
+                            if (ImGui::MenuItem("DELETE"))
+                            {
+                                _track->getComposer()->commandExecute(new command::ModuleDisconnect(connection.get()));
+                            }
+                            ImGui::EndPopup();
+                        }
+                        ImGui::PopID();
+                    }
+                }
+                if (!sced && ImGui::Button("Sidechain"))
+                {
                     _track->getComposer()->_sideChainInputSelector->open(this, 1);
                 }
             }

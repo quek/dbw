@@ -13,6 +13,7 @@ public:
     Connection(Module* from, int fromIndex, Module* to, int toIndex, bool post = true);
     void resolveModuleReference();
     void process(Module* to);
+    std::string scLabel();
     void setLatency(uint32_t latency);
     virtual nlohmann::json toJson(SerializeContext& context) override;
 
@@ -24,11 +25,9 @@ public:
     NekoId _toNekoRef = 0;
     int _toIndex;
 
+    bool _post = true;
+
     uint32_t _latency = 0;
     std::vector<std::deque<float>> _dcpBuffer;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Connection, _fromIndex, _toIndex);
-private:
-    bool _post = true;
 };
 

@@ -103,6 +103,13 @@ void Connection::process(Module* to)
     }
 }
 
+std::string Connection::scLabel()
+{
+    auto label = std::format("{} {} {}", _from->_track->_name, _from->_name, _toIndex);
+    if (!_post) label += " PRE";
+    return label;
+}
+
 void Connection::setLatency(uint32_t latency)
 {
     _latency = latency;

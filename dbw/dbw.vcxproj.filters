@@ -183,6 +183,9 @@
     <ClCompile Include="command\ModuleConnect.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="command\ModuleDisconnect.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -345,6 +348,9 @@
     </ClInclude>
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="command\ModuleConnect.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\ModuleDisconnect.h">
       <Filter>command</Filter>
     </ClInclude>
   </ItemGroup>
