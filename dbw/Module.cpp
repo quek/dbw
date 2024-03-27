@@ -160,16 +160,18 @@ void Module::processedSet(bool value)
     _processed = value;
 }
 
-void Module::connect(Module* from, int outputIndex, int inputIndex)
+void Module::connect(Module* from, int fromIndex, int toIndex, bool post)
 {
-    _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
-    from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+    disconnect(nullptr, fromIndex, toIndex);
+    _connections.emplace_back(new Connection(from, fromIndex, this, toIndex, post));
+    from->_connections.emplace_back(new Connection(from, fromIndex, this, toIndex, post));
 }
 
-void Module::connectPre(Fader* from, int outputIndex, int inputIndex)
+void Module::disconnect(Module* from, int /*fromIndex*/, int toIndex)
 {
-    _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex, false));
-    from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex, false));
+    auto it = std::ranges::find_if(_connections, [&](auto& x) { return x->_to == this && (!from || x->_from == from) && x->_toIndex == toIndex; });
+    if (it == _connections.end()) return;
+    _connections.erase(it);
 }
 
 int Module::nbuses() const

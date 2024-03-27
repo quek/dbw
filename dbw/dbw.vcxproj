@@ -194,6 +194,7 @@
     <ClInclude Include="command\DuplicateTracks.h" />
     <ClInclude Include="command\EditedParamIdListUpdate.h" />
     <ClInclude Include="command\GroupTracks.h" />
+    <ClInclude Include="command\ModuleConnect.h" />
     <ClInclude Include="command\MoveTracks.h" />
     <ClInclude Include="command\NewLane.h" />
     <ClInclude Include="Command\OpenProject.h" />
@@ -302,6 +303,7 @@
     <ClCompile Include="command\DuplicateTracks.cpp" />
     <ClCompile Include="command\EditedParamIdListUpdate.cpp" />
     <ClCompile Include="command\GroupTracks.cpp" />
+    <ClCompile Include="command\ModuleConnect.cpp" />
     <ClCompile Include="command\MoveTracks.cpp" />
     <ClCompile Include="command\NewLane.cpp" />
     <ClCompile Include="Command\OpenProject.cpp" />

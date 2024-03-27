@@ -12,7 +12,8 @@
 class Fader;
 class Track;
 
-class Module : public Nameable {
+class Module : public Nameable
+{
 public:
     Module(const nlohmann::json& json, SerializeContext& context);
     Module(std::string name, Track* track) : Nameable(name), _track(track) {}
@@ -33,8 +34,8 @@ public:
     void processConnections();
     virtual void onResize(int /*width*/, int /*height*/) {}
     virtual void loadState(std::filesystem::path /*path*/) {}
-    virtual void connect(Module* from, int outputIndex, int inputIndex);
-    virtual void connectPre(Fader* from, int outputIndex, int inputIndex);
+    virtual void connect(Module* from, int fromIndex, int toIndex, bool post = true);
+    virtual void disconnect(Module* from, int fromIndex, int toIndex);
     int nbuses() const;
     ProcessBuffer& getProcessBuffer();
     virtual uint32_t getComputedLatency();

@@ -180,6 +180,9 @@
       <Filter>command</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPool.cpp" />
+    <ClCompile Include="command\ModuleConnect.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -341,6 +344,9 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="command\ModuleConnect.h">
+      <Filter>command</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
