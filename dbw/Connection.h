@@ -6,10 +6,11 @@
 
 class Module;
 
-class Connection : public Nameable {
+class Connection : public Nameable
+{
 public:
     Connection(const nlohmann::json& json, SerializeContext& context);
-    Connection(Module* from, int fromIndex, Module* to, int toIndex);
+    Connection(Module* from, int fromIndex, Module* to, int toIndex, bool post = true);
     void resolveModuleReference();
     void process(Module* to);
     void setLatency(uint32_t latency);

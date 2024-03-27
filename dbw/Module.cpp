@@ -168,8 +168,8 @@ void Module::connect(Module* from, int outputIndex, int inputIndex)
 
 void Module::connectPre(Fader* from, int outputIndex, int inputIndex)
 {
-    _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
-    from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex));
+    _connections.emplace_back(new Connection(from, outputIndex, this, inputIndex, false));
+    from->_connections.emplace_back(new Connection(from, outputIndex, this, inputIndex, false));
 }
 
 int Module::nbuses() const

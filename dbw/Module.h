@@ -9,6 +9,7 @@
 #include "Neko.h"
 #include "Param.h"
 
+class Fader;
 class Track;
 
 class Module : public Nameable {
