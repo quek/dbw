@@ -12,6 +12,7 @@
 #include "command/AddNotes.h"
 #include "command/DeleteNotes.h"
 #include "command/DuplicateNotes.h"
+#include "command/NotesSplit.h"
 #include "command/SequenceDurationSet.h"
 
 constexpr float KEYBOARD_HEIGHT = 30.0f;
@@ -131,9 +132,9 @@ Command* PianoRollWindow::duplicateThings(std::set<Note*>& notes, bool undoable)
     return new command::DuplicateNotes(_clip->_sequence.get(), notes, undoable);
 }
 
-Command* PianoRollWindow::splitThings(std::set<Note*>& things, double time)
+Command* PianoRollWindow::splitThings(std::set<Note*>& notes, double time)
 {
-    return nullptr;
+    return new command::NotesSplit(_clip->_sequence.get(), notes, time);
 }
 
 void PianoRollWindow::prepareAllThings()
@@ -328,9 +329,9 @@ bool PianoRollWindow::fitContent()
         if (key < keyMin) keyMin = key;
         if (keyMax < key) keyMax = key;
 
-        auto time = note->getTime();
+        auto time = note->timeGet();
         if (time < timeMin) timeMin = time;
-        time += note->getDuration();
+        time += note->durationGet();
         if (timeMax < time) timeMax = time;
     }
 

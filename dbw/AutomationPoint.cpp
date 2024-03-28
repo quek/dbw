@@ -5,7 +5,7 @@
 
 AutomationPoint::AutomationPoint(double value, double time) {
     setValue(value);
-    setTime(time);
+    timeSet(time);
 }
 
 AutomationPoint::AutomationPoint(const nlohmann::json& json, SerializeContext& context) : SequenceItem(json, context) {

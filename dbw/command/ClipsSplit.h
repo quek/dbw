@@ -15,7 +15,7 @@ public:
     void undo(Composer* composer) override;
 
 private:
-    std::vector<NekoId> _clonedNekoId;
+    std::vector<NekoId> _clonedNekoIds;
     double _time;
 };
 };

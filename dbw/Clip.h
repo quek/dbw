@@ -29,8 +29,8 @@ public:
 
     virtual nlohmann::json toJson(SerializeContext& context) override;
 
-    double _time;
-    double _duration;
+    double _time = 0.0;
+    double _duration = 4.0;
 
     bool _selected = false;
     std::shared_ptr<Sequence> _sequence;

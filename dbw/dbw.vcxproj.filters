@@ -192,6 +192,9 @@
     <ClCompile Include="command\ClipsMixin.cpp">
       <Filter>command</Filter>
     </ClCompile>
+    <ClCompile Include="command\NotesSplit.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -363,6 +366,9 @@
       <Filter>command</Filter>
     </ClInclude>
     <ClInclude Include="command\ClipsMixin.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="command\NotesSplit.h">
       <Filter>command</Filter>
     </ClInclude>
   </ItemGroup>

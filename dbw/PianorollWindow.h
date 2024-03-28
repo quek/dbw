@@ -22,7 +22,7 @@ public:
     std::pair<std::set<Note*>, Command*> copyThings(std::set<Note*> srcs, bool redoable) override;
     Command* deleteThings(std::set<Note*>& notes, bool undoable) override;
     Command* duplicateThings(std::set<Note*>& things, bool undoable) override;
-    Command* splitThings(std::set<Note*>& things, double time) override;
+    Command* splitThings(std::set<Note*>& notes, double time) override;
 
     void prepareAllThings() override;
 

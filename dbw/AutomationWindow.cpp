@@ -60,7 +60,7 @@ void AutomationWindow::handleMouse() {
     if (_draggingPoint) {
         // TODO command
         _draggingPoint->setValue(point->getValue());
-        _draggingPoint->setTime(point->getTime());
+        _draggingPoint->timeSet(point->timeGet());
         if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             _draggingPoint = nullptr;
         }
@@ -97,7 +97,7 @@ void AutomationWindow::handleShortcut() {
 }
 
 ImVec2 AutomationWindow::pointToScreenPos(const AutomationPoint& point) {
-    return pointToScreenPos(point.getValue(), point.getTime());
+    return pointToScreenPos(point.getValue(), point.timeGet());
 }
 
 ImVec2 AutomationWindow::pointToScreenPos(double value, double time) {

@@ -36,7 +36,7 @@ void AutomationClip::prepareProcessBuffer(Lane* lane, double begin, double end, 
     int lastSampleOffset = -1;
     for (auto& item : items) {
         AutomationPoint* point = (AutomationPoint*)item.get();
-        double pointBegin = point->getTime() + _time;
+        double pointBegin = point->timeGet() + _time;
         double sampleOffsetDouble = (pointBegin - begin) * oneBeatSec * sampleRate;
         int sampleOffset = std::round(sampleOffsetDouble);
         double value = point->getValue();

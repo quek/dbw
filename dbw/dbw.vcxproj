@@ -200,6 +200,7 @@
     <ClInclude Include="command\ModuleDisconnect.h" />
     <ClInclude Include="command\MoveTracks.h" />
     <ClInclude Include="command\NewLane.h" />
+    <ClInclude Include="command\NotesSplit.h" />
     <ClInclude Include="Command\OpenProject.h" />
     <ClInclude Include="command\PasteTracks.h" />
     <ClInclude Include="command\RemoveTracksMixin.h" />
@@ -312,6 +313,7 @@
     <ClCompile Include="command\ModuleDisconnect.cpp" />
     <ClCompile Include="command\MoveTracks.cpp" />
     <ClCompile Include="command\NewLane.cpp" />
+    <ClCompile Include="command\NotesSplit.cpp" />
     <ClCompile Include="Command\OpenProject.cpp" />
     <ClCompile Include="command\PasteTracks.cpp" />
     <ClCompile Include="command\RemoveTracksMixin.cpp" />

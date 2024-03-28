@@ -39,7 +39,7 @@ void SequenceItem::render(const ImVec2&, const ImVec2&, const bool)
 {
 }
 
-void SequenceItem::setTime(double time)
+void SequenceItem::timeSet(double time)
 {
     _time = std::max(0.0, time);
 }

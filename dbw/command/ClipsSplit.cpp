@@ -12,7 +12,7 @@ command::ClipsSplit::ClipsSplit(std::set<std::pair<Lane*, Clip*>>& targets, doub
 void command::ClipsSplit::execute(Composer* composer)
 {
     auto laneAndClips = laneAndClipsGet();
-    _clonedNekoId.clear();
+    _clonedNekoIds.clear();
 
     std::lock_guard<std::recursive_mutex> lock(composer->app()->_mtx);
 
@@ -20,7 +20,7 @@ void command::ClipsSplit::execute(Composer* composer)
     {
         if (_time <= clip->timeGet() || clip->timeGet() + clip->durationGet() <= _time)
         {
-            _clonedNekoId.push_back(0);
+            _clonedNekoIds.push_back(0);
             continue;
         }
 
@@ -28,7 +28,7 @@ void command::ClipsSplit::execute(Composer* composer)
         double newDuration = _time - clip->timeGet();
         clip->durationSet(newDuration);
         auto newClip = clip->clone();
-        _clonedNekoId.push_back(newClip->getNekoId());
+        _clonedNekoIds.push_back(newClip->getNekoId());
         newClip->timeSet(_time);
         newClip->durationSet(oldDuration - newDuration);
         lane->_clips.emplace_back(newClip);
@@ -43,10 +43,10 @@ void command::ClipsSplit::undo(Composer* composer)
 
     for (auto& [lane, clip] : laneAndClips)
     {
-        NekoId id = _clonedNekoId.front();
+        NekoId id = _clonedNekoIds.front();
         if (id == 0) continue;
         Clip* clonedClip = Neko::findByNekoId<Clip>(id);
-        _clonedNekoId.erase(_clonedNekoId.begin());
+        _clonedNekoIds.erase(_clonedNekoIds.begin());
         if (!clonedClip) continue;
 
         clip->durationSet(clip->durationGet() + clonedClip->durationGet());
