@@ -12,7 +12,8 @@ struct ImVec2;
 class Lane;
 class Track;
 
-class TimelineWindow : public TimelineCanvasMixin<Clip, Lane> {
+class TimelineWindow : public TimelineCanvasMixin<Clip, Lane>
+{
 public:
     TimelineWindow(Composer* composer);
 
@@ -23,6 +24,7 @@ public:
     std::pair<std::set<Clip*>, Command*> copyThings(std::set<Clip*> clips, bool redoable) override;
     Command* deleteThings(std::set<Clip*>& clips, bool undoable) override;
     Command* duplicateThings(std::set<Clip*>& things, bool undoable) override;
+    Command* splitThings(std::set<Clip*>& things, double time) override;
 
     void prepareAllThings() override;
     void prepareAllThings(Track* track);
@@ -45,6 +47,8 @@ protected:
     std::string canvasName() override;
 
 private:
+    std::set<std::pair<Lane*, Clip*>> commandTargets(std::set<Clip*>& clips);
+
     std::map<Clip*, Lane*> _clipLaneMap;
     float _headerHeight = 0.0f;
     TrackWidthManager _trackWidthManager;

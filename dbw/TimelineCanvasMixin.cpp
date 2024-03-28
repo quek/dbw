@@ -412,6 +412,18 @@ void TimelineCanvasMixin<THING, LANE>::handleShortcut()
         _composer->commandExecute(deleteThings(_state._selectedThings, true));
         _state._selectedThings.clear();
     }
+    else if (defineShortcut(ImGuiKey_S))
+    {
+        float time = timeFromMousePos();
+        auto things = _state._selectedThings;
+        if (things.empty())
+        {
+            ImGuiIO& io = ImGui::GetIO();
+            ImVec2 mousePos = io.MousePos;
+            things.insert(thingAtPos(mousePos));
+        }
+        _composer->commandExecute(splitThings(things, time));
+    }
 }
 
 template class TimelineCanvasMixin<Clip, Lane>;

@@ -52,6 +52,16 @@ Clip::Clip(double time, double duration) :
 {
 }
 
+double Clip::durationGet() const
+{
+    return _duration;
+}
+
+void Clip::durationSet(double value)
+{
+    _duration = value;
+}
+
 std::string Clip::name() const
 {
     std::string name = (_sequence.use_count() > 1 ? "∞" : "") + _sequence->_name;
@@ -113,6 +123,16 @@ void Clip::dragTop(double delta)
     _time += delta;
     _duration -= delta;
     _offset = fmod(_offset - delta, _sequence->durationGet());
+}
+
+double Clip::timeGet() const
+{
+    return _time;
+}
+
+void Clip::timeSet(double value)
+{
+    _time = value;
 }
 
 nlohmann::json Clip::toJson(SerializeContext& context)

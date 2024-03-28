@@ -26,6 +26,7 @@ public:
     virtual std::pair<std::set<THING*>, Command*> copyThings(std::set<THING*> srscs, bool redoable) = 0;
     virtual Command* deleteThings(std::set<THING*>& things, bool undoable) = 0;
     virtual Command* duplicateThings(std::set<THING*>& things, bool undoable) = 0;
+    virtual Command* splitThings(std::set<THING*>& things, double time) = 0;
 
     virtual void onClickThing(THING*) {};
 

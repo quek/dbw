@@ -15,6 +15,7 @@
 #include "TrackHeaderView.h"
 #include "command/AddClips.h"
 #include "command/AddTrack.h"
+#include "command/ClipsSplit.h"
 #include "command/DeleteClips.h"
 #include "command/DuplicateClips.h"
 
@@ -121,22 +122,20 @@ std::pair<std::set<Clip*>, Command*> TimelineWindow::copyThings(std::set<Clip*> 
 
 Command* TimelineWindow::deleteThings(std::set<Clip*>& clips, bool undoable)
 {
-    std::set<std::pair<Lane*, Clip*>> targets;
-    for (auto& it : clips)
-    {
-        targets.insert(std::pair(_clipLaneMap[it], it));
-    }
+    auto targets = commandTargets(clips);
     return new command::DeleteClips(targets, undoable);
 }
 
 Command* TimelineWindow::duplicateThings(std::set<Clip*>& clips, bool undoable)
 {
-    std::set<std::pair<Lane*, Clip*>> targets;
-    for (auto& it : clips)
-    {
-        targets.insert(std::pair(_clipLaneMap[it], it));
-    }
+    auto targets = commandTargets(clips);
     return new command::DuplicateClips(targets, undoable);
+}
+
+Command* TimelineWindow::splitThings(std::set<Clip*>& clips, double time)
+{
+    auto targets = commandTargets(clips);
+    return new command::ClipsSplit(targets, time);
 }
 
 void TimelineWindow::handleDoubleClick(Clip* clip)
@@ -281,6 +280,16 @@ std::string TimelineWindow::windowName()
 std::string TimelineWindow::canvasName()
 {
     return "##Timeline Canvas";
+}
+
+std::set<std::pair<Lane*, Clip*>> TimelineWindow::commandTargets(std::set<Clip*>& clips)
+{
+    std::set<std::pair<Lane*, Clip*>> targets;
+    for (auto& it : clips)
+    {
+        targets.insert(std::pair(_clipLaneMap[it], it));
+    }
+    return targets;
 }
 
 float TimelineWindow::getLaneWidth(Clip* clip)

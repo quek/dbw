@@ -13,6 +13,8 @@ public:
     Clip(double time = 0.0, double duration = 16.0);
     virtual ~Clip() = default;
     virtual Clip* clone() = 0;
+    double durationGet() const;
+    void durationSet(double value);
     virtual void edit(Composer* composer, Lane* lane) = 0;
     virtual std::string name() const;
     std::shared_ptr<Sequence>& getSequence() { return _sequence; }
@@ -22,6 +24,8 @@ public:
     double offsetGet() const { return _offset; }
     double offsetSet(const double value) { _offset = value; }
     virtual void dragTop(double delta);
+    double timeGet() const;
+    void timeSet(double value);
 
     virtual nlohmann::json toJson(SerializeContext& context) override;
 

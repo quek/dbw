@@ -5,10 +5,7 @@
 #include "../Lane.h"
 
 command::DuplicateClips::DuplicateClips(std::set<std::pair<Lane*, Clip*>>& targets, bool undoable) :
-    Command(undoable) {
-    for (auto& [lane, clip] : targets) {
-        _laneIdAndClipIds.emplace_back(lane->getNekoId(), clip->getNekoId());
-    }
+    Command(undoable), ClipsMixin(targets) {
 }
 
 void command::DuplicateClips::execute(Composer* composer) {

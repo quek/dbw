@@ -131,6 +131,11 @@ Command* PianoRollWindow::duplicateThings(std::set<Note*>& notes, bool undoable)
     return new command::DuplicateNotes(_clip->_sequence.get(), notes, undoable);
 }
 
+Command* PianoRollWindow::splitThings(std::set<Note*>& things, double time)
+{
+    return nullptr;
+}
+
 void PianoRollWindow::prepareAllThings()
 {
     _allThings.clear();
