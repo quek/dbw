@@ -48,7 +48,8 @@ bool Module::isWaitingForTo()
 {
     for (auto& connection : _connections)
     {
-        if (connection->_from == this && !connection->_to->processedGet() && connection->_to->isStarting())
+        if (connection->_from == this && !connection->_to->processedGet() && connection->_to->isStarting() &&
+            connection->_from->_track != connection->_to->_track)
         {
             return true;
         }

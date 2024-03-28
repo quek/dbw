@@ -194,6 +194,7 @@ void Composer::computeProcessOrder()
     std::set<Module*> processedModules;
     std::map<Track*, Module*> waitingModule;
 
+    _masterTrack->prepare(gPreference.bufferSize);
     while (true)
     {
         if (computeProcessOrder(_masterTrack.get(), orderedModules, processedModules, waitingModule))
@@ -236,27 +237,20 @@ bool Composer::computeProcessOrder(Track* track,
         }
         if (module->isStarting())
         {
-            if (!processedModules.contains(module))
+            if (!module->processedGet())
             {
-                for (auto& connection : module->_connections)
-                {
-                    if (connection->_to == module && !processedModules.contains(connection->_from) && connection->_from->isStarting())
-                    {
-                        waitingModule[track] = module;
-                        return false;
-                    }
-
-                }
-                orderedModules.push_back(module);
-                processedModules.insert(module);
-            }
-            for (auto& connection : module->_connections)
-            {
-                if (connection->_from == module && !processedModules.contains(connection->_to) && connection->_to->isStarting())
+                if (module->isWaitingForFrom())
                 {
                     waitingModule[track] = module;
                     return false;
                 }
+                orderedModules.push_back(module);
+                module->processedSet(true);
+            }
+            if (module->isWaitingForTo())
+            {
+                    waitingModule[track] = module;
+                    return false;
             }
         }
     }
