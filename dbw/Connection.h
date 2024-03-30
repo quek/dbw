@@ -2,6 +2,7 @@
 #include <deque>
 #include <memory>
 #include <vector>
+#include "AudioBuffer.h"
 #include "Nameable.h"
 
 class Module;
@@ -11,6 +12,7 @@ class Connection : public Nameable
 public:
     Connection(const nlohmann::json& json, SerializeContext& context);
     Connection(Module* from, int fromIndex, Module* to, int toIndex, bool post = true);
+    std::unique_ptr<AudioBuffer>& bufferGet();
     void resolveModuleReference();
     void process(Module* to);
     std::string scLabel();
@@ -29,5 +31,9 @@ public:
 
     uint32_t _latency = 0;
     std::vector<std::deque<float>> _dcpBuffer;
+
+private:
+    bool bufferRequired();
+    std::unique_ptr<AudioBuffer> _buffer = nullptr;
 };
 

@@ -39,6 +39,21 @@ Connection::Connection(Module* from, int fromIndex, Module* to, int toIndex, boo
     _from(from), _fromIndex(fromIndex), _to(to), _toIndex(toIndex), _post(post)
 {
     setLatency(0);
+
+    if (bufferRequired())
+    {
+        _buffer = std::make_unique<AudioBuffer>();
+        _buffer->ensure(gPreference.bufferSize, 2);
+    }
+    else
+    {
+        _buffer.reset();
+    }
+}
+
+std::unique_ptr<AudioBuffer>& Connection::bufferGet()
+{
+    return _buffer;
 }
 
 void Connection::resolveModuleReference()
@@ -49,21 +64,14 @@ void Connection::resolveModuleReference()
 
 void Connection::process(Module* to)
 {
-    if (_to != to)
-    {
-        return;
-    }
-    if (!_from->isStarting())
-    {
-        return;
-    }
+    if (_to != to || !_from->isStarting()) return;
 
-    auto& from = _post ? _from->_track->_processBuffer._out : _from->_track->_processBuffer._in;
+    auto& from = _buffer ? *_buffer : (_post ? _from->_track->_processBuffer._out[_fromIndex] : _from->_track->_processBuffer._in[_fromIndex]);
     for (int channel = 0; channel < 2; ++channel)
     {
-        bool xConstantp = from.at(_fromIndex)._constantp[channel];
+        bool xConstantp = from._constantp[channel];
         bool yConstantp = _to->_track->_processBuffer._in.at(_toIndex)._constantp[channel];
-        auto& x = from.at(_fromIndex).buffer32()[channel];
+        auto& x = from.buffer32()[channel];
         auto& y = to->_track->_processBuffer._in.at(_toIndex).buffer32()[channel];
         auto y0 = y[0];
         for (size_t i = 0; i < gPreference.bufferSize; ++i)
@@ -133,4 +141,19 @@ nlohmann::json Connection::toJson(SerializeContext& context)
     json["_toNekoRef"] = _to->getNekoId();
     json["_post"] = _post;
     return json;
+}
+
+bool Connection::bufferRequired()
+{
+    if (_from->_track == _to->_track)
+    {
+        auto modules = _from->_track->allModules();
+        auto fromIt = std::ranges::find(modules, _from);
+        auto toIt = std::ranges::find(modules, _to);
+        if (std::distance(fromIt, toIt) >= 2)
+        {
+            return true;
+        }
+    }
+    return false;
 }

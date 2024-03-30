@@ -154,9 +154,19 @@ void Module::render(std::vector<Module*>& selectedModules, float width, float he
     ImGui::PopID();
 }
 
-bool Module::process(ProcessBuffer* /*buffer*/, int64_t /*steadyTime*/)
+bool Module::process(ProcessBuffer* processBuffer, int64_t /*steadyTime*/)
 {
     _processed = true;
+
+    for (auto& c : _connections)
+    {
+        auto& buffer = c->bufferGet();
+        if (c->_from == this && buffer)
+        {
+            processBuffer->_out[c->_fromIndex].copyTo(*buffer);
+        }
+    }
+    
     return true;
 }
 
